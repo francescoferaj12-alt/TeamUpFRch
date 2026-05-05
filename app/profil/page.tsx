@@ -69,7 +69,7 @@ export default function ProfilPage() {
     }).eq('id', profile.id)
 
     if (!error) {
-      setProfile({ ...profile, bio, position, ligue, zone, foot, age: age ? parseInt(age) : null, available })
+      setProfile({ ...profile, bio, position, ligue, zone, foot, age: age ? parseInt(age) : undefined, available })
       setSaveMsg('✅ Profil mis à jour !')
       setEditing(false)
       setTimeout(() => setSaveMsg(''), 3000)
