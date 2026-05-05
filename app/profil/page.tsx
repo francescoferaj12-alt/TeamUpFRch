@@ -284,7 +284,7 @@ export default function ProfilPage() {
               profile.ligue ? ['Ligue', profile.ligue] : null,
               profile.position ? ['Position', profile.position] : null,
               profile.club_name ? ['Club', profile.club_name] : null,
-            ].filter(Boolean).map(([k, v]) => (
+            ].filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
               <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--gray-light)', fontSize:14 }}>
                 <span style={{ color:'var(--text-muted)' }}>{k}</span>
                 <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all' }}>{v}</span>
