@@ -1,0 +1,17 @@
+{
+  "name": "TeamUpFR — Ton équipe, ton avenir",
+  "short_name": "TeamUpFR",
+  "description": "La plateforme du football amateur fribourgeois",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1f5c",
+  "theme_color": "#0a1f5c",
+  "lang": "fr-CH",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
