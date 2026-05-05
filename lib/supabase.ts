@@ -20,5 +20,9 @@ export type Profile = {
   bio?: string
   club_name?: string
   avatar_url?: string
+  goals?: number
+  assists?: number
+  matches?: number
+  rating?: number
   created_at: string
 }
