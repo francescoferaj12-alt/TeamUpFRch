@@ -10,24 +10,20 @@ export default function HomePage() {
           HERO — VIDEO BACKGROUND
       ══════════════════════════════════════ */}
       <section style={{ position: 'relative', height: '100vh', minHeight: 650, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-        {/* VIDEO — centrato verticalmente per video verticale */}
-        <video
-          autoPlay muted loop playsInline
+        {/* PHOTO HERO */}
+        <img
+          src="/images/banner.png"
+          alt="TeamUpFR hero"
           style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            minWidth: '100%', minHeight: '100%',
-            width: 'auto', height: 'auto',
-            objectFit: 'cover',
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center 20%',
             zIndex: 0
           }}
-        >
-          <source src="/video/hero.mp4" type="video/mp4" />
-        </video>
+        />
 
-        {/* DARK OVERLAY — più leggero per vedere meglio il video */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,31,92,.88) 0%, rgba(10,31,92,.65) 40%, rgba(0,0,0,.4) 100%)', zIndex: 1 }} />
+        {/* DARK OVERLAY */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,31,92,.92) 0%, rgba(10,31,92,.75) 40%, rgba(10,31,92,.4) 100%)', zIndex: 1 }} />
 
         {/* CONTENT */}
         <div style={{ position: 'relative', zIndex: 3, maxWidth: 1100, margin: '0 auto', padding: '0 2rem', width: '100%' }}>
@@ -276,21 +272,12 @@ export default function HomePage() {
       {/* ══════════════════════════════════════
           LIGUES — Stade St-Léonard
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', overflow: 'hidden', padding: '5rem 0' }}>
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <img
-            src="/images/stade-st-leonard.jpeg"
-            alt="Stade St-Léonard Fribourg"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
-          />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,31,92,.78)' }} />
-        </div>
-
-        <div style={{ position: 'relative', maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+      <section style={{ background: 'var(--blue-dark)', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginBottom: '.5rem' }}>Compétitions</div>
             <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1, color: '#fff' }}>Ligues couvertes</h2>
-            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 14, marginTop: '.5rem' }}>📍 Stade St-Léonard · Fribourg, Suisse</p>
+            
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
             {ligues.map(g => (
