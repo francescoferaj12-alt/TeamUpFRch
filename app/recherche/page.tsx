@@ -1,187 +1,80 @@
-'use client';
+'use client'
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { players, coaches, clubs, ligues, zones, positions } from '../../lib/data';
+import { useEffect, useState, useMemo } from 'react'
+import Link from 'next/link'
+import { supabase, Profile } from '../../lib/supabase'
 
-type ResultType = 'all' | 'player' | 'coach' | 'team';
+const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
+const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
+const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 
-interface ResultItem {
-  type: 'player' | 'coach' | 'team';
-  id: string;
-  name: string;
-  sub: string;
-  emoji: string;
-  available: boolean;
-  ligue: string;
-  position?: string;
-  zone: string;
-  age?: number;
-  tags: string[];
-  stats: { v: string | number; k: string }[];
-  href: string;
-}
+type FilterType = 'all' | 'player' | 'coach' | 'club'
 
-export default function SearchPage() {
-  const [type, setType] = useState<ResultType>('all');
-  const [query, setQuery] = useState('');
-  const [filterLigue, setFilterLigue] = useState('');
-  const [filterPos, setFilterPos] = useState('');
-  const [filterZone, setFilterZone] = useState('');
-  const [filterAge, setFilterAge] = useState('');
-  const [filterDispo, setFilterDispo] = useState(true);
+export default function RecherchePage() {
+  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [loading, setLoading] = useState(true)
+  const [query, setQuery] = useState('')
+  const [filterType, setFilterType] = useState<FilterType>('all')
+  const [filterLigue, setFilterLigue] = useState('')
+  const [filterPos, setFilterPos] = useState('')
+  const [filterZone, setFilterZone] = useState('')
+  const [filterDispo, setFilterDispo] = useState(false)
 
-  const allResults = useMemo<ResultItem[]>(() => {
-    const playerItems: ResultItem[] = players.map((p) => ({
-      type: 'player',
-      id: p.id,
-      name: p.name,
-      sub: `${p.position} · ${p.age} ans`,
-      emoji: '👤',
-      available: p.available,
-      ligue: p.ligue,
-      position: p.position,
-      zone: p.zone,
-      age: p.age,
-      tags: [p.ligue, p.zone, `Pied ${p.foot.toLowerCase()}`],
-      stats: [
-        { v: p.stats.goals, k: 'Buts' },
-        { v: p.stats.assists, k: 'Assists' },
-        { v: p.stats.matches, k: 'Matchs' }
-      ],
-      href: '/profil'
-    }));
+  useEffect(() => {
+    async function load() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    const coachItems: ResultItem[] = coaches.map((c) => ({
-      type: 'coach',
-      id: c.id,
-      name: c.name,
-      sub: `Coach ${c.license} · ${c.experience} ans exp.`,
-      emoji: '🧑‍🏫',
-      available: c.available,
-      ligue: '',
-      zone: c.zone,
-      age: c.age,
-      tags: [c.license, c.philosophy, c.zone],
-      stats: [
-        { v: c.experience, k: 'Ans exp.' },
-        { v: c.pastClubs.length, k: 'Clubs' },
-        { v: c.age, k: 'Âge' }
-      ],
-      href: '/recherche'
-    }));
-
-    const clubItems: ResultItem[] = clubs.map((c) => ({
-      type: 'team',
-      id: c.id,
-      name: c.name,
-      sub: `${c.ligue} · ${c.zone}`,
-      emoji: c.emoji,
-      available: c.recruiting,
-      ligue: c.ligue,
-      zone: c.zone,
-      tags: [c.ligue, c.zone, c.recruiting ? 'Recrute' : 'Complet'],
-      stats: [
-        { v: c.rosterCount, k: 'Joueurs' },
-        { v: c.season.wins, k: 'Victoires' },
-        { v: c.rating, k: 'Note' }
-      ],
-      href: '/club/bulle'
-    }));
-
-    return [...playerItems, ...coachItems, ...clubItems];
-  }, []);
+      if (!error && data) setProfiles(data)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filtered = useMemo(() => {
-    return allResults.filter((r) => {
-      if (type !== 'all' && r.type !== type) return false;
-      if (filterDispo && !r.available) return false;
-      if (filterLigue && r.ligue !== filterLigue) return false;
-      if (filterPos && r.type === 'player' && r.position !== filterPos) return false;
-      if (filterZone && r.zone !== filterZone) return false;
-      if (filterAge && r.age) {
-        const ages: Record<string, [number, number]> = {
-          '16–19 ans': [16, 19],
-          '20–25 ans': [20, 25],
-          '26–30 ans': [26, 30],
-          '30+ ans': [30, 99]
-        };
-        const range = ages[filterAge];
-        if (range && (r.age < range[0] || r.age > range[1])) return false;
-      }
+    return profiles.filter(p => {
+      if (filterType !== 'all' && p.role !== filterType) return false
+      if (filterDispo && !p.available) return false
+      if (filterLigue && p.ligue !== filterLigue) return false
+      if (filterPos && p.position !== filterPos) return false
+      if (filterZone && p.zone !== filterZone) return false
       if (query) {
-        const q = query.toLowerCase();
-        if (
-          !r.name.toLowerCase().includes(q) &&
-          !r.sub.toLowerCase().includes(q) &&
-          !r.tags.some((t) => t.toLowerCase().includes(q))
-        )
-          return false;
+        const q = query.toLowerCase()
+        const name = `${p.first_name || ''} ${p.last_name || ''} ${p.club_name || ''}`.toLowerCase()
+        if (!name.includes(q) && !(p.position || '').toLowerCase().includes(q) && !(p.ligue || '').toLowerCase().includes(q) && !(p.zone || '').toLowerCase().includes(q)) return false
       }
-      return true;
-    });
-  }, [allResults, type, filterDispo, filterLigue, filterPos, filterZone, filterAge, query]);
+      return true
+    })
+  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, query])
 
   const counts = {
     all: filtered.length,
-    player: filtered.filter((r) => r.type === 'player').length,
-    coach: filtered.filter((r) => r.type === 'coach').length,
-    team: filtered.filter((r) => r.type === 'team').length
-  };
+    player: filtered.filter(p => p.role === 'player').length,
+    coach: filtered.filter(p => p.role === 'coach').length,
+    club: filtered.filter(p => p.role === 'club').length,
+  }
 
   return (
     <>
-      {/* HERO SEARCH */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%)',
-          padding: '2.5rem 1.5rem 1.5rem'
-        }}
-      >
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <h1
-            style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: '2.5rem',
-              color: '#fff',
-              letterSpacing: 2,
-              marginBottom: '.25rem'
-            }}
-          >
-            Recherche <span style={{ color: 'var(--red-light)' }}>Avancée</span>
+      {/* HERO */}
+      <div style={{ background:'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', padding:'2.5rem 1.5rem 1.5rem' }}>
+        <div style={{ maxWidth:900, margin:'0 auto' }}>
+          <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:'#fff', letterSpacing:2, marginBottom:'.25rem' }}>
+            Recherche <span style={{ color:'var(--red-light)' }}>Avancée</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginBottom: '1.25rem' }}>
+          <p style={{ color:'rgba(255,255,255,.6)', fontSize:14, marginBottom:'1.25rem' }}>
             Trouve joueurs, coachs et clubs dans le canton de Fribourg
           </p>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display:'flex', gap:8 }}>
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Nom, club, position, ligue…"
-              style={{
-                flex: 1,
-                background: 'rgba(255,255,255,.95)',
-                border: 'none',
-                borderRadius: 10,
-                padding: '12px 16px',
-                fontSize: 15,
-                outline: 'none',
-                fontFamily: 'inherit'
-              }}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Nom, position, ligue, zone…"
+              style={{ flex:1, background:'rgba(255,255,255,.95)', border:'none', borderRadius:10, padding:'12px 16px', fontSize:15, outline:'none', fontFamily:'inherit' }}
             />
-            <button
-              style={{
-                background: 'var(--red)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 10,
-                padding: '12px 22px',
-                fontSize: 14,
-                fontWeight: 700,
-                fontFamily: 'inherit',
-                cursor: 'pointer'
-              }}
-            >
+            <button style={{ background:'var(--red)', color:'#fff', border:'none', borderRadius:10, padding:'12px 22px', fontSize:14, fontWeight:700, fontFamily:'inherit', cursor:'pointer' }}>
               Rechercher
             </button>
           </div>
@@ -189,305 +82,145 @@ export default function SearchPage() {
       </div>
 
       {/* TYPE TABS */}
-      <div
-        style={{
-          background: '#fff',
-          padding: '.85rem 1.5rem',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          gap: 6,
-          maxWidth: '100%',
-          overflowX: 'auto'
-        }}
-      >
-        {(
-          [
-            ['all', 'Tous', counts.all],
-            ['player', '👤 Joueurs', counts.player],
-            ['coach', '🧑‍🏫 Coachs', counts.coach],
-            ['team', '🏟️ Clubs', counts.team]
-          ] as const
-        ).map(([t, label, count]) => (
-          <button
-            key={t}
-            onClick={() => setType(t as ResultType)}
-            style={{
-              padding: '7px 18px',
-              borderRadius: 8,
-              border: `1.5px solid ${type === t ? 'var(--blue-bright)' : 'var(--border)'}`,
-              background: type === t ? 'var(--blue-light)' : '#fff',
-              color: type === t ? 'var(--blue-mid)' : 'var(--text-muted)',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {label}{' '}
-            <span
-              style={{
-                background: 'var(--blue-light)',
-                color: 'var(--blue-mid)',
-                borderRadius: 100,
-                padding: '1px 7px',
-                fontSize: 11,
-                marginLeft: 4
-              }}
-            >
-              {count}
-            </span>
+      <div style={{ background:'#fff', padding:'.85rem 1.5rem', borderBottom:'1px solid var(--border)', display:'flex', gap:6, overflowX:'auto' }}>
+        {([
+          ['all', 'Tous', counts.all],
+          ['player', '👤 Joueurs', counts.player],
+          ['coach', '🧑‍🏫 Coachs', counts.coach],
+          ['club', '🏟️ Clubs', counts.club],
+        ] as const).map(([t, label, count]) => (
+          <button key={t} onClick={() => setFilterType(t as FilterType)} style={{
+            padding:'7px 18px', borderRadius:8,
+            border:`1.5px solid ${filterType === t ? 'var(--blue-bright)' : 'var(--border)'}`,
+            background: filterType === t ? 'var(--blue-light)' : '#fff',
+            color: filterType === t ? 'var(--blue-mid)' : 'var(--text-muted)',
+            fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit'
+          }}>
+            {label} <span style={{ background:'var(--blue-light)', color:'var(--blue-mid)', borderRadius:100, padding:'1px 7px', fontSize:11, marginLeft:4 }}>{count}</span>
           </button>
         ))}
       </div>
 
-      {/* FILTERS BAR */}
-      <div
-        style={{
-          background: '#fff',
-          borderBottom: '1px solid var(--border)',
-          padding: '.85rem 1.5rem',
-          display: 'flex',
-          gap: '.75rem',
-          flexWrap: 'wrap',
-          alignItems: 'center'
-        }}
-      >
-        <button
-          onClick={() => setFilterDispo(!filterDispo)}
-          style={{
-            border: `1.5px solid ${filterDispo ? 'var(--blue-bright)' : 'var(--border)'}`,
-            background: filterDispo ? 'var(--blue-light)' : 'var(--gray-bg)',
-            color: filterDispo ? 'var(--blue-mid)' : 'inherit',
-            borderRadius: 100,
-            padding: '6px 14px',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer'
-          }}
-        >
-          🟢 Disponible
-        </button>
+      {/* FILTERS */}
+      <div style={{ background:'#fff', borderBottom:'1px solid var(--border)', padding:'.85rem 1.5rem', display:'flex', gap:'.75rem', flexWrap:'wrap', alignItems:'center' }}>
+        <button onClick={() => setFilterDispo(!filterDispo)} style={{
+          border:`1.5px solid ${filterDispo ? 'var(--blue-bright)' : 'var(--border)'}`,
+          background: filterDispo ? 'var(--blue-light)' : 'var(--gray-bg)',
+          color: filterDispo ? 'var(--blue-mid)' : 'inherit',
+          borderRadius:100, padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit'
+        }}>🟢 Disponible</button>
 
-        <FilterSelect
-          value={filterLigue}
-          onChange={setFilterLigue}
-          placeholder="Toutes les ligues"
-          options={ligues.flatMap((g) => g.items)}
-        />
-        <FilterSelect
-          value={filterPos}
-          onChange={setFilterPos}
-          placeholder="Toutes positions"
-          options={positions}
-        />
-        <FilterSelect
-          value={filterZone}
-          onChange={setFilterZone}
-          placeholder="Toute la zone"
-          options={zones}
-        />
-        <FilterSelect
-          value={filterAge}
-          onChange={setFilterAge}
-          placeholder="Tout âge"
-          options={['16–19 ans', '20–25 ans', '26–30 ans', '30+ ans']}
-        />
+        {[
+          { value: filterLigue, set: setFilterLigue, placeholder: 'Toutes les ligues', options: LIGUES },
+          { value: filterPos, set: setFilterPos, placeholder: 'Toutes positions', options: POSITIONS },
+          { value: filterZone, set: setFilterZone, placeholder: 'Toute la zone', options: ZONES },
+        ].map((f, i) => (
+          <select key={i} value={f.value} onChange={e => f.set(e.target.value)} style={{
+            background:'var(--gray-bg)', border:'1.5px solid var(--border)', borderRadius:100,
+            padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
+          }}>
+            <option value="">{f.placeholder}</option>
+            {f.options.map(o => <option key={o}>{o}</option>)}
+          </select>
+        ))}
 
-        <span style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>
+        <span style={{ marginLeft:'auto', fontSize:13, color:'var(--text-muted)', fontWeight:500 }}>
           {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
         </span>
       </div>
 
       {/* RESULTS */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1rem',
-          padding: '1.5rem'
-        }}
-      >
-        {filtered.length === 0 ? (
-          <div
-            style={{
-              gridColumn: '1 / -1',
-              textAlign: 'center',
-              padding: '3rem',
-              color: 'var(--text-muted)'
-            }}
-          >
-            😕 Aucun résultat. Modifie tes filtres.
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:'1rem', padding:'1.5rem' }}>
+        {loading ? (
+          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>
+            <div style={{ width:36, height:36, border:'4px solid var(--gray-light)', borderTopColor:'var(--blue-bright)', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
+            Chargement des profils…
+            <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>
+            <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>😕</div>
+            <div style={{ fontSize:16, fontWeight:500, marginBottom:'.5rem' }}>Aucun résultat</div>
+            <div style={{ fontSize:14 }}>
+              {profiles.length === 0
+                ? "Sois le premier à t'inscrire sur TeamUpFR !"
+                : "Modifie tes filtres pour trouver ce que tu cherches."
+              }
+            </div>
+            {profiles.length === 0 && (
+              <Link href="/login" className="btn btn-blue" style={{ marginTop:'1rem', display:'inline-flex' }}>
+                Créer mon profil →
+              </Link>
+            )}
           </div>
         ) : (
-          filtered.map((r) => <ResultCard key={r.id} item={r} />)
+          filtered.map(p => <ProfileCard key={p.id} profile={p} />)
         )}
       </div>
     </>
-  );
+  )
 }
 
-function FilterSelect({
-  value,
-  onChange,
-  placeholder,
-  options
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  options: string[];
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        background: 'var(--gray-bg)',
-        border: '1.5px solid var(--border)',
-        borderRadius: 100,
-        padding: '6px 14px',
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: 'pointer',
-        outline: 'none',
-        fontFamily: 'inherit'
-      }}
-    >
-      <option value="">{placeholder}</option>
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </select>
-  );
-}
+function ProfileCard({ profile: p }: { profile: Profile }) {
+  const name = p.role === 'club'
+    ? (p.club_name || 'Club')
+    : `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email
 
-function ResultCard({ item }: { item: ResultItem }) {
-  const stripeColors = {
-    player: 'linear-gradient(90deg,#1a6fd4,#5b9eff)',
-    coach: 'linear-gradient(90deg,#e02020,#ff8c42)',
-    team: 'linear-gradient(90deg,#0d7a36,#1db954)'
-  };
-  const bgClass = {
-    player: '#deeafa',
-    coach: '#fde8e8',
-    team: 'var(--green-bg)'
-  };
+  const initials = p.role === 'club'
+    ? (p.club_name?.[0] || '🏟️')
+    : `${p.first_name?.[0] || ''}${p.last_name?.[0] || ''}`.toUpperCase() || '??'
+
+  const roleEmoji = p.role === 'player' ? '👤' : p.role === 'coach' ? '🧑‍🏫' : '🏟️'
+  const roleLabel = p.role === 'player' ? 'Joueur' : p.role === 'coach' ? 'Coach' : 'Club'
+
+  const stripeColor = p.role === 'player'
+    ? 'linear-gradient(90deg,#1a6fd4,#5b9eff)'
+    : p.role === 'coach'
+    ? 'linear-gradient(90deg,#e02020,#ff8c42)'
+    : 'linear-gradient(90deg,#0d7a36,#1db954)'
+
+  const bgColor = p.role === 'player' ? '#deeafa' : p.role === 'coach' ? '#fde8e8' : 'var(--green-bg)'
 
   return (
-    <Link
-      href={item.href}
-      style={{
-        background: '#fff',
-        borderRadius: 14,
-        border: '1px solid var(--border)',
-        padding: '1.25rem',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'block',
-        transition: 'all .15s'
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 3,
-          background: stripeColors[item.type]
-        }}
-      />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '.85rem' }}>
-        <div
-          style={{
-            width: 46,
-            height: 46,
-            borderRadius: 12,
-            background: bgClass[item.type],
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 22,
-            flexShrink: 0
-          }}
-        >
-          {item.emoji}
+    <div style={{ background:'#fff', borderRadius:14, border:'1px solid var(--border)', padding:'1.25rem', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:stripeColor }} />
+
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'.85rem' }}>
+        <div style={{ width:46, height:46, borderRadius:12, background:bgColor, display:'flex', alignItems:'center', justifyContent:'center', fontSize:p.avatar_url ? 0 : 18, fontWeight:700, flexShrink:0, overflow:'hidden' }}>
+          {p.avatar_url
+            ? <img src={p.avatar_url} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            : (initials.length > 2 ? roleEmoji : initials)
+          }
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.2 }}>{item.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{item.sub}</div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</div>
+          <div style={{ fontSize:12, color:'var(--text-muted)' }}>{p.position || roleLabel}{p.age ? ` · ${p.age} ans` : ''}</div>
         </div>
-        <span className={`badge ${item.available ? 'badge-green' : 'badge-gray'}`}>
-          {item.available ? 'Dispo' : 'Indisponible'}
+        <span className={`badge ${p.available ? 'badge-green' : 'badge-gray'}`}>
+          {p.available ? 'Dispo' : 'Indispo'}
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: '.85rem' }}>
-        {item.tags.map((t) => (
-          <span key={t} className="badge badge-blue">
-            {t}
-          </span>
-        ))}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginBottom:'.85rem' }}>
+        {p.ligue && <span className="badge badge-blue">{p.ligue}</span>}
+        {p.zone && <span className="badge badge-blue">📍 {p.zone}</span>}
+        {p.foot && <span className="badge badge-gray">🦵 {p.foot}</span>}
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: 6,
-          marginBottom: '.85rem'
-        }}
-      >
-        {item.stats.map((s, i) => (
-          <div
-            key={i}
-            style={{
-              background: 'var(--gray-bg)',
-              borderRadius: 8,
-              padding: '.4rem',
-              textAlign: 'center'
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: '1.3rem',
-                color: 'var(--blue-mid)',
-                lineHeight: 1
-              }}
-            >
-              {s.v}
-            </div>
-            <div
-              style={{
-                fontSize: 9,
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '.8px'
-              }}
-            >
-              {s.k}
-            </div>
-          </div>
-        ))}
-      </div>
+      {p.bio && (
+        <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.5, marginBottom:'.85rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+          {p.bio}
+        </p>
+      )}
 
-      <div style={{ display: 'flex', gap: 6 }}>
-        <span
-          className="btn btn-blue btn-sm"
-          style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
-        >
-          Contacter
-        </span>
-        <span
-          className="btn btn-ghost btn-sm"
-          style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
-        >
-          Profil
-        </span>
+      <div style={{ display:'flex', gap:6 }}>
+        <Link href="/messages" style={{ flex:1, background:'var(--blue-bright)', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          💬 Contacter
+        </Link>
+        <Link href="/profil" style={{ flex:1, background:'var(--gray-light)', color:'var(--text-muted)', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          👤 Profil
+        </Link>
       </div>
-    </Link>
-  );
+    </div>
+  )
 }
