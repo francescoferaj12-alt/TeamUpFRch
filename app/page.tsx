@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link';
 import { annonces, ligues } from '../lib/data';
 
@@ -44,7 +46,7 @@ export default function HomePage() {
 
               {/* LOGO */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1.5rem' }}>
-                <img src="/images/logo.png" alt="TeamUpFR" style={{ height: 48, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                <img src="/images/logo.png" alt="TeamUpFR" style={{ height: 48, objectFit: 'contain' }} />
                 <div>
                   <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.8rem', color: '#fff', letterSpacing: 2, lineHeight: 1 }}>TeamUp<span style={{ color: '#ff3333' }}>FR</span></div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', fontStyle: 'italic' }}>Ton équipe, ton avenir</div>
@@ -117,10 +119,7 @@ export default function HomePage() {
           src="/images/banner.png"
           alt="TeamUpFR"
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).parentElement!.style.background = 'linear-gradient(135deg, #0a1f5c, #1a6fd4)';
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
+
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,31,92,.85) 0%, rgba(10,31,92,.3) 60%, transparent 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 4rem' }}>
