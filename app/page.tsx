@@ -12,7 +12,7 @@ export default function HomePage() {
       <section style={{ position: 'relative', height: '100vh', minHeight: 650, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
         {/* PHOTO HERO */}
         <img
-          src="/images/stade-bulle.jpeg"
+          src="/images/banner.png"
           alt="TeamUpFR hero"
           style={{
             position: 'absolute', inset: 0,
@@ -113,7 +113,7 @@ export default function HomePage() {
       ══════════════════════════════════════ */}
       <section style={{ position: 'relative', height: 420, overflow: 'hidden' }}>
         <img
-          src="/images/banner.png"
+          src="/images/stade-bulle.jpeg"
           alt="TeamUpFR"
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }}
         />
