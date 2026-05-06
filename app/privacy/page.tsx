@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       sections: [
         {
           title: '1. Responsable du traitement',
-          content: "TeamUpFR est responsable du traitement de vos données personnelles. Contact : support@teamupfr.ch"
+          content: "TeamUpFR est responsable du traitement de vos données personnelles. Contact : teamupfr.ch@gmail.com"
         },
         {
           title: '2. Données collectées',
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
         },
         {
           title: '7. Vos droits',
-          content: "Conformément à la LPD suisse, vous disposez des droits suivants : accès à vos données, rectification, suppression, portabilité, opposition au traitement. Pour exercer ces droits, contactez-nous à support@teamupfr.ch. Nous répondons dans les 30 jours."
+          content: "Conformément à la LPD suisse, vous disposez des droits suivants : accès à vos données, rectification, suppression, portabilité, opposition au traitement. Pour exercer ces droits, contactez-nous à teamupfr.ch@gmail.com. Nous répondons dans les 30 jours."
         },
         {
           title: '8. Cookies',
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
         },
         {
           title: '10. Contact',
-          content: "Pour toute question relative à vos données personnelles : support@teamupfr.ch"
+          content: "Pour toute question relative à vos données personnelles : teamupfr.ch@gmail.com"
         }
       ]
     },
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
       sections: [
         {
           title: '1. Verantwortlicher für die Datenverarbeitung',
-          content: "TeamUpFR ist für die Verarbeitung Ihrer personenbezogenen Daten verantwortlich. Kontakt: support@teamupfr.ch"
+          content: "TeamUpFR ist für die Verarbeitung Ihrer personenbezogenen Daten verantwortlich. Kontakt: teamupfr.ch@gmail.com"
         },
         {
           title: '2. Erhobene Daten',
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
         },
         {
           title: '7. Ihre Rechte',
-          content: "Gemäss dem Schweizer DSG haben Sie folgende Rechte: Auskunft, Berichtigung, Löschung, Datenportabilität, Widerspruch gegen die Verarbeitung. Um diese Rechte auszuüben, kontaktieren Sie uns unter support@teamupfr.ch. Wir antworten innerhalb von 30 Tagen."
+          content: "Gemäss dem Schweizer DSG haben Sie folgende Rechte: Auskunft, Berichtigung, Löschung, Datenportabilität, Widerspruch gegen die Verarbeitung. Um diese Rechte auszuüben, kontaktieren Sie uns unter teamupfr.ch@gmail.com. Wir antworten innerhalb von 30 Tagen."
         },
         {
           title: '8. Cookies',
@@ -98,7 +98,7 @@ export default function PrivacyPage() {
         },
         {
           title: '10. Kontakt',
-          content: "Bei Fragen zu Ihren personenbezogenen Daten: support@teamupfr.ch"
+          content: "Bei Fragen zu Ihren personenbezogenen Daten: teamupfr.ch@gmail.com"
         }
       ]
     }
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
             <div style={{ fontWeight: 600, marginBottom: '.25rem' }}>
               {lang === 'fr' ? 'Des questions sur vos données ?' : 'Fragen zu Ihren Daten?'}
             </div>
-            <a href="mailto:support@teamupfr.ch" style={{ color: 'var(--blue-bright)', fontWeight: 700 }}>support@teamupfr.ch</a>
+            <a href="mailto:teamupfr.ch@gmail.com" style={{ color: 'var(--blue-bright)', fontWeight: 700 }}>teamupfr.ch@gmail.com</a>
           </div>
         </div>
       </section>

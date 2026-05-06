@@ -89,8 +89,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {/* Contact */}
                 <div>
                   <div style={{ color: '#fff', fontWeight: 600, marginBottom: '.75rem', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Contact</div>
-                  <a href="mailto:support@teamupfr.ch" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', display: 'block', marginBottom: '.4rem' }}>
-                    📧 support@teamupfr.ch
+                  <a href="mailto:teamupfr.ch@gmail.com" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', display: 'block', marginBottom: '.4rem' }}>
+                    📧 teamupfr.ch@gmail.com
                   </a>
                   <div style={{ color: 'rgba(255,255,255,.3)', marginTop: '1rem', fontSize: 12 }}>
                     Fondé par Francesco, Hugo & Tiago<br />

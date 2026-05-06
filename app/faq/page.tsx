@@ -32,7 +32,7 @@ const faqs: { category: { fr: string; de: string }; icon: string; items: FAQ[] }
       },
       {
         q: { fr: 'Comment contacter le support ?', de: 'Wie kontaktiere ich den Support?' },
-        a: { fr: "Tu peux nous contacter par email à support@teamupfr.ch ou via la messagerie de la plateforme. Nous répondons dans les 24 heures.", de: "Du kannst uns per E-Mail unter support@teamupfr.ch oder über die Plattform-Messaging-Funktion kontaktieren. Wir antworten innerhalb von 24 Stunden." }
+        a: { fr: "Tu peux nous contacter par email à teamupfr.ch@gmail.com ou via la messagerie de la plateforme. Nous répondons dans les 24 heures.", de: "Du kannst uns per E-Mail unter teamupfr.ch@gmail.com oder über die Plattform-Messaging-Funktion kontaktieren. Wir antworten innerhalb von 24 Stunden." }
       },
     ]
   },
@@ -78,7 +78,7 @@ const faqs: { category: { fr: string; de: string }; icon: string; items: FAQ[] }
     items: [
       {
         q: { fr: 'Comment supprimer mon profil ?', de: 'Wie lösche ich mein Profil?' },
-        a: { fr: "Pour supprimer ton compte, envoie un email à support@teamupfr.ch avec ton adresse email. Nous supprimerons toutes tes données dans les 48 heures conformément à la LPD suisse.", de: "Um dein Konto zu löschen, sende eine E-Mail an support@teamupfr.ch mit deiner E-Mail-Adresse. Wir löschen alle deine Daten innerhalb von 48 Stunden gemäss dem Schweizer DSG." }
+        a: { fr: "Pour supprimer ton compte, envoie un email à teamupfr.ch@gmail.com avec ton adresse email. Nous supprimerons toutes tes données dans les 48 heures conformément à la LPD suisse.", de: "Um dein Konto zu löschen, sende eine E-Mail an teamupfr.ch@gmail.com mit deiner E-Mail-Adresse. Wir löschen alle deine Daten innerhalb von 48 Stunden gemäss dem Schweizer DSG." }
       },
     ]
   },
@@ -164,7 +164,7 @@ export default function FAQPage() {
                 ? "Notre équipe est disponible pour t'aider. On répond dans les 24 heures."
                 : 'Unser Team steht dir zur Verfügung. Wir antworten innerhalb von 24 Stunden.'}
             </p>
-            <a href="mailto:support@teamupfr.ch" style={{ display: 'inline-block', background: 'var(--red)', color: '#fff', padding: '12px 28px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, textDecoration: 'none' }}>
+            <a href="mailto:teamupfr.ch@gmail.com" style={{ display: 'inline-block', background: 'var(--red)', color: '#fff', padding: '12px 28px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, textDecoration: 'none' }}>
               {lang === 'fr' ? '📧 Contacter le support' : '📧 Support kontaktieren'}
             </a>
           </div>
