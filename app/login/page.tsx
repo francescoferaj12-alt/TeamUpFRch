@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
@@ -9,12 +9,22 @@ const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Vevey
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const [mode, setMode] = useState<'login'|'register'>('login')
   const [role, setRole] = useState<'player'|'coach'|'club'>('player')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/profil'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -33,7 +43,7 @@ export default function LoginPage() {
     setLoading(true); setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError('Email ou mot de passe incorrect.'); setLoading(false); return }
-    router.push('/profil')
+    router.push(redirectTo)
   }
 
   async function handleRegister(e: React.FormEvent) {
