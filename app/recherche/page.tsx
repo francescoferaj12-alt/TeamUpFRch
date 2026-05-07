@@ -165,6 +165,16 @@ export default function RecherchePage() {
   )
 }
 
+function calcAge(birthdate?: string): number | null {
+  if (!birthdate) return null
+  const today = new Date()
+  const birth = new Date(birthdate)
+  let age = today.getFullYear() - birth.getFullYear()
+  if (today.getMonth() - birth.getMonth() < 0 ||
+      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--
+  return age
+}
+
 function ProfileCard({ profile: p }: { profile: Profile }) {
   const { lang } = useLang()
 
@@ -202,7 +212,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</div>
-          <div style={{ fontSize:12, color:'var(--text-muted)' }}>{p.position || roleLabel}{p.age ? ` · ${p.age}${ageSuffix}` : ''}</div>
+          <div style={{ fontSize:12, color:'var(--text-muted)' }}>{p.position || roleLabel}{calcAge(p.birthdate) ? ` · ${calcAge(p.birthdate)}${ageSuffix}` : ''}</div>
         </div>
         <span className={`badge ${p.available ? 'badge-green' : 'badge-gray'}`}>
           {p.available ? t.search.dispo[lang] : t.search.indispo[lang]}

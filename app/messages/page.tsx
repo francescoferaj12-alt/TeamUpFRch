@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase, Profile, Message } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
+import { useAuth } from '../../lib/auth-context'
 
 type Conversation = {
   partnerId: string
@@ -27,20 +28,15 @@ export default function MessagesPage() {
   const [search, setSearch] = useState('')
   const bodyRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { session, profile: authProfile, authLoading } = useAuth()
 
   useEffect(() => {
-    async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
-
-      const { data: prof } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-      if (!prof) { router.push('/login'); return }
-      setProfile(prof)
-
-      await loadMessages(prof)
-    }
-    load()
-  }, [router])
+    if (authLoading) return
+    if (!session || !authProfile) { router.push('/login'); return }
+    setProfile(authProfile)
+    loadMessages(authProfile)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, session, authProfile])
 
   async function loadMessages(prof: Profile) {
     const { data: msgs } = await supabase

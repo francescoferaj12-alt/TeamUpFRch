@@ -113,15 +113,6 @@ function LoginForm() {
     setLoading(false)
   }
 
-  async function handleGoogleLogin() {
-    setLoading(true); setError('')
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'https://team-up-f-rch.vercel.app/profil' }
-    })
-    if (error) { setError(error.message); setLoading(false) }
-  }
-
   const inputStyle = {
     width: '100%', background: 'var(--gray-bg)', border: '1.5px solid var(--border)',
     borderRadius: 9, padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
