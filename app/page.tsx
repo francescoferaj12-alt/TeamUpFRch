@@ -109,29 +109,20 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════
-          BANNER IMAGE
+          BANNER — COLOR ONLY
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: 420, overflow: 'hidden' }}>
-        <img
-          src="/images/stade-bulle.jpeg"
-          alt="TeamUpFR"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,31,92,.9) 0%, rgba(10,31,92,.6) 50%, rgba(10,31,92,.1) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 5rem' }}>
-          <div style={{ maxWidth: 560 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginBottom: '.75rem' }}>TeamUpFR</div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.2rem, 5vw, 4rem)', color: '#fff', letterSpacing: 2, lineHeight: 1.05, marginBottom: '1rem' }}>
-              La plateforme du<br />
-              <span style={{ color: '#ff3333' }}>football fribourgeois</span>
-            </div>
-            <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 16, lineHeight: 1.7, marginBottom: '1.5rem', maxWidth: 420 }}>
-              Rejoins des centaines de joueurs et clubs qui font confiance à TeamUpFR pour leur carrière amateur.
-            </p>
-            <Link href="/login" style={{ background: '#e02020', color: '#fff', padding: '12px 28px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-block' }}>
-              Rejoindre →
-            </Link>
+      <section style={{ background: 'linear-gradient(135deg, #0a1f5c, #1a6fd4)', padding: '5rem 2rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: 620, margin: '0 auto' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: '1rem' }}>TeamUpFR</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', color: '#fff', letterSpacing: 2, lineHeight: 1.05, marginBottom: '1rem' }}>
+            La plateforme du football fribourgeois
           </div>
+          <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 16, lineHeight: 1.7, marginBottom: '2rem' }}>
+            Rejoins des centaines de joueurs et clubs qui font confiance à TeamUpFR pour leur carrière amateur.
+          </p>
+          <Link href="/login" style={{ background: '#e02020', color: '#fff', padding: '13px 32px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-block', boxShadow: '0 8px 24px rgba(224,32,32,.35)' }}>
+            Rejoindre →
+          </Link>
         </div>
       </section>
 
