@@ -89,20 +89,20 @@ export default function FAQPage() {
   const [open, setOpen] = useState<string | null>(null)
 
   return (
-    <>
+    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
       {/* HERO */}
-      <section style={{ background: 'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', padding: '5rem 2rem 4rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '6px 18px', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: 14 }}>❓</span>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.85)', textTransform: 'uppercase' }}>
+      <section style={{ background:'linear-gradient(180deg,#030a24 0%,#061540 100%)', padding:'5rem 2rem 4rem', textAlign:'center' }}>
+        <div style={{ maxWidth:700, margin:'0 auto' }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(230,57,70,.15)', border:'1px solid rgba(230,57,70,.3)', borderRadius:100, padding:'6px 18px', marginBottom:'1.5rem' }}>
+            <span style={{ fontSize:14 }}>❓</span>
+            <span style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'#e63946', textTransform:'uppercase' }}>
               {lang === 'fr' ? 'Centre d\'aide' : 'Hilfecenter'}
             </span>
           </div>
-          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(3rem, 7vw, 5rem)', color: '#fff', letterSpacing: 3, lineHeight: 1, marginBottom: '1rem' }}>
+          <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'clamp(3rem,7vw,5rem)', color:'#fff', letterSpacing:3, lineHeight:1, marginBottom:'1rem' }}>
             {lang === 'fr' ? 'Questions fréquentes' : 'Häufig gestellte Fragen'}
           </h1>
-          <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 17, lineHeight: 1.7 }}>
+          <p style={{ color:'rgba(255,255,255,.55)', fontSize:17, lineHeight:1.7 }}>
             {lang === 'fr'
               ? "Tu as une question ? La réponse est sûrement ici. Sinon, contacte-nous !"
               : "Du hast eine Frage? Die Antwort findest du sicher hier. Sonst kontaktiere uns!"}
@@ -111,37 +111,37 @@ export default function FAQPage() {
       </section>
 
       {/* FAQ */}
-      <section style={{ background: 'var(--gray-bg)', padding: '4rem 2rem' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <section style={{ padding:'4rem 2rem' }}>
+        <div style={{ maxWidth:800, margin:'0 auto' }}>
           {faqs.map(cat => (
-            <div key={cat.category.fr} style={{ marginBottom: '2.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
-                <span style={{ fontSize: '1.5rem' }}>{cat.icon}</span>
-                <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: 1 }}>
+            <div key={cat.category.fr} style={{ marginBottom:'2.5rem' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'1rem' }}>
+                <span style={{ fontSize:'1.5rem' }}>{cat.icon}</span>
+                <h2 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.5rem', letterSpacing:1 }}>
                   {cat.category[lang]}
                 </h2>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                 {cat.items.map((faq, i) => {
                   const key = `${cat.category.fr}-${i}`
                   const isOpen = open === key
                   return (
-                    <div key={key} style={{ background: '#fff', borderRadius: 14, border: `1.5px solid ${isOpen ? 'var(--blue-bright)' : 'var(--border)'}`, overflow: 'hidden', transition: 'border-color .15s' }}>
+                    <div key={key} style={{ background: isOpen ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.03)', borderRadius:14, border:`1.5px solid ${isOpen ? 'rgba(230,57,70,.4)' : 'rgba(255,255,255,.08)'}`, overflow:'hidden', transition:'border-color .15s,background .15s' }}>
                       <button
                         onClick={() => setOpen(isOpen ? null : key)}
-                        style={{ width: '100%', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '1rem', fontFamily: 'inherit' }}
+                        style={{ width:'100%', padding:'1.25rem 1.5rem', display:'flex', alignItems:'center', justifyContent:'space-between', background:'none', border:'none', cursor:'pointer', textAlign:'left', gap:'1rem', fontFamily:'inherit' }}
                       >
-                        <span style={{ fontWeight: 600, fontSize: 15, color: isOpen ? 'var(--blue-mid)' : 'var(--text-dark)', lineHeight: 1.4 }}>
+                        <span style={{ fontWeight:600, fontSize:15, color: isOpen ? '#e63946' : '#fff', lineHeight:1.4 }}>
                           {faq.q[lang]}
                         </span>
-                        <span style={{ fontSize: 20, color: isOpen ? 'var(--blue-bright)' : 'var(--text-muted)', flexShrink: 0, transition: 'transform .2s', transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+                        <span style={{ fontSize:20, color: isOpen ? '#e63946' : 'rgba(255,255,255,.4)', flexShrink:0, transition:'transform .2s', transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
                           +
                         </span>
                       </button>
                       {isOpen && (
-                        <div style={{ padding: '0 1.5rem 1.25rem', borderTop: '1px solid var(--gray-light)' }}>
-                          <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.8, paddingTop: '1rem' }}>
+                        <div style={{ padding:'0 1.5rem 1.25rem', borderTop:'1px solid rgba(255,255,255,.07)' }}>
+                          <p style={{ fontSize:15, color:'rgba(255,255,255,.55)', lineHeight:1.8, paddingTop:'1rem' }}>
                             {faq.a[lang]}
                           </p>
                         </div>
@@ -154,22 +154,22 @@ export default function FAQPage() {
           ))}
 
           {/* STILL NEED HELP */}
-          <div style={{ background: 'var(--blue-dark)', borderRadius: 20, padding: '2.5rem', textAlign: 'center', marginTop: '2rem' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💬</div>
-            <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.8rem', color: '#fff', letterSpacing: 1, marginBottom: '.75rem' }}>
+          <div style={{ background:'linear-gradient(135deg,#0a1f5c,#061540)', borderRadius:20, padding:'2.5rem', textAlign:'center', marginTop:'2rem', border:'1px solid rgba(255,255,255,.08)' }}>
+            <div style={{ fontSize:'2rem', marginBottom:'1rem' }}>💬</div>
+            <h3 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.8rem', color:'#fff', letterSpacing:1, marginBottom:'.75rem' }}>
               {lang === 'fr' ? "Tu n'as pas trouvé ta réponse ?" : 'Keine Antwort gefunden?'}
             </h3>
-            <p style={{ color: 'rgba(255,255,255,.65)', fontSize: 15, marginBottom: '1.5rem' }}>
+            <p style={{ color:'rgba(255,255,255,.55)', fontSize:15, marginBottom:'1.5rem' }}>
               {lang === 'fr'
                 ? "Notre équipe est disponible pour t'aider. On répond dans les 24 heures."
                 : 'Unser Team steht dir zur Verfügung. Wir antworten innerhalb von 24 Stunden.'}
             </p>
-            <a href="mailto:teamupfr.ch@gmail.com" style={{ display: 'inline-block', background: 'var(--red)', color: '#fff', padding: '12px 28px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, textDecoration: 'none' }}>
+            <a href="mailto:teamupfr.ch@gmail.com" style={{ display:'inline-block', background:'#e63946', color:'#fff', padding:'12px 28px', borderRadius:9, fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, textDecoration:'none' }}>
               {lang === 'fr' ? '📧 Contacter le support' : '📧 Support kontaktieren'}
             </a>
           </div>
         </div>
       </section>
-    </>
+    </div>
   )
 }

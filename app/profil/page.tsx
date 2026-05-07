@@ -1,58 +1,232 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
+import { useLang } from '../../lib/lang-context'
+import { useAuth } from '../../lib/auth-context'
+import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
+// ── Role-specific strength tags ──────────────────────────────────────────────
+const STRENGTHS_PLAYER = [
+  { key: 'fast',        fr: 'Rapide',             de: 'Schnell' },
+  { key: 'technical',   fr: 'Technique',          de: 'Technisch' },
+  { key: 'physical',    fr: 'Physique',           de: 'Körperlich' },
+  { key: 'dribbling',   fr: 'Dribble',            de: 'Dribbling' },
+  { key: 'shooting',    fr: 'Frappe puissante',   de: 'Schussstärke' },
+  { key: 'finishing',   fr: 'Finition',           de: 'Abschluss' },
+  { key: 'passing',     fr: 'Passes précises',    de: 'Genaue Pässe' },
+  { key: 'vision',      fr: 'Vision du jeu',      de: 'Spielübersicht' },
+  { key: 'aerial',      fr: 'Jeu aérien',         de: 'Kopfballspiel' },
+  { key: 'onevsone',    fr: '1 contre 1',         de: '1 gegen 1' },
+  { key: 'sprint',      fr: 'Vitesse de pointe',  de: 'Sprintschnelligkeit' },
+  { key: 'pressing',    fr: 'Pressing',           de: 'Pressing' },
+  { key: 'defensive',   fr: 'Défensif',           de: 'Defensiv' },
+  { key: 'offensive',   fr: 'Offensif',           de: 'Offensiv' },
+  { key: 'leadership',  fr: 'Leadership',         de: 'Führungsstärke' },
+  { key: 'hardworking', fr: 'Travailleur',        de: 'Fleissig' },
+  { key: 'composed',    fr: 'Calme',              de: 'Ruhig' },
+  { key: 'precise',     fr: 'Précis',             de: 'Präzise' },
+]
+
+const STRENGTHS_COACH = [
+  { key: 'tactical',    fr: 'Tactique',              de: 'Taktisch' },
+  { key: 'motivator',   fr: 'Motivateur',            de: 'Motivator' },
+  { key: 'communication', fr: 'Communication',       de: 'Kommunikation' },
+  { key: 'experienced', fr: 'Expérimenté',           de: 'Erfahren' },
+  { key: 'video',       fr: 'Analyse vidéo',         de: 'Videoanalyse' },
+  { key: 'youth',       fr: 'Formation des jeunes',  de: 'Jugendausbildung' },
+  { key: 'defense',     fr: 'Défense organisée',     de: 'Organisierte Abwehr' },
+  { key: 'counter',     fr: 'Contre-attaque',        de: 'Konterspiel' },
+  { key: 'possession',  fr: 'Jeu de possession',     de: 'Ballbesitzspiel' },
+  { key: 'pressing',    fr: 'Jeu de pression',       de: 'Pressing-Spiel' },
+  { key: 'leadership',  fr: 'Leadership',            de: 'Führungsstärke' },
+  { key: 'passionate',  fr: 'Passionné',             de: 'Leidenschaftlich' },
+  { key: 'innovative',  fr: 'Innovateur',            de: 'Innovativ' },
+  { key: 'composed',    fr: 'Calme',                 de: 'Ruhig' },
+  { key: 'fitness',     fr: 'Préparation physique',  de: 'Fitness-Training' },
+]
+
+const STRENGTHS_CLUB = [
+  { key: 'infrastructure', fr: 'Infrastructure de qualité', de: 'Gute Infrastruktur' },
+  { key: 'family',         fr: 'Esprit familial',           de: 'Familiäre Atmosphäre' },
+  { key: 'ambition',       fr: 'Ambition sportive',         de: 'Sportlicher Ehrgeiz' },
+  { key: 'youth',          fr: 'Formation jeunes',          de: 'Jugendförderung' },
+  { key: 'competitive',    fr: 'Équipe compétitive',        de: 'Wettbewerbsfähig' },
+  { key: 'atmosphere',     fr: 'Bonne ambiance',            de: 'Gute Stimmung' },
+  { key: 'professional',   fr: 'Structure sérieuse',        de: 'Seriöse Struktur' },
+  { key: 'social',         fr: 'Vie sociale active',        de: 'Aktives Sozialleben' },
+  { key: 'equipment',      fr: 'Bons équipements',          de: 'Gute Ausrüstung' },
+  { key: 'local',          fr: 'Ancrage local',             de: 'Lokale Verankerung' },
+  { key: 'growing',        fr: 'Club en développement',     de: 'Wachsender Verein' },
+  { key: 'welcoming',      fr: 'Accueil de nouveaux joueurs', de: 'Offene Aufnahme' },
+]
+
+const ALL_STRENGTHS = [...STRENGTHS_PLAYER, ...STRENGTHS_COACH, ...STRENGTHS_CLUB]
+
+function getStrengthsByRole(role: string) {
+  if (role === 'coach') return STRENGTHS_COACH
+  if (role === 'club') return STRENGTHS_CLUB
+  return STRENGTHS_PLAYER
+}
+
+function strengthLabel(key: string, lang: Lang) {
+  const s = ALL_STRENGTHS.find(x => x.key === key)
+  return s ? s[lang] : key
+}
+
+function parseStrengths(raw?: string): string[] {
+  if (!raw) return []
+  return raw.split(',').map(s => s.trim()).filter(Boolean)
+}
+
+function calcAge(birthdate?: string): number | null {
+  if (!birthdate) return null
+  const today = new Date()
+  const birth = new Date(birthdate)
+  let age = today.getFullYear() - birth.getFullYear()
+  if (today.getMonth() - birth.getMonth() < 0 ||
+      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+function parseBirthdate(birthdate?: string) {
+  if (!birthdate) return { day: '', month: '', year: '' }
+  const [y, m, d] = birthdate.split('-')
+  return { day: String(parseInt(d)), month: String(parseInt(m)), year: y }
+}
+
+function getYouTubeEmbed(url: string): string | null {
+  try {
+    const u = new URL(url)
+    if (u.hostname === 'youtu.be') return `https://www.youtube.com/embed/${u.pathname.slice(1)}`
+    if (u.hostname.includes('youtube.com')) {
+      const v = u.searchParams.get('v')
+      if (v) return `https://www.youtube.com/embed/${v}`
+    }
+    return null
+  } catch { return null }
+}
+
 export default function ProfilPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { lang } = useLang()
+  const { session, profile: authProfile, authLoading, refreshProfile } = useAuth()
+  const [profile, setProfile] = useState<Profile | null>(authProfile)
+  const [loading, setLoading] = useState(!authProfile)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Editable fields
   const [bio, setBio] = useState('')
   const [position, setPosition] = useState('')
   const [ligue, setLigue] = useState('')
   const [zone, setZone] = useState('')
-  const [foot, setFoot] = useState('')
-  const [age, setAge] = useState('')
+  const [foot, setFoot] = useState('Droit')
   const [available, setAvailable] = useState(true)
+  const [phone, setPhone] = useState('')
+  const [career, setCareer] = useState('')
+  const [birthDay, setBirthDay] = useState('')
+  const [birthMonth, setBirthMonth] = useState('')
+  const [birthYear, setBirthYear] = useState('')
+  const [goals, setGoals] = useState('')
+  const [assists, setAssists] = useState('')
+  const [matches, setMatches] = useState('')
+  const [goalsPrev, setGoalsPrev] = useState('')
+  const [assistsPrev, setAssistsPrev] = useState('')
+  const [matchesPrev, setMatchesPrev] = useState('')
+  const [selectedStrengths, setSelectedStrengths] = useState<string[]>([])
+  const [video1, setVideo1] = useState('')
+  const [video2, setVideo2] = useState('')
+  const [video3, setVideo3] = useState('')
+
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 55 }, (_, i) => currentYear - 14 - i)
+  const days = Array.from({ length: 31 }, (_, i) => i + 1)
+  const MONTHS = months[lang]
 
   useEffect(() => {
+    if (authLoading) return
+    if (!session) { router.push('/login'); return }
+
     async function load() {
-      // Check session
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
+      let data = authProfile
 
-      // Load profile
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
+      if (!data) {
+        const meta = session!.user.user_metadata || {}
+        const newProfile = {
+          id: session!.user.id,
+          email: session!.user.email || '',
+          role: (meta.role as string) || 'player',
+          first_name: meta.first_name || meta.given_name || meta.full_name?.split(' ')[0] || '',
+          last_name: meta.last_name || meta.family_name || meta.full_name?.split(' ').slice(1).join(' ') || '',
+          available: true,
+        }
+        const { data: inserted } = await supabase.from('profiles').insert(newProfile).select().single()
+        data = inserted
+        await refreshProfile()
+      }
 
-      if (error || !data) { router.push('/login'); return }
-
+      if (!data) { setLoading(false); return }
       setProfile(data)
-      setBio(data.bio || '')
-      setPosition(data.position || '')
-      setLigue(data.ligue || '')
-      setZone(data.zone || '')
-      setFoot(data.foot || 'Droit')
-      setAge(data.age ? String(data.age) : '')
-      setAvailable(data.available ?? true)
+      populateForm(data)
       setLoading(false)
     }
     load()
-  }, [router])
+  }, [authLoading, session, authProfile, router])
+
+  function populateForm(data: Profile) {
+    setBio(data.bio || '')
+    setPosition(data.position || '')
+    setLigue(data.ligue || '')
+    setZone(data.zone || '')
+    setFoot(data.foot || 'Droit')
+    setAvailable(data.available ?? true)
+    setPhone(data.phone || '')
+    setCareer(data.career || '')
+    const parsed = parseBirthdate(data.birthdate)
+    setBirthDay(parsed.day)
+    setBirthMonth(parsed.month)
+    setBirthYear(parsed.year)
+    setGoals(data.goals != null ? String(data.goals) : '')
+    setAssists(data.assists != null ? String(data.assists) : '')
+    setMatches(data.matches != null ? String(data.matches) : '')
+    setGoalsPrev(data.goals_prev != null ? String(data.goals_prev) : '')
+    setAssistsPrev(data.assists_prev != null ? String(data.assists_prev) : '')
+    setMatchesPrev(data.matches_prev != null ? String(data.matches_prev) : '')
+    setSelectedStrengths(parseStrengths(data.strengths))
+    setVideo1(data.video1_url || '')
+    setVideo2(data.video2_url || '')
+    setVideo3(data.video3_url || '')
+  }
+
+  async function handlePhotoUpload(e: ChangeEvent<HTMLInputElement>) {
+    if (!profile || !e.target.files?.[0]) return
+    const file = e.target.files[0]
+    if (!file.type.startsWith('image/')) { alert('Seules les images sont acceptées'); return }
+    if (file.size > 5 * 1024 * 1024) { alert('Max 5 MB'); return }
+    setUploadingPhoto(true)
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const path = `${profile.id}/avatar.${ext}`
+    const { data: uploadData, error } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type })
+    if (error) { alert('Erreur upload: ' + error.message); setUploadingPhoto(false); return }
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
+    const avatar_url = urlData.publicUrl + '?t=' + Date.now()
+    await supabase.from('profiles').update({ avatar_url }).eq('id', profile.id)
+    setProfile({ ...profile, avatar_url })
+    await refreshProfile()
+    setUploadingPhoto(false)
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -62,25 +236,71 @@ export default function ProfilPage() {
   async function handleSave() {
     if (!profile) return
     setSaving(true)
-    const { error } = await supabase.from('profiles').update({
-      bio, position, ligue, zone, foot,
-      age: age ? parseInt(age) : null,
-      available
-    }).eq('id', profile.id)
+    setSaveError('')
 
-    if (!error) {
-      setProfile({ ...profile, bio, position, ligue, zone, foot, age: age ? parseInt(age) : undefined, available })
-      setSaveMsg('✅ Profil mis à jour !')
-      setEditing(false)
-      setTimeout(() => setSaveMsg(''), 3000)
+    const birthdate = birthDay && birthMonth && birthYear
+      ? `${birthYear}-${birthMonth.padStart(2,'0')}-${birthDay.padStart(2,'0')}`
+      : null
+
+    // Base fields that always exist in the DB
+    const baseUpdates = {
+      bio: bio || null,
+      position: position || null,
+      ligue: ligue || null,
+      zone: zone || null,
+      foot: foot || null,
+      available,
+      phone: phone || null,
+      career: career || null,
+      birthdate,
+      goals: goals !== '' ? parseInt(goals) : null,
+      assists: assists !== '' ? parseInt(assists) : null,
+      matches: matches !== '' ? parseInt(matches) : null,
     }
+
+    // Try saving base fields first
+    const { error: baseError } = await supabase
+      .from('profiles')
+      .update(baseUpdates)
+      .eq('id', profile.id)
+
+    if (baseError) {
+      setSaveError(baseError.message)
+      setSaving(false)
+      return
+    }
+
+    // Try saving new fields (may not exist if SQL migration wasn't run)
+    const newFields = {
+      goals_prev: goalsPrev !== '' ? parseInt(goalsPrev) : null,
+      assists_prev: assistsPrev !== '' ? parseInt(assistsPrev) : null,
+      matches_prev: matchesPrev !== '' ? parseInt(matchesPrev) : null,
+      strengths: selectedStrengths.join(',') || null,
+      video1_url: video1 || null,
+      video2_url: video2 || null,
+      video3_url: video3 || null,
+    }
+    await supabase.from('profiles').update(newFields).eq('id', profile.id)
+
+    const updated = { ...profile, ...baseUpdates, ...newFields }
+    setProfile(updated as Profile)
+    await refreshProfile()
+    setSaveMsg(t.profil.saved[lang])
+    setEditing(false)
+    setTimeout(() => setSaveMsg(''), 3000)
     setSaving(false)
   }
 
-  if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem' }}>
-      <div style={{ width:40, height:40, border:'4px solid var(--gray-light)', borderTopColor:'var(--blue-bright)', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
-      <div style={{ color:'var(--text-muted)', fontSize:14 }}>Chargement du profil…</div>
+  function toggleStrength(key: string) {
+    setSelectedStrengths(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    )
+  }
+
+  if (loading || authLoading) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
+      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+      <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.profil.loading[lang]}</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -89,240 +309,487 @@ export default function ProfilPage() {
 
   const initials = `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
-  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🧑‍🏫' : '🏟️'
-  const roleLabel = profile.role === 'player' ? 'Joueur' : profile.role === 'coach' ? 'Coach' : 'Club'
+  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
+  const roleLabel = profile.role === 'player' ? t.profil.role_player[lang] : profile.role === 'coach' ? t.profil.role_coach[lang] : t.profil.role_club[lang]
+  const displayAge = calcAge(profile.birthdate)
+  const ageSuffix = t.general.age_suffix[lang]
+  const strengthKeys = parseStrengths(profile.strengths)
+  const roleStrengths = getStrengthsByRole(profile.role)
+
+  const infoRows: ([string, string] | null)[] = [
+    [t.profil.role_k[lang], roleLabel],
+    [t.profil.email_k[lang], profile.email],
+    displayAge ? [t.profil.age_k[lang], `${displayAge}${ageSuffix}`] : null,
+    profile.birthdate ? [t.profil.birth_k[lang], new Date(profile.birthdate).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH', { day: 'numeric', month: 'long', year: 'numeric' })] : null,
+    profile.foot ? [t.profil.foot_k[lang], translateFoot(profile.foot, lang)] : null,
+    profile.zone ? [t.profil.zone_k[lang], profile.zone] : null,
+    profile.ligue ? [t.profil.ligue_k[lang], profile.ligue] : null,
+    profile.position ? [t.profil.position_k[lang], profile.position] : null,
+    profile.club_name ? [t.profil.club_k[lang], profile.club_name] : null,
+    profile.phone ? [t.profil.phone_k[lang], profile.phone] : null,
+  ]
+
+  const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
+
+  const darkCard: React.CSSProperties = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, padding:'1.25rem' }
+  const inpSt: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:9, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }
+  const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'rgba(255,255,255,.55)', marginBottom:6 }
+  const optSt = { background:'#061540' }
 
   return (
-    <div className="wrap">
+    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+      <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
-        <div style={{ background:'var(--green-bg)', border:'1px solid var(--green)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'var(--green)', marginBottom:'1rem' }}>
-          {saveMsg}
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
+          ✅ {saveMsg}
         </div>
       )}
 
-      {/* HERO */}
-      <div style={{ background:'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
+      {/* ── HERO ── */}
+      <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
         <div style={{ display:'flex', alignItems:'flex-end', gap:'1.5rem', flexWrap:'wrap', position:'relative' }}>
 
           {/* AVATAR */}
-          <div style={{ width:90, height:90, borderRadius:16, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:profile.avatar_url ? 0 : '2rem', fontWeight:700, color:'#fff', flexShrink:0, overflow:'hidden' }}>
-            {profile.avatar_url
-              ? <img src={profile.avatar_url} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-              : (initials || roleEmoji)
-            }
+          <div style={{ position:'relative', flexShrink:0 }}>
+            <div
+              style={{ width:100, height:100, borderRadius:18, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {profile.avatar_url
+                ? <img src={profile.avatar_url} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : (initials || roleEmoji)
+              }
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#e63946', border:'2px solid #030a24', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, cursor:'pointer', color:'#fff' }}
+              title={t.profil.photo_upload[lang]}
+            >
+              {uploadingPhoto ? '⏳' : '📷'}
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handlePhotoUpload} />
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:4 }}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6 }}>
               {fullName || profile.club_name || profile.email}
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
-              <span style={{ background:'rgba(255,255,255,.15)', padding:'3px 10px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
+              <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
                 {roleEmoji} {profile.position || roleLabel}
               </span>
               {profile.foot && (
-                <span style={{ background:'rgba(255,255,255,.15)', padding:'3px 10px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
-                  🦵 Pied {profile.foot.toLowerCase()}
+                <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
+                  {footDisplay(profile.foot, lang)}
                 </span>
               )}
-              {profile.age && (
-                <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>{profile.age} ans · {profile.zone}</span>
+              {displayAge && (
+                <span style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{displayAge}{ageSuffix}{profile.zone ? ` · ${profile.zone}` : ''}</span>
               )}
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
               {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
               <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
-                {profile.available ? '🟢 Disponible' : '⚪ Indisponible'}
+                {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
+              {profile.verified && (
+                <span style={{ background:'rgba(0,200,130,.2)', border:'1px solid rgba(0,200,130,.4)', color:'#00c882', fontSize:12, padding:'4px 12px', borderRadius:100 }}>✓ Vérifié</span>
+              )}
             </div>
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            <button onClick={() => setEditing(!editing)} className="btn btn-red btn-sm">
-              {editing ? '✕ Annuler' : '✏️ Modifier'}
+            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+              {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
-            <button onClick={handleLogout} className="btn btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff', border:'1px solid rgba(255,255,255,.3)' }}>
-              🚪 Déconnexion
+            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+              {t.profil.logout[lang]}
             </button>
           </div>
         </div>
       </div>
 
-      {/* EDIT FORM */}
+      {/* ── STATS (joueur / coach uniquement) ── */}
+      {profile.role !== 'club' && (() => {
+        const now = new Date()
+        const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
+        const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
+        const seasonPrev = `${sy - 1} – ${String(sy).slice(2)}`
+        const hasPrev = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
+        const stats = [
+          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#e02020' },
+          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#1a6fd4' },
+          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#0a7c3e' },
+        ]
+        return (
+          <div style={{ background:'rgba(255,255,255,.04)', borderRadius:16, border:'1px solid rgba(255,255,255,.08)', marginBottom:'1.25rem', overflow:'hidden' }}>
+            {/* CURRENT SEASON header */}
+            <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
+              <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', letterSpacing:1, fontWeight:600 }}>{seasonNow}</span>
+            </div>
+
+            {/* Current big numbers */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
+              {stats.map((s, i) => {
+                const delta = s.prev != null ? s.v - s.prev : null
+                return (
+                  <div key={s.k} style={{ padding:'1.4rem .5rem 1.1rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
+                    <div style={{ position:'absolute', top:0, left:'25%', right:'25%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
+                    <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
+                    <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
+                    {delta !== null && (
+                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#4cdb7a' : delta < 0 ? '#ff6b6b' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,107,107,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
+                        {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {hasPrev && (
+              <>
+                {/* PREVIOUS SEASON header — same style as current but lighter */}
+                <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
+                  <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.prev_season[lang]}</span>
+                  <span style={{ fontSize:11, color:'rgba(255,255,255,.55)', letterSpacing:1, fontWeight:600 }}>{seasonPrev}</span>
+                </div>
+
+                {/* Previous numbers — smaller */}
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
+                  {[
+                    { v: profile.goals_prev,   k: t.profil.goals[lang],   color:'#e02020' },
+                    { v: profile.assists_prev, k: t.profil.assists[lang], color:'#1a6fd4' },
+                    { v: profile.matches_prev, k: t.profil.matches[lang], color:'#0a7c3e' },
+                  ].map((s, i) => (
+                    <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', background:'rgba(255,255,255,.02)' }}>
+                      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.9rem', color: s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
+                      <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* ── PUNTI FORTI ── */}
+      <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
+        {strengthKeys.length === 0 ? (
+          <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
+            {t.profil.no_strengths[lang]}{' '}
+            <button onClick={() => setEditing(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
+          </p>
+        ) : (
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            {strengthKeys.map(key => (
+              <span key={key} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.8)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
+                {strengthLabel(key, lang)}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── EDIT FORM ── */}
       {editing && (
-        <div className="card" style={{ marginBottom:'1.25rem', border:'2px solid var(--blue-bright)' }}>
-          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem' }}>
-            ✏️ Modifier mon profil
+        <div style={{ ...darkCard, marginBottom:'1.25rem', border:'1px solid rgba(230,57,70,.25)' }}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1.25rem' }}>
+            {t.profil.edit_title[lang]}
           </div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
+          {saveError && (
+            <div style={{ background:'rgba(230,57,70,.12)', border:'1px solid rgba(230,57,70,.3)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#ff6b6b', marginBottom:'1rem' }}>
+              ❌ Erreur: {saveError}
+            </div>
+          )}
+
+          {/* Basic info */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'1rem', marginBottom:'1rem' }}>
             {profile.role === 'player' && (
-              <div className="field">
-                <label className="field-label">Position</label>
-                <select className="input" value={position} onChange={e => setPosition(e.target.value)}>
-                  <option value="">—</option>
-                  {POSITIONS.map(p => <option key={p}>{p}</option>)}
+              <div>
+                <label style={lblSt}>{t.profil.position[lang]}</label>
+                <select style={inpSt} value={position} onChange={e => setPosition(e.target.value)}>
+                  <option value="" style={optSt}>—</option>
+                  {POSITIONS.map(p => <option key={p} style={optSt}>{p}</option>)}
                 </select>
               </div>
             )}
             {profile.role === 'player' && (
-              <div className="field">
-                <label className="field-label">Pied dominant</label>
-                <select className="input" value={foot} onChange={e => setFoot(e.target.value)}>
-                  <option>Droit</option><option>Gauche</option><option>Ambidextre</option>
+              <div>
+                <label style={lblSt}>{t.profil.foot[lang]}</label>
+                <select style={inpSt} value={foot} onChange={e => setFoot(e.target.value)}>
+                  <option value="Droit" style={optSt}>{t.login.right[lang]}</option>
+                  <option value="Gauche" style={optSt}>{t.login.left[lang]}</option>
+                  <option value="Ambidextre" style={optSt}>{t.login.both[lang]}</option>
                 </select>
               </div>
             )}
-            <div className="field">
-              <label className="field-label">Ligue</label>
-              <select className="input" value={ligue} onChange={e => setLigue(e.target.value)}>
-                <option value="">—</option>
-                {LIGUES.map(l => <option key={l}>{l}</option>)}
+            <div>
+              <label style={lblSt}>{t.profil.ligue[lang]}</label>
+              <select style={inpSt} value={ligue} onChange={e => setLigue(e.target.value)}>
+                <option value="" style={optSt}>—</option>
+                {LIGUES.map(l => <option key={l} style={optSt}>{l}</option>)}
               </select>
             </div>
-            <div className="field">
-              <label className="field-label">Zone</label>
-              <select className="input" value={zone} onChange={e => setZone(e.target.value)}>
-                <option value="">—</option>
-                {ZONES.map(z => <option key={z}>{z}</option>)}
+            <div>
+              <label style={lblSt}>{t.profil.zone[lang]}</label>
+              <select style={inpSt} value={zone} onChange={e => setZone(e.target.value)}>
+                <option value="" style={optSt}>—</option>
+                {ZONES.map(z => <option key={z} style={optSt}>{z}</option>)}
               </select>
             </div>
-            {profile.role !== 'club' && (
-              <div className="field">
-                <label className="field-label">Âge</label>
-                <input className="input" type="number" min="14" max="60" value={age} onChange={e => setAge(e.target.value)} />
+            <div>
+              <label style={lblSt}>{t.profil.dispo[lang]}</label>
+              <select style={inpSt} value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
+                <option value="oui" style={optSt}>{t.profil.dispo_yes[lang]}</option>
+                <option value="non" style={optSt}>{t.profil.dispo_no[lang]}</option>
+              </select>
+            </div>
+          </div>
+
+          {profile.role !== 'club' && (
+            <div style={{ marginBottom:'1rem' }}>
+              <label style={lblSt}>{t.profil.birthdate[lang]}</label>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr 1fr', gap:8 }}>
+                <select style={inpSt} value={birthDay} onChange={e => setBirthDay(e.target.value)}>
+                  <option value="" style={optSt}>{t.profil.day[lang]}</option>
+                  {days.map(d => <option key={d} value={d} style={optSt}>{d}</option>)}
+                </select>
+                <select style={inpSt} value={birthMonth} onChange={e => setBirthMonth(e.target.value)}>
+                  <option value="" style={optSt}>{t.profil.month[lang]}</option>
+                  {MONTHS.map((m, i) => <option key={m} value={i + 1} style={optSt}>{m}</option>)}
+                </select>
+                <select style={inpSt} value={birthYear} onChange={e => setBirthYear(e.target.value)}>
+                  <option value="" style={optSt}>{t.profil.year[lang]}</option>
+                  {years.map(y => <option key={y} value={y} style={optSt}>{y}</option>)}
+                </select>
               </div>
-            )}
-            <div className="field">
-              <label className="field-label">Disponibilité</label>
-              <select className="input" value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
-                <option value="oui">🟢 Disponible</option>
-                <option value="non">⚪ Indisponible</option>
-              </select>
+            </div>
+          )}
+
+          <div style={{ marginBottom:'1rem' }}>
+            <label style={lblSt}>{t.profil.phone[lang]}</label>
+            <input style={inpSt} type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
+          </div>
+
+          {/* Stats */}
+          {profile.role !== 'club' && (
+            <>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'#3a8cff' }}>{t.profil.current_season[lang]}</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
+                {[
+                  { v: goals, set: setGoals, label: t.profil.goals[lang] },
+                  { v: assists, set: setAssists, label: t.profil.assists[lang] },
+                  { v: matches, set: setMatches, label: t.profil.matches[lang] },
+                ].map(f => (
+                  <div key={f.label}>
+                    <label style={lblSt}>{f.label}</label>
+                    <input style={inpSt} type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'rgba(255,255,255,.45)' }}>{t.profil.prev_season[lang]}</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
+                {[
+                  { v: goalsPrev, set: setGoalsPrev, label: t.profil.goals[lang] },
+                  { v: assistsPrev, set: setAssistsPrev, label: t.profil.assists[lang] },
+                  { v: matchesPrev, set: setMatchesPrev, label: t.profil.matches[lang] },
+                ].map(f => (
+                  <div key={f.label}>
+                    <label style={lblSt}>{f.label}</label>
+                    <input style={inpSt} type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Bio */}
+          <div style={{ marginTop:'1rem' }}>
+            <label style={lblSt}>{t.profil.bio_label[lang]}</label>
+            <textarea style={{ ...inpSt, resize:'vertical' }} rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.profil.bio_ph[lang]} />
+          </div>
+
+          {/* Career */}
+          <div>
+            <label style={lblSt}>{t.profil.career_label[lang]}</label>
+            <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder={t.profil.career_ph[lang]} />
+          </div>
+
+          {/* Strengths — role-specific tags */}
+          <div>
+            <label style={lblSt}>{t.profil.strengths_label[lang]}</label>
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:4 }}>
+              {roleStrengths.map(s => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => toggleStrength(s.key)}
+                  style={{
+                    padding:'6px 14px', borderRadius:100, fontSize:13, fontWeight:600,
+                    cursor:'pointer', fontFamily:'inherit', border:'1.5px solid', transition:'all .15s',
+                    background: selectedStrengths.includes(s.key) ? 'rgba(58,140,255,.25)' : 'transparent',
+                    color: selectedStrengths.includes(s.key) ? '#fff' : 'rgba(255,255,255,.45)',
+                    borderColor: selectedStrengths.includes(s.key) ? '#3a8cff' : 'rgba(255,255,255,.15)',
+                  }}
+                >
+                  {s[lang]}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="field">
-            <label className="field-label">Bio / Présentation</label>
-            <textarea className="input" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="Présente-toi en quelques mots…" />
+          {/* Videos */}
+          <div>
+            <label style={lblSt}>{t.profil.video_label[lang]}</label>
+            {[
+              { v: video1, set: setVideo1, label: t.profil.video1[lang] },
+              { v: video2, set: setVideo2, label: t.profil.video2[lang] },
+              { v: video3, set: setVideo3, label: t.profil.video3[lang] },
+            ].map((f, i) => (
+              <input key={i} style={{ ...inpSt, marginBottom: i < 2 ? 8 : 0 }} value={f.v}
+                onChange={e => f.set(e.target.value)}
+                placeholder={`${f.label} — ${t.profil.video_url_ph[lang]}`} />
+            ))}
           </div>
 
-          <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
-            {saving ? '⏳ Sauvegarde…' : '💾 Sauvegarder les modifications'}
-          </button>
+          <div style={{ display:'flex', gap:8, marginTop:'1rem' }}>
+            <button onClick={handleSave} disabled={saving} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity: saving ? .7 : 1 }}>
+              {saving ? t.profil.saving[lang] : t.profil.save_btn[lang]}
+            </button>
+            <button onClick={() => { setEditing(false); setSaveError('') }} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 20px', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+              {t.profil.cancel[lang]}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* PROFILE GRID */}
+      {/* ── MAIN GRID ── */}
       <div className="profile-grid">
+
+        {/* LEFT — Bio + Videos */}
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
-          {/* BIO */}
-          <div className="card">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              📝 À propos
+          <div style={darkCard}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+              {t.profil.about[lang]}
             </div>
             {profile.bio
-              ? <p style={{ fontSize:14, color:'var(--text-muted)', lineHeight:1.7 }}>{profile.bio}</p>
-              : <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
-                  Aucune présentation. <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>Ajoute-en une →</button>
+              ? <p style={{ fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.7 }}>{profile.bio}</p>
+              : <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
+                  {t.profil.no_bio[lang]}{' '}
+                  <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
                 </p>
             }
           </div>
 
-          {/* STATS */}
-          <div className="card">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              📊 Statistiques
+          <div style={darkCard}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+              {t.profil.highlights[lang]}
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
-              {[
-                { v: profile.goals ?? 0, k: 'Buts' },
-                { v: profile.assists ?? 0, k: 'Assists' },
-                { v: profile.matches ?? 0, k: 'Matchs' }
-              ].map(s => (
-                <div key={s.k} style={{ background:'var(--gray-bg)', borderRadius:12, padding:'1rem', textAlign:'center' }}>
-                  <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', color:'var(--blue-mid)', lineHeight:1 }}>{s.v}</div>
-                  <div style={{ fontSize:11, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:1, marginTop:4 }}>{s.k}</div>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontSize:12, color:'var(--text-muted)', marginTop:'.75rem', fontStyle:'italic' }}>
-              Les stats seront mises à jour manuellement. Fonctionnalité complète bientôt.
-            </p>
-          </div>
-
-          {/* HIGHLIGHTS */}
-          <div className="card">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              🎬 Highlights vidéo
-            </div>
-            <div style={{ background:'var(--gray-bg)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed var(--gray-mid)' }}>
-              <div style={{ fontSize:'2rem', marginBottom:'.5rem' }}>🎬</div>
-              <div style={{ fontSize:14, color:'var(--text-muted)' }}>Upload de vidéos bientôt disponible</div>
-            </div>
+            {videoUrls.length === 0 ? (
+              <div style={{ background:'rgba(255,255,255,.03)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed rgba(255,255,255,.12)' }}>
+                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)' }}>🎬 {t.profil.video_soon[lang]}</div>
+                <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
+                  {t.profil.edit_videos[lang]} →
+                </button>
+              </div>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+                {videoUrls.map((url, i) => {
+                  const embed = getYouTubeEmbed(url)
+                  return embed ? (
+                    <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
+                      <iframe src={embed} title={`Video ${i+1}`} frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
+                    </div>
+                  ) : (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'rgba(255,255,255,.05)', borderRadius:10, textDecoration:'none', color:'#3a8cff', fontSize:14, fontWeight:600 }}>
+                      🎬 {t.profil.video_label[lang]} {i+1}
+                    </a>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* SIDEBAR */}
+        {/* RIGHT SIDEBAR — Info · Career · Actions · Tip */}
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
-          <div className="card card-sm">
+
+          {/* Informations */}
+          <div style={darkCard}>
             {profile.available && (
-              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'var(--green-bg)', color:'var(--green)', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
-                <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--green)' }} />
-                Disponible
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(13,122,54,.2)', color:'#4cdb7a', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
+                <span style={{ width:8, height:8, borderRadius:'50%', background:'#4cdb7a' }} />
+                {t.profil.available_badge[lang]}
               </div>
             )}
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>ℹ️ Informations</div>
-            {[
-              ['Rôle', roleLabel],
-              ['Email', profile.email],
-              profile.age ? ['Âge', `${profile.age} ans`] : null,
-              profile.foot ? ['Pied dominant', profile.foot] : null,
-              profile.zone ? ['Zone', profile.zone] : null,
-              profile.ligue ? ['Ligue', profile.ligue] : null,
-              profile.position ? ['Position', profile.position] : null,
-              profile.club_name ? ['Club', profile.club_name] : null,
-            ].filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
-              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--gray-light)', fontSize:14 }}>
-                <span style={{ color:'var(--text-muted)' }}>{k}</span>
-                <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all' }}>{v}</span>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.info[lang]}</div>
+            {infoRows.filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
+              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
+                <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
+                <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all', color:'#fff' }}>{v}</span>
               </div>
             ))}
           </div>
 
-          <div className="card card-sm">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>🚀 Actions rapides</div>
+          {/* Parcours — entre Info et Actions */}
+          <div style={darkCard}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.career[lang]}</div>
+            {profile.career ? (
+              <div style={{ display:'flex', flexDirection:'column' }}>
+                {profile.career.split('\n').filter(Boolean).map((line, i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.5rem 0', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', background:'#3a8cff', flexShrink:0, marginTop:5 }} />
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.8)', lineHeight:1.5 }}>{line}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize:13, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
+                {t.profil.no_career[lang]}{' '}
+                <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13 }}>
+                  {t.profil.add_career[lang]}
+                </button>
+              </p>
+            )}
+          </div>
+
+          {/* Actions rapides */}
+          <div style={darkCard}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.actions[lang]}</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              <Link href="/recherche" className="btn btn-blue btn-sm btn-full" style={{ justifyContent:'center' }}>🔍 Rechercher des clubs</Link>
-              <Link href="/messages" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>💬 Mes messages</Link>
-              <Link href="/candidatures" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>📋 Mes candidatures</Link>
+              <Link href="/recherche" style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.search_clubs[lang]}</Link>
+              <Link href="/messages" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_msgs[lang]}</Link>
+              <Link href="/candidatures" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_cands[lang]}</Link>
             </div>
           </div>
 
-          <div className="card card-sm" style={{ background:'var(--blue-light)', border:'1px solid var(--blue-bright)' }}>
-            <div style={{ fontSize:13, color:'var(--blue-mid)', fontWeight:600, marginBottom:'.5rem' }}>💡 Conseil</div>
-            <div style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>
-              Un profil complet reçoit <strong>3x plus de contacts</strong>. Ajoute ta bio et ta disponibilité pour être visible !
-            </div>
-            <button onClick={() => setEditing(true)} className="btn btn-blue btn-sm" style={{ marginTop:'.75rem', width:'100%', justifyContent:'center' }}>
-              Compléter mon profil →
+          {/* Conseil */}
+          <div style={{ ...darkCard, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.25)' }}>
+            <div style={{ fontSize:13, color:'#3a8cff', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
+            <div style={{ fontSize:13, color:'rgba(255,255,255,.55)', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
+            <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', width:'100%', background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+              {t.profil.complete[lang]}
             </button>
           </div>
         </div>
       </div>
 
       <style>{`
-        .profile-grid {
-          display: grid;
-          grid-template-columns: 1fr 320px;
-          gap: 1.25rem;
-        }
-        @media (max-width: 720px) {
-          .profile-grid { grid-template-columns: 1fr; }
-        }
+        .profile-grid { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; }
+        @media (max-width: 720px) { .profile-grid { grid-template-columns: 1fr; } }
       `}</style>
+      </div>
     </div>
   )
 }

@@ -95,7 +95,7 @@ export default function ClubPage({ params }: { params: { slug: string } }) {
             </div>
             <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
               <ClubChip>🏆 {club.ligue}</ClubChip>
-              <ClubChip>📍 {club.zone}</ClubChip>
+              <ClubChip>{club.zone}</ClubChip>
               <ClubChip>👥 {club.rosterCount} joueurs</ClubChip>
               <ClubChip>⭐ {club.rating} / 5</ClubChip>
               {club.recruiting && (
@@ -197,7 +197,7 @@ export default function ClubPage({ params }: { params: { slug: string } }) {
               }}
             >
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 1 }}>
-                📢 Nos annonces
+                Nos annonces
               </div>
               <Link href="/annonces" className="btn btn-red btn-sm">
                 + Nouvelle annonce
@@ -253,7 +253,7 @@ export default function ClubPage({ params }: { params: { slug: string } }) {
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: '.85rem' }}>
                     <span className="badge badge-blue">{a.ligue}</span>
                     {a.position && <span className="badge badge-amber">{a.position}</span>}
-                    <span className="badge badge-gray">📍 {a.zone}</span>
+                    <span className="badge badge-gray">{a.zone}</span>
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: '.75rem' }}>
                     Candidatures :{' '}
@@ -333,7 +333,7 @@ export default function ClubPage({ params }: { params: { slug: string } }) {
 
           {/* INFOS */}
           <div className="card card-sm">
-            <SectionH>ℹ️ Informations</SectionH>
+            <SectionH>Informations</SectionH>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem', fontSize: 14 }}>
               {[
                 ['Fondé en', String(club.founded)],
@@ -354,7 +354,7 @@ export default function ClubPage({ params }: { params: { slug: string } }) {
 
           {/* SAISON */}
           <div className="card card-sm">
-            <SectionH>📊 Saison en cours</SectionH>
+            <SectionH>Saison en cours</SectionH>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.6rem' }}>
               <SeasonStat value={club.season.wins} label="Victoires" color="var(--green)" />
               <SeasonStat value={club.season.draws} label="Nuls" color="var(--amber)" />
