@@ -52,7 +52,10 @@ function LoginForm() {
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email, password,
-      options: { data: { first_name: firstName, last_name: lastName, role } }
+      options: {
+        data: { first_name: firstName, last_name: lastName, role },
+        emailRedirectTo: 'https://team-up-f-rch.vercel.app/profil'
+      }
     })
 
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
@@ -79,7 +82,7 @@ function LoginForm() {
     e.preventDefault()
     setLoading(true); setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
+      redirectTo: 'https://team-up-f-rch.vercel.app/reset-password'
     })
     if (error) { setError(error.message); setLoading(false); return }
     setSuccess('Lien de réinitialisation envoyé ! Vérifie ton email.')
@@ -90,7 +93,7 @@ function LoginForm() {
     setLoading(true); setError('')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/profil` }
+      options: { redirectTo: 'https://team-up-f-rch.vercel.app/profil' }
     })
     if (error) { setError(error.message); setLoading(false) }
   }
