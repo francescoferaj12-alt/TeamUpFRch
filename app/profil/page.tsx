@@ -12,25 +12,72 @@ const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur 
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
-const STRENGTHS = [
+// ── Role-specific strength tags ──────────────────────────────────────────────
+const STRENGTHS_PLAYER = [
   { key: 'fast',        fr: 'Rapide',             de: 'Schnell' },
-  { key: 'technical',  fr: 'Technique',           de: 'Technisch' },
-  { key: 'physical',   fr: 'Physique',            de: 'Körperlich' },
-  { key: 'leadership', fr: 'Leadership',          de: 'Führungsstärke' },
-  { key: 'vision',     fr: 'Vision du jeu',       de: 'Spielübersicht' },
-  { key: 'shooting',   fr: 'Frappe puissante',    de: 'Schussstärke' },
-  { key: 'dribbling',  fr: 'Dribble',             de: 'Dribbling' },
-  { key: 'precise',    fr: 'Précis',              de: 'Präzise' },
-  { key: 'defensive',  fr: 'Défensif',            de: 'Defensiv' },
-  { key: 'offensive',  fr: 'Offensif',            de: 'Offensiv' },
-  { key: 'hardworking',fr: 'Travailleur',         de: 'Fleissig' },
-  { key: 'composed',   fr: 'Calme',               de: 'Ruhig' },
+  { key: 'technical',   fr: 'Technique',          de: 'Technisch' },
+  { key: 'physical',    fr: 'Physique',           de: 'Körperlich' },
+  { key: 'dribbling',   fr: 'Dribble',            de: 'Dribbling' },
+  { key: 'shooting',    fr: 'Frappe puissante',   de: 'Schussstärke' },
+  { key: 'finishing',   fr: 'Finition',           de: 'Abschluss' },
+  { key: 'passing',     fr: 'Passes précises',    de: 'Genaue Pässe' },
+  { key: 'vision',      fr: 'Vision du jeu',      de: 'Spielübersicht' },
+  { key: 'aerial',      fr: 'Jeu aérien',         de: 'Kopfballspiel' },
+  { key: 'onevsone',    fr: '1 contre 1',         de: '1 gegen 1' },
+  { key: 'sprint',      fr: 'Vitesse de pointe',  de: 'Sprintschnelligkeit' },
+  { key: 'pressing',    fr: 'Pressing',           de: 'Pressing' },
+  { key: 'defensive',   fr: 'Défensif',           de: 'Defensiv' },
+  { key: 'offensive',   fr: 'Offensif',           de: 'Offensiv' },
+  { key: 'leadership',  fr: 'Leadership',         de: 'Führungsstärke' },
+  { key: 'hardworking', fr: 'Travailleur',        de: 'Fleissig' },
+  { key: 'composed',    fr: 'Calme',              de: 'Ruhig' },
+  { key: 'precise',     fr: 'Précis',             de: 'Präzise' },
 ]
 
+const STRENGTHS_COACH = [
+  { key: 'tactical',    fr: 'Tactique',              de: 'Taktisch' },
+  { key: 'motivator',   fr: 'Motivateur',            de: 'Motivator' },
+  { key: 'communication', fr: 'Communication',       de: 'Kommunikation' },
+  { key: 'experienced', fr: 'Expérimenté',           de: 'Erfahren' },
+  { key: 'video',       fr: 'Analyse vidéo',         de: 'Videoanalyse' },
+  { key: 'youth',       fr: 'Formation des jeunes',  de: 'Jugendausbildung' },
+  { key: 'defense',     fr: 'Défense organisée',     de: 'Organisierte Abwehr' },
+  { key: 'counter',     fr: 'Contre-attaque',        de: 'Konterspiel' },
+  { key: 'possession',  fr: 'Jeu de possession',     de: 'Ballbesitzspiel' },
+  { key: 'pressing',    fr: 'Jeu de pression',       de: 'Pressing-Spiel' },
+  { key: 'leadership',  fr: 'Leadership',            de: 'Führungsstärke' },
+  { key: 'passionate',  fr: 'Passionné',             de: 'Leidenschaftlich' },
+  { key: 'innovative',  fr: 'Innovateur',            de: 'Innovativ' },
+  { key: 'composed',    fr: 'Calme',                 de: 'Ruhig' },
+  { key: 'fitness',     fr: 'Préparation physique',  de: 'Fitness-Training' },
+]
+
+const STRENGTHS_CLUB = [
+  { key: 'infrastructure', fr: 'Infrastructure de qualité', de: 'Gute Infrastruktur' },
+  { key: 'family',         fr: 'Esprit familial',           de: 'Familiäre Atmosphäre' },
+  { key: 'ambition',       fr: 'Ambition sportive',         de: 'Sportlicher Ehrgeiz' },
+  { key: 'youth',          fr: 'Formation jeunes',          de: 'Jugendförderung' },
+  { key: 'competitive',    fr: 'Équipe compétitive',        de: 'Wettbewerbsfähig' },
+  { key: 'atmosphere',     fr: 'Bonne ambiance',            de: 'Gute Stimmung' },
+  { key: 'professional',   fr: 'Structure sérieuse',        de: 'Seriöse Struktur' },
+  { key: 'social',         fr: 'Vie sociale active',        de: 'Aktives Sozialleben' },
+  { key: 'equipment',      fr: 'Bons équipements',          de: 'Gute Ausrüstung' },
+  { key: 'local',          fr: 'Ancrage local',             de: 'Lokale Verankerung' },
+  { key: 'growing',        fr: 'Club en développement',     de: 'Wachsender Verein' },
+  { key: 'welcoming',      fr: 'Accueil de nouveaux joueurs', de: 'Offene Aufnahme' },
+]
+
+const ALL_STRENGTHS = [...STRENGTHS_PLAYER, ...STRENGTHS_COACH, ...STRENGTHS_CLUB]
+
+function getStrengthsByRole(role: string) {
+  if (role === 'coach') return STRENGTHS_COACH
+  if (role === 'club') return STRENGTHS_CLUB
+  return STRENGTHS_PLAYER
+}
+
 function strengthLabel(key: string, lang: Lang) {
-  const s = STRENGTHS.find(x => x.key === key)
-  if (!s) return key
-  return s[lang]
+  const s = ALL_STRENGTHS.find(x => x.key === key)
+  return s ? s[lang] : key
 }
 
 function parseStrengths(raw?: string): string[] {
@@ -74,11 +121,11 @@ export default function ProfilPage() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [saveError, setSaveError] = useState('')
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Edit form state
   const [bio, setBio] = useState('')
   const [position, setPosition] = useState('')
   const [ligue, setLigue] = useState('')
@@ -113,7 +160,6 @@ export default function ProfilPage() {
     async function load() {
       let data = authProfile
 
-      // Auto-create profile row if missing (e.g., after Google OAuth signup)
       if (!data) {
         const meta = session!.user.user_metadata || {}
         const newProfile = {
@@ -130,7 +176,6 @@ export default function ProfilPage() {
       }
 
       if (!data) { setLoading(false); return }
-
       setProfile(data)
       populateForm(data)
       setLoading(false)
@@ -166,21 +211,14 @@ export default function ProfilPage() {
   async function handlePhotoUpload(e: ChangeEvent<HTMLInputElement>) {
     if (!profile || !e.target.files?.[0]) return
     const file = e.target.files[0]
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Max 5 MB')
-      return
-    }
+    if (file.size > 5 * 1024 * 1024) { alert('Max 5 MB'); return }
     setUploadingPhoto(true)
     const ext = file.name.split('.').pop()
     const path = `${profile.id}/avatar.${ext}`
     const { data: uploadData, error } = await supabase.storage
       .from('avatars')
       .upload(path, file, { upsert: true, contentType: file.type })
-    if (error) {
-      alert('Erreur upload: ' + error.message)
-      setUploadingPhoto(false)
-      return
-    }
+    if (error) { alert('Erreur upload: ' + error.message); setUploadingPhoto(false); return }
     const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
     const avatar_url = urlData.publicUrl + '?t=' + Date.now()
     await supabase.from('profiles').update({ avatar_url }).eq('id', profile.id)
@@ -197,36 +235,58 @@ export default function ProfilPage() {
   async function handleSave() {
     if (!profile) return
     setSaving(true)
+    setSaveError('')
+
     const birthdate = birthDay && birthMonth && birthYear
       ? `${birthYear}-${birthMonth.padStart(2,'0')}-${birthDay.padStart(2,'0')}`
       : null
 
-    const updates: Partial<Profile> = {
-      bio, position, ligue, zone, foot, available,
-      phone: phone || undefined,
-      career: career || undefined,
-      birthdate: birthdate || undefined,
-      goals: goals !== '' ? parseInt(goals) : undefined,
-      assists: assists !== '' ? parseInt(assists) : undefined,
-      matches: matches !== '' ? parseInt(matches) : undefined,
-      goals_prev: goalsPrev !== '' ? parseInt(goalsPrev) : undefined,
-      assists_prev: assistsPrev !== '' ? parseInt(assistsPrev) : undefined,
-      matches_prev: matchesPrev !== '' ? parseInt(matchesPrev) : undefined,
-      strengths: selectedStrengths.join(',') || undefined,
-      video1_url: video1 || undefined,
-      video2_url: video2 || undefined,
-      video3_url: video3 || undefined,
+    // Base fields that always exist in the DB
+    const baseUpdates = {
+      bio: bio || null,
+      position: position || null,
+      ligue: ligue || null,
+      zone: zone || null,
+      foot: foot || null,
+      available,
+      phone: phone || null,
+      career: career || null,
+      birthdate,
+      goals: goals !== '' ? parseInt(goals) : null,
+      assists: assists !== '' ? parseInt(assists) : null,
+      matches: matches !== '' ? parseInt(matches) : null,
     }
 
-    const { error } = await supabase.from('profiles').update(updates).eq('id', profile.id)
-    if (!error) {
-      const updated = { ...profile, ...updates }
-      setProfile(updated)
-      await refreshProfile()
-      setSaveMsg(t.profil.saved[lang])
-      setEditing(false)
-      setTimeout(() => setSaveMsg(''), 3000)
+    // Try saving base fields first
+    const { error: baseError } = await supabase
+      .from('profiles')
+      .update(baseUpdates)
+      .eq('id', profile.id)
+
+    if (baseError) {
+      setSaveError(baseError.message)
+      setSaving(false)
+      return
     }
+
+    // Try saving new fields (may not exist if SQL migration wasn't run)
+    const newFields = {
+      goals_prev: goalsPrev !== '' ? parseInt(goalsPrev) : null,
+      assists_prev: assistsPrev !== '' ? parseInt(assistsPrev) : null,
+      matches_prev: matchesPrev !== '' ? parseInt(matchesPrev) : null,
+      strengths: selectedStrengths.join(',') || null,
+      video1_url: video1 || null,
+      video2_url: video2 || null,
+      video3_url: video3 || null,
+    }
+    await supabase.from('profiles').update(newFields).eq('id', profile.id)
+
+    const updated = { ...profile, ...baseUpdates, ...newFields }
+    setProfile(updated as Profile)
+    await refreshProfile()
+    setSaveMsg(t.profil.saved[lang])
+    setEditing(false)
+    setTimeout(() => setSaveMsg(''), 3000)
     setSaving(false)
   }
 
@@ -253,6 +313,7 @@ export default function ProfilPage() {
   const displayAge = calcAge(profile.birthdate)
   const ageSuffix = t.general.age_suffix[lang]
   const strengthKeys = parseStrengths(profile.strengths)
+  const roleStrengths = getStrengthsByRole(profile.role)
 
   const infoRows: ([string, string] | null)[] = [
     [t.profil.role_k[lang], roleLabel],
@@ -274,19 +335,20 @@ export default function ProfilPage() {
 
       {saveMsg && (
         <div style={{ background:'var(--green-bg)', border:'1px solid var(--green)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'var(--green)', marginBottom:'1rem' }}>
-          {saveMsg}
+          ✅ {saveMsg}
         </div>
       )}
 
       {/* ── HERO ── */}
       <div style={{ background:'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
-
         <div style={{ display:'flex', alignItems:'flex-end', gap:'1.5rem', flexWrap:'wrap', position:'relative' }}>
 
-          {/* AVATAR WITH UPLOAD */}
+          {/* AVATAR */}
           <div style={{ position:'relative', flexShrink:0 }}>
-            <div style={{ width:100, height:100, borderRadius:18, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
-              onClick={() => fileInputRef.current?.click()}>
+            <div
+              style={{ width:100, height:100, borderRadius:18, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
+              onClick={() => fileInputRef.current?.click()}
+            >
               {profile.avatar_url
                 ? <img src={profile.avatar_url} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                 : (initials || roleEmoji)
@@ -342,10 +404,10 @@ export default function ProfilPage() {
         </div>
       </div>
 
-      {/* ── STATS BANNER (current season) ── */}
+      {/* ── STATS (joueur / coach uniquement) ── */}
       {profile.role !== 'club' && (
         <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', marginBottom:'1.25rem', overflow:'hidden' }}>
-          <div style={{ background:'var(--blue-dark)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <div style={{ background:'var(--blue-dark)', padding:'.75rem 1.25rem' }}>
             <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:1 }}>{t.profil.current_season[lang]}</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
@@ -371,26 +433,24 @@ export default function ProfilPage() {
         </div>
       )}
 
-      {/* ── STRENGTHS ── */}
-      {(strengthKeys.length > 0 || profile.role !== 'club') && (
-        <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', padding:'1.25rem', marginBottom:'1.25rem' }}>
-          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
-          {strengthKeys.length === 0 ? (
-            <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
-              {t.profil.no_strengths[lang]}{' '}
-              <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
-            </p>
-          ) : (
-            <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-              {strengthKeys.map(key => (
-                <span key={key} style={{ background:'var(--blue-light)', color:'var(--blue-mid)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
-                  {strengthLabel(key, lang)}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* ── PUNTI FORTI ── */}
+      <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', padding:'1.25rem', marginBottom:'1.25rem' }}>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
+        {strengthKeys.length === 0 ? (
+          <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
+            {t.profil.no_strengths[lang]}{' '}
+            <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
+          </p>
+        ) : (
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            {strengthKeys.map(key => (
+              <span key={key} style={{ background:'var(--blue-light)', color:'var(--blue-mid)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
+                {strengthLabel(key, lang)}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* ── EDIT FORM ── */}
       {editing && (
@@ -398,6 +458,12 @@ export default function ProfilPage() {
           <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1.25rem' }}>
             {t.profil.edit_title[lang]}
           </div>
+
+          {saveError && (
+            <div style={{ background:'var(--red-bg)', border:'1px solid var(--red)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'var(--red)', marginBottom:'1rem' }}>
+              ❌ Erreur: {saveError}
+            </div>
+          )}
 
           {/* Basic info */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'1rem', marginBottom:'1rem' }}>
@@ -473,33 +539,29 @@ export default function ProfilPage() {
             <>
               <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'var(--blue-mid)' }}>{t.profil.current_season[lang]}</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
-                <div className="field">
-                  <label className="field-label">{t.profil.goals[lang]}</label>
-                  <input className="input" type="number" min="0" value={goals} onChange={e => setGoals(e.target.value)} placeholder="0" />
-                </div>
-                <div className="field">
-                  <label className="field-label">{t.profil.assists[lang]}</label>
-                  <input className="input" type="number" min="0" value={assists} onChange={e => setAssists(e.target.value)} placeholder="0" />
-                </div>
-                <div className="field">
-                  <label className="field-label">{t.profil.matches[lang]}</label>
-                  <input className="input" type="number" min="0" value={matches} onChange={e => setMatches(e.target.value)} placeholder="0" />
-                </div>
+                {[
+                  { v: goals, set: setGoals, label: t.profil.goals[lang] },
+                  { v: assists, set: setAssists, label: t.profil.assists[lang] },
+                  { v: matches, set: setMatches, label: t.profil.matches[lang] },
+                ].map(f => (
+                  <div key={f.label} className="field">
+                    <label className="field-label">{f.label}</label>
+                    <input className="input" type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
+                  </div>
+                ))}
               </div>
               <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'var(--text-muted)' }}>{t.profil.prev_season[lang]}</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
-                <div className="field">
-                  <label className="field-label">{t.profil.goals[lang]}</label>
-                  <input className="input" type="number" min="0" value={goalsPrev} onChange={e => setGoalsPrev(e.target.value)} placeholder="0" />
-                </div>
-                <div className="field">
-                  <label className="field-label">{t.profil.assists[lang]}</label>
-                  <input className="input" type="number" min="0" value={assistsPrev} onChange={e => setAssistsPrev(e.target.value)} placeholder="0" />
-                </div>
-                <div className="field">
-                  <label className="field-label">{t.profil.matches[lang]}</label>
-                  <input className="input" type="number" min="0" value={matchesPrev} onChange={e => setMatchesPrev(e.target.value)} placeholder="0" />
-                </div>
+                {[
+                  { v: goalsPrev, set: setGoalsPrev, label: t.profil.goals[lang] },
+                  { v: assistsPrev, set: setAssistsPrev, label: t.profil.assists[lang] },
+                  { v: matchesPrev, set: setMatchesPrev, label: t.profil.matches[lang] },
+                ].map(f => (
+                  <div key={f.label} className="field">
+                    <label className="field-label">{f.label}</label>
+                    <input className="input" type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
+                  </div>
+                ))}
               </div>
             </>
           )}
@@ -516,52 +578,60 @@ export default function ProfilPage() {
             <textarea className="input" rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder={t.profil.career_ph[lang]} />
           </div>
 
-          {/* Strengths */}
-          {profile.role !== 'club' && (
-            <div className="field">
-              <label className="field-label">{t.profil.strengths_label[lang]}</label>
-              <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:4 }}>
-                {STRENGTHS.map(s => (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => toggleStrength(s.key)}
-                    style={{
-                      padding:'6px 14px', borderRadius:100, fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', border:'1.5px solid',
-                      background: selectedStrengths.includes(s.key) ? 'var(--blue-mid)' : 'transparent',
-                      color: selectedStrengths.includes(s.key) ? '#fff' : 'var(--text-muted)',
-                      borderColor: selectedStrengths.includes(s.key) ? 'var(--blue-mid)' : 'var(--border)',
-                    }}
-                  >
-                    {s[lang]}
-                  </button>
-                ))}
-              </div>
+          {/* Strengths — role-specific tags */}
+          <div className="field">
+            <label className="field-label">{t.profil.strengths_label[lang]}</label>
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:4 }}>
+              {roleStrengths.map(s => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => toggleStrength(s.key)}
+                  style={{
+                    padding:'6px 14px', borderRadius:100, fontSize:13, fontWeight:600,
+                    cursor:'pointer', fontFamily:'inherit', border:'1.5px solid', transition:'all .15s',
+                    background: selectedStrengths.includes(s.key) ? 'var(--blue-mid)' : 'transparent',
+                    color: selectedStrengths.includes(s.key) ? '#fff' : 'var(--text-muted)',
+                    borderColor: selectedStrengths.includes(s.key) ? 'var(--blue-mid)' : 'var(--border)',
+                  }}
+                >
+                  {s[lang]}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
-          {/* Video highlights */}
+          {/* Videos */}
           <div className="field">
             <label className="field-label">{t.profil.video_label[lang]}</label>
-            <input className="input" style={{ marginBottom:8 }} value={video1} onChange={e => setVideo1(e.target.value)} placeholder={`${t.profil.video1[lang]} — ${t.profil.video_url_ph[lang]}`} />
-            <input className="input" style={{ marginBottom:8 }} value={video2} onChange={e => setVideo2(e.target.value)} placeholder={`${t.profil.video2[lang]} — ${t.profil.video_url_ph[lang]}`} />
-            <input className="input" value={video3} onChange={e => setVideo3(e.target.value)} placeholder={`${t.profil.video3[lang]} — ${t.profil.video_url_ph[lang]}`} />
+            {[
+              { v: video1, set: setVideo1, label: t.profil.video1[lang] },
+              { v: video2, set: setVideo2, label: t.profil.video2[lang] },
+              { v: video3, set: setVideo3, label: t.profil.video3[lang] },
+            ].map((f, i) => (
+              <input key={i} className="input" style={{ marginBottom: i < 2 ? 8 : 0 }} value={f.v}
+                onChange={e => f.set(e.target.value)}
+                placeholder={`${f.label} — ${t.profil.video_url_ph[lang]}`} />
+            ))}
           </div>
 
           <div style={{ display:'flex', gap:8, marginTop:'1rem' }}>
             <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
               {saving ? t.profil.saving[lang] : t.profil.save_btn[lang]}
             </button>
-            <button onClick={() => setEditing(false)} className="btn btn-ghost">{t.profil.cancel[lang]}</button>
+            <button onClick={() => { setEditing(false); setSaveError('') }} className="btn btn-ghost">
+              {t.profil.cancel[lang]}
+            </button>
           </div>
         </div>
       )}
 
       {/* ── MAIN GRID ── */}
       <div className="profile-grid">
+
+        {/* LEFT — Bio + Videos */}
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
-          {/* BIO */}
           <div className="card">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
               {t.profil.about[lang]}
@@ -575,38 +645,13 @@ export default function ProfilPage() {
             }
           </div>
 
-          {/* CAREER HISTORY */}
-          <div className="card">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              {t.profil.career[lang]}
-            </div>
-            {profile.career ? (
-              <div style={{ display:'flex', flexDirection:'column', gap:'.25rem' }}>
-                {profile.career.split('\n').filter(Boolean).map((line, i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:12, padding:'.6rem 0', borderBottom:'1px solid var(--gray-light)' }}>
-                    <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--blue-bright)', flexShrink:0, marginTop:4 }} />
-                    <div style={{ fontSize:14, color:'var(--text-dark)', lineHeight:1.5 }}>{line}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
-                {t.profil.no_career[lang]}{' '}
-                <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_career[lang]}</button>
-              </p>
-            )}
-          </div>
-
-          {/* VIDEO HIGHLIGHTS */}
           <div className="card">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
               {t.profil.highlights[lang]}
             </div>
             {videoUrls.length === 0 ? (
               <div style={{ background:'var(--gray-bg)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed var(--gray-mid)' }}>
-                <div style={{ fontSize:14, color:'var(--text-muted)' }}>
-                  🎬 {t.profil.video_soon[lang]}
-                </div>
+                <div style={{ fontSize:14, color:'var(--text-muted)' }}>🎬 {t.profil.video_soon[lang]}</div>
                 <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
                   {t.profil.edit_videos[lang]} →
                 </button>
@@ -615,25 +660,17 @@ export default function ProfilPage() {
               <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
                 {videoUrls.map((url, i) => {
                   const embed = getYouTubeEmbed(url)
-                  return (
-                    <div key={i}>
-                      {embed ? (
-                        <div style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
-                          <iframe
-                            src={embed}
-                            title={`Video ${i+1}`}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }}
-                          />
-                        </div>
-                      ) : (
-                        <a href={url} target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'var(--gray-bg)', borderRadius:10, textDecoration:'none', color:'var(--blue-mid)', fontSize:14, fontWeight:600 }}>
-                          🎬 {t.profil.video_label[lang]} {i+1}
-                        </a>
-                      )}
+                  return embed ? (
+                    <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
+                      <iframe src={embed} title={`Video ${i+1}`} frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
                     </div>
+                  ) : (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'var(--gray-bg)', borderRadius:10, textDecoration:'none', color:'var(--blue-mid)', fontSize:14, fontWeight:600 }}>
+                      🎬 {t.profil.video_label[lang]} {i+1}
+                    </a>
                   )
                 })}
               </div>
@@ -641,8 +678,10 @@ export default function ProfilPage() {
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
+        {/* RIGHT SIDEBAR — Info · Career · Actions · Tip */}
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
+
+          {/* Informations */}
           <div className="card card-sm">
             {profile.available && (
               <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'var(--green-bg)', color:'var(--green)', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
@@ -659,6 +698,29 @@ export default function ProfilPage() {
             ))}
           </div>
 
+          {/* Parcours — entre Info et Actions */}
+          <div className="card card-sm">
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.career[lang]}</div>
+            {profile.career ? (
+              <div style={{ display:'flex', flexDirection:'column' }}>
+                {profile.career.split('\n').filter(Boolean).map((line, i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.5rem 0', borderBottom:'1px solid var(--gray-light)' }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--blue-bright)', flexShrink:0, marginTop:5 }} />
+                    <div style={{ fontSize:13, color:'var(--text-dark)', lineHeight:1.5 }}>{line}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize:13, color:'var(--text-muted)', fontStyle:'italic' }}>
+                {t.profil.no_career[lang]}{' '}
+                <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13 }}>
+                  {t.profil.add_career[lang]}
+                </button>
+              </p>
+            )}
+          </div>
+
+          {/* Actions rapides */}
           <div className="card card-sm">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.actions[lang]}</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
@@ -668,11 +730,10 @@ export default function ProfilPage() {
             </div>
           </div>
 
+          {/* Conseil */}
           <div className="card card-sm" style={{ background:'var(--blue-light)', border:'1px solid var(--blue-bright)' }}>
             <div style={{ fontSize:13, color:'var(--blue-mid)', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
-            <div style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>
-              {t.profil.conseil_text[lang]}
-            </div>
+            <div style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
             <button onClick={() => setEditing(true)} className="btn btn-blue btn-sm" style={{ marginTop:'.75rem', width:'100%', justifyContent:'center' }}>
               {t.profil.complete[lang]}
             </button>
@@ -681,14 +742,8 @@ export default function ProfilPage() {
       </div>
 
       <style>{`
-        .profile-grid {
-          display: grid;
-          grid-template-columns: 1fr 300px;
-          gap: 1.25rem;
-        }
-        @media (max-width: 720px) {
-          .profile-grid { grid-template-columns: 1fr; }
-        }
+        .profile-grid { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; }
+        @media (max-width: 720px) { .profile-grid { grid-template-columns: 1fr; } }
       `}</style>
     </div>
   )
