@@ -53,6 +53,7 @@ function LoginForm() {
   const [birthYear, setBirthYear] = useState('')
   const [clubName, setClubName] = useState('')
   const [bio, setBio] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   const regYear = new Date().getFullYear()
   const regYears = Array.from({ length: 55 }, (_, i) => regYear - 14 - i)
@@ -72,6 +73,12 @@ function LoginForm() {
     e.preventDefault()
     setLoading(true); setError('')
 
+    if (password !== confirmPassword) {
+      setError(t.login.error_pwd_match[lang])
+      setLoading(false)
+      return
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email, password,
       options: {
@@ -89,13 +96,16 @@ function LoginForm() {
         position: role === 'player' ? position : null,
         ligue, zone,
         foot: role === 'player' ? foot : null,
-        birthdate: (birthDay && birthMonth && birthYear)
-          ? `${birthYear}-${birthMonth.padStart(2,'0')}-${birthDay.padStart(2,'0')}`
-          : null,
         club_name: role === 'club' ? clubName : null,
         bio, available: true
       })
       if (profileError) { setError('Erreur profil: ' + profileError.message); setLoading(false); return }
+
+      // Save birthdate separately (requires migration column — fails silently if not yet applied)
+      if (birthDay && birthMonth && birthYear) {
+        const bd = `${birthYear}-${birthMonth.toString().padStart(2,'0')}-${birthDay.toString().padStart(2,'0')}`
+        await supabase.from('profiles').update({ birthdate: bd }).eq('id', data.user.id)
+      }
     }
 
     setSuccess(t.login.success_register[lang])
@@ -299,7 +309,7 @@ function LoginForm() {
                 <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ton@email.ch" required />
               </div>
 
-              <div style={{ marginBottom: mode === 'login' ? 0 : '1rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>{t.login.password[lang]}</div>
                   {mode === 'login' && (
@@ -310,6 +320,24 @@ function LoginForm() {
                 </div>
                 <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={mode === 'register' ? t.login.min_pwd[lang] : '••••••••'} required minLength={6} />
               </div>
+
+              {mode === 'register' && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.confirm_pwd[lang]}</div>
+                  <input
+                    style={{ ...inputStyle, borderColor: confirmPassword && confirmPassword !== password ? 'var(--red)' : undefined }}
+                    type="password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder={t.login.confirm_pwd_ph[lang]}
+                    required
+                    minLength={6}
+                  />
+                  {confirmPassword && confirmPassword !== password && (
+                    <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 4 }}>{t.login.error_pwd_match[lang]}</div>
+                  )}
+                </div>
+              )}
 
               <button type="submit" disabled={loading} style={{
                 width: '100%', marginTop: '1.25rem',
