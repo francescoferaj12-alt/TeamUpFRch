@@ -93,8 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     📧 teamupfr.ch@gmail.com
                   </a>
                   <div style={{ color: 'rgba(255,255,255,.3)', marginTop: '1rem', fontSize: 12 }}>
-                    Fondé par Francesco, Hugo & Tiago<br />
-                    🇮🇹🇦🇱🇵🇹 Fribourg, Suisse
+                    🇨🇭 Fribourg, Suisse
                   </div>
                 </div>
               </div>

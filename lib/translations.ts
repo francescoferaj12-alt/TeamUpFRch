@@ -13,6 +13,7 @@ export const t = {
     apropos: { fr: 'À propos', de: 'Über uns' },
     faq: { fr: 'FAQ', de: 'FAQ' },
     connexion: { fr: 'Connexion', de: 'Anmelden' },
+    deconnexion: { fr: 'Déconnexion', de: 'Abmelden' },
   },
 
   // HOMEPAGE

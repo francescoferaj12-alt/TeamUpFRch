@@ -24,5 +24,42 @@ export type Profile = {
   assists?: number
   matches?: number
   rating?: number
+  phone?: string
+  verified?: boolean
+  verification_requested?: boolean
+  created_at: string
+}
+
+export type Annonce = {
+  id: string
+  author_id: string
+  author_name: string
+  author_type: 'player' | 'coach' | 'club'
+  title: string
+  body: string
+  ligue: string
+  position?: string
+  zone: string
+  status: 'active' | 'closed'
+  type?: 'club_cherche_joueur' | 'joueur_cherche_club' | 'coach_cherche_club' | 'club_cherche_coach' | 'coach_cherche_joueurs'
+  created_at: string
+}
+
+export type Application = {
+  id: string
+  annonce_id: string
+  applicant_id: string
+  applicant_name: string
+  message: string
+  status: 'pending' | 'accepted' | 'rejected'
+  created_at: string
+}
+
+export type Message = {
+  id: string
+  sender_id: string
+  receiver_id: string
+  text: string
+  read: boolean
   created_at: string
 }
