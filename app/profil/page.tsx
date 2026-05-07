@@ -41,6 +41,7 @@ export default function ProfilPage() {
   const [foot, setFoot] = useState('')
   const [available, setAvailable] = useState(true)
   const [phone, setPhone] = useState('')
+  const [career, setCareer] = useState('')
   const [birthDay, setBirthDay] = useState('')
   const [birthMonth, setBirthMonth] = useState('')
   const [birthYear, setBirthYear] = useState('')
@@ -53,8 +54,26 @@ export default function ProfilPage() {
     async function load() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-      if (error || !data) { router.push('/login'); return }
+
+      let { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
+
+      // Auto-create profile row if missing (e.g., after Google OAuth signup)
+      if (!data) {
+        const meta = session.user.user_metadata || {}
+        const newProfile = {
+          id: session.user.id,
+          email: session.user.email || '',
+          role: (meta.role as string) || 'player',
+          first_name: meta.first_name || meta.given_name || meta.full_name?.split(' ')[0] || '',
+          last_name: meta.last_name || meta.family_name || meta.full_name?.split(' ').slice(1).join(' ') || '',
+          available: true,
+        }
+        const { data: inserted } = await supabase.from('profiles').insert(newProfile).select().single()
+        data = inserted
+      }
+
+      if (!data) { setLoading(false); return }
+
       setProfile(data)
       setBio(data.bio || '')
       setPosition(data.position || '')
@@ -63,6 +82,7 @@ export default function ProfilPage() {
       setFoot(data.foot || 'Droit')
       setAvailable(data.available ?? true)
       setPhone(data.phone || '')
+      setCareer(data.career || '')
       const parsed = parseBirthdate(data.birthdate)
       setBirthDay(parsed.day)
       setBirthMonth(parsed.month)
@@ -87,10 +107,11 @@ export default function ProfilPage() {
       bio, position, ligue, zone, foot,
       available,
       phone: phone || null,
+      career: career || null,
       birthdate
     }).eq('id', profile.id)
     if (!error) {
-      setProfile({ ...profile, bio, position, ligue, zone, foot, available, phone: phone || undefined, birthdate: birthdate || undefined })
+      setProfile({ ...profile, bio, position, ligue, zone, foot, available, phone: phone || undefined, career: career || undefined, birthdate: birthdate || undefined })
       setSaveMsg('Profil mis à jour !')
       setEditing(false)
       setTimeout(() => setSaveMsg(''), 3000)
@@ -249,6 +270,11 @@ export default function ProfilPage() {
             <textarea className="input" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="Présente-toi en quelques mots…" />
           </div>
 
+          <div className="field">
+            <label className="field-label">Parcours / Clubs précédents</label>
+            <textarea className="input" rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder="2020-2022 · FC Bulle&#10;2022-2024 · FC Marly&#10;2024-présent · FC Fribourg" />
+          </div>
+
           <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
             {saving ? 'Sauvegarde…' : 'Sauvegarder les modifications'}
           </button>
@@ -294,13 +320,34 @@ export default function ProfilPage() {
             </p>
           </div>
 
+          {/* CAREER HISTORY */}
+          <div className="card">
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
+              Parcours
+            </div>
+            {profile.career ? (
+              <div style={{ display:'flex', flexDirection:'column', gap:'.5rem' }}>
+                {profile.career.split('\n').filter(Boolean).map((line, i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'.5rem 0' }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--blue-bright)', flexShrink:0 }} />
+                    <div style={{ fontSize:14, color:'var(--text-dark)' }}>{line}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
+                Aucun parcours renseigné. <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>Ajouter mes clubs précédents →</button>
+              </p>
+            )}
+          </div>
+
           {/* HIGHLIGHTS */}
           <div className="card">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
               Highlights vidéo
             </div>
             <div style={{ background:'var(--gray-bg)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed var(--gray-mid)' }}>
-              <div style={{ fontSize:14, color:'var(--text-muted)' }}>Upload de vidéos bientôt disponible</div>
+              <div style={{ fontSize:14, color:'var(--text-muted)' }}>Upload de vidéos bientôt disponible (max 3 vidéos, 2 min, 100MB)</div>
             </div>
           </div>
         </div>
