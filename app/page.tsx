@@ -1,172 +1,240 @@
 'use client'
 
-import Link from 'next/link';
-import { annonces, ligues } from '../lib/data';
-import { useLang } from '../lib/lang-context';
-import { t, tagsByRole } from '../lib/translations';
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { annonces, ligues } from '../lib/data'
+import { useLang } from '../lib/lang-context'
+import { t, tagsByRole } from '../lib/translations'
+
+function useCounters() {
+  const [counts, setCounts] = useState({ players: 0, clubs: 0, coaches: 0 })
+  const ref = useRef<HTMLDivElement>(null)
+  const animated = useRef(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || animated.current) return
+      animated.current = true
+      observer.disconnect()
+      const start = performance.now()
+      const dur = 1500
+      function frame(now: number) {
+        const progress = Math.min((now - start) / dur, 1)
+        const ease = 1 - Math.pow(1 - progress, 3)
+        setCounts({
+          players: Math.round(340 * ease),
+          clubs: Math.round(52 * ease),
+          coaches: Math.round(18 * ease),
+        })
+        if (progress < 1) requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+    }, { threshold: 0.2 })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return [counts, ref] as const
+}
+
+type LigueTab = 'all' | 'senior' | 'youth' | 'junior'
+
+const allLigueItems = [
+  ...ligues[0].items.map(item => ({ item, cat: 'senior' as LigueTab })),
+  ...ligues[1].items.map(item => ({ item, cat: 'youth' as LigueTab })),
+  ...ligues[2].items.map(item => ({ item, cat: 'junior' as LigueTab })),
+  ...ligues[3].items.map(item => ({ item, cat: 'junior' as LigueTab })),
+]
+
+function shieldColor(type: string) {
+  if (type === 'club') return '#e63946'
+  if (type === 'coach') return '#0a1f5c'
+  return '#1a1a1a'
+}
 
 export default function HomePage() {
   const { lang } = useLang()
+  const [activeTab, setActiveTab] = useState<LigueTab>('all')
+  const [counts, statsRef] = useCounters()
 
-  const cards = [
+  const filteredLigues = activeTab === 'all'
+    ? allLigueItems
+    : allLigueItems.filter(l => l.cat === activeTab)
+
+  const profileCards = [
     {
-      href: '/login', icon: '👤', title: t.types.player_title[lang], color: '#1a6fd4',
-      bg: 'linear-gradient(135deg, #0a1f5c, #1a6fd4)',
+      href: '/login',
+      title: t.types.player_title[lang],
       desc: t.types.player_desc[lang],
       tags: tagsByRole.player[lang],
       cta: t.types.player_cta[lang],
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} width={32} height={32}>
+          <path d="M12 12c2.5 0 4.5-2 4.5-4.5S14.5 3 12 3 7.5 5 7.5 7.5 9.5 12 12 12z"/>
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+      ),
     },
     {
-      href: '/login', icon: '🧑‍🏫', title: t.types.coach_title[lang], color: '#e02020',
-      bg: 'linear-gradient(135deg, #6b0000, #e02020)',
+      href: '/login',
+      title: t.types.coach_title[lang],
       desc: t.types.coach_desc[lang],
       tags: tagsByRole.coach[lang],
       cta: t.types.coach_cta[lang],
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} width={32} height={32}>
+          <path d="M3 8l9-5 9 5-9 5-9-5z"/>
+          <path d="M3 8v6l9 5 9-5V8"/>
+        </svg>
+      ),
     },
     {
-      href: '/clubs', icon: '🏟️', title: t.types.club_title[lang], color: '#0d7a36',
-      bg: 'linear-gradient(135deg, #063a1a, #0d7a36)',
+      href: '/clubs',
+      title: t.types.club_title[lang],
       desc: t.types.club_desc[lang],
       tags: tagsByRole.club[lang],
       cta: t.types.club_cta[lang],
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} width={32} height={32}>
+          <path d="M3 21h18M5 21V8l7-5 7 5v13M9 9h6M9 13h6M9 17h6"/>
+        </svg>
+      ),
     },
   ]
 
   const steps = [
-    { num: '01', icon: '👤', title: t.how.step1_title[lang], desc: t.how.step1_desc[lang] },
-    { num: '02', icon: '🔍', title: t.how.step2_title[lang], desc: t.how.step2_desc[lang] },
-    { num: '03', icon: '📋', title: t.how.step3_title[lang], desc: t.how.step3_desc[lang] },
-    { num: '04', icon: '🏆', title: t.how.step4_title[lang], desc: t.how.step4_desc[lang] },
+    { num: '01', title: t.how.step1_title[lang], desc: t.how.step1_desc[lang] },
+    { num: '02', title: t.how.step2_title[lang], desc: t.how.step2_desc[lang] },
+    { num: '03', title: t.how.step3_title[lang], desc: t.how.step3_desc[lang] },
+    { num: '04', title: t.how.step4_title[lang], desc: t.how.step4_desc[lang] },
   ]
 
-  const stats = [
-    { num: '340+', label: t.home.stats_players[lang], icon: '👤' },
-    { num: '52', label: t.home.stats_clubs[lang], icon: '🏟️' },
-    { num: '18', label: t.home.stats_coaches[lang], icon: '🧑‍🏫' },
-    { num: '100%', label: t.home.stats_free[lang], icon: '🆓' },
+  const ligueTabs: { key: LigueTab; label: string }[] = [
+    { key: 'all',    label: t.home.ligues_all[lang] },
+    { key: 'senior', label: t.home.ligues_seniors[lang] },
+    { key: 'youth',  label: t.home.ligues_youth[lang] },
+    { key: 'junior', label: t.home.ligues_juniors[lang] },
   ]
 
   return (
     <>
-      {/* ══════════════════════════════════════
-          HERO
-      ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', minHeight: 650, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-        <img
-          src="/images/banner.png"
-          alt="TeamUpFR hero"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', zIndex: 0 }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,31,92,.92) 0%, rgba(10,31,92,.75) 40%, rgba(10,31,92,.4) 100%)', zIndex: 1 }} />
+      {/* ═══════════════════════ HERO ═══════════════════════ */}
+      <section style={{ position: 'relative', minHeight: 'calc(100vh - 60px)', display: 'flex', alignItems: 'center', overflow: 'hidden', padding: '60px 0 80px' }}>
+        {/* Background */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 30%, rgba(230,57,70,0.22), transparent 50%), radial-gradient(circle at 80% 70%, rgba(10,31,92,0.55), transparent 50%), linear-gradient(180deg, #030a24 0%, #061540 100%)' }} />
+        {/* Grid overlay */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '60px 60px', maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)' }} />
 
-        <div style={{ position: 'relative', zIndex: 3, maxWidth: 1100, margin: '0 auto', padding: '0 2rem', width: '100%' }}>
-          <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', alignItems: 'center', gap: '2rem' }}>
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 1280, margin: '0 auto', padding: '0 24px', width: '100%' }}>
+          <div className="hp-hero-grid">
+            {/* ── Left ── */}
             <div>
-              {/* BADGE */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '6px 16px', marginBottom: '1.5rem' }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 8px #00ff88' }} />
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.9)', textTransform: 'uppercase' }}>{t.home.badge[lang]}</span>
+              {/* Badge */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', padding: '8px 16px', borderRadius: 100, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: 28 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#e63946', flexShrink: 0, animation: 'hp-pulse 2s infinite' }} />
+                {t.home.badge[lang]}
               </div>
 
-              {/* TITLE */}
-              <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(4rem, 10vw, 8rem)', color: '#fff', letterSpacing: 3, lineHeight: .95, marginBottom: '1rem' }}>
-                {t.home.title1[lang]}<br />
-                <span style={{ color: '#ff3333', textShadow: '0 0 40px rgba(255,51,51,.5)' }}>{t.home.title2[lang]}</span>
+              {/* Title */}
+              <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(56px, 8.5vw, 124px)', lineHeight: 0.92, marginBottom: 24, letterSpacing: '0.01em', color: '#fff' }}>
+                IT&apos;S TIME<br />TO <span style={{ color: '#e63946' }}>{t.home.title2[lang]}</span>
               </h1>
 
-              {/* LOGO + MOTTO */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1.5rem' }}>
-                <img src="/images/logo-official.jpeg" alt="TeamUpFR" style={{ height: 52, width: 52, objectFit: 'cover', borderRadius: 10, border: '2px solid rgba(255,255,255,.25)' }} />
-                <div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.8rem', color: '#fff', letterSpacing: 2, lineHeight: 1 }}>TeamUp<span style={{ color: '#ff3333' }}>FR</span></div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', fontStyle: 'italic' }}>{t.home.motto[lang]}</div>
-                </div>
-              </div>
-
-              <p style={{ fontSize: 'clamp(15px, 2vw, 17px)', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, maxWidth: 500, marginBottom: '2rem' }}>
+              {/* Description */}
+              <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.75)', maxWidth: 520, marginBottom: 36, lineHeight: 1.6 }}>
                 {t.home.desc[lang]}
               </p>
 
-              {/* BUTTONS */}
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <Link href="/login" style={{ background: '#e02020', color: '#fff', padding: '16px 36px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 32px rgba(224,32,32,.4)' }}>
+              {/* CTAs */}
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 52 }}>
+                <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: '#e63946', color: '#fff', boxShadow: '0 8px 24px rgba(230,57,70,0.4)' }}>
                   ⚽ {t.home.cta_primary[lang]}
                 </Link>
-                <Link href="/recherche" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', padding: '16px 36px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,.25)', backdropFilter: 'blur(10px)' }}>
+                <Link href="/recherche" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
                   🔍 {t.home.cta_secondary[lang]}
                 </Link>
               </div>
-            </div>
 
-            {/* STATS CARD */}
-            <div style={{ background: 'rgba(255,255,255,.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 20, padding: '1.75rem' }}>
-              {stats.map(s => (
-                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '.75rem 0', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
-                  <span style={{ fontSize: 20 }}>{s.icon}</span>
-                  <div>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', color: '#fff', lineHeight: 1 }}>{s.num}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: 1 }}>{s.label}</div>
+              {/* Stat counters */}
+              <div ref={statsRef} className="hp-stats-grid">
+                {[
+                  { value: String(counts.players), label: t.home.stats_players[lang] },
+                  { value: String(counts.clubs),   label: t.home.stats_clubs[lang] },
+                  { value: String(counts.coaches), label: t.home.stats_coaches[lang] },
+                  { value: '100%',                 label: t.home.stats_free[lang] },
+                ].map((s, i) => (
+                  <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '18px 14px', textAlign: 'center', transition: 'all 0.3s' }}>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 36, color: '#fff', lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{s.label}</div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* SCROLL INDICATOR */}
-        <div style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', letterSpacing: 2, textTransform: 'uppercase' }}>{t.home.scroll[lang]}</span>
-          <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(255,255,255,.4), transparent)' }} />
-        </div>
-      </section>
+            {/* ── Right — Player Card ── */}
+            <div className="hp-hero-card-wrap">
+              <div style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 24, background: 'linear-gradient(135deg, #0a1f5c, #061540)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: 32, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 32px 80px rgba(0,0,0,0.55)' }}>
+                <div style={{ position: 'absolute', top: '-50%', right: '-50%', width: '100%', height: '100%', background: 'radial-gradient(circle, rgba(230,57,70,0.35), transparent 70%)', pointerEvents: 'none' }} />
 
-      {/* ══════════════════════════════════════
-          BANNER
-      ══════════════════════════════════════ */}
-      <section style={{ background: 'linear-gradient(135deg, #0a1f5c, #1a6fd4)', padding: '5rem 2rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: 620, margin: '0 auto' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: '1rem' }}>TeamUpFR</div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', color: '#fff', letterSpacing: 2, lineHeight: 1.05, marginBottom: '1rem' }}>
-            {t.home.banner_title[lang]}
-          </div>
-          <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 16, lineHeight: 1.7, marginBottom: '2rem' }}>
-            {t.home.banner_desc[lang]}
-          </p>
-          <Link href="/login" style={{ background: '#e02020', color: '#fff', padding: '13px 32px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-block', boxShadow: '0 8px 24px rgba(224,32,32,.35)' }}>
-            {t.home.banner_join[lang]}
-          </Link>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          3 USER TYPES
-      ══════════════════════════════════════ */}
-      <section style={{ background: '#fff', padding: '5rem 0' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.5rem' }}>{t.home.section_who[lang]}</div>
-            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: 1, marginBottom: '.75rem' }}>{t.home.section_who_title[lang]}</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 500, margin: '0 auto' }}>{t.home.section_who_desc[lang]}</p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {cards.map(card => (
-              <Link key={card.title} href={card.href} style={{ textDecoration: 'none', display: 'block', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                <div style={{ background: card.bg, padding: '2.5rem 2rem', position: 'relative' }}>
-                  <div style={{ position: 'absolute', top: -20, right: -20, fontSize: '6rem', opacity: .1 }}>{card.icon}</div>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{card.icon}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', color: '#fff', letterSpacing: 1, marginBottom: '.5rem' }}>{card.title}</div>
-                  <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.6 }}>{card.desc}</p>
+                {/* Top row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 118, lineHeight: 1, color: '#fff', textShadow: '0 6px 20px rgba(0,0,0,0.4)' }}>10</div>
+                  <div style={{ width: 56, height: 64, background: '#e63946', clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#fff', paddingBottom: 14 }}>FR</div>
                 </div>
-                <div style={{ background: '#f8faff', padding: '1.5rem 2rem' }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem' }}>
-                    {card.tags.map(tag => (
-                      <span key={tag} style={{ background: '#fff', border: `1px solid ${card.color}22`, color: card.color, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>{tag}</span>
+
+                {/* Bottom */}
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, marginBottom: 8, color: '#fff' }}>Marco Rossi</div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Milieu offensif · 3ème Ligue</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 16 }}>
+                    {[{ v: '24', l: 'Matchs' }, { v: '12', l: 'Buts' }, { v: '8', l: 'Assists' }].map(s => (
+                      <div key={s.l}>
+                        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#e63946' }}>{s.v}</div>
+                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.l}</div>
+                      </div>
                     ))}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: card.color, fontWeight: 700, fontSize: 14 }}>
-                    {card.cta} <span>→</span>
-                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div style={{ position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)', color: 'rgba(255,255,255,0.5)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 2 }}>
+          {t.home.scroll[lang]}
+          <div style={{ width: 1, height: 28, background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)', animation: 'hp-scrolldown 2s infinite' }} />
+        </div>
+      </section>
+
+      {/* ═══════════════════════ PROFILES ═══════════════════════ */}
+      <section style={{ background: 'linear-gradient(180deg, #061540 0%, #030a24 100%)', padding: '100px 0' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <span className="hp-section-label">{t.home.section_who[lang]}</span>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1, marginBottom: 20, color: '#fff' }}>
+            {t.home.section_who_title[lang]}
+          </h2>
+          <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', maxWidth: 600, marginBottom: 60 }}>
+            {t.home.section_who_desc[lang]}
+          </p>
+
+          <div className="hp-3col-grid">
+            {profileCards.map(card => (
+              <Link key={card.title} href={card.href} className="hp-profile-card">
+                <div style={{ width: 64, height: 64, background: 'linear-gradient(135deg, #e63946, #0a1f5c)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '0 12px 32px rgba(230,57,70,0.3)' }}>
+                  {card.icon}
+                </div>
+                <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, marginBottom: 12, color: '#fff' }}>{card.title}</h3>
+                <p style={{ color: 'rgba(255,255,255,0.65)', marginBottom: 24, fontSize: 15, lineHeight: 1.6 }}>{card.desc}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
+                  {card.tags.map(tag => (
+                    <span key={tag} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{tag}</span>
+                  ))}
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#e63946', fontWeight: 700, fontSize: 14 }}>
+                  {card.cta} →
                 </div>
               </Link>
             ))}
@@ -174,46 +242,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          ANNONCES
-      ══════════════════════════════════════ */}
-      <section style={{ background: 'var(--gray-bg)', padding: '5rem 0' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* ═══════════════════════ ANNONCES ═══════════════════════ */}
+      <section style={{ background: '#030a24', padding: '100px 0' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 60, flexWrap: 'wrap', gap: 20 }}>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.5rem' }}>{t.home.annonces_badge[lang]}</div>
-              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1 }}>{t.home.annonces_title[lang]}</h2>
+              <span className="hp-section-label">{t.home.annonces_badge[lang]}</span>
+              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1, color: '#fff' }}>
+                {t.home.annonces_title[lang]}
+              </h2>
             </div>
-            <Link href="/recherche" style={{ color: 'var(--blue-bright)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+            <Link href="/recherche" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
               {t.home.annonces_link[lang]}
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-            {annonces.map(a => (
-              <div key={a.id} style={{ background: '#fff', borderRadius: 16, border: '1px solid var(--border)', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: a.authorType === 'club' ? 'linear-gradient(90deg,#0d7a36,#1db954)' : a.authorType === 'coach' ? 'linear-gradient(90deg,#e02020,#ff8c42)' : 'linear-gradient(90deg,#1a6fd4,#5b9eff)' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-                    {a.authorEmoji}
+          <div className="hp-3col-grid">
+            {annonces.slice(0, 3).map(a => (
+              <div key={a.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, position: 'relative' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 44, height: 50, background: shieldColor(a.authorType), clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, paddingBottom: 12, color: '#fff', flexShrink: 0 }}>
+                      {a.authorName.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>{a.authorName}</div>
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{a.createdAt}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{a.authorName}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.createdAt}</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.15)', color: '#4ade80', padding: '4px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', flexShrink: 0 }}>
+                    <span style={{ width: 6, height: 6, background: '#4ade80', borderRadius: '50%', animation: 'hp-pulse-green 2s infinite', flexShrink: 0 }} />
+                    Active
                   </div>
-                  <span style={{ marginLeft: 'auto', background: 'var(--green-bg)', color: 'var(--green)', fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{t.home.annonce_active[lang]}</span>
                 </div>
-                <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: '1rem', color: 'var(--text-dark)' }}>{a.body}</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem' }}>
-                  <span style={{ background: 'var(--blue-light)', color: 'var(--blue-mid)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.ligue}</span>
-                  {a.position && <span style={{ background: '#fef3e2', color: '#a05a00', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.position}</span>}
-                  <span style={{ background: 'var(--green-bg)', color: 'var(--green)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.zone}</span>
+
+                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.55, marginBottom: 16 }}>{a.body}</p>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+                  <span style={{ background: 'rgba(70,140,255,0.12)', color: '#88b4ff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{a.ligue}</span>
+                  {a.position && <span style={{ background: 'rgba(230,57,70,0.12)', color: '#ff8590', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{a.position}</span>}
+                  <span style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{a.zone}</span>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Link href="/login" style={{ flex: 1, background: 'var(--blue-bright)', color: '#fff', border: 'none', borderRadius: 8, padding: '9px', fontSize: 13, fontWeight: 700, textAlign: 'center', textDecoration: 'none', display: 'block' }}>
+
+                <div style={{ display: 'flex', gap: 8, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
+                  <Link href="/login" style={{ flex: 1, background: '#e63946', color: '#fff', borderRadius: 8, padding: '9px', fontSize: 13, fontWeight: 700, textAlign: 'center', textDecoration: 'none', display: 'block', boxShadow: '0 4px 14px rgba(230,57,70,0.3)' }}>
                     {t.home.postuler[lang]}
                   </Link>
-                  <Link href="/messages" style={{ background: 'var(--gray-light)', color: 'var(--text-muted)', border: 'none', borderRadius: 8, padding: '9px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none', display: 'block' }}>
+                  <Link href="/messages" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 15, textDecoration: 'none' }}>
                     💬
                   </Link>
                 </div>
@@ -223,84 +299,136 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          HOW IT WORKS
-      ══════════════════════════════════════ */}
-      <section style={{ background: '#fff', padding: '5rem 0' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.5rem' }}>{t.home.how_badge[lang]}</div>
-            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1 }}>{t.home.how_title[lang]}</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
-            {steps.map(step => (
-              <div key={step.num} style={{ textAlign: 'center', padding: '1.5rem' }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4rem', color: 'var(--gray-light)', letterSpacing: 2, lineHeight: 1, marginBottom: '.5rem' }}>{step.num}</div>
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem', marginTop: '-1.5rem' }}>{step.icon}</div>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '.5rem' }}>{step.title}</div>
-                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          LIGUES
-      ══════════════════════════════════════ */}
-      <section style={{ background: 'var(--blue-dark)', padding: '5rem 0' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginBottom: '.5rem' }}>{t.home.ligues_badge[lang]}</div>
-            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1, color: '#fff' }}>{t.home.ligues_title[lang]}</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {ligues.map(g => (
-              <div key={g.group} style={{ background: 'rgba(255,255,255,.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 14, padding: '1.25rem' }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1rem', letterSpacing: 1, color: '#7eb8ff', marginBottom: '.75rem', paddingBottom: '.5rem', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
-                  {g.group}
-                </div>
-                {g.items.map(item => (
-                  <div key={item} style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', padding: '4px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#7eb8ff', flexShrink: 0 }} />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          CTA FINAL
-      ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: '#e02020', padding: '6rem 0', textAlign: 'center' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='30' fill='none' stroke='%23fff' stroke-width='1' stroke-opacity='.05'/%3E%3C/svg%3E")` }} />
-        <div style={{ position: 'relative', maxWidth: 700, margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>⚽</div>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.5rem, 7vw, 5rem)', color: '#fff', letterSpacing: 3, lineHeight: 1, marginBottom: '1rem' }}>
-            {t.home.cta_final[lang]}
+      {/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */}
+      <section style={{ background: 'linear-gradient(180deg, #030a24 0%, #061540 100%)', padding: '100px 0' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <span className="hp-section-label">{t.home.how_badge[lang]}</span>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1, marginBottom: 20, color: '#fff' }}>
+            {t.home.how_title[lang]}
           </h2>
-          <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 17, marginBottom: '2.5rem', lineHeight: 1.7 }}>
+          <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', maxWidth: 600, marginBottom: 60 }}>
+            {t.home.how_subtitle[lang]}
+          </p>
+
+          <div className="hp-timeline">
+            <div className="hp-timeline-line" />
+            {steps.map(step => (
+              <div key={step.num} className="hp-step">
+                <div className="hp-step-circle">{step.num}</div>
+                <h4 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, marginBottom: 10, color: '#fff' }}>{step.title}</h4>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.55 }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ LIGUES ═══════════════════════ */}
+      <section style={{ background: '#030a24', padding: '100px 0' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <span className="hp-section-label">{t.home.ligues_badge[lang]}</span>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1, marginBottom: 20, color: '#fff' }}>
+            {t.home.ligues_title[lang]}
+          </h2>
+          <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', maxWidth: 600, marginBottom: 40 }}>
+            {t.home.ligues_subtitle[lang]}
+          </p>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 32, flexWrap: 'wrap' }}>
+            {ligueTabs.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                style={{ padding: '10px 20px', background: activeTab === key ? '#e63946' : 'rgba(255,255,255,0.04)', border: activeTab === key ? '1px solid #e63946' : '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: activeTab === key ? '#fff' : 'rgba(255,255,255,0.7)', fontWeight: 600, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'inherit' }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {filteredLigues.map(l => (
+              <div key={l.item} className="hp-ligue-item">
+                <div style={{ width: 8, height: 8, background: '#4ade80', borderRadius: '50%', flexShrink: 0 }} />
+                <span style={{ fontWeight: 600, fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>{l.item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ CTA FINAL ═══════════════════════ */}
+      <section style={{ background: 'linear-gradient(135deg, #0a1f5c 0%, #061540 100%)', textAlign: 'center', padding: '120px 0', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 30%, rgba(230,57,70,0.22), transparent 50%), radial-gradient(circle at 70% 70%, rgba(230,57,70,0.14), transparent 50%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(48px, 8vw, 110px)', lineHeight: 0.95, marginBottom: 24, color: '#fff' }}>
+            PRÊT À<br /><span style={{ color: '#e63946' }}>JOUER ?</span>
+          </h2>
+          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.75)', maxWidth: 580, margin: '0 auto 40px' }}>
             {t.home.cta_final_desc[lang]}
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/login" style={{ background: '#fff', color: '#e02020', padding: '16px 40px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 2, textDecoration: 'none', boxShadow: '0 8px 32px rgba(0,0,0,.2)' }}>
-              {t.home.signup[lang]}
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 30px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', background: '#e63946', color: '#fff', boxShadow: '0 8px 24px rgba(230,57,70,0.4)' }}>
+              ⚽ {t.home.signup[lang]}
             </Link>
-            <Link href="/recherche" style={{ background: 'transparent', color: '#fff', padding: '16px 40px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 2, textDecoration: 'none', border: '2px solid rgba(255,255,255,.5)' }}>
+            <Link href="/recherche" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 30px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', background: '#fff', color: '#0a1f5c' }}>
               {t.home.explore[lang]}
             </Link>
           </div>
         </div>
       </section>
+
       <style>{`
-        @media (max-width: 640px) {
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .hero-grid > div:last-child { display: none; }
+        .hp-hero-grid {
+          display: grid;
+          grid-template-columns: 1.3fr 1fr;
+          gap: 60px;
+          align-items: center;
+        }
+        .hp-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+          max-width: 600px;
+        }
+        .hp-3col-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
+        .hp-timeline {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+        .hp-timeline-line {
+          position: absolute;
+          top: 32px;
+          left: 8%;
+          right: 8%;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, rgba(230,57,70,0.5), rgba(230,57,70,0.5), transparent);
+          z-index: 0;
+        }
+        .hp-annonces-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+        @media (max-width: 960px) {
+          .hp-hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .hp-3col-grid { grid-template-columns: 1fr !important; }
+          .hp-annonces-grid { grid-template-columns: 1fr !important; }
+          .hp-timeline { grid-template-columns: repeat(2, 1fr) !important; }
+          .hp-timeline-line { display: none !important; }
+          .hp-stats-grid { grid-template-columns: repeat(2, 1fr) !important; max-width: 100% !important; }
+        }
+        @media (max-width: 540px) {
+          .hp-hero-card-wrap { display: none !important; }
         }
       `}</style>
     </>
-  );
+  )
 }

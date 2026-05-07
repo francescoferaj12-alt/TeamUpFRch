@@ -51,6 +51,12 @@ export const t = {
     cta_final_desc: { fr: "Inscris-toi gratuitement et rejoins la communauté du football fribourgeois. Ton équipe t'attend.", de: 'Registriere dich kostenlos und tritt der Freiburger Fussballgemeinschaft bei. Dein Team wartet auf dich.' },
     signup: { fr: "S'inscrire gratuitement", de: 'Kostenlos registrieren' },
     explore: { fr: 'Explorer', de: 'Erkunden' },
+    how_subtitle: { fr: "Quatre étapes pour trouver ton équipe ou tes futurs coéquipiers.", de: "Vier Schritte, um dein Team oder zukünftige Teamkollegen zu finden." },
+    ligues_subtitle: { fr: 'Toutes les catégories du football fribourgeois, des seniors aux juniors.', de: 'Alle Kategorien des Freiburger Fussballs, von den Senioren bis zu den Junioren.' },
+    ligues_all: { fr: 'Toutes', de: 'Alle' },
+    ligues_seniors: { fr: 'Seniors', de: 'Senioren' },
+    ligues_youth: { fr: 'Youth League', de: 'Youth League' },
+    ligues_juniors: { fr: 'Juniors', de: 'Junioren' },
   },
 
   // USER TYPES
