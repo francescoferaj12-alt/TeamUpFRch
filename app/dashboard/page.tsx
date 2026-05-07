@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, Profile, Annonce, Application } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
+import { useLang } from '../../lib/lang-context'
+import { t } from '../../lib/translations'
 
 type Section = 'vue' | 'candidatures' | 'annonces' | 'messages' | 'settings'
-
 type AppWithAnnonce = Application & { annonce_title?: string }
 
 export default function DashboardPage() {
+  const { lang } = useLang()
   const [section, setSection] = useState<Section>('vue')
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,7 +40,7 @@ export default function DashboardPage() {
   if (!profile) return null
 
   const displayName = profile.role === 'club' ? profile.club_name : `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
-  const roleLabel = profile.role === 'club' ? 'Club · Admin' : profile.role === 'coach' ? 'Coach' : 'Joueur'
+  const roleLabel = profile.role === 'club' ? t.dash.role_club[lang] : profile.role === 'coach' ? t.dash.role_coach[lang] : t.dash.role_player[lang]
 
   return (
     <div className="dash-grid">
@@ -54,18 +56,18 @@ export default function DashboardPage() {
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{profile.ligue || ''} · {roleLabel}</div>
         </div>
 
-        <SidebarSection label="Principal" />
-        <SidebarLink icon="📊" label="Vue d'ensemble" active={section === 'vue'} onClick={() => setSection('vue')} />
+        <SidebarSection label={t.dash.principal[lang]} />
+        <SidebarLink icon="📊" label={t.dash.overview_link[lang]} active={section === 'vue'} onClick={() => setSection('vue')} />
         {(profile.role === 'club' || profile.role === 'coach') && (
-          <SidebarLink icon="📋" label="Candidatures reçues" active={section === 'candidatures'} onClick={() => setSection('candidatures')} />
+          <SidebarLink icon="📋" label={t.dash.received_apps_link[lang]} active={section === 'candidatures'} onClick={() => setSection('candidatures')} />
         )}
 
-        <SidebarSection label="Contenu" />
-        <SidebarLink icon="📢" label="Mes annonces" active={section === 'annonces'} onClick={() => setSection('annonces')} />
-        <SidebarLink icon="💬" label="Messages" active={section === 'messages'} onClick={() => setSection('messages')} />
+        <SidebarSection label={t.dash.content[lang]} />
+        <SidebarLink icon="📢" label={t.dash.my_annonces_link[lang]} active={section === 'annonces'} onClick={() => setSection('annonces')} />
+        <SidebarLink icon="💬" label={t.dash.messages_link[lang]} active={section === 'messages'} onClick={() => setSection('messages')} />
 
-        <SidebarSection label="Paramètres" />
-        <SidebarLink icon="⚙️" label="Réglages profil" active={section === 'settings'} onClick={() => setSection('settings')} />
+        <SidebarSection label={t.dash.settings_section[lang]} />
+        <SidebarLink icon="⚙️" label={t.dash.settings_link[lang]} active={section === 'settings'} onClick={() => setSection('settings')} />
       </aside>
 
       {/* MAIN */}
@@ -88,8 +90,6 @@ export default function DashboardPage() {
   )
 }
 
-/* ── SIDEBAR COMPONENTS ── */
-
 function SidebarSection({ label }: { label: string }) {
   return (
     <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: 2, padding: '.75rem .5rem .3rem', marginTop: '.5rem' }}>
@@ -110,9 +110,8 @@ function SidebarLink({ icon, label, active, onClick, badge }: { icon: string; la
   )
 }
 
-/* ── SECTIONS ── */
-
 function VueSection({ profile }: { profile: Profile }) {
+  const { lang } = useLang()
   const [annonces, setAnnonces] = useState<Annonce[]>([])
   const [apps, setApps] = useState<AppWithAnnonce[]>([])
 
@@ -139,36 +138,38 @@ function VueSection({ profile }: { profile: Profile }) {
   return (
     <>
       <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">Dashboard</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>Vue d'ensemble</div>
+        <div className="section-label">{t.dash.dashboard_label[lang]}</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.overview_title[lang]}</div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-        <KPI value={String(annonces.length)} label="Annonces publiées" color="var(--blue-mid)" />
-        <KPI value={String(apps.length)} label="Candidatures en attente" color="var(--red)" />
-        <KPI value={String(annonces.filter(a => a.status === 'active').length)} label="Annonces actives" color="var(--green)" />
+        <KPI value={String(annonces.length)} label={t.dash.kpi_published[lang]} color="var(--blue-mid)" />
+        <KPI value={String(apps.length)} label={t.dash.kpi_pending[lang]} color="var(--red)" />
+        <KPI value={String(annonces.filter(a => a.status === 'active').length)} label={t.dash.kpi_active[lang]} color="var(--green)" />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
         <div className="card">
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, marginBottom: '1rem' }}>📢 Mes dernières annonces</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.last_annonces[lang]}</div>
           {annonces.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Aucune annonce publiée. <button onClick={() => {}} style={{ color: 'var(--blue-bright)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Publier →</button></p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+              {t.dash.no_annonce[lang]} <button onClick={() => {}} style={{ color: 'var(--blue-bright)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>{t.dash.publish_link[lang]}</button>
+            </p>
           ) : annonces.slice(0, 3).map((a) => (
             <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '.65rem 0', borderBottom: '1px solid var(--gray-light)' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{a.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.ligue} · {new Date(a.created_at).toLocaleDateString('fr-CH')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.ligue} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}</div>
               </div>
-              <span className={`badge ${a.status === 'active' ? 'badge-green' : 'badge-gray'}`}>{a.status === 'active' ? 'Active' : 'Fermée'}</span>
+              <span className={`badge ${a.status === 'active' ? 'badge-green' : 'badge-gray'}`}>{a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}</span>
             </div>
           ))}
         </div>
 
         <div className="card">
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, marginBottom: '1rem' }}>📋 Candidatures en attente</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.pending_apps_title[lang]}</div>
           {apps.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Aucune candidature en attente.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t.dash.no_apps[lang]}</p>
           ) : apps.map((a) => (
             <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '.65rem 0', borderBottom: '1px solid var(--gray-light)' }}>
               <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>👤</div>
@@ -180,7 +181,7 @@ function VueSection({ profile }: { profile: Profile }) {
           ))}
           {apps.length > 0 && (
             <Link href="/candidatures" className="btn btn-blue btn-full" style={{ marginTop: '.75rem', justifyContent: 'center' }}>
-              Voir toutes les candidatures →
+              {t.dash.see_all_apps[lang]}
             </Link>
           )}
         </div>
@@ -190,6 +191,7 @@ function VueSection({ profile }: { profile: Profile }) {
 }
 
 function CandidaturesSection({ profile }: { profile: Profile }) {
+  const { lang } = useLang()
   const [apps, setApps] = useState<AppWithAnnonce[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -216,12 +218,12 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
   return (
     <>
       <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">Gestion</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>Candidatures reçues</div>
+        <div className="section-label">{t.dash.management[lang]}</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.received_title[lang]}</div>
       </div>
-      {loading ? <div style={{ color: 'var(--text-muted)' }}>Chargement…</div> : apps.length === 0 ? (
+      {loading ? <div style={{ color: 'var(--text-muted)' }}>{t.dash.loading[lang]}</div> : apps.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-          Aucune candidature reçue pour l'instant.
+          {t.dash.no_received[lang]}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.85rem' }}>
@@ -231,18 +233,18 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15 }}>{a.applicant_name}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    Pour : {a.annonce_title} · {new Date(a.created_at).toLocaleDateString('fr-CH')}
+                    {t.dash.for_annonce[lang]} {a.annonce_title} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}
                   </div>
                 </div>
                 <StatusBadge status={a.status} />
               </div>
               <div style={{ background: 'var(--gray-bg)', borderRadius: 8, padding: '.65rem .85rem', fontSize: 13, fontStyle: 'italic', marginBottom: '.75rem', lineHeight: 1.55 }}>
-                "{a.message}"
+                &ldquo;{a.message}&rdquo;
               </div>
               {a.status === 'pending' && (
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => updateStatus(a.id, 'accepted')} className="btn btn-green btn-sm">✅ Accepter</button>
-                  <button onClick={() => updateStatus(a.id, 'rejected')} className="btn btn-red btn-sm">❌ Refuser</button>
+                  <button onClick={() => updateStatus(a.id, 'accepted')} className="btn btn-green btn-sm">{t.dash.accept[lang]}</button>
+                  <button onClick={() => updateStatus(a.id, 'rejected')} className="btn btn-red btn-sm">{t.dash.refuse[lang]}</button>
                 </div>
               )}
             </div>
@@ -254,6 +256,7 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
 }
 
 function AnnoncesSection({ profile }: { profile: Profile }) {
+  const { lang } = useLang()
   const [myAnnonces, setMyAnnonces] = useState<Annonce[]>([])
   const [loadingList, setLoadingList] = useState(true)
   const [form, setForm] = useState({ title: '', body: '', ligue: '', position: '', zone: profile.zone || '' })
@@ -268,7 +271,7 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
 
   async function handlePublish() {
     if (!form.title.trim() || !form.body.trim() || !form.ligue) {
-      setError('Titre, description et ligue sont obligatoires.')
+      setError(t.dash.error_required[lang])
       return
     }
     setPublishing(true)
@@ -287,10 +290,10 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
     }).select().single()
 
     setPublishing(false)
-    if (err) { setError('Erreur lors de la publication.'); return }
+    if (err) { setError(t.dash.error_publish[lang]); return }
     setMyAnnonces((prev) => [data, ...prev])
     setForm({ title: '', body: '', ligue: '', position: '', zone: profile.zone || '' })
-    setSuccessMsg('✅ Annonce publiée avec succès !')
+    setSuccessMsg(t.dash.published_ok[lang])
     setTimeout(() => setSuccessMsg(''), 4000)
   }
 
@@ -302,13 +305,13 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
   return (
     <>
       <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">Contenu</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>Mes annonces</div>
+        <div className="section-label">{t.dash.content[lang]}</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.annonces_title[lang]}</div>
       </div>
 
       {/* FORM */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '1rem' }}>📢 Publier une nouvelle annonce</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.publish_new[lang]}</div>
 
         {successMsg && (
           <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green)', borderRadius: 10, padding: '10px 14px', fontSize: 14, color: 'var(--green)', marginBottom: '1rem' }}>
@@ -322,61 +325,61 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
         )}
 
         <div className="field">
-          <label className="field-label">Titre de l'annonce *</label>
-          <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Recherche attaquant 3ème Ligue…" />
+          <label className="field-label">{t.dash.annonce_title_label[lang]}</label>
+          <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t.dash.annonce_title_ph[lang]} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div className="field">
-            <label className="field-label">Ligue *</label>
+            <label className="field-label">{t.dash.ligue_req[lang]}</label>
             <select className="input" value={form.ligue} onChange={(e) => setForm({ ...form, ligue: e.target.value })}>
-              <option value="">— Sélectionner —</option>
+              <option value="">{t.dash.select[lang]}</option>
               {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div className="field">
-            <label className="field-label">Position recherchée</label>
+            <label className="field-label">{t.dash.pos_sought[lang]}</label>
             <select className="input" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>
-              <option value="">— Aucune —</option>
+              <option value="">{t.dash.none[lang]}</option>
               {positions.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div className="field">
-            <label className="field-label">Zone</label>
+            <label className="field-label">{t.dash.zone_label[lang]}</label>
             <select className="input" value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })}>
-              <option value="">— Sélectionner —</option>
+              <option value="">{t.dash.select[lang]}</option>
               {zones.map((z) => <option key={z} value={z}>{z}</option>)}
             </select>
           </div>
         </div>
 
         <div className="field">
-          <label className="field-label">Description *</label>
-          <textarea className="input" rows={4} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Décris le profil recherché, les conditions, les contacts…" />
+          <label className="field-label">{t.dash.desc_req[lang]}</label>
+          <textarea className="input" rows={4} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t.dash.desc_ph[lang]} />
         </div>
 
         <button onClick={handlePublish} disabled={publishing} className="btn btn-red" style={{ opacity: publishing ? .7 : 1 }}>
-          {publishing ? '⏳ Publication…' : '📢 Publier l\'annonce'}
+          {publishing ? t.dash.publishing[lang] : t.dash.publish_btn[lang]}
         </button>
       </div>
 
       {/* MY ANNONCES LIST */}
       <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 1, marginBottom: '.75rem' }}>
-        Annonces publiées ({myAnnonces.length})
+        {t.dash.published_count[lang]} ({myAnnonces.length})
       </div>
-      {loadingList ? <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>Chargement…</div> : myAnnonces.length === 0 ? (
-        <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>Aucune annonce publiée.</div>
+      {loadingList ? <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t.dash.loading[lang]}</div> : myAnnonces.length === 0 ? (
+        <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t.dash.no_annonces[lang]}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
           {myAnnonces.map((a) => (
             <div key={a.id} style={{ background: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{a.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.ligue}{a.position ? ` · ${a.position}` : ''} · {new Date(a.created_at).toLocaleDateString('fr-CH')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.ligue}{a.position ? ` · ${a.position}` : ''} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}</div>
               </div>
-              <span className={`badge ${a.status === 'active' ? 'badge-green' : 'badge-gray'}`}>{a.status === 'active' ? '🟢 Active' : '⚪ Fermée'}</span>
+              <span className={`badge ${a.status === 'active' ? 'badge-green' : 'badge-gray'}`}>{a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}</span>
               {a.status === 'active' && (
-                <button onClick={() => closeAnnonce(a.id)} className="btn btn-ghost btn-sm">Fermer</button>
+                <button onClick={() => closeAnnonce(a.id)} className="btn btn-ghost btn-sm">{t.dash.close_btn[lang]}</button>
               )}
             </div>
           ))}
@@ -387,16 +390,18 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
 }
 
 function MessagesSection() {
+  const { lang } = useLang()
   return (
     <div className="card">
-      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: 1, marginBottom: '1rem' }}>💬 Messages</div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: 14 }}>Gérer tes conversations dans la messagerie.</p>
-      <Link href="/messages" className="btn btn-blue">Ouvrir la messagerie →</Link>
+      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.msgs_section_title[lang]}</div>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: 14 }}>{t.dash.msgs_section_desc[lang]}</p>
+      <Link href="/messages" className="btn btn-blue">{t.dash.open_msgs[lang]}</Link>
     </div>
   )
 }
 
 function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: Profile) => void }) {
+  const { lang } = useLang()
   const [clubName, setClubName] = useState(profile.club_name || '')
   const [bio, setBio] = useState(profile.bio || '')
   const [ligue, setLigue] = useState(profile.ligue || '')
@@ -410,33 +415,33 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
     if (profile.role === 'club') updates.club_name = clubName
     const { error } = await supabase.from('profiles').update(updates).eq('id', profile.id)
     setSaving(false)
-    if (!error) { onSaved({ ...profile, ...updates }); setMsg('✅ Modifications enregistrées !'); setTimeout(() => setMsg(''), 3000) }
+    if (!error) { onSaved({ ...profile, ...updates }); setMsg(t.dash.saved_ok[lang]); setTimeout(() => setMsg(''), 3000) }
   }
 
   return (
     <>
       <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">Paramètres</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>Réglages du profil</div>
+        <div className="section-label">{t.dash.settings_title[lang]}</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.settings_profile_title[lang]}</div>
       </div>
       <div className="card">
         {msg && <div style={{ background: 'var(--green-bg)', color: 'var(--green)', borderRadius: 10, padding: '10px 14px', fontSize: 14, marginBottom: '1rem' }}>{msg}</div>}
         {profile.role === 'club' && (
           <div className="field">
-            <label className="field-label">Nom du club</label>
+            <label className="field-label">{t.dash.club_name[lang]}</label>
             <input className="input" value={clubName} onChange={(e) => setClubName(e.target.value)} />
           </div>
         )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div className="field">
-            <label className="field-label">Ligue</label>
+            <label className="field-label">{t.dash.ligue_req[lang].replace(' *','')}</label>
             <select className="input" value={ligue} onChange={(e) => setLigue(e.target.value)}>
               <option value="">—</option>
               {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div className="field">
-            <label className="field-label">Zone</label>
+            <label className="field-label">{t.dash.zone_label[lang]}</label>
             <select className="input" value={zone} onChange={(e) => setZone(e.target.value)}>
               <option value="">—</option>
               {zones.map((z) => <option key={z} value={z}>{z}</option>)}
@@ -444,14 +449,14 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
           </div>
         </div>
         <div className="field">
-          <label className="field-label">Bio / Description</label>
-          <textarea className="input" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Présentation, philosophie, contact…" />
+          <label className="field-label">{t.dash.bio_desc[lang]}</label>
+          <textarea className="input" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t.dash.bio_ph[lang]} />
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
-            {saving ? '⏳ Sauvegarde…' : '💾 Enregistrer'}
+            {saving ? t.dash.saving_btn[lang] : t.dash.save_btn[lang]}
           </button>
-          <Link href="/profil" className="btn btn-ghost">Voir mon profil complet</Link>
+          <Link href="/profil" className="btn btn-ghost">{t.dash.see_profile[lang]}</Link>
         </div>
       </div>
     </>
@@ -468,10 +473,11 @@ function KPI({ value, label, color }: { value: string; label: string; color: str
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const { lang } = useLang()
   const map: Record<string, { cls: string; label: string }> = {
-    pending: { cls: 'badge-amber', label: '⏳ En attente' },
-    accepted: { cls: 'badge-green', label: '✅ Acceptée' },
-    rejected: { cls: 'badge-red', label: '❌ Refusée' }
+    pending: { cls: 'badge-amber', label: `⏳ ${t.general.pending[lang]}` },
+    accepted: { cls: 'badge-green', label: `✅ ${t.general.accepted[lang]}` },
+    rejected: { cls: 'badge-red', label: `❌ ${t.general.rejected[lang]}` },
   }
   const m = map[status] || map.pending
   return <span className={`badge ${m.cls}`}>{m.label}</span>

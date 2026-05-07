@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
+import { t } from '../../lib/translations'
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState<Profile[]>([])
@@ -45,16 +46,14 @@ export default function ClubsPage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '6px 18px', marginBottom: '1.25rem' }}>
             <span>🏟️</span>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.85)', textTransform: 'uppercase' }}>
-              {lang === 'fr' ? 'Annuaire officiel' : 'Offizielles Verzeichnis'}
+              {t.clubs.directory[lang]}
             </span>
           </div>
           <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.5rem, 7vw, 5rem)', color: '#fff', letterSpacing: 2, lineHeight: 1, marginBottom: '.75rem' }}>
-            {lang === 'fr' ? 'Les clubs de Fribourg' : 'Freiburger Vereine'}
+            {t.clubs.title[lang]}
           </h1>
           <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 16, marginBottom: '1.5rem' }}>
-            {lang === 'fr'
-              ? 'Tous les clubs inscrits sur TeamUpFR — rejoins-les ou contacte-les directement.'
-              : 'Alle bei TeamUpFR eingetragenen Vereine — tritt ihnen bei oder kontaktiere sie direkt.'}
+            {t.clubs.subtitle[lang]}
           </p>
 
           {/* Search */}
@@ -62,7 +61,7 @@ export default function ClubsPage() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder={lang === 'fr' ? 'Rechercher un club…' : 'Verein suchen…'}
+              placeholder={t.clubs.search_ph[lang]}
               style={{ flex: 1, background: 'rgba(255,255,255,.95)', border: 'none', borderRadius: 10, padding: '12px 16px', fontSize: 15, outline: 'none', fontFamily: 'inherit' }}
             />
             <select
@@ -70,7 +69,7 @@ export default function ClubsPage() {
               onChange={e => setFilterZone(e.target.value)}
               style={{ background: 'rgba(255,255,255,.95)', border: 'none', borderRadius: 10, padding: '12px 14px', fontSize: 14, outline: 'none', fontFamily: 'inherit' }}
             >
-              <option value="">{lang === 'fr' ? 'Toutes les zones' : 'Alle Zonen'}</option>
+              <option value="">{t.clubs.all_zones[lang]}</option>
               {ZONES.map(z => <option key={z}>{z}</option>)}
             </select>
           </div>
@@ -81,26 +80,26 @@ export default function ClubsPage() {
       <section style={{ background: 'var(--gray-bg)', padding: '3rem 2rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ marginBottom: '1.25rem', fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>
-            {filtered.length} {lang === 'fr' ? `club${filtered.length > 1 ? 's' : ''} inscrit${filtered.length > 1 ? 's' : ''}` : `eingetragene${filtered.length > 1 ? ' Vereine' : 'r Verein'}`}
+            {filtered.length} {filtered.length > 1 ? t.clubs.count_plural[lang] : t.clubs.count_single[lang]}
           </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
               <div style={{ width: 36, height: 36, border: '4px solid var(--gray-light)', borderTopColor: 'var(--green)', borderRadius: '50%', animation: 'spin .8s linear infinite', margin: '0 auto 1rem' }} />
-              {lang === 'fr' ? 'Chargement des clubs…' : 'Vereine werden geladen…'}
+              {t.clubs.loading[lang]}
               <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 20, border: '1px solid var(--border)' }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏟️</div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: 1, marginBottom: '.5rem' }}>
-                {lang === 'fr' ? 'Aucun club trouvé' : 'Kein Verein gefunden'}
+                {t.clubs.none_found[lang]}
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: '1.5rem' }}>
-                {lang === 'fr' ? 'Sois le premier club de ta zone !' : 'Sei der erste Verein in deiner Zone!'}
+                {t.clubs.none_desc[lang]}
               </p>
               <Link href="/login" style={{ background: 'var(--green)', color: '#fff', padding: '12px 28px', borderRadius: 10, fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>
-                {lang === 'fr' ? 'Inscrire mon club →' : 'Meinen Verein registrieren →'}
+                {t.clubs.register[lang]}
               </Link>
             </div>
           ) : (
@@ -120,7 +119,7 @@ export default function ClubsPage() {
                     </div>
                     {club.available && (
                       <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(13,122,54,.5)', border: '1px solid rgba(13,122,54,.6)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>
-                        🟢 {lang === 'fr' ? 'Recrute' : 'Rekrutiert'}
+                        🟢 {t.clubs.recruits[lang]}
                       </div>
                     )}
                   </div>
@@ -140,7 +139,7 @@ export default function ClubsPage() {
 
                     <div style={{ display: 'flex', gap: 8 }}>
                       <Link href={`/club/${club.id}`} style={{ flex: 1, background: 'var(--green)', color: '#fff', borderRadius: 8, padding: '8px', fontSize: 13, fontWeight: 700, textAlign: 'center', textDecoration: 'none' }}>
-                        {lang === 'fr' ? 'Voir le club' : 'Verein ansehen'}
+                        {t.clubs.view_club[lang]}
                       </Link>
                       <Link href="/messages" style={{ background: 'var(--gray-light)', color: 'var(--text-muted)', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
                         💬

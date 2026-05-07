@@ -18,7 +18,7 @@ export default function Navbar() {
 
   const links = [
     { href: '/recherche', label: t.nav.recherche[lang] },
-    { href: '/annonces', label: 'Annonces' },
+    { href: '/annonces', label: t.nav.annonces[lang] },
     { href: '/clubs', label: t.nav.clubs[lang] },
     { href: '/dashboard', label: t.nav.dashboard[lang] },
     { href: '/candidatures', label: t.nav.candidatures[lang] },
@@ -124,7 +124,7 @@ export default function Navbar() {
               {user ? (
                 <div style={{ display: 'flex', gap: 8 }}>
                   <Link href="/profil" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--blue-bright)', color: '#fff', padding: '11px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
-                    Mon profil
+                    {t.nav.my_profile[lang]}
                   </Link>
                   <button onClick={handleLogout} style={{ flex: 1, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.7)', padding: '11px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
                     {t.nav.deconnexion[lang]}

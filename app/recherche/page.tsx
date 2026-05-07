@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
+import { useLang } from '../../lib/lang-context'
+import { t } from '../../lib/translations'
 
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
@@ -11,6 +13,7 @@ const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur 
 type FilterType = 'all' | 'player' | 'coach' | 'club'
 
 export default function RecherchePage() {
+  const { lang } = useLang()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -26,7 +29,6 @@ export default function RecherchePage() {
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false })
-
       if (!error && data) setProfiles(data)
       setLoading(false)
     }
@@ -56,26 +58,33 @@ export default function RecherchePage() {
     club: filtered.filter(p => p.role === 'club').length,
   }
 
+  const tabs = [
+    ['all', t.search.all[lang], counts.all],
+    ['player', t.search.players[lang], counts.player],
+    ['coach', t.search.coaches[lang], counts.coach],
+    ['club', t.search.clubs[lang], counts.club],
+  ] as const
+
   return (
     <>
       {/* HERO */}
       <div style={{ background:'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', padding:'2.5rem 1.5rem 1.5rem' }}>
         <div style={{ maxWidth:900, margin:'0 auto' }}>
           <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:'#fff', letterSpacing:2, marginBottom:'.25rem' }}>
-            Recherche <span style={{ color:'var(--red-light)' }}>Avancée</span>
+            {t.search.title[lang]} <span style={{ color:'var(--red-light)' }}>{t.search.advanced[lang]}</span>
           </h1>
           <p style={{ color:'rgba(255,255,255,.6)', fontSize:14, marginBottom:'1.25rem' }}>
-            Trouve joueurs, coachs et clubs dans le canton de Fribourg
+            {t.search.subtitle[lang]}
           </p>
           <div style={{ display:'flex', gap:8 }}>
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Nom, position, ligue, zone…"
+              placeholder={t.search.placeholder[lang]}
               style={{ flex:1, background:'rgba(255,255,255,.95)', border:'none', borderRadius:10, padding:'12px 16px', fontSize:15, outline:'none', fontFamily:'inherit' }}
             />
             <button style={{ background:'var(--red)', color:'#fff', border:'none', borderRadius:10, padding:'12px 22px', fontSize:14, fontWeight:700, fontFamily:'inherit', cursor:'pointer' }}>
-              Rechercher
+              {t.search.btn[lang]}
             </button>
           </div>
         </div>
@@ -83,17 +92,12 @@ export default function RecherchePage() {
 
       {/* TYPE TABS */}
       <div style={{ background:'#fff', padding:'.85rem 1.5rem', borderBottom:'1px solid var(--border)', display:'flex', gap:6, overflowX:'auto' }}>
-        {([
-          ['all', 'Tous', counts.all],
-          ['player', '👤 Joueurs', counts.player],
-          ['coach', '🧑‍🏫 Coachs', counts.coach],
-          ['club', '🏟️ Clubs', counts.club],
-        ] as const).map(([t, label, count]) => (
-          <button key={t} onClick={() => setFilterType(t as FilterType)} style={{
+        {tabs.map(([type, label, count]) => (
+          <button key={type} onClick={() => setFilterType(type as FilterType)} style={{
             padding:'7px 18px', borderRadius:8,
-            border:`1.5px solid ${filterType === t ? 'var(--blue-bright)' : 'var(--border)'}`,
-            background: filterType === t ? 'var(--blue-light)' : '#fff',
-            color: filterType === t ? 'var(--blue-mid)' : 'var(--text-muted)',
+            border:`1.5px solid ${filterType === type ? 'var(--blue-bright)' : 'var(--border)'}`,
+            background: filterType === type ? 'var(--blue-light)' : '#fff',
+            color: filterType === type ? 'var(--blue-mid)' : 'var(--text-muted)',
             fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit'
           }}>
             {label} <span style={{ background:'var(--blue-light)', color:'var(--blue-mid)', borderRadius:100, padding:'1px 7px', fontSize:11, marginLeft:4 }}>{count}</span>
@@ -108,12 +112,12 @@ export default function RecherchePage() {
           background: filterDispo ? 'var(--blue-light)' : 'var(--gray-bg)',
           color: filterDispo ? 'var(--blue-mid)' : 'inherit',
           borderRadius:100, padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit'
-        }}>🟢 Disponible</button>
+        }}>{t.search.available[lang]}</button>
 
         {[
-          { value: filterLigue, set: setFilterLigue, placeholder: 'Toutes les ligues', options: LIGUES },
-          { value: filterPos, set: setFilterPos, placeholder: 'Toutes positions', options: POSITIONS },
-          { value: filterZone, set: setFilterZone, placeholder: 'Toute la zone', options: ZONES },
+          { value: filterLigue, set: setFilterLigue, placeholder: t.search.all_ligues[lang], options: LIGUES },
+          { value: filterPos, set: setFilterPos, placeholder: t.search.all_positions[lang], options: POSITIONS },
+          { value: filterZone, set: setFilterZone, placeholder: t.search.all_zones[lang], options: ZONES },
         ].map((f, i) => (
           <select key={i} value={f.value} onChange={e => f.set(e.target.value)} style={{
             background:'var(--gray-bg)', border:'1.5px solid var(--border)', borderRadius:100,
@@ -125,7 +129,7 @@ export default function RecherchePage() {
         ))}
 
         <span style={{ marginLeft:'auto', fontSize:13, color:'var(--text-muted)', fontWeight:500 }}>
-          {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
+          {filtered.length} {filtered.length > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
         </span>
       </div>
 
@@ -134,22 +138,22 @@ export default function RecherchePage() {
         {loading ? (
           <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>
             <div style={{ width:36, height:36, border:'4px solid var(--gray-light)', borderTopColor:'var(--blue-bright)', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
-            Chargement des profils…
+            {t.search.loading[lang]}
             <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>
             <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>😕</div>
-            <div style={{ fontSize:16, fontWeight:500, marginBottom:'.5rem' }}>Aucun résultat</div>
+            <div style={{ fontSize:16, fontWeight:500, marginBottom:'.5rem' }}>{t.search.no_results[lang]}</div>
             <div style={{ fontSize:14 }}>
               {profiles.length === 0
-                ? "Sois le premier à t'inscrire sur TeamUpFR !"
-                : "Modifie tes filtres pour trouver ce que tu cherches."
+                ? t.search.first_register[lang]
+                : t.search.no_filter[lang]
               }
             </div>
             {profiles.length === 0 && (
               <Link href="/login" className="btn btn-blue" style={{ marginTop:'1rem', display:'inline-flex' }}>
-                Créer mon profil →
+                {t.search.create_profile[lang]}
               </Link>
             )}
           </div>
@@ -162,6 +166,8 @@ export default function RecherchePage() {
 }
 
 function ProfileCard({ profile: p }: { profile: Profile }) {
+  const { lang } = useLang()
+
   const name = p.role === 'club'
     ? (p.club_name || 'Club')
     : `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email
@@ -171,7 +177,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
     : `${p.first_name?.[0] || ''}${p.last_name?.[0] || ''}`.toUpperCase() || '??'
 
   const roleEmoji = p.role === 'player' ? '👤' : p.role === 'coach' ? '🧑‍🏫' : '🏟️'
-  const roleLabel = p.role === 'player' ? 'Joueur' : p.role === 'coach' ? 'Coach' : 'Club'
+  const roleLabel = p.role === 'player' ? t.search.joueur[lang] : p.role === 'coach' ? t.search.coach_label[lang] : t.search.club_label[lang]
 
   const stripeColor = p.role === 'player'
     ? 'linear-gradient(90deg,#1a6fd4,#5b9eff)'
@@ -180,6 +186,8 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
     : 'linear-gradient(90deg,#0d7a36,#1db954)'
 
   const bgColor = p.role === 'player' ? '#deeafa' : p.role === 'coach' ? '#fde8e8' : 'var(--green-bg)'
+
+  const ageSuffix = t.general.age_suffix[lang]
 
   return (
     <div style={{ background:'#fff', borderRadius:14, border:'1px solid var(--border)', padding:'1.25rem', position:'relative', overflow:'hidden' }}>
@@ -194,10 +202,10 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</div>
-          <div style={{ fontSize:12, color:'var(--text-muted)' }}>{p.position || roleLabel}{p.age ? ` · ${p.age} ans` : ''}</div>
+          <div style={{ fontSize:12, color:'var(--text-muted)' }}>{p.position || roleLabel}{p.age ? ` · ${p.age}${ageSuffix}` : ''}</div>
         </div>
         <span className={`badge ${p.available ? 'badge-green' : 'badge-gray'}`}>
-          {p.available ? 'Dispo' : 'Indispo'}
+          {p.available ? t.search.dispo[lang] : t.search.indispo[lang]}
         </span>
       </div>
 
@@ -215,10 +223,10 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
       <div style={{ display:'flex', gap:6 }}>
         <Link href="/messages" style={{ flex:1, background:'var(--blue-bright)', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          💬 Contacter
+          {t.search.contact[lang]}
         </Link>
         <Link href="/profil" style={{ flex:1, background:'var(--gray-light)', color:'var(--text-muted)', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          👤 Profil
+          {t.search.profile[lang]}
         </Link>
       </div>
     </div>
