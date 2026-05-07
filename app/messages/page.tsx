@@ -96,6 +96,22 @@ export default function MessagesPage() {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
   }, [activePartnerId, conversations])
 
+  // Realtime: refetch conversations when a new message arrives for me
+  useEffect(() => {
+    if (!profile) return
+    const channel = supabase
+      .channel(`msg-rt-${profile.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${profile.id}`,
+      }, () => { loadMessages(profile) })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id])
+
   async function handleSend() {
     const txt = input.trim()
     if (!txt || !profile || !activePartnerId || sending) return

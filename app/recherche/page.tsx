@@ -27,29 +27,37 @@ export default function RecherchePage() {
     async function load() {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id,email,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,birthdate')
         .order('created_at', { ascending: false })
-      if (!error && data) setProfiles(data)
+        .limit(500)
+      if (!error && data) setProfiles(data as Profile[])
       setLoading(false)
     }
     load()
   }, [])
 
+  // Debounce the search query to avoid filtering on every keystroke
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query), 200)
+    return () => clearTimeout(id)
+  }, [query])
+
   const filtered = useMemo(() => {
+    const q = debouncedQuery.toLowerCase()
     return profiles.filter(p => {
       if (filterType !== 'all' && p.role !== filterType) return false
       if (filterDispo && !p.available) return false
       if (filterLigue && p.ligue !== filterLigue) return false
       if (filterPos && p.position !== filterPos) return false
       if (filterZone && p.zone !== filterZone) return false
-      if (query) {
-        const q = query.toLowerCase()
+      if (q) {
         const name = `${p.first_name || ''} ${p.last_name || ''} ${p.club_name || ''}`.toLowerCase()
         if (!name.includes(q) && !(p.position || '').toLowerCase().includes(q) && !(p.ligue || '').toLowerCase().includes(q) && !(p.zone || '').toLowerCase().includes(q)) return false
       }
       return true
     })
-  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, query])
+  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, debouncedQuery])
 
   const counts = {
     all: filtered.length,

@@ -35,12 +35,29 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!session) { setUnread(0); return }
-    supabase
-      .from('messages')
-      .select('id', { count: 'exact', head: true })
-      .eq('receiver_id', session.user.id)
-      .eq('read', false)
-      .then(({ count }) => setUnread(count || 0))
+    const uid = session.user.id
+
+    const refresh = () => {
+      supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('receiver_id', uid)
+        .eq('read', false)
+        .then(({ count }) => setUnread(count || 0))
+    }
+    refresh()
+
+    const channel = supabase
+      .channel(`nav-unread-${uid}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${uid}`,
+      }, refresh)
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [session])
 
   useEffect(() => { setMenuOpen(false) }, [pathname])

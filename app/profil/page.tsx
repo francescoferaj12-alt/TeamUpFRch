@@ -211,9 +211,10 @@ export default function ProfilPage() {
   async function handlePhotoUpload(e: ChangeEvent<HTMLInputElement>) {
     if (!profile || !e.target.files?.[0]) return
     const file = e.target.files[0]
+    if (!file.type.startsWith('image/')) { alert('Seules les images sont acceptées'); return }
     if (file.size > 5 * 1024 * 1024) { alert('Max 5 MB'); return }
     setUploadingPhoto(true)
-    const ext = file.name.split('.').pop()
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
     const path = `${profile.id}/avatar.${ext}`
     const { data: uploadData, error } = await supabase.storage
       .from('avatars')
