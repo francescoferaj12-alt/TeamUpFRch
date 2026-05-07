@@ -15,6 +15,7 @@ export type Profile = {
   ligue?: string
   zone?: string
   age?: number
+  birthdate?: string
   foot?: string
   available: boolean
   bio?: string

@@ -34,8 +34,15 @@ function LoginForm() {
   const [ligue, setLigue] = useState('')
   const [zone, setZone] = useState('')
   const [foot, setFoot] = useState('Droit')
-  const [age, setAge] = useState('')
+  const [birthDay, setBirthDay] = useState('')
+  const [birthMonth, setBirthMonth] = useState('')
+  const [birthYear, setBirthYear] = useState('')
   const [clubName, setClubName] = useState('')
+
+  const regYear = new Date().getFullYear()
+  const regYears = Array.from({ length: 55 }, (_, i) => regYear - 14 - i)
+  const regDays = Array.from({ length: 31 }, (_, i) => i + 1)
+  const regMonths = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
   const [bio, setBio] = useState('')
 
   async function handleLogin(e: React.FormEvent) {
@@ -67,7 +74,9 @@ function LoginForm() {
         position: role === 'player' ? position : null,
         ligue, zone,
         foot: role === 'player' ? foot : null,
-        age: age ? parseInt(age) : null,
+        birthdate: (birthDay && birthMonth && birthYear)
+          ? `${birthYear}-${birthMonth.padStart(2,'0')}-${birthDay.padStart(2,'0')}`
+          : null,
         club_name: role === 'club' ? clubName : null,
         bio, available: true
       })
@@ -277,8 +286,21 @@ function LoginForm() {
                 </div>
 
                 {role !== 'club' && <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>Âge</div>
-                  <input style={inputStyle} type="number" min="14" max="60" value={age} onChange={e => setAge(e.target.value)} placeholder="24" required />
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>Date de naissance</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 6 }}>
+                    <select style={inputStyle} value={birthDay} onChange={e => setBirthDay(e.target.value)} required>
+                      <option value="">Jour</option>
+                      {regDays.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <select style={inputStyle} value={birthMonth} onChange={e => setBirthMonth(e.target.value)} required>
+                      <option value="">Mois</option>
+                      {regMonths.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                    </select>
+                    <select style={inputStyle} value={birthYear} onChange={e => setBirthYear(e.target.value)} required>
+                      <option value="">Année</option>
+                      {regYears.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
                 </div>}
 
                 <div style={{ marginBottom: '1rem' }}>
