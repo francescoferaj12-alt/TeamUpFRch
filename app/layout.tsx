@@ -3,6 +3,7 @@ import '../styles/globals.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { LangProvider } from '../lib/lang-context';
+import { AuthProvider } from '../lib/auth-context';
 
 export const metadata: Metadata = {
   title: 'TeamUpFR — Ton équipe, ton avenir',
@@ -35,9 +36,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr">
       <body>
         <LangProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
+          <AuthProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+          </AuthProvider>
         </LangProvider>
       </body>
     </html>

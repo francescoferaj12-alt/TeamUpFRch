@@ -7,14 +7,23 @@ import { supabase } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
 import { useLang } from '../lib/lang-context'
 import { t } from '../lib/translations'
+import { useAuth } from '../lib/auth-context'
 
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { lang } = useLang()
-  const [user, setUser] = useState<{ email: string; initials: string } | null>(null)
+  const { session, profile } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [unread, setUnread] = useState(0)
+
+  const user = profile
+    ? {
+        email: profile.email,
+        initials: `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '??',
+        avatar_url: profile.avatar_url,
+      }
+    : null
 
   const links = [
     { href: '/recherche', label: t.nav.recherche[lang] },
@@ -25,34 +34,19 @@ export default function Navbar() {
   ]
 
   useEffect(() => {
-    async function loadUserData(userId: string) {
-      const { data } = await supabase.from('profiles').select('first_name,last_name,email').eq('id', userId).single()
-      if (data) {
-        const initials = `${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase() || '??'
-        setUser({ email: data.email, initials })
-      }
-      const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', userId).eq('read', false)
-      setUnread(count || 0)
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) loadUserData(session.user.id)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) { setUser(null); setUnread(0) }
-      else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-        loadUserData(session.user.id)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
+    if (!session) { setUnread(0); return }
+    supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', session.user.id)
+      .eq('read', false)
+      .then(({ count }) => setUnread(count || 0))
+  }, [session])
 
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
   async function handleLogout() {
     await supabase.auth.signOut()
-    setUser(null)
     router.push('/')
   }
 
@@ -84,8 +78,11 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-              <Link href="/profil" className="nav-avatar" title={user.email} style={{ textDecoration: 'none' }}>
-                {user.initials}
+              <Link href="/profil" className="nav-avatar" title={user.email} style={{ textDecoration: 'none', overflow: 'hidden', padding: user.avatar_url ? 0 : undefined }}>
+                {user.avatar_url
+                  ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : user.initials
+                }
               </Link>
               <button onClick={handleLogout} className="nav-desktop" style={{ background: 'none', border: 'none', color: '#ff6b6b', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 10px', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                 {t.nav.deconnexion[lang]}

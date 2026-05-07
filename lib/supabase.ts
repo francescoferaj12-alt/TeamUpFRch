@@ -24,6 +24,13 @@ export type Profile = {
   goals?: number
   assists?: number
   matches?: number
+  goals_prev?: number
+  assists_prev?: number
+  matches_prev?: number
+  strengths?: string
+  video1_url?: string
+  video2_url?: string
+  video3_url?: string
   rating?: number
   phone?: string
   career?: string

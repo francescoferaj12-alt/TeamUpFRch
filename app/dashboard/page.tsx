@@ -7,6 +7,7 @@ import { supabase, Profile, Annonce, Application } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
+import { useAuth } from '../../lib/auth-context'
 
 type Section = 'vue' | 'candidatures' | 'annonces' | 'messages' | 'settings'
 type AppWithAnnonce = Application & { annonce_title?: string }
@@ -17,18 +18,14 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const { session, profile: authProfile, authLoading } = useAuth()
 
   useEffect(() => {
-    async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
-      const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-      if (!data) { router.push('/login'); return }
-      setProfile(data)
-      setLoading(false)
-    }
-    load()
-  }, [router])
+    if (authLoading) return
+    if (!session) { router.push('/login'); return }
+    if (authProfile) { setProfile(authProfile); setLoading(false) }
+    else { router.push('/login') }
+  }, [authLoading, session, authProfile, router])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
