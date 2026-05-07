@@ -25,18 +25,25 @@ export default function Navbar() {
   ]
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) return
-      const { data } = await supabase.from('profiles').select('first_name,last_name,email').eq('id', session.user.id).single()
+    async function loadUserData(userId: string) {
+      const { data } = await supabase.from('profiles').select('first_name,last_name,email').eq('id', userId).single()
       if (data) {
         const initials = `${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase() || '??'
         setUser({ email: data.email, initials })
       }
-      const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', session.user.id).eq('read', false)
+      const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', userId).eq('read', false)
       setUnread(count || 0)
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) loadUserData(session.user.id)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { setUser(null); setUnread(0) }
+      else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        loadUserData(session.user.id)
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -80,8 +87,8 @@ export default function Navbar() {
               <Link href="/profil" className="nav-avatar" title={user.email} style={{ textDecoration: 'none' }}>
                 {user.initials}
               </Link>
-              <button onClick={handleLogout} className="nav-link nav-desktop" style={{ fontSize: 16, padding: '5px 8px' }}>
-                🚪
+              <button onClick={handleLogout} className="nav-desktop" style={{ background: 'none', border: 'none', color: '#ff6b6b', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 10px', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                {t.nav.deconnexion[lang]}
               </button>
             </>
           ) : (

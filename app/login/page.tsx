@@ -51,6 +51,7 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError('Email ou mot de passe incorrect.'); setLoading(false); return }
     router.push(redirectTo)
+    router.refresh()
   }
 
   async function handleRegister(e: React.FormEvent) {
