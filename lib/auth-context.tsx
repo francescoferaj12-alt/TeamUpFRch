@@ -51,7 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!s) {
         setProfile(null)
         setAuthLoading(false)
-      } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        setAuthLoading(true)
         await loadProfile(s.user.id)
         if (mounted) setAuthLoading(false)
       }

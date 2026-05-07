@@ -24,7 +24,6 @@ export default function DashboardPage() {
     if (authLoading) return
     if (!session) { router.push('/login'); return }
     if (authProfile) { setProfile(authProfile); setLoading(false) }
-    else { router.push('/login') }
   }, [authLoading, session, authProfile, router])
 
   if (loading) return (

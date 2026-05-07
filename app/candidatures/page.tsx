@@ -22,7 +22,6 @@ export default function CandidaturesPage() {
     if (authLoading) return
     if (!session) { router.push('/login'); return }
     if (authProfile) { setProfile(authProfile); setLoading(false) }
-    else { router.push('/login') }
   }, [authLoading, session, authProfile, router])
 
   if (loading) return (
