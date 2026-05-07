@@ -6,27 +6,23 @@ import Link from 'next/link'
 import { supabase, Profile, Application, Annonce } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
+import { useAuth } from '../../lib/auth-context'
 
 type AppWithAnnonce = Application & { annonce_title?: string; annonce_author?: string; annonce_ligue?: string }
 type Status = 'all' | 'pending' | 'accepted' | 'rejected'
 
 export default function CandidaturesPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
   const { lang } = useLang()
+  const { session, profile: authProfile, authLoading } = useAuth()
+  const [profile, setProfile] = useState<Profile | null>(authProfile)
+  const [loading, setLoading] = useState(!authProfile)
 
   useEffect(() => {
-    async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
-      const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-      if (!data) { router.push('/login'); return }
-      setProfile(data)
-      setLoading(false)
-    }
-    load()
-  }, [router])
+    if (authLoading) return
+    if (!session) { router.push('/login'); return }
+    if (authProfile) { setProfile(authProfile); setLoading(false) }
+  }, [authLoading, session, authProfile, router])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>

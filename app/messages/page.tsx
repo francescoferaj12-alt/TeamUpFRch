@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase, Profile, Message } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
+import { useAuth } from '../../lib/auth-context'
 
 type Conversation = {
   partnerId: string
@@ -27,20 +28,15 @@ export default function MessagesPage() {
   const [search, setSearch] = useState('')
   const bodyRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { session, profile: authProfile, authLoading } = useAuth()
 
   useEffect(() => {
-    async function load() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/login'); return }
-
-      const { data: prof } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-      if (!prof) { router.push('/login'); return }
-      setProfile(prof)
-
-      await loadMessages(prof)
-    }
-    load()
-  }, [router])
+    if (authLoading) return
+    if (!session || !authProfile) { router.push('/login'); return }
+    setProfile(authProfile)
+    loadMessages(authProfile)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, session, authProfile])
 
   async function loadMessages(prof: Profile) {
     const { data: msgs } = await supabase
@@ -99,6 +95,22 @@ export default function MessagesPage() {
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
   }, [activePartnerId, conversations])
+
+  // Realtime: refetch conversations when a new message arrives for me
+  useEffect(() => {
+    if (!profile) return
+    const channel = supabase
+      .channel(`msg-rt-${profile.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${profile.id}`,
+      }, () => { loadMessages(profile) })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id])
 
   async function handleSend() {
     const txt = input.trim()

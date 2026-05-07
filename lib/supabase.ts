@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -15,6 +15,7 @@ export type Profile = {
   ligue?: string
   zone?: string
   age?: number
+  birthdate?: string
   foot?: string
   available: boolean
   bio?: string
@@ -23,9 +24,15 @@ export type Profile = {
   goals?: number
   assists?: number
   matches?: number
+  goals_prev?: number
+  assists_prev?: number
+  matches_prev?: number
+  strengths?: string
+  video1_url?: string
+  video2_url?: string
+  video3_url?: string
   rating?: number
   phone?: string
-  birthdate?: string
   career?: string
   verified?: boolean
   verification_requested?: boolean

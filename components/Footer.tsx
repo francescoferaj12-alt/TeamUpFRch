@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useLang } from '../lib/lang-context'
 import { t } from '../lib/translations'
 
@@ -7,75 +8,122 @@ export default function Footer() {
   const { lang } = useLang()
 
   const platformLinks = [
-    ['/recherche', t.nav.recherche[lang]],
-    ['/clubs', t.nav.clubs[lang]],
-    ['/candidatures', t.nav.candidatures[lang]],
-    ['/messages', t.nav.messages[lang]],
-    ['/dashboard', t.nav.dashboard[lang]],
+    ['/recherche',   t.nav.recherche[lang]],
+    ['/clubs',       t.nav.clubs[lang]],
+    ['/annonces',    t.nav.annonces[lang]],
+    ['/dashboard',   t.nav.dashboard[lang]],
+    ['/candidatures',t.nav.candidatures[lang]],
   ]
 
   const aboutLinks = [
     ['/a-propos', t.nav.apropos[lang]],
-    ['/faq', t.nav.faq[lang]],
-    ['/privacy', t.footer.privacy_link[lang]],
-    ['/cgu', t.footer.cgu_link[lang]],
+    ['/faq',      t.nav.faq[lang]],
+    ['/privacy',  t.footer.privacy_link[lang]],
+    ['/cgu',      t.footer.cgu_link[lang]],
   ]
 
+  const colHead: React.CSSProperties = {
+    fontFamily: "'Bebas Neue', sans-serif",
+    fontSize: 18,
+    marginBottom: 18,
+    color: '#e63946',
+    letterSpacing: '0.05em',
+  }
+  const colLink: React.CSSProperties = {
+    display: 'block',
+    color: 'rgba(255,255,255,0.55)',
+    textDecoration: 'none',
+    fontSize: 14,
+    marginBottom: 10,
+    transition: 'color 0.2s',
+  }
+
   return (
-    <footer style={{ background: 'var(--blue-dark)', color: 'rgba(255,255,255,.5)', padding: '3rem 2rem 2rem', fontSize: 13 }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+    <footer style={{ background: '#000', padding: '70px 0 32px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+        <div className="hp-footer-grid">
           {/* Brand */}
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: 2, color: '#fff', marginBottom: '.5rem' }}>
-              TeamUp<span style={{ color: '#ff4444' }}>FR</span>
-            </div>
-            <div style={{ fontStyle: 'italic', marginBottom: '1rem', color: 'rgba(255,255,255,.4)', fontSize: 12 }}>
-              {t.footer.motto[lang]}
-            </div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.3)' }}>{t.footer.location[lang]}</div>
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none', marginBottom: 18 }}>
+              <img
+                src="/images/logo-official.jpeg"
+                alt="TeamUpFR"
+                style={{ height: 40, width: 40, objectFit: 'cover', borderRadius: 9, border: '2px solid rgba(255,255,255,.18)' }}
+              />
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 1, color: '#fff' }}>
+                TeamUp<span style={{ color: '#e63946' }}>FR</span>
+              </span>
+            </Link>
+            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14, lineHeight: 1.65, maxWidth: 300 }}>
+              {t.footer.motto[lang]}.<br />{t.footer.location[lang]}.
+            </p>
           </div>
 
           {/* Platform */}
           <div>
-            <div style={{ color: '#fff', fontWeight: 600, marginBottom: '.75rem', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t.footer.platform[lang]}</div>
-            {platformLinks.map(([href, label]) => (
-              <a key={href} href={href} style={{ display: 'block', color: 'rgba(255,255,255,.45)', marginBottom: '.4rem', textDecoration: 'none' }}>
-                {label}
-              </a>
-            ))}
+            <div style={colHead}>{t.footer.platform[lang]}</div>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {platformLinks.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} style={colLink}>{label}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* About */}
           <div>
-            <div style={{ color: '#fff', fontWeight: 600, marginBottom: '.75rem', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t.footer.about_section[lang]}</div>
-            {aboutLinks.map(([href, label]) => (
-              <a key={href} href={href} style={{ display: 'block', color: 'rgba(255,255,255,.45)', marginBottom: '.4rem', textDecoration: 'none' }}>
-                {label}
-              </a>
-            ))}
+            <div style={colHead}>{t.footer.about_section[lang]}</div>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {aboutLinks.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} style={colLink}>{label}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <div style={{ color: '#fff', fontWeight: 600, marginBottom: '.75rem', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t.footer.contact_section[lang]}</div>
-            <a href="mailto:teamupfr.ch@gmail.com" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'none', display: 'block', marginBottom: '.4rem' }}>
-              📧 teamupfr.ch@gmail.com
-            </a>
-            <div style={{ color: 'rgba(255,255,255,.3)', marginTop: '1rem', fontSize: 12 }}>
-              🇨🇭 Fribourg, Suisse
-            </div>
+            <div style={colHead}>{t.footer.contact_section[lang]}</div>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              <li>
+                <a href="mailto:teamupfr.ch@gmail.com" style={colLink}>
+                  teamupfr.ch@gmail.com
+                </a>
+              </li>
+              <li>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>🇨🇭 Fribourg, Suisse</span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>{t.footer.copyright[lang]} {t.footer.rights[lang]}</div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <span>{t.footer.languages[lang]}</span>
-          </div>
+        {/* Bottom bar */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+            {t.footer.copyright[lang]} {t.footer.rights[lang]}
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+            {t.footer.languages[lang]}
+          </p>
         </div>
       </div>
+
+      <style>{`
+        .hp-footer-grid {
+          display: grid;
+          grid-template-columns: 1.5fr 1fr 1fr 1fr;
+          gap: 40px;
+          margin-bottom: 50px;
+        }
+        @media (max-width: 900px) {
+          .hp-footer-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          .hp-footer-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </footer>
   )
 }
