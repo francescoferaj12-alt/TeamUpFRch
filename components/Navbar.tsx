@@ -31,6 +31,7 @@ export default function Navbar() {
     { href: '/clubs', label: t.nav.clubs[lang] },
     { href: '/dashboard', label: t.nav.dashboard[lang] },
     { href: '/candidatures', label: t.nav.candidatures[lang] },
+    ...(user ? [{ href: '/messages', label: t.nav.messages[lang] }] : []),
   ]
 
   useEffect(() => {
@@ -77,8 +78,13 @@ export default function Navbar() {
 
         <div className="nav-links nav-desktop" style={{ overflow: 'auto', maxWidth: '50vw' }}>
           {links.map(l => (
-            <Link key={l.href} href={l.href} className={`nav-link ${pathname?.startsWith(l.href) ? 'active' : ''}`} style={{ textDecoration: 'none' }}>
+            <Link key={l.href} href={l.href} className={`nav-link ${pathname?.startsWith(l.href) ? 'active' : ''}`} style={{ textDecoration: 'none', position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               {l.label}
+              {l.href === '/messages' && unread > 0 && (
+                <span className="nav-dot" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff', width: 14, height: 14, borderRadius: '50%', background: '#e02020', flexShrink: 0 }}>
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
             </Link>
           ))}
         </div>
@@ -87,14 +93,6 @@ export default function Navbar() {
           <LangSwitcher />
           {user ? (
             <>
-              <Link href="/messages" className="nav-icon-btn" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, textDecoration: 'none' }}>
-                💬
-                {unread > 0 && (
-                  <span className="nav-dot" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff', width: 14, height: 14, top: 2, right: 2 }}>
-                    {unread > 9 ? '9+' : unread}
-                  </span>
-                )}
-              </Link>
               <Link href="/profil" className="nav-avatar" title={user.email} style={{ textDecoration: 'none', overflow: 'hidden', padding: user.avatar_url ? 0 : undefined }}>
                 {user.avatar_url
                   ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -130,8 +128,13 @@ export default function Navbar() {
         <div style={{ position: 'fixed', top: 60, left: 0, right: 0, background: 'var(--blue-dark)', borderBottom: '1px solid rgba(255,255,255,.1)', zIndex: 199, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
           <div style={{ padding: '1rem' }}>
             {links.map(l => (
-              <Link key={l.href} href={l.href} style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderRadius: 10, color: pathname?.startsWith(l.href) ? '#fff' : 'rgba(255,255,255,.7)', fontWeight: pathname?.startsWith(l.href) ? 700 : 500, fontSize: 15, background: pathname?.startsWith(l.href) ? 'rgba(255,255,255,.12)' : 'transparent', marginBottom: 4, textDecoration: 'none' }}>
+              <Link key={l.href} href={l.href} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 10, color: pathname?.startsWith(l.href) ? '#fff' : 'rgba(255,255,255,.7)', fontWeight: pathname?.startsWith(l.href) ? 700 : 500, fontSize: 15, background: pathname?.startsWith(l.href) ? 'rgba(255,255,255,.12)' : 'transparent', marginBottom: 4, textDecoration: 'none' }}>
                 {l.label}
+                {l.href === '/messages' && unread > 0 && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff', width: 14, height: 14, borderRadius: '50%', background: '#e02020', flexShrink: 0 }}>
+                    {unread > 9 ? '9+' : unread}
+                  </span>
+                )}
               </Link>
             ))}
             <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '.5rem', paddingTop: '.75rem' }}>
