@@ -25,6 +25,8 @@ export type Profile = {
   matches?: number
   rating?: number
   phone?: string
+  birthdate?: string
+  career?: string
   verified?: boolean
   verification_requested?: boolean
   created_at: string

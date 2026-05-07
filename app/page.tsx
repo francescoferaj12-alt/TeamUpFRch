@@ -1,202 +1,221 @@
-import Link from 'next/link'
-import { supabase, Annonce } from '../lib/supabase'
-import { ligues } from '../lib/data'
+'use client'
 
-async function getAnnonces(): Promise<Annonce[]> {
-  const { data } = await supabase
-    .from('annonces')
-    .select('*')
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(6)
-  return data || []
-}
+import Link from 'next/link';
+import { annonces, ligues } from '../lib/data';
+import { useLang } from '../lib/lang-context';
+import { t, tagsByRole } from '../lib/translations';
 
-export default async function HomePage() {
-  const annonces = await getAnnonces()
+export default function HomePage() {
+  const { lang } = useLang()
+
+  const cards = [
+    {
+      href: '/login', icon: '👤', title: t.types.player_title[lang], color: '#1a6fd4',
+      bg: 'linear-gradient(135deg, #0a1f5c, #1a6fd4)',
+      desc: t.types.player_desc[lang],
+      tags: tagsByRole.player[lang],
+      cta: t.types.player_cta[lang],
+    },
+    {
+      href: '/login', icon: '🧑‍🏫', title: t.types.coach_title[lang], color: '#e02020',
+      bg: 'linear-gradient(135deg, #6b0000, #e02020)',
+      desc: t.types.coach_desc[lang],
+      tags: tagsByRole.coach[lang],
+      cta: t.types.coach_cta[lang],
+    },
+    {
+      href: '/clubs', icon: '🏟️', title: t.types.club_title[lang], color: '#0d7a36',
+      bg: 'linear-gradient(135deg, #063a1a, #0d7a36)',
+      desc: t.types.club_desc[lang],
+      tags: tagsByRole.club[lang],
+      cta: t.types.club_cta[lang],
+    },
+  ]
+
+  const steps = [
+    { num: '01', icon: '👤', title: t.how.step1_title[lang], desc: t.how.step1_desc[lang] },
+    { num: '02', icon: '🔍', title: t.how.step2_title[lang], desc: t.how.step2_desc[lang] },
+    { num: '03', icon: '📋', title: t.how.step3_title[lang], desc: t.how.step3_desc[lang] },
+    { num: '04', icon: '🏆', title: t.how.step4_title[lang], desc: t.how.step4_desc[lang] },
+  ]
+
+  const stats = [
+    { num: '340+', label: t.home.stats_players[lang], icon: '👤' },
+    { num: '52', label: t.home.stats_clubs[lang], icon: '🏟️' },
+    { num: '18', label: t.home.stats_coaches[lang], icon: '🧑‍🏫' },
+    { num: '100%', label: t.home.stats_free[lang], icon: '🆓' },
+  ]
 
   return (
     <>
-      {/* ═══ 1. HERO — image stadio + slogan ═══ */}
-      <section style={{ position: 'relative', height: '100vh', minHeight: 600, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-
-        {/* BG IMAGE */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* ══════════════════════════════════════
+          HERO
+      ══════════════════════════════════════ */}
+      <section style={{ position: 'relative', height: '100vh', minHeight: 650, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
         <img
-          src="/images/hero-stadium.jpg"
-          alt=""
-          aria-hidden="true"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
+          src="/images/banner.png"
+          alt="TeamUpFR hero"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', zIndex: 0 }}
         />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,31,92,.92) 0%, rgba(10,31,92,.75) 40%, rgba(10,31,92,.4) 100%)', zIndex: 1 }} />
 
-        {/* GRADIENT OVERLAY */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,31,92,.55) 0%, rgba(10,31,92,.82) 55%, rgba(10,31,92,.97) 100%)' }} />
-
-        {/* CONTENT */}
-        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 1.5rem', maxWidth: 860, width: '100%' }}>
-
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', backdropFilter: 'blur(8px)', padding: '7px 18px', borderRadius: 100, marginBottom: '1.75rem' }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e02020', boxShadow: '0 0 8px #e02020' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: 'rgba(255,255,255,.85)', textTransform: 'uppercase' }}>Canton de Fribourg · Suisse</span>
-          </div>
-
-          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(4rem, 13vw, 10rem)', color: '#fff', letterSpacing: 4, lineHeight: .88, marginBottom: '1.5rem', textShadow: '0 4px 32px rgba(0,0,0,.45)' }}>
-            TON ÉQUIPE<br />
-            <span style={{ color: '#e02020' }}>TON AVENIR</span>
-          </h1>
-
-          <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 'clamp(14px, 2vw, 18px)', lineHeight: 1.6, marginBottom: '2.5rem', maxWidth: 520, margin: '0 auto 2.5rem' }}>
-            La plateforme qui connecte joueurs, coachs et clubs de football amateur du canton de Fribourg.
-          </p>
-
-          <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#e02020', color: '#fff', padding: '18px 42px', borderRadius: 12, fontWeight: 800, fontSize: 17, boxShadow: '0 10px 32px rgba(224,32,32,.5)', letterSpacing: .3 }}>
-            ⚽ Créer mon profil gratuitement
-          </Link>
-
-          {/* STATS — glassmorphism */}
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '4rem' }}>
-            {[
-              { num: '340+', label: 'Joueurs inscrits' },
-              { num: '52', label: 'Clubs actifs' },
-              { num: '18', label: 'Coachs disponibles' },
-              { num: '9', label: 'Ligues couvertes' }
-            ].map((s) => (
-              <div key={s.label} style={{ background: 'rgba(255,255,255,.1)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 14, padding: '.85rem 1.4rem', textAlign: 'center', minWidth: 100 }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', color: '#fff', lineHeight: 1 }}>{s.num}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.55)', textTransform: 'uppercase', letterSpacing: 1, marginTop: 3 }}>{s.label}</div>
+        <div style={{ position: 'relative', zIndex: 3, maxWidth: 1100, margin: '0 auto', padding: '0 2rem', width: '100%' }}>
+          <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', alignItems: 'center', gap: '2rem' }}>
+            <div>
+              {/* BADGE */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '6px 16px', marginBottom: '1.5rem' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 8px #00ff88' }} />
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.9)', textTransform: 'uppercase' }}>{t.home.badge[lang]}</span>
               </div>
-            ))}
+
+              {/* TITLE */}
+              <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(4rem, 10vw, 8rem)', color: '#fff', letterSpacing: 3, lineHeight: .95, marginBottom: '1rem' }}>
+                {t.home.title1[lang]}<br />
+                <span style={{ color: '#ff3333', textShadow: '0 0 40px rgba(255,51,51,.5)' }}>{t.home.title2[lang]}</span>
+              </h1>
+
+              {/* LOGO + MOTTO */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1.5rem' }}>
+                <img src="/images/logo-official.jpeg" alt="TeamUpFR" style={{ height: 52, width: 52, objectFit: 'cover', borderRadius: 10, border: '2px solid rgba(255,255,255,.25)' }} />
+                <div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.8rem', color: '#fff', letterSpacing: 2, lineHeight: 1 }}>TeamUp<span style={{ color: '#ff3333' }}>FR</span></div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', fontStyle: 'italic' }}>{t.home.motto[lang]}</div>
+                </div>
+              </div>
+
+              <p style={{ fontSize: 'clamp(15px, 2vw, 17px)', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, maxWidth: 500, marginBottom: '2rem' }}>
+                {t.home.desc[lang]}
+              </p>
+
+              {/* BUTTONS */}
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <Link href="/login" style={{ background: '#e02020', color: '#fff', padding: '16px 36px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 32px rgba(224,32,32,.4)' }}>
+                  ⚽ {t.home.cta_primary[lang]}
+                </Link>
+                <Link href="/recherche" style={{ background: 'rgba(255,255,255,.12)', color: '#fff', padding: '16px 36px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,.25)', backdropFilter: 'blur(10px)' }}>
+                  🔍 {t.home.cta_secondary[lang]}
+                </Link>
+              </div>
+            </div>
+
+            {/* STATS CARD */}
+            <div style={{ background: 'rgba(255,255,255,.08)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 20, padding: '1.75rem' }}>
+              {stats.map(s => (
+                <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '.75rem 0', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+                  <span style={{ fontSize: 20 }}>{s.icon}</span>
+                  <div>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', color: '#fff', lineHeight: 1 }}>{s.num}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: 1 }}>{s.label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Scroll hint */}
-        <div style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+        {/* SCROLL INDICATOR */}
+        <div style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', letterSpacing: 2, textTransform: 'uppercase' }}>{t.home.scroll[lang]}</span>
           <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(255,255,255,.4), transparent)' }} />
         </div>
       </section>
 
-      {/* ═══ 2. BANNER ═══ */}
-      <section style={{ position: 'relative', width: '100%', height: 300, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/banner.png"
-          alt="TeamUpFR — Le football fribourgeois"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,31,92,.92) 0%, rgba(10,31,92,.65) 55%, rgba(10,31,92,.1) 100%)' }} />
-        <div style={{ position: 'relative', zIndex: 1, padding: '0 max(2rem, 5vw)', maxWidth: 700 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase', color: '#e02020', marginBottom: '.75rem' }}>
-            Plateforme officielle
+      {/* ══════════════════════════════════════
+          BANNER
+      ══════════════════════════════════════ */}
+      <section style={{ background: 'linear-gradient(135deg, #0a1f5c, #1a6fd4)', padding: '5rem 2rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: 620, margin: '0 auto' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', marginBottom: '1rem' }}>TeamUpFR</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', color: '#fff', letterSpacing: 2, lineHeight: 1.05, marginBottom: '1rem' }}>
+            {t.home.banner_title[lang]}
           </div>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: '#fff', letterSpacing: 2, lineHeight: 1.05, marginBottom: '1rem' }}>
-            La plateforme du football fribourgeois
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,.72)', fontSize: 15, lineHeight: 1.65, maxWidth: 420 }}>
-            Inscription gratuite · Profils joueurs, coachs et clubs · Canton de Fribourg
+          <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 16, lineHeight: 1.7, marginBottom: '2rem' }}>
+            {t.home.banner_desc[lang]}
           </p>
+          <Link href="/login" style={{ background: '#e02020', color: '#fff', padding: '13px 32px', borderRadius: 9, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 2, textDecoration: 'none', display: 'inline-block', boxShadow: '0 8px 24px rgba(224,32,32,.35)' }}>
+            {t.home.banner_join[lang]}
+          </Link>
         </div>
       </section>
 
-      {/* ═══ 3. PROFILS (Joueur / Coach / Club) ═══ */}
-      <section style={{ background: 'var(--gray-bg)', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label" style={{ textAlign: 'center' }}>Qui peut rejoindre ?</div>
-          <h2 className="section-title" style={{ textAlign: 'center', margin: '0 auto .75rem' }}>Une plateforme pour tous</h2>
-          <p className="section-desc" style={{ textAlign: 'center', margin: '0 auto 3rem', maxWidth: 520 }}>
-            Que tu sois joueur, entraîneur ou responsable de club, TeamUpFR est fait pour toi.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            <ProfileCard
-              href="/login"
-              gradient="linear-gradient(135deg,#1a6fd4,#0a1f5c)"
-              icon="👤"
-              title="Joueur"
-              desc="Crée ton profil avec stats et historique de clubs. Postule aux annonces de recrutement en un clic."
-              tags={['Statistiques', 'Candidature', 'Historique']}
-              tagColor="#e6f0fb" tagTextColor="#1040a0"
-              cta="Créer mon profil joueur" ctaColor="#1a6fd4"
-            />
-            <ProfileCard
-              href="/login"
-              gradient="linear-gradient(135deg,#e02020,#7a0a0a)"
-              icon="🧑‍🏫"
-              title="Coach"
-              desc="Publie ton CV et tes licences UEFA. Trouve un club ou recrute des joueurs pour ta prochaine saison."
-              tags={['Licences UEFA', 'Recrutement', 'CV digital']}
-              tagColor="#fce8e8" tagTextColor="#a01010"
-              cta="Créer mon profil coach" ctaColor="#e02020"
-            />
-            <ProfileCard
-              href="/login"
-              gradient="linear-gradient(135deg,#0d7a36,#064020)"
-              icon="🏟️"
-              title="Club"
-              desc="Page officielle avec roster, annonces et gestion des candidatures. Badge Vérifié pour les clubs reconnus."
-              tags={['Page officielle', 'Annonces', 'Badge Vérifié']}
-              tagColor="#e2f5ea" tagTextColor="#0d5c28"
-              cta="Créer la page du club" ctaColor="#0d7a36"
-            />
+      {/* ══════════════════════════════════════
+          3 USER TYPES
+      ══════════════════════════════════════ */}
+      <section style={{ background: '#fff', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.5rem' }}>{t.home.section_who[lang]}</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: 1, marginBottom: '.75rem' }}>{t.home.section_who_title[lang]}</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 500, margin: '0 auto' }}>{t.home.section_who_desc[lang]}</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            {cards.map(card => (
+              <Link key={card.title} href={card.href} style={{ textDecoration: 'none', display: 'block', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                <div style={{ background: card.bg, padding: '2.5rem 2rem', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: -20, right: -20, fontSize: '6rem', opacity: .1 }}>{card.icon}</div>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{card.icon}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', color: '#fff', letterSpacing: 1, marginBottom: '.5rem' }}>{card.title}</div>
+                  <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.6 }}>{card.desc}</p>
+                </div>
+                <div style={{ background: '#f8faff', padding: '1.5rem 2rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem' }}>
+                    {card.tags.map(tag => (
+                      <span key={tag} style={{ background: '#fff', border: `1px solid ${card.color}22`, color: card.color, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>{tag}</span>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: card.color, fontWeight: 700, fontSize: 14 }}>
+                    {card.cta} <span>→</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ 4. ANNONCES RÉELLES ═══ */}
-      <section style={{ background: '#fff', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.5rem' }}>
+      {/* ══════════════════════════════════════
+          ANNONCES
+      ══════════════════════════════════════ */}
+      <section style={{ background: 'var(--gray-bg)', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div className="section-label">Fil d'annonces</div>
-              <h2 className="section-title" style={{ marginBottom: '.5rem' }}>Dernières offres & recherches</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: 15, maxWidth: 480, lineHeight: 1.6 }}>
-                Les clubs et coachs publient leurs besoins en temps réel.
-              </p>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.5rem' }}>{t.home.annonces_badge[lang]}</div>
+              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1 }}>{t.home.annonces_title[lang]}</h2>
             </div>
-            <Link href="/annonces" style={{ color: 'var(--blue-bright)', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
-              Voir toutes les annonces →
+            <Link href="/recherche" style={{ color: 'var(--blue-bright)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+              {t.home.annonces_link[lang]}
             </Link>
           </div>
 
-          {annonces.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3.5rem', color: 'var(--text-muted)', border: '2px dashed var(--border)', borderRadius: 16 }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📢</div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: '.5rem' }}>Aucune annonce pour l'instant</div>
-              <p style={{ fontSize: 14, marginBottom: '1.25rem' }}>Sois le premier à publier une annonce sur TeamUpFR !</p>
-              <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#e02020', color: '#fff', padding: '11px 22px', borderRadius: 9, fontWeight: 700, fontSize: 14 }}>
-                Rejoindre gratuitement →
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-              {annonces.map((a) => <AnnonceCard key={a.id} annonce={a} />)}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ═══ 5. TÉMOIGNAGES ═══ */}
-      <section style={{ background: 'var(--gray-bg)', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label" style={{ textAlign: 'center' }}>Ils nous font confiance</div>
-          <h2 className="section-title" style={{ textAlign: 'center', margin: '0 auto 3rem' }}>Ce qu'ils en disent</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {[
-              { quote: "Grâce à TeamUpFR, j'ai trouvé mon club en 3 jours. La plateforme est simple et efficace.", name: 'Marco', info: '22 ans · Attaquant · Gruyère', initials: 'MA', color: '#1a6fd4' },
-              { quote: "En tant que coach, j'ai reçu 5 candidatures en une semaine. Je recommande à tous les clubs du canton.", name: 'Patrick', info: 'Coach UEFA B · Bulle', initials: 'PA', color: '#e02020' },
-              { quote: "Notre club a trouvé 2 joueurs grâce à TeamUpFR. Un outil indispensable pour le recrutement local.", name: 'FC Marly', info: 'Club · 4ème Ligue · Broye', initials: 'FM', color: '#0d7a36' }
-            ].map((t) => (
-              <div key={t.name} style={{ background: '#fff', borderRadius: 16, border: '1px solid var(--border)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div style={{ fontSize: '2rem', color: t.color, lineHeight: 1 }}>"</div>
-                <p style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-dark)', fontStyle: 'italic', flex: 1 }}>
-                  {t.quote}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 10, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue', sans-serif", fontSize: 15, color: '#fff', letterSpacing: 1, flexShrink: 0 }}>
-                    {t.initials}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+            {annonces.map(a => (
+              <div key={a.id} style={{ background: '#fff', borderRadius: 16, border: '1px solid var(--border)', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: a.authorType === 'club' ? 'linear-gradient(90deg,#0d7a36,#1db954)' : a.authorType === 'coach' ? 'linear-gradient(90deg,#e02020,#ff8c42)' : 'linear-gradient(90deg,#1a6fd4,#5b9eff)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                    {a.authorEmoji}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{t.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.info}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{a.authorName}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.createdAt}</div>
                   </div>
+                  <span style={{ marginLeft: 'auto', background: 'var(--green-bg)', color: 'var(--green)', fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{t.home.annonce_active[lang]}</span>
+                </div>
+                <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: '1rem', color: 'var(--text-dark)' }}>{a.body}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem' }}>
+                  <span style={{ background: 'var(--blue-light)', color: 'var(--blue-mid)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.ligue}</span>
+                  {a.position && <span style={{ background: '#fef3e2', color: '#a05a00', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.position}</span>}
+                  <span style={{ background: 'var(--green-bg)', color: 'var(--green)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.zone}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Link href="/login" style={{ flex: 1, background: 'var(--blue-bright)', color: '#fff', border: 'none', borderRadius: 8, padding: '9px', fontSize: 13, fontWeight: 700, textAlign: 'center', textDecoration: 'none', display: 'block' }}>
+                    {t.home.postuler[lang]}
+                  </Link>
+                  <Link href="/messages" style={{ background: 'var(--gray-light)', color: 'var(--text-muted)', border: 'none', borderRadius: 8, padding: '9px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none', display: 'block' }}>
+                    💬
+                  </Link>
                 </div>
               </div>
             ))}
@@ -204,66 +223,46 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ═══ 6. COMMENT ÇA MARCHE — 3 ÉTAPES ═══ */}
-      <section style={{ background: '#fff', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label" style={{ textAlign: 'center' }}>Simple & rapide</div>
-          <h2 className="section-title" style={{ textAlign: 'center', margin: '0 auto 1rem' }}>Comment ça marche ?</h2>
-          <p className="section-desc" style={{ textAlign: 'center', margin: '0 auto 3.5rem', maxWidth: 450 }}>
-            Trois étapes suffisent pour trouver ton équipe dans le canton de Fribourg.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', position: 'relative' }}>
-            {[
-              { step: '01', icon: '👤', title: 'Crée ton profil', desc: 'Inscription gratuite en 2 minutes. Remplis tes informations, stats et disponibilités.' },
-              { step: '02', icon: '🔍', title: 'Trouve ton équipe', desc: 'Filtre par ligue, zone et position. Explore les annonces et les profils de tout le canton.' },
-              { step: '03', icon: '⚽', title: 'Joue !', desc: 'Contacte directement et rejoins ton nouveau club. Simple, rapide, 100% fribourgeois.' }
-            ].map((s, i) => (
-              <div key={s.step} style={{ background: 'var(--gray-bg)', borderRadius: 16, border: '1px solid var(--border)', padding: '2rem 1.75rem', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '5rem', color: 'var(--border)', lineHeight: 1, position: 'absolute', top: '-.5rem', right: '1rem', userSelect: 'none' }}>
-                  {s.step}
-                </div>
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem', position: 'relative' }}>{s.icon}</div>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.4rem', letterSpacing: 1, marginBottom: '.65rem', position: 'relative' }}>{s.title}</div>
-                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.65, position: 'relative' }}>{s.desc}</p>
-                {i < 2 && (
-                  <div style={{ position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)', width: 32, height: 32, background: '#e02020', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 700, zIndex: 2, boxShadow: '0 2px 10px rgba(224,32,32,.35)' }}>
-                    →
-                  </div>
-                )}
+      {/* ══════════════════════════════════════
+          HOW IT WORKS
+      ══════════════════════════════════════ */}
+      <section style={{ background: '#fff', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.5rem' }}>{t.home.how_badge[lang]}</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1 }}>{t.home.how_title[lang]}</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
+            {steps.map(step => (
+              <div key={step.num} style={{ textAlign: 'center', padding: '1.5rem' }}>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4rem', color: 'var(--gray-light)', letterSpacing: 2, lineHeight: 1, marginBottom: '.5rem' }}>{step.num}</div>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem', marginTop: '-1.5rem' }}>{step.icon}</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '.5rem' }}>{step.title}</div>
+                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>{step.desc}</p>
               </div>
             ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-            <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--blue-dark)', color: '#fff', padding: '14px 32px', borderRadius: 10, fontWeight: 700, fontSize: 15 }}>
-              Commencer maintenant →
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 7. LIGUES — fond bleu foncé ═══ */}
-      <section style={{ background: 'var(--blue-dark)', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '3rem' }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: '.5rem' }}>Compétitions</div>
-              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(1.8rem,4vw,2.8rem)', color: '#fff', letterSpacing: 1, lineHeight: 1.05 }}>
-                Ligues du Canton de Fribourg
-              </h2>
-            </div>
-            <p style={{ color: 'rgba(255,255,255,.45)', fontSize: 14, maxWidth: 320, lineHeight: 1.6 }}>
-              TeamUpFR couvre l'ensemble des compétitions officielles du football fribourgeois.
-            </p>
+      {/* ══════════════════════════════════════
+          LIGUES
+      ══════════════════════════════════════ */}
+      <section style={{ background: 'var(--blue-dark)', padding: '5rem 0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginBottom: '.5rem' }}>{t.home.ligues_badge[lang]}</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1, color: '#fff' }}>{t.home.ligues_title[lang]}</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            {ligues.map((g) => (
-              <div key={g.group} style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '1.25rem' }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1rem', letterSpacing: 1, color: 'var(--blue-bright)', marginBottom: '.85rem', paddingBottom: '.6rem', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            {ligues.map(g => (
+              <div key={g.group} style={{ background: 'rgba(255,255,255,.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 14, padding: '1.25rem' }}>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1rem', letterSpacing: 1, color: '#7eb8ff', marginBottom: '.75rem', paddingBottom: '.5rem', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
                   {g.group}
                 </div>
-                {g.items.map((item) => (
-                  <div key={item} style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', padding: '4px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#e02020', flexShrink: 0 }} />
+                {g.items.map(item => (
+                  <div key={item} style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', padding: '4px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#7eb8ff', flexShrink: 0 }} />
                     {item}
                   </div>
                 ))}
@@ -273,104 +272,35 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ═══ 8. CTA FINALE — rosso ═══ */}
-      <section style={{ background: '#e02020', padding: '6rem 1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='35' fill='none' stroke='%23fff' stroke-width='.5' stroke-opacity='.07'/%3E%3C/svg%3E\")", backgroundSize: '80px 80px' }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 640, margin: '0 auto' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 11, letterSpacing: 4, color: 'rgba(255,255,255,.6)', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
-            Rejoins la communauté
-          </div>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.5rem,7vw,5rem)', color: '#fff', letterSpacing: 2, lineHeight: .95, marginBottom: '1.5rem' }}>
-            Prêt à trouver<br />ton équipe ?
+      {/* ══════════════════════════════════════
+          CTA FINAL
+      ══════════════════════════════════════ */}
+      <section style={{ position: 'relative', overflow: 'hidden', background: '#e02020', padding: '6rem 0', textAlign: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='30' fill='none' stroke='%23fff' stroke-width='1' stroke-opacity='.05'/%3E%3C/svg%3E")` }} />
+        <div style={{ position: 'relative', maxWidth: 700, margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>⚽</div>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.5rem, 7vw, 5rem)', color: '#fff', letterSpacing: 3, lineHeight: 1, marginBottom: '1rem' }}>
+            {t.home.cta_final[lang]}
           </h2>
           <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 17, marginBottom: '2.5rem', lineHeight: 1.7 }}>
-            Gratuit pour tous. Inscription en 2 minutes.<br />Ton équipe t'attend sur TeamUpFR.
+            {t.home.cta_final_desc[lang]}
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/login" style={{ background: '#fff', color: '#e02020', padding: '15px 36px', borderRadius: 10, fontWeight: 800, fontSize: 15, boxShadow: '0 8px 24px rgba(0,0,0,.2)' }}>
-              S'inscrire gratuitement →
+            <Link href="/login" style={{ background: '#fff', color: '#e02020', padding: '16px 40px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 2, textDecoration: 'none', boxShadow: '0 8px 32px rgba(0,0,0,.2)' }}>
+              {t.home.signup[lang]}
             </Link>
-            <Link href="/recherche" style={{ background: 'rgba(255,255,255,.15)', color: '#fff', padding: '15px 36px', borderRadius: 10, fontWeight: 600, fontSize: 15, border: '1.5px solid rgba(255,255,255,.35)', backdropFilter: 'blur(8px)' }}>
-              Explorer la plateforme
+            <Link href="/recherche" style={{ background: 'transparent', color: '#fff', padding: '16px 40px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 2, textDecoration: 'none', border: '2px solid rgba(255,255,255,.5)' }}>
+              {t.home.explore[lang]}
             </Link>
-          </div>
-          <div style={{ marginTop: '2.5rem', display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {['100% gratuit', 'Canton de Fribourg', 'Données sécurisées'].map((t) => (
-              <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,.75)', fontSize: 13 }}>
-                <span style={{ fontWeight: 700, color: '#fff' }}>✓</span> {t}
-              </div>
-            ))}
           </div>
         </div>
       </section>
+      <style>{`
+        @media (max-width: 640px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .hero-grid > div:last-child { display: none; }
+        }
+      `}</style>
     </>
-  )
-}
-
-/* ── COMPONENTS ── */
-
-function ProfileCard({ href, gradient, icon, title, desc, tags, tagColor, tagTextColor, cta, ctaColor }: {
-  href: string; gradient: string; icon: string; title: string; desc: string
-  tags: string[]; tagColor: string; tagTextColor: string; cta: string; ctaColor: string
-}) {
-  return (
-    <Link href={href} style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ background: gradient, padding: '2rem 1.75rem 1.75rem', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,.07)' }} />
-        <div style={{ fontSize: '3rem', marginBottom: '.75rem' }}>{icon}</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', color: '#fff', letterSpacing: 2, lineHeight: 1 }}>{title}</div>
-      </div>
-      <div style={{ padding: '1.5rem 1.75rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{desc}</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {tags.map((t) => (
-            <span key={t} style={{ background: tagColor, color: tagTextColor, fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 100 }}>{t}</span>
-          ))}
-        </div>
-        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6, color: ctaColor, fontWeight: 700, fontSize: 14 }}>
-          {cta} →
-        </div>
-      </div>
-    </Link>
-  )
-}
-
-function AnnonceCard({ annonce }: { annonce: Annonce }) {
-  const typeColors: Record<string, { bg: string; text: string; bar: string }> = {
-    club: { bg: '#e2f5ea', text: '#0d5c28', bar: '#0d7a36' },
-    coach: { bg: '#fce8e8', text: '#a01010', bar: '#e02020' },
-    player: { bg: '#e6f0fb', text: '#1040a0', bar: '#1a6fd4' }
-  }
-  const c = typeColors[annonce.author_type] || typeColors.club
-  const emoji = annonce.author_type === 'club' ? '🏟️' : annonce.author_type === 'coach' ? '🧑‍🏫' : '👤'
-  const dateStr = new Date(annonce.created_at).toLocaleDateString('fr-CH', { day: 'numeric', month: 'short' })
-
-  return (
-    <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 16, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '.85rem', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: c.bar }} />
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-          {emoji}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3, marginBottom: 2 }}>{annonce.title}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{annonce.author_name} · {dateStr}</div>
-        </div>
-      </div>
-      <p style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--text-muted)', margin: 0 }}>{annonce.body}</p>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-        {annonce.ligue && <span style={{ background: '#e6f0fb', color: '#1040a0', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{annonce.ligue}</span>}
-        {annonce.position && <span style={{ background: '#fef3e2', color: '#a05a00', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{annonce.position}</span>}
-        {annonce.zone && <span style={{ background: '#e2f5ea', color: '#0d5c28', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>📍 {annonce.zone}</span>}
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
-        <Link href="/annonces" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e02020', color: '#fff', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13 }}>
-          Postuler
-        </Link>
-        <Link href="/messages" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--gray-bg)', color: 'var(--text-muted)', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13 }}>
-          Message
-        </Link>
-      </div>
-    </div>
-  )
+  );
 }

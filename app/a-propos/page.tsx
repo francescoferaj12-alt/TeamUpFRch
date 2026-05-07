@@ -1,131 +1,233 @@
+'use client'
+
 import Link from 'next/link'
-
-const TEAM = [
-  {
-    name: 'Francesco',
-    role: 'Co-fondateur & Développement',
-    desc: 'Passionné de football et de technologie, Francesco a imaginé TeamUpFR pour connecter les acteurs du football amateur fribourgeois.',
-    initials: 'F'
-  },
-  {
-    name: 'Hugo',
-    role: 'Co-fondateur & Design',
-    desc: "Hugo s'occupe de l'expérience utilisateur et du design de la plateforme pour que chaque joueur trouve facilement ce qu'il cherche.",
-    initials: 'H'
-  },
-  {
-    name: 'Tiago',
-    role: 'Co-fondateur & Communication',
-    desc: 'Tiago gère les relations avec les clubs et la communauté, assurant que TeamUpFR répond aux besoins réels du terrain.',
-    initials: 'T'
-  }
-]
-
-const TIMELINE = [
-  { date: 'Fin 2025', label: 'Idée & conception', desc: 'Naissance du projet TeamUpFR, analyse des besoins du football amateur fribourgeois.' },
-  { date: '2025 – 2026', label: 'Développement', desc: 'Création de la plateforme, intégration des profils, annonces et messagerie.' },
-  { date: '2026', label: 'Lancement officiel', desc: 'Ouverture au public, partenariats avec les clubs du canton de Fribourg.' },
-  { date: 'Bientôt', label: 'Expansion', desc: "Nouvelles fonctionnalités, application mobile, extension à d'autres cantons romands." }
-]
+import { useLang } from '../../lib/lang-context'
+import { t } from '../../lib/translations'
 
 export default function AProposPage() {
+  const { lang } = useLang()
+
+  const members = [
+    {
+      name: 'Tiago',
+      age: 28,
+      role: t.apropos.tiago_role[lang],
+      emoji: '🧑‍🏫',
+      flag: '🇵🇹',
+      origin: t.apropos.tiago_origin[lang],
+      color: '#e02020',
+      bg: 'linear-gradient(135deg, #6b0000, #e02020)',
+      desc: t.apropos.tiago_desc[lang],
+      tag: t.apropos.tiago_tag[lang],
+    },
+    {
+      name: 'Francesco',
+      age: 21,
+      role: t.apropos.fran_role[lang],
+      emoji: '⚽',
+      flag: '🇮🇹🇦🇱',
+      origin: t.apropos.fran_origin[lang],
+      color: '#1a6fd4',
+      bg: 'linear-gradient(135deg, #0a1f5c, #1a6fd4)',
+      desc: t.apropos.fran_desc[lang],
+      tag: t.apropos.fran_tag[lang],
+    },
+    {
+      name: 'Hugo',
+      age: 21,
+      role: t.apropos.hugo_role[lang],
+      emoji: '🏃',
+      flag: '🇵🇹',
+      origin: t.apropos.hugo_origin[lang],
+      color: '#0d7a36',
+      bg: 'linear-gradient(135deg, #063a1a, #0d7a36)',
+      desc: t.apropos.hugo_desc[lang],
+      tag: t.apropos.hugo_tag[lang],
+    },
+  ]
+
+  const missions = [
+    { icon: '👁️', title: t.apropos.val_visibility[lang], desc: t.apropos.val_visibility_desc[lang] },
+    { icon: '🤝', title: t.apropos.val_connection[lang], desc: t.apropos.val_connection_desc[lang] },
+    { icon: '🆓', title: t.apropos.val_free[lang], desc: t.apropos.val_free_desc[lang] },
+    { icon: '🇨🇭', title: t.apropos.val_local[lang], desc: t.apropos.val_local_desc[lang] },
+  ]
+
+  const timeline = [
+    { date: '2024', icon: '💡', title: t.apropos.tl1_title[lang], desc: t.apropos.tl1_desc[lang] },
+    { date: '2024–2025', icon: '🛠️', title: t.apropos.tl2_title[lang], desc: t.apropos.tl2_desc[lang] },
+    { date: '2025', icon: '🚀', title: t.apropos.tl3_title[lang], desc: t.apropos.tl3_desc[lang] },
+    { date: t.apropos.tl4_date[lang], icon: '🌟', title: t.apropos.tl4_title[lang], desc: t.apropos.tl4_desc[lang] },
+  ]
+
+  const ageSuffix = t.apropos.age_suffix[lang]
+
   return (
-    <div>
+    <>
       {/* HERO */}
-      <div style={{ background: 'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', padding: '5rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: '1rem' }}>À propos</div>
-          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(3rem,8vw,5rem)', color: '#fff', letterSpacing: 2, lineHeight: 1, marginBottom: '1.5rem' }}>
-            Notre mission
+      <section style={{
+        background: 'linear-gradient(135deg, var(--blue-dark) 0%, #0d2d7a 60%, var(--blue-mid) 100%)',
+        padding: '6rem 2rem 5rem',
+        position: 'relative',
+        overflow: 'hidden',
+        textAlign: 'center'
+      }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L0 30h30V0zm0 60L60 30H30v30z' fill='%23fff' fill-opacity='.03'/%3E%3C/svg%3E")` }} />
+        <div style={{ position: 'relative', maxWidth: 700, margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '6px 18px', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: 14 }}>⚽</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.85)', textTransform: 'uppercase' }}>{t.apropos.hero_badge[lang]}</span>
+          </div>
+          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(3rem, 8vw, 6rem)', color: '#fff', letterSpacing: 3, lineHeight: 1, marginBottom: '1rem' }}>
+            {t.apropos.hero_title1[lang]}<br />
+            <span style={{ color: 'var(--red-light)' }}>{t.apropos.hero_title2[lang]}</span>
           </h1>
-          <p style={{ fontSize: 17, color: 'rgba(255,255,255,.75)', lineHeight: 1.8, maxWidth: 560, margin: '0 auto' }}>
-            TeamUpFR connecte joueurs, coachs et clubs du football amateur dans le canton de Fribourg. Notre objectif : rendre le recrutement local simple, rapide et accessible à tous.
+          <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 18, lineHeight: 1.7, maxWidth: 580, margin: '0 auto' }}>
+            {t.apropos.hero_desc[lang]}
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="wrap" style={{ paddingTop: '3rem', paddingBottom: '4rem' }}>
-
-        {/* MISSION */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '4rem' }}>
-          {[
-            { icon: '⚽', title: 'Pour les joueurs', desc: 'Crée ton profil, mets en avant tes stats et trouve le club qui correspond à ton niveau et ta zone géographique.' },
-            { icon: '🏟️', title: 'Pour les clubs', desc: 'Publie des annonces, découvre les joueurs disponibles dans ta ligue et gère les candidatures depuis ton dashboard.' },
-            { icon: '🧑‍🏫', title: 'Pour les coachs', desc: "Mets ta disponibilité en avant, connecte-toi avec des clubs à la recherche d'un entraîneur qualifié." }
-          ].map(v => (
-            <div key={v.title} style={{ background: '#fff', borderRadius: 18, border: '1px solid var(--border)', padding: '2rem' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{v.icon}</div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '.75rem' }}>{v.title}</div>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>{v.desc}</p>
+      {/* ORIGINE */}
+      <section style={{ background: '#fff', padding: '5rem 2rem' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.75rem' }}>{t.apropos.origin_badge[lang]}</div>
+              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1, marginBottom: '1.5rem', lineHeight: 1.05 }}>
+                {t.apropos.origin_title[lang]}
+              </h2>
+              <p style={{ fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
+                {t.apropos.origin_p1[lang]}
+              </p>
+              <p style={{ fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
+                {t.apropos.origin_p2[lang]}
+              </p>
+              <p style={{ fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.8 }}>
+                {t.apropos.origin_p3[lang]}
+              </p>
             </div>
-          ))}
-        </div>
-
-        {/* TEAM */}
-        <div style={{ marginBottom: '4rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div className="section-label">L'équipe</div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem,5vw,3rem)', letterSpacing: 1 }}>
-              Derrière TeamUpFR
+            <div style={{ background: 'var(--gray-bg)', borderRadius: 20, padding: '2.5rem', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -16, right: -16, width: 60, height: 60, background: 'var(--red)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', boxShadow: '0 8px 24px rgba(224,32,32,.3)' }}>
+                💡
+              </div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '5rem', color: 'var(--gray-light)', lineHeight: 1, marginBottom: '.5rem' }}>"</div>
+              <p style={{ fontSize: 18, lineHeight: 1.7, color: 'var(--text-dark)', fontStyle: 'italic', marginTop: '-2rem' }}>
+                {t.apropos.quote[lang]}
+              </p>
+              <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #e02020, #ff8c42)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🧑‍🏫</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>Tiago</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.apropos.quote_sub[lang]}</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
-            {TEAM.map(m => (
-              <div key={m.name} style={{ background: '#fff', borderRadius: 18, border: '1px solid var(--border)', padding: '2rem', textAlign: 'center' }}>
-                <div style={{ width: 72, height: 72, borderRadius: 16, background: 'linear-gradient(135deg, var(--blue-dark), var(--blue-bright))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', color: '#fff', margin: '0 auto 1rem' }}>
-                  {m.initials}
+        </div>
+      </section>
+
+      {/* TEAM */}
+      <section style={{ background: 'var(--gray-bg)', padding: '5rem 2rem' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.75rem' }}>{t.apropos.team_badge[lang]}</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1 }}>
+              {t.apropos.team_title[lang]}
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: 15, marginTop: '.75rem', maxWidth: 500, margin: '.75rem auto 0' }}>
+              {t.apropos.team_desc[lang]}
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+            {members.map(m => (
+              <div key={m.name} style={{ background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                <div style={{ background: m.bg, padding: '2rem', textAlign: 'center', position: 'relative' }}>
+                  <div style={{ fontSize: '3.5rem', marginBottom: '.75rem' }}>{m.emoji}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.8rem', color: '#fff', letterSpacing: 1 }}>{m.name}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', marginTop: 4 }}>{m.flag} {m.age}{ageSuffix}</div>
+                  <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: '#fff', fontWeight: 600 }}>{m.tag}</div>
                 </div>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.4rem', letterSpacing: 1, marginBottom: '.25rem' }}>{m.name}</div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--blue-bright)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: '1rem' }}>{m.role}</div>
-                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>{m.desc}</p>
+                <div style={{ padding: '1.5rem' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: m.color, textTransform: 'uppercase', letterSpacing: 1, marginBottom: '.25rem' }}>{m.role}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: '.75rem', fontStyle: 'italic' }}>{m.origin}</div>
+                  <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>{m.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* TIMELINE */}
-        <div style={{ marginBottom: '4rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div className="section-label">Histoire</div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem,5vw,3rem)', letterSpacing: 1 }}>
-              Notre parcours
-            </div>
+      {/* MISSION */}
+      <section style={{ background: '#fff', padding: '5rem 2rem' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--blue-bright)', marginBottom: '.75rem' }}>{t.apropos.mission_badge[lang]}</div>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: 1, marginBottom: '1.5rem', lineHeight: 1.05 }}>
+            {t.apropos.mission_title1[lang]}<br />
+            <span style={{ color: 'var(--red)' }}>{t.apropos.mission_title2[lang]}</span>
+          </h2>
+          <p style={{ fontSize: 17, color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '3rem', maxWidth: 600, margin: '0 auto 3rem' }}>
+            {t.apropos.mission_desc[lang]}
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            {missions.map(v => (
+              <div key={v.title} style={{ padding: '1.5rem', background: 'var(--gray-bg)', borderRadius: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '.75rem' }}>{v.icon}</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 1, marginBottom: '.5rem' }}>{v.title}</div>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>{v.desc}</p>
+              </div>
+            ))}
           </div>
-          <div style={{ maxWidth: 680, margin: '0 auto', position: 'relative' }}>
-            <div style={{ position: 'absolute', left: 20, top: 0, bottom: 0, width: 2, background: 'var(--gray-light)' }} />
-            {TIMELINE.map((t, i) => (
+        </div>
+      </section>
+
+      {/* TIMELINE */}
+      <section style={{ background: 'var(--blue-dark)', padding: '5rem 2rem' }}>
+        <div style={{ maxWidth: 700, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: '.75rem' }}>{t.apropos.timeline_badge[lang]}</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: 1, color: '#fff' }}>{t.apropos.timeline_title[lang]}</h2>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 20, top: 0, bottom: 0, width: 2, background: 'rgba(255,255,255,.1)' }} />
+            {timeline.map((e, i) => (
               <div key={i} style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', position: 'relative' }}>
-                <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--blue-bright)', border: '3px solid #fff', boxShadow: '0 0 0 2px var(--blue-bright)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 1, fontSize: 14, fontWeight: 700, color: '#fff' }}>
-                  {i + 1}
+                <div style={{ width: 42, height: 42, borderRadius: '50%', background: i === 3 ? 'var(--red)' : 'rgba(255,255,255,.1)', border: '2px solid rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0, zIndex: 1 }}>
+                  {e.icon}
                 </div>
-                <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', padding: '1.25rem 1.5rem', flex: 1 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-bright)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: '.25rem' }}>{t.date}</div>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: '.4rem' }}>{t.label}</div>
-                  <div style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>{t.desc}</div>
+                <div style={{ paddingTop: '.5rem' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-bright)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: '.25rem' }}>{e.date}</div>
+                  <div style={{ fontWeight: 600, fontSize: 15, color: '#fff', marginBottom: '.35rem' }}>{e.title}</div>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,.55)', lineHeight: 1.6 }}>{e.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* CTA */}
-        <div style={{ background: 'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', borderRadius: 24, padding: '3rem 2rem', textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem,5vw,3rem)', color: '#fff', letterSpacing: 1, marginBottom: '1rem' }}>
-            Rejoins la communauté
-          </div>
-          <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 15, marginBottom: '2rem', maxWidth: 400, margin: '0 auto 2rem' }}>
-            Des centaines de joueurs et clubs du canton de Fribourg t&apos;attendent.
+      {/* CTA */}
+      <section style={{ background: 'var(--red)', padding: '5rem 2rem', textAlign: 'center' }}>
+        <div style={{ maxWidth: 600, margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.5rem, 6vw, 4rem)', color: '#fff', letterSpacing: 3, marginBottom: '1rem' }}>
+            {t.apropos.cta_title[lang]}
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 16, lineHeight: 1.7, marginBottom: '2rem' }}>
+            {t.apropos.cta_desc[lang]}
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/login" style={{ display: 'inline-block', background: '#e02020', color: '#fff', padding: '13px 32px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none' }}>
-              Créer mon profil →
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/login" style={{ background: '#fff', color: 'var(--red)', padding: '14px 36px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 2, textDecoration: 'none', fontWeight: 700 }}>
+              {t.apropos.cta_btn1[lang]}
             </Link>
-            <Link href="/recherche" style={{ display: 'inline-block', background: 'rgba(255,255,255,.15)', color: '#fff', padding: '13px 32px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,.2)' }}>
-              Explorer la plateforme
+            <Link href="/recherche" style={{ background: 'transparent', color: '#fff', padding: '14px 36px', borderRadius: 10, fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 2, textDecoration: 'none', border: '2px solid rgba(255,255,255,.5)' }}>
+              {t.apropos.cta_btn2[lang]}
             </Link>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   )
 }

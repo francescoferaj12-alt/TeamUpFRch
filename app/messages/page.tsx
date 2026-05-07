@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, Profile, Message } from '../../lib/supabase'
+import { useLang } from '../../lib/lang-context'
+import { t } from '../../lib/translations'
 
 type Conversation = {
   partnerId: string
@@ -15,6 +17,7 @@ type Conversation = {
 }
 
 export default function MessagesPage() {
+  const { lang } = useLang()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activePartnerId, setActivePartnerId] = useState<string | null>(null)
@@ -78,7 +81,7 @@ export default function MessagesPage() {
       }
       convMap[partnerId].messages.push(m)
       convMap[partnerId].lastMessage = m.text
-      convMap[partnerId].lastTime = new Date(m.created_at).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
+      convMap[partnerId].lastTime = new Date(m.created_at).toLocaleTimeString(lang === 'fr' ? 'fr-CH' : 'de-CH', { hour: '2-digit', minute: '2-digit' })
       if (!m.read && m.receiver_id === prof.id) convMap[partnerId].unread++
     }
 
@@ -113,7 +116,7 @@ export default function MessagesPage() {
         const existing = prev.find((c) => c.partnerId === activePartnerId)
         if (existing) {
           return prev.map((c) => c.partnerId === activePartnerId
-            ? { ...c, messages: [...c.messages, newMsg], lastMessage: txt, lastTime: new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' }) }
+            ? { ...c, messages: [...c.messages, newMsg], lastMessage: txt, lastTime: new Date().toLocaleTimeString(lang === 'fr' ? 'fr-CH' : 'de-CH', { hour: '2-digit', minute: '2-digit' }) }
             : c
           )
         }
@@ -135,7 +138,8 @@ export default function MessagesPage() {
   const filteredConvs = conversations.filter((c) => !search || c.partnerName.toLowerCase().includes(search.toLowerCase()))
 
   const roleEmoji = (role: string) => role === 'club' ? '🏟️' : role === 'coach' ? '🧑‍🏫' : '👤'
-  const myName = profile ? (profile.role === 'club' ? profile.club_name : `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()) : 'Moi'
+  const roleLabel = (role: string) => role === 'club' ? t.messages.role_club[lang] : role === 'coach' ? t.messages.role_coach[lang] : t.messages.role_player[lang]
+  const myName = profile ? (profile.role === 'club' ? profile.club_name : `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()) : t.messages.me[lang]
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
@@ -149,11 +153,11 @@ export default function MessagesPage() {
       {/* SIDEBAR */}
       <aside className="msg-sidebar">
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '.75rem' }}>Messages</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '.75rem' }}>{t.messages.title[lang]}</div>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="🔍  Rechercher…"
+            placeholder={t.messages.search_pl[lang]}
             style={{ width: '100%', background: 'var(--gray-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
           />
         </div>
@@ -161,8 +165,8 @@ export default function MessagesPage() {
           {filteredConvs.length === 0 ? (
             <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
               {conversations.length === 0
-                ? 'Aucune conversation.\nContacte quelqu\'un depuis la recherche.'
-                : 'Aucun résultat.'}
+                ? t.messages.no_conv[lang]
+                : t.messages.no_results[lang]}
             </div>
           ) : filteredConvs.map((c) => {
             const isActive = c.partnerId === activePartnerId
@@ -195,8 +199,10 @@ export default function MessagesPage() {
         {!activeConv ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)', padding: '2rem' }}>
             <div style={{ fontSize: '3rem' }}>💬</div>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>Aucune conversation sélectionnée</div>
-            <div style={{ fontSize: 13 }}>Contacte quelqu'un depuis la <a href="/recherche" style={{ color: 'var(--blue-bright)' }}>recherche</a>.</div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>{t.messages.no_selected[lang]}</div>
+            <div style={{ fontSize: 13 }}>
+              {t.messages.no_selected_desc[lang]} <a href="/recherche" style={{ color: 'var(--blue-bright)' }}>{t.messages.recherche_link[lang]}</a>.
+            </div>
           </div>
         ) : (
           <>
@@ -207,7 +213,7 @@ export default function MessagesPage() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>{activeConv.partnerName}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {activeConv.partnerRole === 'club' ? 'Club' : activeConv.partnerRole === 'coach' ? 'Coach' : 'Joueur'}
+                  {roleLabel(activeConv.partnerRole)}
                 </div>
               </div>
             </div>
@@ -215,11 +221,11 @@ export default function MessagesPage() {
             <div className="msg-body" ref={bodyRef}>
               {activeConv.messages.map((m, i) => {
                 const fromMe = m.sender_id === profile?.id
-                const time = new Date(m.created_at).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })
+                const time = new Date(m.created_at).toLocaleTimeString(lang === 'fr' ? 'fr-CH' : 'de-CH', { hour: '2-digit', minute: '2-digit' })
                 return (
                   <div key={m.id || i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flexDirection: fromMe ? 'row-reverse' : 'row' }}>
                     <div style={{ width: 28, height: 28, borderRadius: 8, background: fromMe ? 'var(--blue-bright)' : 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: fromMe ? 11 : 14, fontWeight: fromMe ? 700 : 400, color: fromMe ? '#fff' : 'inherit', flexShrink: 0 }}>
-                      {fromMe ? (myName?.slice(0, 2) || 'Moi') : roleEmoji(activeConv.partnerRole)}
+                      {fromMe ? (myName?.slice(0, 2) || t.messages.me[lang]) : roleEmoji(activeConv.partnerRole)}
                     </div>
                     <div style={{ maxWidth: '70%' }}>
                       <div style={{ background: fromMe ? 'var(--blue-bright)' : '#fff', color: fromMe ? '#fff' : 'var(--text-dark)', border: fromMe ? 'none' : '1px solid var(--border)', padding: '.65rem .95rem', borderRadius: 14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize: 14, lineHeight: 1.5 }}>
@@ -237,7 +243,7 @@ export default function MessagesPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder="Écrire un message…"
+                placeholder={t.messages.write_pl[lang]}
                 style={{ flex: 1, background: 'var(--gray-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', fontSize: 14, outline: 'none', fontFamily: 'inherit' }}
               />
               <button onClick={handleSend} disabled={sending || !input.trim()}

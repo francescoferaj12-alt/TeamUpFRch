@@ -4,12 +4,31 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
+import { useLang } from '../../lib/lang-context'
+import { t, months, footDisplay, translateFoot } from '../../lib/translations'
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
+function calcAge(birthdate?: string): number | null {
+  if (!birthdate) return null
+  const today = new Date()
+  const birth = new Date(birthdate)
+  let age = today.getFullYear() - birth.getFullYear()
+  if (today.getMonth() - birth.getMonth() < 0 ||
+      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+function parseBirthdate(birthdate?: string) {
+  if (!birthdate) return { day: '', month: '', year: '' }
+  const [y, m, d] = birthdate.split('-')
+  return { day: String(parseInt(d)), month: String(parseInt(m)), year: y }
+}
+
 export default function ProfilPage() {
+  const { lang } = useLang()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -17,30 +36,46 @@ export default function ProfilPage() {
   const [saveMsg, setSaveMsg] = useState('')
   const router = useRouter()
 
-  // Editable fields
   const [bio, setBio] = useState('')
   const [position, setPosition] = useState('')
   const [ligue, setLigue] = useState('')
   const [zone, setZone] = useState('')
   const [foot, setFoot] = useState('')
-  const [age, setAge] = useState('')
   const [available, setAvailable] = useState(true)
   const [phone, setPhone] = useState('')
+  const [career, setCareer] = useState('')
+  const [birthDay, setBirthDay] = useState('')
+  const [birthMonth, setBirthMonth] = useState('')
+  const [birthYear, setBirthYear] = useState('')
+
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 55 }, (_, i) => currentYear - 14 - i)
+  const days = Array.from({ length: 31 }, (_, i) => i + 1)
+  const MONTHS = months[lang]
 
   useEffect(() => {
     async function load() {
-      // Check session
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
 
-      // Load profile
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
+      let { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
 
-      if (error || !data) { router.push('/login'); return }
+      // Auto-create profile row if missing (e.g., after Google OAuth signup)
+      if (!data) {
+        const meta = session.user.user_metadata || {}
+        const newProfile = {
+          id: session.user.id,
+          email: session.user.email || '',
+          role: (meta.role as string) || 'player',
+          first_name: meta.first_name || meta.given_name || meta.full_name?.split(' ')[0] || '',
+          last_name: meta.last_name || meta.family_name || meta.full_name?.split(' ').slice(1).join(' ') || '',
+          available: true,
+        }
+        const { data: inserted } = await supabase.from('profiles').insert(newProfile).select().single()
+        data = inserted
+      }
+
+      if (!data) { setLoading(false); return }
 
       setProfile(data)
       setBio(data.bio || '')
@@ -48,9 +83,13 @@ export default function ProfilPage() {
       setLigue(data.ligue || '')
       setZone(data.zone || '')
       setFoot(data.foot || 'Droit')
-      setAge(data.age ? String(data.age) : '')
       setAvailable(data.available ?? true)
       setPhone(data.phone || '')
+      setCareer(data.career || '')
+      const parsed = parseBirthdate(data.birthdate)
+      setBirthDay(parsed.day)
+      setBirthMonth(parsed.month)
+      setBirthYear(parsed.year)
       setLoading(false)
     }
     load()
@@ -64,16 +103,19 @@ export default function ProfilPage() {
   async function handleSave() {
     if (!profile) return
     setSaving(true)
+    const birthdate = birthDay && birthMonth && birthYear
+      ? `${birthYear}-${birthMonth.padStart(2,'0')}-${birthDay.padStart(2,'0')}`
+      : null
     const { error } = await supabase.from('profiles').update({
       bio, position, ligue, zone, foot,
-      age: age ? parseInt(age) : null,
       available,
-      phone: phone || null
+      phone: phone || null,
+      career: career || null,
+      birthdate
     }).eq('id', profile.id)
-
     if (!error) {
-      setProfile({ ...profile, bio, position, ligue, zone, foot, age: age ? parseInt(age) : undefined, available, phone: phone || undefined })
-      setSaveMsg('✅ Profil mis à jour !')
+      setProfile({ ...profile, bio, position, ligue, zone, foot, available, phone: phone || undefined, career: career || undefined, birthdate: birthdate || undefined })
+      setSaveMsg(t.profil.saved[lang])
       setEditing(false)
       setTimeout(() => setSaveMsg(''), 3000)
     }
@@ -83,7 +125,7 @@ export default function ProfilPage() {
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem' }}>
       <div style={{ width:40, height:40, border:'4px solid var(--gray-light)', borderTopColor:'var(--blue-bright)', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
-      <div style={{ color:'var(--text-muted)', fontSize:14 }}>Chargement du profil…</div>
+      <div style={{ color:'var(--text-muted)', fontSize:14 }}>{t.profil.loading[lang]}</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -92,8 +134,23 @@ export default function ProfilPage() {
 
   const initials = `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
-  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🧑‍🏫' : '🏟️'
-  const roleLabel = profile.role === 'player' ? 'Joueur' : profile.role === 'coach' ? 'Coach' : 'Club'
+  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
+  const roleLabel = profile.role === 'player' ? t.profil.role_player[lang] : profile.role === 'coach' ? t.profil.role_coach[lang] : t.profil.role_club[lang]
+  const displayAge = calcAge(profile.birthdate)
+  const ageSuffix = t.general.age_suffix[lang]
+
+  const infoRows: ([string, string] | null)[] = [
+    [t.profil.role_k[lang], roleLabel],
+    [t.profil.email_k[lang], profile.email],
+    displayAge ? [t.profil.age_k[lang], `${displayAge}${ageSuffix}`] : null,
+    profile.birthdate ? [t.profil.birth_k[lang], new Date(profile.birthdate).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH', { day: 'numeric', month: 'long', year: 'numeric' })] : null,
+    profile.foot ? [t.profil.foot_k[lang], translateFoot(profile.foot, lang)] : null,
+    profile.zone ? [t.profil.zone_k[lang], profile.zone] : null,
+    profile.ligue ? [t.profil.ligue_k[lang], profile.ligue] : null,
+    profile.position ? [t.profil.position_k[lang], profile.position] : null,
+    profile.club_name ? [t.profil.club_k[lang], profile.club_name] : null,
+    profile.phone ? [t.profil.phone_k[lang], profile.phone] : null,
+  ]
 
   return (
     <div className="wrap">
@@ -126,27 +183,27 @@ export default function ProfilPage() {
               </span>
               {profile.foot && (
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'3px 10px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
-                  🦵 Pied {profile.foot.toLowerCase()}
+                  {footDisplay(profile.foot, lang)}
                 </span>
               )}
-              {profile.age && (
-                <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>{profile.age} ans · {profile.zone}</span>
+              {displayAge && (
+                <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>{displayAge}{ageSuffix} · {profile.zone}</span>
               )}
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
               {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
               <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
-                {profile.available ? '🟢 Disponible' : '⚪ Indisponible'}
+                {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
             </div>
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             <button onClick={() => setEditing(!editing)} className="btn btn-red btn-sm">
-              {editing ? '✕ Annuler' : '✏️ Modifier'}
+              {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
             <button onClick={handleLogout} className="btn btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff', border:'1px solid rgba(255,255,255,.3)' }}>
-              🚪 Déconnexion
+              {t.profil.logout[lang]}
             </button>
           </div>
         </div>
@@ -156,13 +213,13 @@ export default function ProfilPage() {
       {editing && (
         <div className="card" style={{ marginBottom:'1.25rem', border:'2px solid var(--blue-bright)' }}>
           <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem' }}>
-            ✏️ Modifier mon profil
+            {t.profil.edit_title[lang]}
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
             {profile.role === 'player' && (
               <div className="field">
-                <label className="field-label">Position</label>
+                <label className="field-label">{t.profil.position[lang]}</label>
                 <select className="input" value={position} onChange={e => setPosition(e.target.value)}>
                   <option value="">—</option>
                   {POSITIONS.map(p => <option key={p}>{p}</option>)}
@@ -171,53 +228,74 @@ export default function ProfilPage() {
             )}
             {profile.role === 'player' && (
               <div className="field">
-                <label className="field-label">Pied dominant</label>
+                <label className="field-label">{t.profil.foot[lang]}</label>
                 <select className="input" value={foot} onChange={e => setFoot(e.target.value)}>
-                  <option>Droit</option><option>Gauche</option><option>Ambidextre</option>
+                  <option value="Droit">{t.login.right[lang]}</option>
+                  <option value="Gauche">{t.login.left[lang]}</option>
+                  <option value="Ambidextre">{t.login.both[lang]}</option>
                 </select>
               </div>
             )}
             <div className="field">
-              <label className="field-label">Ligue</label>
+              <label className="field-label">{t.profil.ligue[lang]}</label>
               <select className="input" value={ligue} onChange={e => setLigue(e.target.value)}>
                 <option value="">—</option>
                 {LIGUES.map(l => <option key={l}>{l}</option>)}
               </select>
             </div>
             <div className="field">
-              <label className="field-label">Zone</label>
+              <label className="field-label">{t.profil.zone[lang]}</label>
               <select className="input" value={zone} onChange={e => setZone(e.target.value)}>
                 <option value="">—</option>
                 {ZONES.map(z => <option key={z}>{z}</option>)}
               </select>
             </div>
-            {profile.role !== 'club' && (
-              <div className="field">
-                <label className="field-label">Âge</label>
-                <input className="input" type="number" min="14" max="60" value={age} onChange={e => setAge(e.target.value)} />
-              </div>
-            )}
             <div className="field">
-              <label className="field-label">Disponibilité</label>
+              <label className="field-label">{t.profil.dispo[lang]}</label>
               <select className="input" value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
-                <option value="oui">🟢 Disponible</option>
-                <option value="non">⚪ Indisponible</option>
+                <option value="oui">{t.profil.dispo_yes[lang]}</option>
+                <option value="non">{t.profil.dispo_no[lang]}</option>
               </select>
             </div>
           </div>
 
+          {profile.role !== 'club' && (
+            <div className="field">
+              <label className="field-label">{t.profil.birthdate[lang]}</label>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr 1fr', gap:8 }}>
+                <select className="input" value={birthDay} onChange={e => setBirthDay(e.target.value)}>
+                  <option value="">{t.profil.day[lang]}</option>
+                  {days.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select className="input" value={birthMonth} onChange={e => setBirthMonth(e.target.value)}>
+                  <option value="">{t.profil.month[lang]}</option>
+                  {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                </select>
+                <select className="input" value={birthYear} onChange={e => setBirthYear(e.target.value)}>
+                  <option value="">{t.profil.year[lang]}</option>
+                  {years.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="field">
-            <label className="field-label">Téléphone (optionnel)</label>
+            <label className="field-label">{t.profil.phone[lang]}</label>
             <input className="input" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
           </div>
 
           <div className="field">
-            <label className="field-label">Bio / Présentation</label>
-            <textarea className="input" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="Présente-toi en quelques mots…" />
+            <label className="field-label">{t.profil.bio_label[lang]}</label>
+            <textarea className="input" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.profil.bio_ph[lang]} />
+          </div>
+
+          <div className="field">
+            <label className="field-label">{t.profil.career_label[lang]}</label>
+            <textarea className="input" rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder={t.profil.career_ph[lang]} />
           </div>
 
           <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
-            {saving ? '⏳ Sauvegarde…' : '💾 Sauvegarder les modifications'}
+            {saving ? t.profil.saving[lang] : t.profil.save_btn[lang]}
           </button>
         </div>
       )}
@@ -229,12 +307,12 @@ export default function ProfilPage() {
           {/* BIO */}
           <div className="card">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              📝 À propos
+              {t.profil.about[lang]}
             </div>
             {profile.bio
               ? <p style={{ fontSize:14, color:'var(--text-muted)', lineHeight:1.7 }}>{profile.bio}</p>
               : <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
-                  Aucune présentation. <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>Ajoute-en une →</button>
+                  {t.profil.no_bio[lang]} <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
                 </p>
             }
           </div>
@@ -242,13 +320,13 @@ export default function ProfilPage() {
           {/* STATS */}
           <div className="card">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              📊 Statistiques
+              {t.profil.stats[lang]}
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
               {[
-                { v: profile.goals ?? 0, k: 'Buts' },
-                { v: profile.assists ?? 0, k: 'Assists' },
-                { v: profile.matches ?? 0, k: 'Matchs' }
+                { v: profile.goals ?? 0, k: t.profil.goals[lang] },
+                { v: profile.assists ?? 0, k: t.profil.assists[lang] },
+                { v: profile.matches ?? 0, k: t.profil.matches[lang] }
               ].map(s => (
                 <div key={s.k} style={{ background:'var(--gray-bg)', borderRadius:12, padding:'1rem', textAlign:'center' }}>
                   <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', color:'var(--blue-mid)', lineHeight:1 }}>{s.v}</div>
@@ -257,18 +335,38 @@ export default function ProfilPage() {
               ))}
             </div>
             <p style={{ fontSize:12, color:'var(--text-muted)', marginTop:'.75rem', fontStyle:'italic' }}>
-              Les stats seront mises à jour manuellement. Fonctionnalité complète bientôt.
+              {t.profil.stats_soon[lang]}
             </p>
+          </div>
+
+          {/* CAREER HISTORY */}
+          <div className="card">
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
+              {t.profil.career[lang]}
+            </div>
+            {profile.career ? (
+              <div style={{ display:'flex', flexDirection:'column', gap:'.5rem' }}>
+                {profile.career.split('\n').filter(Boolean).map((line, i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'.5rem 0' }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--blue-bright)', flexShrink:0 }} />
+                    <div style={{ fontSize:14, color:'var(--text-dark)' }}>{line}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
+                {t.profil.no_career[lang]} <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_career[lang]}</button>
+              </p>
+            )}
           </div>
 
           {/* HIGHLIGHTS */}
           <div className="card">
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
-              🎬 Highlights vidéo
+              {t.profil.highlights[lang]}
             </div>
             <div style={{ background:'var(--gray-bg)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed var(--gray-mid)' }}>
-              <div style={{ fontSize:'2rem', marginBottom:'.5rem' }}>🎬</div>
-              <div style={{ fontSize:14, color:'var(--text-muted)' }}>Upload de vidéos bientôt disponible</div>
+              <div style={{ fontSize:14, color:'var(--text-muted)' }}>{t.profil.video_soon[lang]}</div>
             </div>
           </div>
         </div>
@@ -279,21 +377,11 @@ export default function ProfilPage() {
             {profile.available && (
               <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'var(--green-bg)', color:'var(--green)', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
                 <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--green)' }} />
-                Disponible
+                {t.profil.available_badge[lang]}
               </div>
             )}
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>ℹ️ Informations</div>
-            {[
-              ['Rôle', roleLabel],
-              ['Email', profile.email],
-              profile.age ? ['Âge', `${profile.age} ans`] : null,
-              profile.foot ? ['Pied dominant', profile.foot] : null,
-              profile.zone ? ['Zone', profile.zone] : null,
-              profile.ligue ? ['Ligue', profile.ligue] : null,
-              profile.position ? ['Position', profile.position] : null,
-              profile.club_name ? ['Club', profile.club_name] : null,
-              profile.phone ? ['Téléphone', profile.phone] : null,
-            ].filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.info[lang]}</div>
+            {infoRows.filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
               <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--gray-light)', fontSize:14 }}>
                 <span style={{ color:'var(--text-muted)' }}>{k}</span>
                 <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all' }}>{v}</span>
@@ -302,21 +390,21 @@ export default function ProfilPage() {
           </div>
 
           <div className="card card-sm">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>🚀 Actions rapides</div>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.actions[lang]}</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              <Link href="/recherche" className="btn btn-blue btn-sm btn-full" style={{ justifyContent:'center' }}>🔍 Rechercher des clubs</Link>
-              <Link href="/messages" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>💬 Mes messages</Link>
-              <Link href="/candidatures" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>📋 Mes candidatures</Link>
+              <Link href="/recherche" className="btn btn-blue btn-sm btn-full" style={{ justifyContent:'center' }}>{t.profil.search_clubs[lang]}</Link>
+              <Link href="/messages" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>{t.profil.my_msgs[lang]}</Link>
+              <Link href="/candidatures" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>{t.profil.my_cands[lang]}</Link>
             </div>
           </div>
 
           <div className="card card-sm" style={{ background:'var(--blue-light)', border:'1px solid var(--blue-bright)' }}>
-            <div style={{ fontSize:13, color:'var(--blue-mid)', fontWeight:600, marginBottom:'.5rem' }}>💡 Conseil</div>
+            <div style={{ fontSize:13, color:'var(--blue-mid)', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
             <div style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>
-              Un profil complet reçoit <strong>3x plus de contacts</strong>. Ajoute ta bio et ta disponibilité pour être visible !
+              {t.profil.conseil_text[lang]}
             </div>
             <button onClick={() => setEditing(true)} className="btn btn-blue btn-sm" style={{ marginTop:'.75rem', width:'100%', justifyContent:'center' }}>
-              Compléter mon profil →
+              {t.profil.complete[lang]}
             </button>
           </div>
         </div>
