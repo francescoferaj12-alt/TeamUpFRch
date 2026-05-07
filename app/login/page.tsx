@@ -146,7 +146,7 @@ function LoginForm() {
         <div style={{ position:'absolute', top:'20%', left:'30%', width:400, height:400, borderRadius:'50%', background:'radial-gradient(circle, rgba(230,57,70,.12) 0%, transparent 70%)', pointerEvents:'none' }} />
         <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:12, letterSpacing:3, color:'rgba(255,255,255,.4)', marginBottom:'.5rem' }}>{t.login.canton[lang]}</div>
         <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'clamp(2.5rem,5vw,4rem)', color:'#fff', letterSpacing:2, lineHeight:1 }}>
-          <span style={{ color:'#e63946' }}>TeamUp</span><span style={{ color:'#000', WebkitTextStroke:'1px white' }}>F</span><span style={{ color:'#fff' }}>R</span>
+          <span className="brand-teamup">TeamUp</span><span className="brand-f">F</span><span className="brand-r">R</span>
         </h1>
         <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,.5)', margin: '.5rem 0 2rem' }}>{t.login.motto[lang]}</p>
         {features.map(f => (

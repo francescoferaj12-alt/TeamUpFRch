@@ -86,7 +86,11 @@ export default function Navbar() {
             alt="TeamUpFR"
             style={{ height: 38, width: 38, objectFit: 'cover', borderRadius: 9, border: '2px solid rgba(255,255,255,.18)', flexShrink: 0 }}
           />
-          <span className="nav-brand"><span style={{ color:'#e63946' }}>TeamUp</span><span style={{ color:'#000', WebkitTextStroke:'1px white' }}>F</span><span style={{ color:'#fff' }}>R</span></span>
+          <span className="brand-text">
+            <span className="brand-teamup">TeamUp</span>
+            <span className="brand-f">F</span>
+            <span className="brand-r">R</span>
+          </span>
         </Link>
 
         <div className="nav-links nav-desktop" style={{ overflow: 'auto', maxWidth: '52vw' }}>

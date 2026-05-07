@@ -73,6 +73,27 @@ input, select, textarea { font-family: inherit; }
   font-size: 16px;
   border: 2px solid rgba(255,255,255,.18);
 }
+/* ── BRAND LOGO TEXT ── */
+.brand-text {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.brand-teamup { color: #e63946; }
+.brand-f {
+  color: #000000;
+  background: #ffffff;
+  padding: 1px 5px 2px;
+  margin: 0 2px;
+  border-radius: 3px;
+  display: inline-block;
+  line-height: 1.1;
+}
+.brand-r { color: #ffffff; }
+
 .nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
 
 .nav-links { display: flex; gap: 4px; }

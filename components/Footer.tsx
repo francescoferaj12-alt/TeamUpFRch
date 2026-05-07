@@ -33,7 +33,10 @@ export default function Footer() {
     display: 'block',
     color: 'rgba(255,255,255,0.55)',
     textDecoration: 'none',
-    fontSize: 14,
+    fontFamily: "'Bebas Neue', sans-serif",
+    fontSize: 15,
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
     marginBottom: 10,
     transition: 'color 0.2s',
   }
@@ -50,8 +53,10 @@ export default function Footer() {
                 alt="TeamUpFR"
                 style={{ height: 40, width: 40, objectFit: 'cover', borderRadius: 9, border: '2px solid rgba(255,255,255,.18)' }}
               />
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 1 }}>
-                <span style={{ color:'#e63946' }}>TeamUp</span><span style={{ color:'#000', WebkitTextStroke:'1px white' }}>F</span><span style={{ color:'#fff' }}>R</span>
+              <span className="brand-text">
+                <span className="brand-teamup">TeamUp</span>
+                <span className="brand-f">F</span>
+                <span className="brand-r">R</span>
               </span>
             </Link>
             <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14, lineHeight: 1.65, maxWidth: 300 }}>
