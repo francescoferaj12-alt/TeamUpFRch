@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { annonces, ligues } from '../lib/data'
 import { useLang } from '../lib/lang-context'
@@ -173,29 +174,27 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── Right — Player Card ── */}
+            {/* ── Right — Hero Image ── */}
             <div className="hp-hero-card-wrap">
-              <div style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 24, background: 'linear-gradient(135deg, #0a1f5c, #061540)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', padding: 32, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 32px 80px rgba(0,0,0,0.55)' }}>
-                <div style={{ position: 'absolute', top: '-50%', right: '-50%', width: '100%', height: '100%', background: 'radial-gradient(circle, rgba(230,57,70,0.35), transparent 70%)', pointerEvents: 'none' }} />
+              <div className="hero-image">
+                <Image
+                  src="/images/hero-player.jpg"
+                  alt="Joueur de football amateur"
+                  fill
+                  priority
+                  className="hero-image-img"
+                />
+                <div className="hero-image-overlay" />
+                <div className="hero-image-glow" />
 
-                {/* Top row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 118, lineHeight: 1, color: '#fff', textShadow: '0 6px 20px rgba(0,0,0,0.4)' }}>10</div>
-                  <div style={{ width: 56, height: 64, background: '#e63946', clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: '#fff', paddingBottom: 14 }}>FR</div>
+                <div className="floating-badge badge-top">
+                  <span className="badge-dot" />
+                  {counts.players}+ joueurs actifs
                 </div>
 
-                {/* Bottom */}
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, marginBottom: 8, color: '#fff' }}>Marco Rossi</div>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Milieu offensif · 3ème Ligue</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 16 }}>
-                    {[{ v: '24', l: 'Matchs' }, { v: '12', l: 'Buts' }, { v: '8', l: 'Assists' }].map(s => (
-                      <div key={s.l}>
-                        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: '#e63946' }}>{s.v}</div>
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.l}</div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="floating-badge badge-bottom">
+                  <span style={{ fontSize: 16 }}>⚽</span>
+                  Nouveau match disponible
                 </div>
               </div>
             </div>
@@ -425,8 +424,75 @@ export default function HomePage() {
           .hp-timeline-line { display: none !important; }
           .hp-stats-grid { grid-template-columns: repeat(2, 1fr) !important; max-width: 100% !important; }
         }
+        @media (max-width: 900px) {
+          .hero-image { max-width: 400px; margin: 0 auto; }
+        }
         @media (max-width: 540px) {
           .hp-hero-card-wrap { display: none !important; }
+        }
+
+        /* ── Hero image ── */
+        .hero-image {
+          position: relative;
+          aspect-ratio: 4/5;
+          border-radius: 24px;
+          overflow: hidden;
+          box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hero-image-img {
+          object-fit: cover;
+          object-position: center;
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hero-image:hover .hero-image-img { transform: scale(1.05); }
+        .hero-image-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(3,10,36,0) 0%, rgba(3,10,36,0.1) 50%, rgba(3,10,36,0.7) 100%);
+          z-index: 1;
+        }
+        .hero-image-glow {
+          position: absolute;
+          top: -20%; right: -20%;
+          width: 60%; height: 60%;
+          background: radial-gradient(circle, rgba(230,57,70,0.3), transparent 70%);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .floating-badge {
+          position: absolute;
+          z-index: 2;
+          background: rgba(3,10,36,0.85);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.15);
+          padding: 10px 16px;
+          border-radius: 100px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+          animation: floatBadge 4s ease-in-out infinite;
+        }
+        .badge-top { top: 24px; left: 24px; }
+        .badge-bottom { bottom: 24px; right: 24px; animation-delay: 2s; }
+        .badge-dot {
+          width: 8px; height: 8px;
+          background: #4ade80;
+          border-radius: 50%;
+          flex-shrink: 0;
+          animation: pulse-green 2s infinite;
+        }
+        @keyframes floatBadge {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes pulse-green {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
       `}</style>
     </>
