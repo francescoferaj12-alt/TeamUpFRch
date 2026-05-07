@@ -17,7 +17,7 @@ export default function HomePage() {
           style={{
             position: 'absolute', inset: 0,
             width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center 20%',
+            objectFit: 'cover', objectPosition: 'center center',
             zIndex: 0
           }}
         />
@@ -27,7 +27,7 @@ export default function HomePage() {
 
         {/* CONTENT */}
         <div style={{ position: 'relative', zIndex: 3, maxWidth: 1100, margin: '0 auto', padding: '0 2rem', width: '100%' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', alignItems: 'center', gap: '2rem' }}>
+          <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', alignItems: 'center', gap: '2rem' }}>
 
             <div>
               {/* BADGE */}
@@ -320,6 +320,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <style>{`
+        @media (max-width: 640px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .hero-grid > div:last-child { display: none; }
+        }
+      `}</style>
     </>
   );
 }
