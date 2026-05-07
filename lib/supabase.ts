@@ -24,6 +24,9 @@ export type Profile = {
   assists?: number
   matches?: number
   rating?: number
+  phone?: string
+  verified?: boolean
+  verification_requested?: boolean
   created_at: string
 }
 
@@ -38,6 +41,7 @@ export type Annonce = {
   position?: string
   zone: string
   status: 'active' | 'closed'
+  type?: 'club_cherche_joueur' | 'joueur_cherche_club' | 'coach_cherche_club' | 'club_cherche_coach' | 'coach_cherche_joueurs'
   created_at: string
 }
 

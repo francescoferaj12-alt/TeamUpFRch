@@ -25,6 +25,7 @@ export default function ProfilPage() {
   const [foot, setFoot] = useState('')
   const [age, setAge] = useState('')
   const [available, setAvailable] = useState(true)
+  const [phone, setPhone] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -49,6 +50,7 @@ export default function ProfilPage() {
       setFoot(data.foot || 'Droit')
       setAge(data.age ? String(data.age) : '')
       setAvailable(data.available ?? true)
+      setPhone(data.phone || '')
       setLoading(false)
     }
     load()
@@ -65,11 +67,12 @@ export default function ProfilPage() {
     const { error } = await supabase.from('profiles').update({
       bio, position, ligue, zone, foot,
       age: age ? parseInt(age) : null,
-      available
+      available,
+      phone: phone || null
     }).eq('id', profile.id)
 
     if (!error) {
-      setProfile({ ...profile, bio, position, ligue, zone, foot, age: age ? parseInt(age) : undefined, available })
+      setProfile({ ...profile, bio, position, ligue, zone, foot, age: age ? parseInt(age) : undefined, available, phone: phone || undefined })
       setSaveMsg('✅ Profil mis à jour !')
       setEditing(false)
       setTimeout(() => setSaveMsg(''), 3000)
@@ -204,6 +207,11 @@ export default function ProfilPage() {
           </div>
 
           <div className="field">
+            <label className="field-label">Téléphone (optionnel)</label>
+            <input className="input" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
+          </div>
+
+          <div className="field">
             <label className="field-label">Bio / Présentation</label>
             <textarea className="input" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="Présente-toi en quelques mots…" />
           </div>
@@ -284,6 +292,7 @@ export default function ProfilPage() {
               profile.ligue ? ['Ligue', profile.ligue] : null,
               profile.position ? ['Position', profile.position] : null,
               profile.club_name ? ['Club', profile.club_name] : null,
+              profile.phone ? ['Téléphone', profile.phone] : null,
             ].filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
               <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--gray-light)', fontSize:14 }}>
                 <span style={{ color:'var(--text-muted)' }}>{k}</span>
