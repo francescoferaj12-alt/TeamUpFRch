@@ -12,11 +12,11 @@ type AppWithAnnonce = Application & { annonce_title?: string; annonce_author?: s
 type Status = 'all' | 'pending' | 'accepted' | 'rejected'
 
 export default function CandidaturesPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
   const { lang } = useLang()
   const { session, profile: authProfile, authLoading } = useAuth()
+  const [profile, setProfile] = useState<Profile | null>(authProfile)
+  const [loading, setLoading] = useState(!authProfile)
 
   useEffect(() => {
     if (authLoading) return

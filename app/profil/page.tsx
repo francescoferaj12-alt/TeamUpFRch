@@ -116,8 +116,8 @@ function getYouTubeEmbed(url: string): string | null {
 export default function ProfilPage() {
   const { lang } = useLang()
   const { session, profile: authProfile, authLoading, refreshProfile } = useAuth()
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<Profile | null>(authProfile)
+  const [loading, setLoading] = useState(!authProfile)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
@@ -409,22 +409,23 @@ export default function ProfilPage() {
       {profile.role !== 'club' && (() => {
         const now = new Date()
         const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
-        const season = `${sy} – ${String(sy + 1).slice(2)}`
+        const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
+        const seasonPrev = `${sy - 1} – ${String(sy).slice(2)}`
         const hasPrev = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
         const stats = [
-          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#e02020', bg:'#fff0f0' },
-          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#1a6fd4', bg:'#eef4ff' },
-          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#0a7c3e', bg:'#edfaf3' },
+          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#e02020' },
+          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#1a6fd4' },
+          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#0a7c3e' },
         ]
         return (
           <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', marginBottom:'1.25rem', overflow:'hidden' }}>
-            {/* Header */}
+            {/* CURRENT SEASON header */}
             <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
-              <span style={{ fontSize:11, color:'rgba(255,255,255,.45)', letterSpacing:1, fontWeight:600 }}>{season}</span>
+              <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', letterSpacing:1, fontWeight:600 }}>{seasonNow}</span>
             </div>
 
-            {/* Current season big numbers */}
+            {/* Current big numbers */}
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
               {stats.map((s, i) => {
                 const delta = s.prev != null ? s.v - s.prev : null
@@ -443,14 +444,28 @@ export default function ProfilPage() {
               })}
             </div>
 
-            {/* Previous season footer */}
             {hasPrev && (
-              <div style={{ background:'var(--gray-bg)', padding:'.45rem 1.25rem', borderTop:'1px solid var(--gray-light)', display:'flex', gap:16, alignItems:'center', flexWrap:'wrap' }}>
-                <span style={{ fontSize:10, fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:.8 }}>{t.profil.prev_season[lang]}</span>
-                {profile.goals_prev   != null && <span style={{ fontSize:11, color:'var(--text-muted)' }}>⚽ {profile.goals_prev}</span>}
-                {profile.assists_prev != null && <span style={{ fontSize:11, color:'var(--text-muted)' }}>🅰️ {profile.assists_prev}</span>}
-                {profile.matches_prev != null && <span style={{ fontSize:11, color:'var(--text-muted)' }}>📋 {profile.matches_prev}</span>}
-              </div>
+              <>
+                {/* PREVIOUS SEASON header — same style as current but lighter */}
+                <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid var(--gray-light)' }}>
+                  <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.prev_season[lang]}</span>
+                  <span style={{ fontSize:11, color:'rgba(255,255,255,.55)', letterSpacing:1, fontWeight:600 }}>{seasonPrev}</span>
+                </div>
+
+                {/* Previous numbers — smaller */}
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
+                  {[
+                    { v: profile.goals_prev,   k: t.profil.goals[lang],   color:'#e02020' },
+                    { v: profile.assists_prev, k: t.profil.assists[lang], color:'#1a6fd4' },
+                    { v: profile.matches_prev, k: t.profil.matches[lang], color:'#0a7c3e' },
+                  ].map((s, i) => (
+                    <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid var(--gray-light)' : 'none', textAlign:'center', background:'#fafbfd' }}>
+                      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.9rem', color: s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
+                      <div style={{ fontSize:10, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )
