@@ -406,33 +406,55 @@ export default function ProfilPage() {
       </div>
 
       {/* ── STATS (joueur / coach uniquement) ── */}
-      {profile.role !== 'club' && (
-        <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', marginBottom:'1.25rem', overflow:'hidden' }}>
-          <div style={{ background:'var(--blue-dark)', padding:'.75rem 1.25rem' }}>
-            <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:1 }}>{t.profil.current_season[lang]}</span>
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
-            {[
-              { v: profile.goals ?? 0, k: t.profil.goals[lang] },
-              { v: profile.assists ?? 0, k: t.profil.assists[lang] },
-              { v: profile.matches ?? 0, k: t.profil.matches[lang] }
-            ].map((s, i) => (
-              <div key={s.k} style={{ padding:'1.5rem 1rem', borderRight: i < 2 ? '1px solid var(--gray-light)' : 'none' }}>
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'3rem', color:'var(--blue-mid)', lineHeight:1 }}>{s.v}</div>
-                <div style={{ fontSize:11, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:1, marginTop:4 }}>{s.k}</div>
-              </div>
-            ))}
-          </div>
-          {(profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null) && (
-            <div style={{ background:'var(--gray-bg)', padding:'.6rem 1.25rem', fontSize:12, color:'var(--text-muted)', borderTop:'1px solid var(--gray-light)' }}>
-              <span style={{ fontWeight:600, color:'var(--text-dark)', marginRight:8 }}>{t.profil.prev_season[lang]}:</span>
-              {profile.goals_prev != null && <span style={{ marginRight:12 }}>⚽ {profile.goals_prev} {t.profil.goals[lang].toLowerCase()}</span>}
-              {profile.assists_prev != null && <span style={{ marginRight:12 }}>🅰️ {profile.assists_prev} {t.profil.assists[lang].toLowerCase()}</span>}
-              {profile.matches_prev != null && <span>🎮 {profile.matches_prev} {t.profil.matches[lang].toLowerCase()}</span>}
+      {profile.role !== 'club' && (() => {
+        const now = new Date()
+        const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
+        const season = `${sy} – ${String(sy + 1).slice(2)}`
+        const hasPrev = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
+        const stats = [
+          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#e02020', bg:'#fff0f0' },
+          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#1a6fd4', bg:'#eef4ff' },
+          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#0a7c3e', bg:'#edfaf3' },
+        ]
+        return (
+          <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', marginBottom:'1.25rem', overflow:'hidden' }}>
+            {/* Header */}
+            <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
+              <span style={{ fontSize:11, color:'rgba(255,255,255,.45)', letterSpacing:1, fontWeight:600 }}>{season}</span>
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Current season big numbers */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
+              {stats.map((s, i) => {
+                const delta = s.prev != null ? s.v - s.prev : null
+                return (
+                  <div key={s.k} style={{ padding:'1.4rem .5rem 1.1rem', borderRight: i < 2 ? '1px solid var(--gray-light)' : 'none', textAlign:'center', position:'relative' }}>
+                    <div style={{ position:'absolute', top:0, left:'25%', right:'25%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
+                    <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
+                    <div style={{ fontSize:10, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
+                    {delta !== null && (
+                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#0a7c3e' : delta < 0 ? '#e02020' : '#888', background: delta > 0 ? '#edfaf3' : delta < 0 ? '#fff0f0' : 'var(--gray-bg)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
+                        {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Previous season footer */}
+            {hasPrev && (
+              <div style={{ background:'var(--gray-bg)', padding:'.45rem 1.25rem', borderTop:'1px solid var(--gray-light)', display:'flex', gap:16, alignItems:'center', flexWrap:'wrap' }}>
+                <span style={{ fontSize:10, fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:.8 }}>{t.profil.prev_season[lang]}</span>
+                {profile.goals_prev   != null && <span style={{ fontSize:11, color:'var(--text-muted)' }}>⚽ {profile.goals_prev}</span>}
+                {profile.assists_prev != null && <span style={{ fontSize:11, color:'var(--text-muted)' }}>🅰️ {profile.assists_prev}</span>}
+                {profile.matches_prev != null && <span style={{ fontSize:11, color:'var(--text-muted)' }}>📋 {profile.matches_prev}</span>}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* ── PUNTI FORTI ── */}
       <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', padding:'1.25rem', marginBottom:'1.25rem' }}>
