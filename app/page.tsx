@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
+import HeroMap from '../components/HeroMap'
 import { annonces, ligues } from '../lib/data'
 import { useLang } from '../lib/lang-context'
 import { t, tagsByRole } from '../lib/translations'
@@ -174,29 +174,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── Right — Hero Image ── */}
+            {/* ── Right — Hero Map ── */}
             <div className="hp-hero-card-wrap">
-              <div className="hero-image">
-                <Image
-                  src="/images/hero-player.jpg"
-                  alt="Joueur de football amateur"
-                  fill
-                  priority
-                  className="hero-image-img"
-                />
-                <div className="hero-image-overlay" />
-                <div className="hero-image-glow" />
-
-                <div className="floating-badge badge-top">
-                  <span className="badge-dot" />
-                  {counts.players}+ joueurs actifs
-                </div>
-
-                <div className="floating-badge badge-bottom">
-                  <span style={{ fontSize: 16 }}>⚽</span>
-                  Nouveau match disponible
-                </div>
-              </div>
+              <HeroMap />
             </div>
           </div>
         </div>
@@ -425,41 +405,63 @@ export default function HomePage() {
           .hp-stats-grid { grid-template-columns: repeat(2, 1fr) !important; max-width: 100% !important; }
         }
         @media (max-width: 900px) {
-          .hero-image { max-width: 400px; margin: 0 auto; }
+          .hero-map { max-width: 400px; margin: 0 auto; }
         }
         @media (max-width: 540px) {
           .hp-hero-card-wrap { display: none !important; }
         }
 
-        /* ── Hero image ── */
-        .hero-image {
+        /* ── Hero map ── */
+        .hero-map {
           position: relative;
           aspect-ratio: 4/5;
           border-radius: 24px;
           overflow: hidden;
-          box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+          background: linear-gradient(135deg, #0a1f5c 0%, #061540 100%);
           border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 30px 80px rgba(0,0,0,0.5);
         }
-        .hero-image-img {
-          object-fit: cover;
-          object-position: center;
-          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .hero-image:hover .hero-image-img { transform: scale(1.05); }
-        .hero-image-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, rgba(3,10,36,0) 0%, rgba(3,10,36,0.1) 50%, rgba(3,10,36,0.7) 100%);
-          z-index: 1;
-        }
-        .hero-image-glow {
+        .hero-map-svg { width: 100%; height: 100%; display: block; }
+        .hero-map-glow {
           position: absolute;
           top: -20%; right: -20%;
           width: 60%; height: 60%;
-          background: radial-gradient(circle, rgba(230,57,70,0.3), transparent 70%);
+          background: radial-gradient(circle, rgba(230,57,70,0.28), transparent 70%);
+          pointer-events: none;
           z-index: 0;
+        }
+        .map-dot {
+          filter: drop-shadow(0 0 5px rgba(230,57,70,0.85));
+          animation: mapPulseDot 3s ease-in-out infinite;
+        }
+        .map-dot.major { filter: drop-shadow(0 0 9px rgba(230,57,70,1)); }
+        .map-pulse-ring {
+          animation: mapPulseRing 2.8s ease-out infinite;
+          transform-box: fill-box;
+          transform-origin: center;
+        }
+        .map-label {
+          fill: rgba(255,255,255,0.92);
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.06em;
           pointer-events: none;
         }
+        .map-connection {
+          stroke-dasharray: 5 5;
+          animation: mapDash 10s linear infinite;
+          opacity: 0.45;
+        }
+        @keyframes mapPulseDot {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.55; }
+        }
+        @keyframes mapPulseRing {
+          0%   { transform: scale(1); opacity: 0.65; }
+          100% { transform: scale(2.8); opacity: 0; }
+        }
+        @keyframes mapDash { to { stroke-dashoffset: -120; } }
+
         .floating-badge {
           position: absolute;
           z-index: 2;
