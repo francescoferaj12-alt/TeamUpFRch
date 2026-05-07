@@ -203,8 +203,8 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
       <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginBottom:'.85rem' }}>
         {p.ligue && <span className="badge badge-blue">{p.ligue}</span>}
-        {p.zone && <span className="badge badge-blue">📍 {p.zone}</span>}
-        {p.foot && <span className="badge badge-gray">🦵 {p.foot}</span>}
+        {p.zone && <span className="badge badge-blue">{p.zone}</span>}
+        {p.foot && <span className="badge badge-gray">{p.foot}</span>}
       </div>
 
       {p.bio && (

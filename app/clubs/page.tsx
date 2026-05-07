@@ -129,7 +129,7 @@ export default function ClubsPage() {
                   <div style={{ padding: '1.25rem' }}>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: '1rem' }}>
                       {club.ligue && <span style={{ background: 'var(--blue-light)', color: 'var(--blue-mid)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{club.ligue}</span>}
-                      {club.zone && <span style={{ background: 'var(--green-bg)', color: 'var(--green)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>📍 {club.zone}</span>}
+                      {club.zone && <span style={{ background: 'var(--green-bg)', color: 'var(--green)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{club.zone}</span>}
                     </div>
 
                     {club.bio && (

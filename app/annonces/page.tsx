@@ -110,7 +110,7 @@ export default function AnnoncesPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', border: '2px dashed var(--border)', borderRadius: 16, marginTop: '1.5rem' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📢</div>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚽</div>
             {annonces.length === 0
               ? <><div style={{ fontSize: 16, fontWeight: 600, marginBottom: '.5rem' }}>Aucune annonce publiée</div><div>Sois le premier à publier !</div></>
               : <div>Aucune annonce correspond à tes critères. Modifie les filtres.</div>
@@ -183,7 +183,7 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: { annonce: Annonce; c
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {annonce.ligue && <span className="badge badge-blue">{annonce.ligue}</span>}
             {annonce.position && <span className="badge badge-amber">{annonce.position}</span>}
-            {annonce.zone && <span className="badge badge-green">📍 {annonce.zone}</span>}
+            {annonce.zone && <span className="badge badge-green">{annonce.zone}</span>}
           </div>
         </div>
         <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-muted)', marginBottom: 14 }}>{annonce.body}</p>

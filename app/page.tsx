@@ -226,7 +226,7 @@ export default function HomePage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem' }}>
                   <span style={{ background: 'var(--blue-light)', color: 'var(--blue-mid)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.ligue}</span>
                   {a.position && <span style={{ background: '#fef3e2', color: '#a05a00', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.position}</span>}
-                  <span style={{ background: 'var(--green-bg)', color: 'var(--green)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>📍 {a.zone}</span>
+                  <span style={{ background: 'var(--green-bg)', color: 'var(--green)', fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 100 }}>{a.zone}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <Link href="/login" style={{ flex: 1, background: 'var(--blue-bright)', color: '#fff', border: 'none', borderRadius: 8, padding: '9px', fontSize: 13, fontWeight: 700, textAlign: 'center', textDecoration: 'none', display: 'block' }}>
