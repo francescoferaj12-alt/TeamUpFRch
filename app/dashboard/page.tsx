@@ -27,8 +27,8 @@ export default function DashboardPage() {
   }, [authLoading, session, authProfile, router])
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ width: 40, height: 40, border: '4px solid var(--gray-light)', borderTopColor: 'var(--blue-bright)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
+      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -78,9 +78,11 @@ export default function DashboardPage() {
       <style>{`
         .dash-grid { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 60px - 100px); }
         @media (max-width: 700px) { .dash-grid { grid-template-columns: 1fr; } }
-        .dash-sidebar { background: var(--blue-dark); padding: 1.25rem; display: flex; flex-direction: column; gap: 4px; }
-        .dash-club-badge { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 12px; padding: .85rem; margin-bottom: 1rem; text-align: center; }
-        .dash-main { padding: 1.5rem; overflow-y: auto; background: var(--gray-bg); }
+        .dash-sidebar { background: #061540; border-right: 1px solid rgba(255,255,255,.06); padding: 1.25rem; display: flex; flex-direction: column; gap: 4px; }
+        .dash-club-badge { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: .85rem; margin-bottom: 1rem; text-align: center; }
+        .dash-main { padding: 1.5rem; overflow-y: auto; background: #030a24; color: #fff; }
+        .dash-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 1.25rem; }
+        @keyframes spin{to{transform:rotate(360deg);}}
       `}</style>
     </div>
   )
@@ -96,11 +98,11 @@ function SidebarSection({ label }: { label: string }) {
 
 function SidebarLink({ icon, label, active, onClick, badge }: { icon: string; label: string; active: boolean; onClick: () => void; badge?: number }) {
   return (
-    <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '.65rem .85rem', borderRadius: 9, color: active ? '#fff' : 'rgba(255,255,255,.65)', fontSize: 14, fontWeight: 500, cursor: 'pointer', border: 'none', background: active ? 'rgba(255,255,255,.15)' : 'transparent', textAlign: 'left', width: '100%', fontFamily: 'inherit' }}>
-      <span style={{ width: 30, height: 30, borderRadius: 7, background: 'rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>{icon}</span>
-      <span style={{ flex: 1 }}>{label}</span>
+    <button onClick={onClick} style={{ display:'flex', alignItems:'center', gap:10, padding:'.65rem .85rem', borderRadius:9, color: active ? '#fff' : 'rgba(255,255,255,.55)', fontSize:14, fontWeight:500, cursor:'pointer', border: active ? '1px solid rgba(230,57,70,.3)' : '1px solid transparent', background: active ? 'rgba(230,57,70,.12)' : 'transparent', textAlign:'left', width:'100%', fontFamily:'inherit' }}>
+      <span style={{ width:30, height:30, borderRadius:7, background:'rgba(255,255,255,.07)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>{icon}</span>
+      <span style={{ flex:1 }}>{label}</span>
       {badge !== undefined && (
-        <span style={{ background: 'var(--red)', color: '#fff', borderRadius: 100, fontSize: 10, padding: '1px 7px', fontWeight: 700 }}>{badge}</span>
+        <span style={{ background:'#e63946', color:'#fff', borderRadius:100, fontSize:10, padding:'1px 7px', fontWeight:700 }}>{badge}</span>
       )}
     </button>
   )
@@ -131,52 +133,54 @@ function VueSection({ profile }: { profile: Profile }) {
     }
   }, [profile.id, profile.role])
 
+  const darkCard = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }
+
   return (
     <>
-      <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">{t.dash.dashboard_label[lang]}</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.overview_title[lang]}</div>
+      <div style={{ marginBottom:'1.25rem' }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase', marginBottom:4 }}>{t.dash.dashboard_label[lang]}</div>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', letterSpacing:1 }}>{t.dash.overview_title[lang]}</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-        <KPI value={String(annonces.length)} label={t.dash.kpi_published[lang]} color="var(--blue-mid)" />
-        <KPI value={String(apps.length)} label={t.dash.kpi_pending[lang]} color="var(--red)" />
-        <KPI value={String(annonces.filter(a => a.status === 'active').length)} label={t.dash.kpi_active[lang]} color="var(--green)" />
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))', gap:'1rem', marginBottom:'1.5rem' }}>
+        <KPI value={String(annonces.length)} label={t.dash.kpi_published[lang]} color="#5b9eff" />
+        <KPI value={String(apps.length)} label={t.dash.kpi_pending[lang]} color="#e63946" />
+        <KPI value={String(annonces.filter(a => a.status === 'active').length)} label={t.dash.kpi_active[lang]} color="#4cdb7a" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-        <div className="card">
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.last_annonces[lang]}</div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.25rem' }}>
+        <div style={darkCard}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.dash.last_annonces[lang]}</div>
           {annonces.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-              {t.dash.no_annonce[lang]} <button onClick={() => {}} style={{ color: 'var(--blue-bright)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>{t.dash.publish_link[lang]}</button>
+            <p style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>
+              {t.dash.no_annonce[lang]} <button onClick={() => {}} style={{ color:'#5b9eff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit' }}>{t.dash.publish_link[lang]}</button>
             </p>
           ) : annonces.slice(0, 3).map((a) => (
-            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '.65rem 0', borderBottom: '1px solid var(--gray-light)' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{a.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.ligue} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}</div>
+            <div key={a.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'.65rem 0', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontWeight:600, fontSize:14 }}>{a.title}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{a.ligue} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}</div>
               </div>
-              <span className={`badge ${a.status === 'active' ? 'badge-green' : 'badge-gray'}`}>{a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}</span>
+              <span style={{ background: a.status === 'active' ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: a.status === 'active' ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:600 }}>{a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}</span>
             </div>
           ))}
         </div>
 
-        <div className="card">
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.1rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.pending_apps_title[lang]}</div>
+        <div style={darkCard}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.dash.pending_apps_title[lang]}</div>
           {apps.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t.dash.no_apps[lang]}</p>
+            <p style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.dash.no_apps[lang]}</p>
           ) : apps.map((a) => (
-            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '.65rem 0', borderBottom: '1px solid var(--gray-light)' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>👤</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{a.applicant_name}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.annonce_title}</div>
+            <div key={a.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'.65rem 0', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
+              <div style={{ width:36, height:36, borderRadius:9, background:'rgba(26,111,212,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>👤</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontWeight:600, fontSize:14 }}>{a.applicant_name}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{a.annonce_title}</div>
               </div>
             </div>
           ))}
           {apps.length > 0 && (
-            <Link href="/candidatures" className="btn btn-blue btn-full" style={{ marginTop: '.75rem', justifyContent: 'center' }}>
+            <Link href="/candidatures" style={{ display:'block', marginTop:'.75rem', background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:9, padding:'9px', fontSize:13, fontWeight:600, textAlign:'center', textDecoration:'none' }}>
               {t.dash.see_all_apps[lang]}
             </Link>
           )}
@@ -211,36 +215,38 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
     setApps((prev) => prev.map((a) => a.id === id ? { ...a, status } : a))
   }
 
+  const darkCard = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }
+
   return (
     <>
-      <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">{t.dash.management[lang]}</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.received_title[lang]}</div>
+      <div style={{ marginBottom:'1.25rem' }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase' as const, marginBottom:4 }}>{t.dash.management[lang]}</div>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', letterSpacing:1 }}>{t.dash.received_title[lang]}</div>
       </div>
-      {loading ? <div style={{ color: 'var(--text-muted)' }}>{t.dash.loading[lang]}</div> : apps.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+      {loading ? <div style={{ color:'rgba(255,255,255,.4)' }}>{t.dash.loading[lang]}</div> : apps.length === 0 ? (
+        <div style={{ ...darkCard, textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
           {t.dash.no_received[lang]}
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.85rem' }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:'.85rem' }}>
           {apps.map((a) => (
-            <div key={a.id} className="card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '.5rem', marginBottom: '.75rem' }}>
+            <div key={a.id} style={darkCard}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.75rem' }}>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>{a.applicant_name}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  <div style={{ fontWeight:700, fontSize:15 }}>{a.applicant_name}</div>
+                  <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>
                     {t.dash.for_annonce[lang]} {a.annonce_title} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}
                   </div>
                 </div>
                 <StatusBadge status={a.status} />
               </div>
-              <div style={{ background: 'var(--gray-bg)', borderRadius: 8, padding: '.65rem .85rem', fontSize: 13, fontStyle: 'italic', marginBottom: '.75rem', lineHeight: 1.55 }}>
+              <div style={{ background:'rgba(255,255,255,.05)', borderRadius:8, padding:'.65rem .85rem', fontSize:13, fontStyle:'italic', marginBottom:'.75rem', lineHeight:1.55, color:'rgba(255,255,255,.6)' }}>
                 &ldquo;{a.message}&rdquo;
               </div>
               {a.status === 'pending' && (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => updateStatus(a.id, 'accepted')} className="btn btn-green btn-sm">{t.dash.accept[lang]}</button>
-                  <button onClick={() => updateStatus(a.id, 'rejected')} className="btn btn-red btn-sm">{t.dash.refuse[lang]}</button>
+                <div style={{ display:'flex', gap:8 }}>
+                  <button onClick={() => updateStatus(a.id, 'accepted')} style={{ background:'rgba(13,122,54,.2)', color:'#4cdb7a', border:'1px solid rgba(76,219,122,.25)', borderRadius:8, padding:'6px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{t.dash.accept[lang]}</button>
+                  <button onClick={() => updateStatus(a.id, 'rejected')} style={{ background:'rgba(230,57,70,.15)', color:'#ff6b6b', border:'1px solid rgba(230,57,70,.25)', borderRadius:8, padding:'6px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{t.dash.refuse[lang]}</button>
                 </div>
               )}
             </div>
@@ -298,84 +304,89 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
     setMyAnnonces((prev) => prev.map((a) => a.id === id ? { ...a, status: 'closed' } : a))
   }
 
+  const optSt = { background:'#061540' }
+  const inpSt: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:9, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }
+  const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'rgba(255,255,255,.55)', marginBottom:6 }
+  const darkCard: React.CSSProperties = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }
+
   return (
     <>
-      <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">{t.dash.content[lang]}</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.annonces_title[lang]}</div>
+      <div style={{ marginBottom:'1.25rem' }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase', marginBottom:4 }}>{t.dash.content[lang]}</div>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', letterSpacing:1 }}>{t.dash.annonces_title[lang]}</div>
       </div>
 
       {/* FORM */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.publish_new[lang]}</div>
+      <div style={{ ...darkCard, marginBottom:'1.5rem' }}>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1, marginBottom:'1rem' }}>{t.dash.publish_new[lang]}</div>
 
         {successMsg && (
-          <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green)', borderRadius: 10, padding: '10px 14px', fontSize: 14, color: 'var(--green)', marginBottom: '1rem' }}>
+          <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 14px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
             {successMsg}
           </div>
         )}
         {error && (
-          <div style={{ background: 'var(--red-bg)', border: '1px solid var(--red)', borderRadius: 10, padding: '10px 14px', fontSize: 14, color: 'var(--red)', marginBottom: '1rem' }}>
+          <div style={{ background:'rgba(230,57,70,.12)', border:'1px solid rgba(230,57,70,.3)', borderRadius:10, padding:'10px 14px', fontSize:14, color:'#ff6b6b', marginBottom:'1rem' }}>
             {error}
           </div>
         )}
 
-        <div className="field">
-          <label className="field-label">{t.dash.annonce_title_label[lang]}</label>
-          <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t.dash.annonce_title_ph[lang]} />
+        <div style={{ marginBottom:'1rem' }}>
+          <label style={lblSt}>{t.dash.annonce_title_label[lang]}</label>
+          <input style={inpSt} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t.dash.annonce_title_ph[lang]} />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="field">
-            <label className="field-label">{t.dash.ligue_req[lang]}</label>
-            <select className="input" value={form.ligue} onChange={(e) => setForm({ ...form, ligue: e.target.value })}>
-              <option value="">{t.dash.select[lang]}</option>
-              {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l}>{l}</option>)}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1rem' }}>
+          <div>
+            <label style={lblSt}>{t.dash.ligue_req[lang]}</label>
+            <select style={inpSt} value={form.ligue} onChange={(e) => setForm({ ...form, ligue: e.target.value })}>
+              <option value="" style={optSt}>{t.dash.select[lang]}</option>
+              {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l} style={optSt}>{l}</option>)}
             </select>
           </div>
-          <div className="field">
-            <label className="field-label">{t.dash.pos_sought[lang]}</label>
-            <select className="input" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>
-              <option value="">{t.dash.none[lang]}</option>
-              {positions.map((p) => <option key={p} value={p}>{p}</option>)}
+          <div>
+            <label style={lblSt}>{t.dash.pos_sought[lang]}</label>
+            <select style={inpSt} value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>
+              <option value="" style={optSt}>{t.dash.none[lang]}</option>
+              {positions.map((p) => <option key={p} value={p} style={optSt}>{p}</option>)}
             </select>
           </div>
-          <div className="field">
-            <label className="field-label">{t.dash.zone_label[lang]}</label>
-            <select className="input" value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })}>
-              <option value="">{t.dash.select[lang]}</option>
-              {zones.map((z) => <option key={z} value={z}>{z}</option>)}
+          <div>
+            <label style={lblSt}>{t.dash.zone_label[lang]}</label>
+            <select style={inpSt} value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })}>
+              <option value="" style={optSt}>{t.dash.select[lang]}</option>
+              {zones.map((z) => <option key={z} value={z} style={optSt}>{z}</option>)}
             </select>
           </div>
         </div>
 
-        <div className="field">
-          <label className="field-label">{t.dash.desc_req[lang]}</label>
-          <textarea className="input" rows={4} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t.dash.desc_ph[lang]} />
+        <div style={{ marginBottom:'1rem' }}>
+          <label style={lblSt}>{t.dash.desc_req[lang]}</label>
+          <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t.dash.desc_ph[lang]} />
         </div>
 
-        <button onClick={handlePublish} disabled={publishing} className="btn btn-red" style={{ opacity: publishing ? .7 : 1 }}>
+        <button onClick={handlePublish} disabled={publishing} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'11px 22px', fontSize:14, fontWeight:700, cursor:'pointer', opacity:publishing?.7:1, fontFamily:'inherit' }}>
           {publishing ? t.dash.publishing[lang] : t.dash.publish_btn[lang]}
         </button>
       </div>
 
       {/* MY ANNONCES LIST */}
-      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.2rem', letterSpacing: 1, marginBottom: '.75rem' }}>
+      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'.75rem' }}>
         {t.dash.published_count[lang]} ({myAnnonces.length})
       </div>
-      {loadingList ? <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t.dash.loading[lang]}</div> : myAnnonces.length === 0 ? (
-        <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t.dash.no_annonces[lang]}</div>
+      {loadingList ? <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.dash.loading[lang]}</div> : myAnnonces.length === 0 ? (
+        <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.dash.no_annonces[lang]}</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:'.6rem' }}>
           {myAnnonces.map((a) => (
-            <div key={a.id} style={{ background: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{a.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.ligue}{a.position ? ` · ${a.position}` : ''} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}</div>
+            <div key={a.id} style={{ background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.08)', padding:'1rem 1.25rem', display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontWeight:700, fontSize:14 }}>{a.title}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{a.ligue}{a.position ? ` · ${a.position}` : ''} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}</div>
               </div>
-              <span className={`badge ${a.status === 'active' ? 'badge-green' : 'badge-gray'}`}>{a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}</span>
+              <span style={{ background: a.status === 'active' ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: a.status === 'active' ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:600 }}>{a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}</span>
               {a.status === 'active' && (
-                <button onClick={() => closeAnnonce(a.id)} className="btn btn-ghost btn-sm">{t.dash.close_btn[lang]}</button>
+                <button onClick={() => closeAnnonce(a.id)} style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.6)', border:'1px solid rgba(255,255,255,.1)', borderRadius:8, padding:'5px 12px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>{t.dash.close_btn[lang]}</button>
               )}
             </div>
           ))}
@@ -388,10 +399,10 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
 function MessagesSection() {
   const { lang } = useLang()
   return (
-    <div className="card">
-      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', letterSpacing: 1, marginBottom: '1rem' }}>{t.dash.msgs_section_title[lang]}</div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: 14 }}>{t.dash.msgs_section_desc[lang]}</p>
-      <Link href="/messages" className="btn btn-blue">{t.dash.open_msgs[lang]}</Link>
+    <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }}>
+      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.5rem', letterSpacing:1, marginBottom:'1rem' }}>{t.dash.msgs_section_title[lang]}</div>
+      <p style={{ color:'rgba(255,255,255,.45)', marginBottom:'1rem', fontSize:14 }}>{t.dash.msgs_section_desc[lang]}</p>
+      <Link href="/messages" style={{ display:'inline-flex', background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, textDecoration:'none' }}>{t.dash.open_msgs[lang]}</Link>
     </div>
   )
 }
@@ -414,45 +425,49 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
     if (!error) { onSaved({ ...profile, ...updates }); setMsg(t.dash.saved_ok[lang]); setTimeout(() => setMsg(''), 3000) }
   }
 
+  const optSt = { background:'#061540' }
+  const inpSt: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:9, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }
+  const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'rgba(255,255,255,.55)', marginBottom:6 }
+
   return (
     <>
-      <div style={{ marginBottom: '1.25rem' }}>
-        <div className="section-label">{t.dash.settings_title[lang]}</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1 }}>{t.dash.settings_profile_title[lang]}</div>
+      <div style={{ marginBottom:'1.25rem' }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase' as const, marginBottom:4 }}>{t.dash.settings_title[lang]}</div>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', letterSpacing:1 }}>{t.dash.settings_profile_title[lang]}</div>
       </div>
-      <div className="card">
-        {msg && <div style={{ background: 'var(--green-bg)', color: 'var(--green)', borderRadius: 10, padding: '10px 14px', fontSize: 14, marginBottom: '1rem' }}>{msg}</div>}
+      <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }}>
+        {msg && <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', color:'#4cdb7a', borderRadius:10, padding:'10px 14px', fontSize:14, marginBottom:'1rem' }}>{msg}</div>}
         {profile.role === 'club' && (
-          <div className="field">
-            <label className="field-label">{t.dash.club_name[lang]}</label>
-            <input className="input" value={clubName} onChange={(e) => setClubName(e.target.value)} />
+          <div style={{ marginBottom:'1rem' }}>
+            <label style={lblSt}>{t.dash.club_name[lang]}</label>
+            <input style={inpSt} value={clubName} onChange={(e) => setClubName(e.target.value)} />
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="field">
-            <label className="field-label">{t.dash.ligue_req[lang].replace(' *','')}</label>
-            <select className="input" value={ligue} onChange={(e) => setLigue(e.target.value)}>
-              <option value="">—</option>
-              {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l}>{l}</option>)}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1rem' }}>
+          <div>
+            <label style={lblSt}>{t.dash.ligue_req[lang].replace(' *','')}</label>
+            <select style={inpSt} value={ligue} onChange={(e) => setLigue(e.target.value)}>
+              <option value="" style={optSt}>—</option>
+              {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l} style={optSt}>{l}</option>)}
             </select>
           </div>
-          <div className="field">
-            <label className="field-label">{t.dash.zone_label[lang]}</label>
-            <select className="input" value={zone} onChange={(e) => setZone(e.target.value)}>
-              <option value="">—</option>
-              {zones.map((z) => <option key={z} value={z}>{z}</option>)}
+          <div>
+            <label style={lblSt}>{t.dash.zone_label[lang]}</label>
+            <select style={inpSt} value={zone} onChange={(e) => setZone(e.target.value)}>
+              <option value="" style={optSt}>—</option>
+              {zones.map((z) => <option key={z} value={z} style={optSt}>{z}</option>)}
             </select>
           </div>
         </div>
-        <div className="field">
-          <label className="field-label">{t.dash.bio_desc[lang]}</label>
-          <textarea className="input" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t.dash.bio_ph[lang]} />
+        <div style={{ marginBottom:'1rem' }}>
+          <label style={lblSt}>{t.dash.bio_desc[lang]}</label>
+          <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t.dash.bio_ph[lang]} />
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
+        <div style={{ display:'flex', gap:8 }}>
+          <button onClick={handleSave} disabled={saving} style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, cursor:'pointer', opacity:saving?.7:1, fontFamily:'inherit' }}>
             {saving ? t.dash.saving_btn[lang] : t.dash.save_btn[lang]}
           </button>
-          <Link href="/profil" className="btn btn-ghost">{t.dash.see_profile[lang]}</Link>
+          <Link href="/profil" style={{ display:'inline-flex', background:'transparent', color:'rgba(255,255,255,.5)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, textDecoration:'none', alignItems:'center' }}>{t.dash.see_profile[lang]}</Link>
         </div>
       </div>
     </>
@@ -461,20 +476,20 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
 
 function KPI({ value, label, color }: { value: string; label: string; color: string }) {
   return (
-    <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', padding: '1.25rem' }}>
-      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2.5rem', color, lineHeight: 1, marginBottom: '.25rem' }}>{value}</div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.8px' }}>{label}</div>
+    <div style={{ background:'rgba(255,255,255,.04)', borderRadius:14, border:'1px solid rgba(255,255,255,.08)', padding:'1.25rem' }}>
+      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color, lineHeight:1, marginBottom:'.25rem' }}>{value}</div>
+      <div style={{ fontSize:12, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:'.8px' }}>{label}</div>
     </div>
   )
 }
 
 function StatusBadge({ status }: { status: string }) {
   const { lang } = useLang()
-  const map: Record<string, { cls: string; label: string }> = {
-    pending: { cls: 'badge-amber', label: `⏳ ${t.general.pending[lang]}` },
-    accepted: { cls: 'badge-green', label: `✅ ${t.general.accepted[lang]}` },
-    rejected: { cls: 'badge-red', label: `❌ ${t.general.rejected[lang]}` },
+  const map: Record<string, { bg: string; color: string; label: string }> = {
+    pending: { bg:'rgba(255,171,0,.15)', color:'#ffab00', label:`⏳ ${t.general.pending[lang]}` },
+    accepted: { bg:'rgba(13,122,54,.2)', color:'#4cdb7a', label:`✅ ${t.general.accepted[lang]}` },
+    rejected: { bg:'rgba(230,57,70,.15)', color:'#ff6b6b', label:`❌ ${t.general.rejected[lang]}` },
   }
   const m = map[status] || map.pending
-  return <span className={`badge ${m.cls}`}>{m.label}</span>
+  return <span style={{ background:m.bg, color:m.color, borderRadius:100, padding:'3px 9px', fontSize:11, fontWeight:600 }}>{m.label}</span>
 }

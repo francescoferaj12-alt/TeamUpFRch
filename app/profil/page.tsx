@@ -298,9 +298,9 @@ export default function ProfilPage() {
   }
 
   if (loading || authLoading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem' }}>
-      <div style={{ width:40, height:40, border:'4px solid var(--gray-light)', borderTopColor:'var(--blue-bright)', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
-      <div style={{ color:'var(--text-muted)', fontSize:14 }}>{t.profil.loading[lang]}</div>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
+      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+      <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.profil.loading[lang]}</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -331,17 +331,23 @@ export default function ProfilPage() {
 
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
 
+  const darkCard: React.CSSProperties = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, padding:'1.25rem' }
+  const inpSt: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:9, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }
+  const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'rgba(255,255,255,.55)', marginBottom:6 }
+  const optSt = { background:'#061540' }
+
   return (
-    <div className="wrap">
+    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+      <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
-        <div style={{ background:'var(--green-bg)', border:'1px solid var(--green)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'var(--green)', marginBottom:'1rem' }}>
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
           ✅ {saveMsg}
         </div>
       )}
 
       {/* ── HERO ── */}
-      <div style={{ background:'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
+      <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
         <div style={{ display:'flex', alignItems:'flex-end', gap:'1.5rem', flexWrap:'wrap', position:'relative' }}>
 
           {/* AVATAR */}
@@ -358,7 +364,7 @@ export default function ProfilPage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'var(--blue-bright)', border:'2px solid #fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, cursor:'pointer', color:'#fff' }}
+              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#e63946', border:'2px solid #030a24', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, cursor:'pointer', color:'#fff' }}
               title={t.profil.photo_upload[lang]}
             >
               {uploadingPhoto ? '⏳' : '📷'}
@@ -395,10 +401,10 @@ export default function ProfilPage() {
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} className="btn btn-red btn-sm">
+            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
-            <button onClick={handleLogout} className="btn btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff', border:'1px solid rgba(255,255,255,.3)' }}>
+            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
           </div>
@@ -418,7 +424,7 @@ export default function ProfilPage() {
           { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#0a7c3e' },
         ]
         return (
-          <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', marginBottom:'1.25rem', overflow:'hidden' }}>
+          <div style={{ background:'rgba(255,255,255,.04)', borderRadius:16, border:'1px solid rgba(255,255,255,.08)', marginBottom:'1.25rem', overflow:'hidden' }}>
             {/* CURRENT SEASON header */}
             <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
@@ -430,12 +436,12 @@ export default function ProfilPage() {
               {stats.map((s, i) => {
                 const delta = s.prev != null ? s.v - s.prev : null
                 return (
-                  <div key={s.k} style={{ padding:'1.4rem .5rem 1.1rem', borderRight: i < 2 ? '1px solid var(--gray-light)' : 'none', textAlign:'center', position:'relative' }}>
+                  <div key={s.k} style={{ padding:'1.4rem .5rem 1.1rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                     <div style={{ position:'absolute', top:0, left:'25%', right:'25%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
                     <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
-                    <div style={{ fontSize:10, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
+                    <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
                     {delta !== null && (
-                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#0a7c3e' : delta < 0 ? '#e02020' : '#888', background: delta > 0 ? '#edfaf3' : delta < 0 ? '#fff0f0' : 'var(--gray-bg)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
+                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#4cdb7a' : delta < 0 ? '#ff6b6b' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,107,107,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
                         {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
                       </div>
                     )}
@@ -447,7 +453,7 @@ export default function ProfilPage() {
             {hasPrev && (
               <>
                 {/* PREVIOUS SEASON header — same style as current but lighter */}
-                <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid var(--gray-light)' }}>
+                <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
                   <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.prev_season[lang]}</span>
                   <span style={{ fontSize:11, color:'rgba(255,255,255,.55)', letterSpacing:1, fontWeight:600 }}>{seasonPrev}</span>
                 </div>
@@ -459,9 +465,9 @@ export default function ProfilPage() {
                     { v: profile.assists_prev, k: t.profil.assists[lang], color:'#1a6fd4' },
                     { v: profile.matches_prev, k: t.profil.matches[lang], color:'#0a7c3e' },
                   ].map((s, i) => (
-                    <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid var(--gray-light)' : 'none', textAlign:'center', background:'#fafbfd' }}>
+                    <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', background:'rgba(255,255,255,.02)' }}>
                       <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.9rem', color: s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
-                      <div style={{ fontSize:10, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
+                      <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
                     </div>
                   ))}
                 </div>
@@ -472,17 +478,17 @@ export default function ProfilPage() {
       })()}
 
       {/* ── PUNTI FORTI ── */}
-      <div style={{ background:'#fff', borderRadius:16, border:'1px solid var(--border)', padding:'1.25rem', marginBottom:'1.25rem' }}>
+      <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
         {strengthKeys.length === 0 ? (
-          <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
+          <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
             {t.profil.no_strengths[lang]}{' '}
-            <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
+            <button onClick={() => setEditing(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
           </p>
         ) : (
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             {strengthKeys.map(key => (
-              <span key={key} style={{ background:'var(--blue-light)', color:'var(--blue-mid)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
+              <span key={key} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.8)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
                 {strengthLabel(key, lang)}
               </span>
             ))}
@@ -492,13 +498,13 @@ export default function ProfilPage() {
 
       {/* ── EDIT FORM ── */}
       {editing && (
-        <div className="card" style={{ marginBottom:'1.25rem', border:'2px solid var(--blue-bright)' }}>
+        <div style={{ ...darkCard, marginBottom:'1.25rem', border:'1px solid rgba(230,57,70,.25)' }}>
           <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1.25rem' }}>
             {t.profil.edit_title[lang]}
           </div>
 
           {saveError && (
-            <div style={{ background:'var(--red-bg)', border:'1px solid var(--red)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'var(--red)', marginBottom:'1rem' }}>
+            <div style={{ background:'rgba(230,57,70,.12)', border:'1px solid rgba(230,57,70,.3)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#ff6b6b', marginBottom:'1rem' }}>
               ❌ Erreur: {saveError}
             </div>
           )}
@@ -506,98 +512,98 @@ export default function ProfilPage() {
           {/* Basic info */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'1rem', marginBottom:'1rem' }}>
             {profile.role === 'player' && (
-              <div className="field">
-                <label className="field-label">{t.profil.position[lang]}</label>
-                <select className="input" value={position} onChange={e => setPosition(e.target.value)}>
-                  <option value="">—</option>
-                  {POSITIONS.map(p => <option key={p}>{p}</option>)}
+              <div>
+                <label style={lblSt}>{t.profil.position[lang]}</label>
+                <select style={inpSt} value={position} onChange={e => setPosition(e.target.value)}>
+                  <option value="" style={optSt}>—</option>
+                  {POSITIONS.map(p => <option key={p} style={optSt}>{p}</option>)}
                 </select>
               </div>
             )}
             {profile.role === 'player' && (
-              <div className="field">
-                <label className="field-label">{t.profil.foot[lang]}</label>
-                <select className="input" value={foot} onChange={e => setFoot(e.target.value)}>
-                  <option value="Droit">{t.login.right[lang]}</option>
-                  <option value="Gauche">{t.login.left[lang]}</option>
-                  <option value="Ambidextre">{t.login.both[lang]}</option>
+              <div>
+                <label style={lblSt}>{t.profil.foot[lang]}</label>
+                <select style={inpSt} value={foot} onChange={e => setFoot(e.target.value)}>
+                  <option value="Droit" style={optSt}>{t.login.right[lang]}</option>
+                  <option value="Gauche" style={optSt}>{t.login.left[lang]}</option>
+                  <option value="Ambidextre" style={optSt}>{t.login.both[lang]}</option>
                 </select>
               </div>
             )}
-            <div className="field">
-              <label className="field-label">{t.profil.ligue[lang]}</label>
-              <select className="input" value={ligue} onChange={e => setLigue(e.target.value)}>
-                <option value="">—</option>
-                {LIGUES.map(l => <option key={l}>{l}</option>)}
+            <div>
+              <label style={lblSt}>{t.profil.ligue[lang]}</label>
+              <select style={inpSt} value={ligue} onChange={e => setLigue(e.target.value)}>
+                <option value="" style={optSt}>—</option>
+                {LIGUES.map(l => <option key={l} style={optSt}>{l}</option>)}
               </select>
             </div>
-            <div className="field">
-              <label className="field-label">{t.profil.zone[lang]}</label>
-              <select className="input" value={zone} onChange={e => setZone(e.target.value)}>
-                <option value="">—</option>
-                {ZONES.map(z => <option key={z}>{z}</option>)}
+            <div>
+              <label style={lblSt}>{t.profil.zone[lang]}</label>
+              <select style={inpSt} value={zone} onChange={e => setZone(e.target.value)}>
+                <option value="" style={optSt}>—</option>
+                {ZONES.map(z => <option key={z} style={optSt}>{z}</option>)}
               </select>
             </div>
-            <div className="field">
-              <label className="field-label">{t.profil.dispo[lang]}</label>
-              <select className="input" value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
-                <option value="oui">{t.profil.dispo_yes[lang]}</option>
-                <option value="non">{t.profil.dispo_no[lang]}</option>
+            <div>
+              <label style={lblSt}>{t.profil.dispo[lang]}</label>
+              <select style={inpSt} value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
+                <option value="oui" style={optSt}>{t.profil.dispo_yes[lang]}</option>
+                <option value="non" style={optSt}>{t.profil.dispo_no[lang]}</option>
               </select>
             </div>
           </div>
 
           {profile.role !== 'club' && (
-            <div className="field">
-              <label className="field-label">{t.profil.birthdate[lang]}</label>
+            <div style={{ marginBottom:'1rem' }}>
+              <label style={lblSt}>{t.profil.birthdate[lang]}</label>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr 1fr', gap:8 }}>
-                <select className="input" value={birthDay} onChange={e => setBirthDay(e.target.value)}>
-                  <option value="">{t.profil.day[lang]}</option>
-                  {days.map(d => <option key={d} value={d}>{d}</option>)}
+                <select style={inpSt} value={birthDay} onChange={e => setBirthDay(e.target.value)}>
+                  <option value="" style={optSt}>{t.profil.day[lang]}</option>
+                  {days.map(d => <option key={d} value={d} style={optSt}>{d}</option>)}
                 </select>
-                <select className="input" value={birthMonth} onChange={e => setBirthMonth(e.target.value)}>
-                  <option value="">{t.profil.month[lang]}</option>
-                  {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                <select style={inpSt} value={birthMonth} onChange={e => setBirthMonth(e.target.value)}>
+                  <option value="" style={optSt}>{t.profil.month[lang]}</option>
+                  {MONTHS.map((m, i) => <option key={m} value={i + 1} style={optSt}>{m}</option>)}
                 </select>
-                <select className="input" value={birthYear} onChange={e => setBirthYear(e.target.value)}>
-                  <option value="">{t.profil.year[lang]}</option>
-                  {years.map(y => <option key={y} value={y}>{y}</option>)}
+                <select style={inpSt} value={birthYear} onChange={e => setBirthYear(e.target.value)}>
+                  <option value="" style={optSt}>{t.profil.year[lang]}</option>
+                  {years.map(y => <option key={y} value={y} style={optSt}>{y}</option>)}
                 </select>
               </div>
             </div>
           )}
 
-          <div className="field">
-            <label className="field-label">{t.profil.phone[lang]}</label>
-            <input className="input" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
+          <div style={{ marginBottom:'1rem' }}>
+            <label style={lblSt}>{t.profil.phone[lang]}</label>
+            <input style={inpSt} type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
           </div>
 
           {/* Stats */}
           {profile.role !== 'club' && (
             <>
-              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'var(--blue-mid)' }}>{t.profil.current_season[lang]}</div>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'#3a8cff' }}>{t.profil.current_season[lang]}</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
                 {[
                   { v: goals, set: setGoals, label: t.profil.goals[lang] },
                   { v: assists, set: setAssists, label: t.profil.assists[lang] },
                   { v: matches, set: setMatches, label: t.profil.matches[lang] },
                 ].map(f => (
-                  <div key={f.label} className="field">
-                    <label className="field-label">{f.label}</label>
-                    <input className="input" type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
+                  <div key={f.label}>
+                    <label style={lblSt}>{f.label}</label>
+                    <input style={inpSt} type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
                   </div>
                 ))}
               </div>
-              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'var(--text-muted)' }}>{t.profil.prev_season[lang]}</div>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'rgba(255,255,255,.45)' }}>{t.profil.prev_season[lang]}</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
                 {[
                   { v: goalsPrev, set: setGoalsPrev, label: t.profil.goals[lang] },
                   { v: assistsPrev, set: setAssistsPrev, label: t.profil.assists[lang] },
                   { v: matchesPrev, set: setMatchesPrev, label: t.profil.matches[lang] },
                 ].map(f => (
-                  <div key={f.label} className="field">
-                    <label className="field-label">{f.label}</label>
-                    <input className="input" type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
+                  <div key={f.label}>
+                    <label style={lblSt}>{f.label}</label>
+                    <input style={inpSt} type="number" min="0" value={f.v} onChange={e => f.set(e.target.value)} placeholder="0" />
                   </div>
                 ))}
               </div>
@@ -605,20 +611,20 @@ export default function ProfilPage() {
           )}
 
           {/* Bio */}
-          <div className="field" style={{ marginTop:'1rem' }}>
-            <label className="field-label">{t.profil.bio_label[lang]}</label>
-            <textarea className="input" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.profil.bio_ph[lang]} />
+          <div style={{ marginTop:'1rem' }}>
+            <label style={lblSt}>{t.profil.bio_label[lang]}</label>
+            <textarea style={{ ...inpSt, resize:'vertical' }} rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.profil.bio_ph[lang]} />
           </div>
 
           {/* Career */}
-          <div className="field">
-            <label className="field-label">{t.profil.career_label[lang]}</label>
-            <textarea className="input" rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder={t.profil.career_ph[lang]} />
+          <div>
+            <label style={lblSt}>{t.profil.career_label[lang]}</label>
+            <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder={t.profil.career_ph[lang]} />
           </div>
 
           {/* Strengths — role-specific tags */}
-          <div className="field">
-            <label className="field-label">{t.profil.strengths_label[lang]}</label>
+          <div>
+            <label style={lblSt}>{t.profil.strengths_label[lang]}</label>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:4 }}>
               {roleStrengths.map(s => (
                 <button
@@ -628,9 +634,9 @@ export default function ProfilPage() {
                   style={{
                     padding:'6px 14px', borderRadius:100, fontSize:13, fontWeight:600,
                     cursor:'pointer', fontFamily:'inherit', border:'1.5px solid', transition:'all .15s',
-                    background: selectedStrengths.includes(s.key) ? 'var(--blue-mid)' : 'transparent',
-                    color: selectedStrengths.includes(s.key) ? '#fff' : 'var(--text-muted)',
-                    borderColor: selectedStrengths.includes(s.key) ? 'var(--blue-mid)' : 'var(--border)',
+                    background: selectedStrengths.includes(s.key) ? 'rgba(58,140,255,.25)' : 'transparent',
+                    color: selectedStrengths.includes(s.key) ? '#fff' : 'rgba(255,255,255,.45)',
+                    borderColor: selectedStrengths.includes(s.key) ? '#3a8cff' : 'rgba(255,255,255,.15)',
                   }}
                 >
                   {s[lang]}
@@ -640,24 +646,24 @@ export default function ProfilPage() {
           </div>
 
           {/* Videos */}
-          <div className="field">
-            <label className="field-label">{t.profil.video_label[lang]}</label>
+          <div>
+            <label style={lblSt}>{t.profil.video_label[lang]}</label>
             {[
               { v: video1, set: setVideo1, label: t.profil.video1[lang] },
               { v: video2, set: setVideo2, label: t.profil.video2[lang] },
               { v: video3, set: setVideo3, label: t.profil.video3[lang] },
             ].map((f, i) => (
-              <input key={i} className="input" style={{ marginBottom: i < 2 ? 8 : 0 }} value={f.v}
+              <input key={i} style={{ ...inpSt, marginBottom: i < 2 ? 8 : 0 }} value={f.v}
                 onChange={e => f.set(e.target.value)}
                 placeholder={`${f.label} — ${t.profil.video_url_ph[lang]}`} />
             ))}
           </div>
 
           <div style={{ display:'flex', gap:8, marginTop:'1rem' }}>
-            <button onClick={handleSave} disabled={saving} className="btn btn-blue" style={{ opacity: saving ? .7 : 1 }}>
+            <button onClick={handleSave} disabled={saving} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity: saving ? .7 : 1 }}>
               {saving ? t.profil.saving[lang] : t.profil.save_btn[lang]}
             </button>
-            <button onClick={() => { setEditing(false); setSaveError('') }} className="btn btn-ghost">
+            <button onClick={() => { setEditing(false); setSaveError('') }} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 20px', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.cancel[lang]}
             </button>
           </div>
@@ -670,27 +676,27 @@ export default function ProfilPage() {
         {/* LEFT — Bio + Videos */}
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
-          <div className="card">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
+          <div style={darkCard}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
               {t.profil.about[lang]}
             </div>
             {profile.bio
-              ? <p style={{ fontSize:14, color:'var(--text-muted)', lineHeight:1.7 }}>{profile.bio}</p>
-              : <p style={{ fontSize:14, color:'var(--text-muted)', fontStyle:'italic' }}>
+              ? <p style={{ fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.7 }}>{profile.bio}</p>
+              : <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
                   {t.profil.no_bio[lang]}{' '}
-                  <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
+                  <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
                 </p>
             }
           </div>
 
-          <div className="card">
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--gray-light)' }}>
+          <div style={darkCard}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
               {t.profil.highlights[lang]}
             </div>
             {videoUrls.length === 0 ? (
-              <div style={{ background:'var(--gray-bg)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed var(--gray-mid)' }}>
-                <div style={{ fontSize:14, color:'var(--text-muted)' }}>🎬 {t.profil.video_soon[lang]}</div>
-                <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
+              <div style={{ background:'rgba(255,255,255,.03)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed rgba(255,255,255,.12)' }}>
+                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)' }}>🎬 {t.profil.video_soon[lang]}</div>
+                <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
                   {t.profil.edit_videos[lang]} →
                 </button>
               </div>
@@ -706,7 +712,7 @@ export default function ProfilPage() {
                     </div>
                   ) : (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                      style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'var(--gray-bg)', borderRadius:10, textDecoration:'none', color:'var(--blue-mid)', fontSize:14, fontWeight:600 }}>
+                      style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'rgba(255,255,255,.05)', borderRadius:10, textDecoration:'none', color:'#3a8cff', fontSize:14, fontWeight:600 }}>
                       🎬 {t.profil.video_label[lang]} {i+1}
                     </a>
                   )
@@ -720,38 +726,38 @@ export default function ProfilPage() {
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
           {/* Informations */}
-          <div className="card card-sm">
+          <div style={darkCard}>
             {profile.available && (
-              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'var(--green-bg)', color:'var(--green)', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
-                <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--green)' }} />
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(13,122,54,.2)', color:'#4cdb7a', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
+                <span style={{ width:8, height:8, borderRadius:'50%', background:'#4cdb7a' }} />
                 {t.profil.available_badge[lang]}
               </div>
             )}
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.info[lang]}</div>
             {infoRows.filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
-              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--gray-light)', fontSize:14 }}>
-                <span style={{ color:'var(--text-muted)' }}>{k}</span>
-                <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all' }}>{v}</span>
+              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
+                <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
+                <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all', color:'#fff' }}>{v}</span>
               </div>
             ))}
           </div>
 
           {/* Parcours — entre Info et Actions */}
-          <div className="card card-sm">
+          <div style={darkCard}>
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.career[lang]}</div>
             {profile.career ? (
               <div style={{ display:'flex', flexDirection:'column' }}>
                 {profile.career.split('\n').filter(Boolean).map((line, i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.5rem 0', borderBottom:'1px solid var(--gray-light)' }}>
-                    <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--blue-bright)', flexShrink:0, marginTop:5 }} />
-                    <div style={{ fontSize:13, color:'var(--text-dark)', lineHeight:1.5 }}>{line}</div>
+                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.5rem 0', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', background:'#3a8cff', flexShrink:0, marginTop:5 }} />
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.8)', lineHeight:1.5 }}>{line}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p style={{ fontSize:13, color:'var(--text-muted)', fontStyle:'italic' }}>
+              <p style={{ fontSize:13, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
                 {t.profil.no_career[lang]}{' '}
-                <button onClick={() => setEditing(true)} style={{ color:'var(--blue-bright)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13 }}>
+                <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13 }}>
                   {t.profil.add_career[lang]}
                 </button>
               </p>
@@ -759,20 +765,20 @@ export default function ProfilPage() {
           </div>
 
           {/* Actions rapides */}
-          <div className="card card-sm">
+          <div style={darkCard}>
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.actions[lang]}</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              <Link href="/recherche" className="btn btn-blue btn-sm btn-full" style={{ justifyContent:'center' }}>{t.profil.search_clubs[lang]}</Link>
-              <Link href="/messages" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>{t.profil.my_msgs[lang]}</Link>
-              <Link href="/candidatures" className="btn btn-ghost btn-sm btn-full" style={{ justifyContent:'center' }}>{t.profil.my_cands[lang]}</Link>
+              <Link href="/recherche" style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.search_clubs[lang]}</Link>
+              <Link href="/messages" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_msgs[lang]}</Link>
+              <Link href="/candidatures" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_cands[lang]}</Link>
             </div>
           </div>
 
           {/* Conseil */}
-          <div className="card card-sm" style={{ background:'var(--blue-light)', border:'1px solid var(--blue-bright)' }}>
-            <div style={{ fontSize:13, color:'var(--blue-mid)', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
-            <div style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
-            <button onClick={() => setEditing(true)} className="btn btn-blue btn-sm" style={{ marginTop:'.75rem', width:'100%', justifyContent:'center' }}>
+          <div style={{ ...darkCard, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.25)' }}>
+            <div style={{ fontSize:13, color:'#3a8cff', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
+            <div style={{ fontSize:13, color:'rgba(255,255,255,.55)', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
+            <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', width:'100%', background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.complete[lang]}
             </button>
           </div>
@@ -783,6 +789,7 @@ export default function ProfilPage() {
         .profile-grid { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; }
         @media (max-width: 720px) { .profile-grid { grid-template-columns: 1fr; } }
       `}</style>
+      </div>
     </div>
   )
 }

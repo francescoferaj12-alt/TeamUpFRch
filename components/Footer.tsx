@@ -50,8 +50,8 @@ export default function Footer() {
                 alt="TeamUpFR"
                 style={{ height: 40, width: 40, objectFit: 'cover', borderRadius: 9, border: '2px solid rgba(255,255,255,.18)' }}
               />
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 1, color: '#fff' }}>
-                TeamUp<span style={{ color: '#e63946' }}>FR</span>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 1 }}>
+                <span style={{ color:'#e63946' }}>TeamUp</span><span style={{ color:'#000', WebkitTextStroke:'1px white' }}>F</span><span style={{ color:'#fff' }}>R</span>
               </span>
             </Link>
             <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14, lineHeight: 1.65, maxWidth: 300 }}>

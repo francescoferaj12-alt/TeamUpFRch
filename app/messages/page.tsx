@@ -154,8 +154,8 @@ export default function MessagesPage() {
   const myName = profile ? (profile.role === 'club' ? profile.club_name : `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()) : t.messages.me[lang]
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ width: 40, height: 40, border: '4px solid var(--gray-light)', borderTopColor: 'var(--blue-bright)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
+      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -164,18 +164,18 @@ export default function MessagesPage() {
     <div className="msg-wrap">
       {/* SIDEBAR */}
       <aside className="msg-sidebar">
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.3rem', letterSpacing: 1, marginBottom: '.75rem' }}>{t.messages.title[lang]}</div>
+        <div style={{ padding:'1rem', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1, marginBottom:'.75rem', color:'#fff' }}>{t.messages.title[lang]}</div>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t.messages.search_pl[lang]}
-            style={{ width: '100%', background: 'var(--gray-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
+            style={{ width:'100%', background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.1)', color:'#fff', borderRadius:8, padding:'8px 12px', fontSize:13, fontFamily:'inherit', outline:'none' }}
           />
         </div>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex:1, overflowY:'auto' }}>
           {filteredConvs.length === 0 ? (
-            <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+            <div style={{ padding:'2rem 1rem', textAlign:'center', color:'rgba(255,255,255,.4)', fontSize:13 }}>
               {conversations.length === 0
                 ? t.messages.no_conv[lang]
                 : t.messages.no_results[lang]}
@@ -184,18 +184,18 @@ export default function MessagesPage() {
             const isActive = c.partnerId === activePartnerId
             return (
               <button key={c.partnerId} onClick={() => selectConversation(c.partnerId)}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '.85rem 1rem', cursor: 'pointer', borderLeft: `3px solid ${isActive ? 'var(--blue-bright)' : 'transparent'}`, background: isActive ? 'var(--blue-light)' : 'transparent', width: '100%', border: 'none', borderBottom: '1px solid var(--gray-light)', textAlign: 'left' }}>
-                <div style={{ width: 42, height: 42, borderRadius: 12, background: isActive ? 'var(--blue-bright)' : 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0, color: isActive ? '#fff' : 'inherit' }}>
+                style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#e63946' : 'transparent'}`, background: isActive ? 'rgba(230,57,70,.12)' : 'transparent', width:'100%', border:'none', borderBottom:'1px solid rgba(255,255,255,.06)', textAlign:'left' }}>
+                <div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(230,57,70,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0, color:'#fff' }}>
                   {roleEmoji(c.partnerRole)}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.partnerName}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.lastMessage}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontWeight:600, fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#fff' }}>{c.partnerName}</div>
+                  <div style={{ fontSize:12, color:'rgba(255,255,255,.4)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.lastMessage}</div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.lastTime}</span>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
+                  <span style={{ fontSize:11, color:'rgba(255,255,255,.35)' }}>{c.lastTime}</span>
                   {c.unread > 0 && (
-                    <span style={{ width: 18, height: 18, background: 'var(--blue-bright)', borderRadius: '50%', fontSize: 10, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width:18, height:18, background:'#e63946', borderRadius:'50%', fontSize:10, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center' }}>
                       {c.unread}
                     </span>
                   )}
@@ -209,22 +209,22 @@ export default function MessagesPage() {
       {/* MAIN */}
       <section className="msg-main">
         {!activeConv ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)', padding: '2rem' }}>
-            <div style={{ fontSize: '3rem' }}>💬</div>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>{t.messages.no_selected[lang]}</div>
-            <div style={{ fontSize: 13 }}>
-              {t.messages.no_selected_desc[lang]} <a href="/recherche" style={{ color: 'var(--blue-bright)' }}>{t.messages.recherche_link[lang]}</a>.
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1, flexDirection:'column', gap:'1rem', color:'rgba(255,255,255,.4)', padding:'2rem' }}>
+            <div style={{ fontSize:'3rem' }}>💬</div>
+            <div style={{ fontSize:15, fontWeight:600, color:'#fff' }}>{t.messages.no_selected[lang]}</div>
+            <div style={{ fontSize:13 }}>
+              {t.messages.no_selected_desc[lang]} <a href="/recherche" style={{ color:'#e63946' }}>{t.messages.recherche_link[lang]}</a>.
             </div>
           </div>
         ) : (
           <>
             <div className="msg-header">
-              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+              <div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>
                 {roleEmoji(activeConv.partnerRole)}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>{activeConv.partnerName}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontWeight:700, fontSize:15, color:'#fff' }}>{activeConv.partnerName}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>
                   {roleLabel(activeConv.partnerRole)}
                 </div>
               </div>
@@ -235,15 +235,15 @@ export default function MessagesPage() {
                 const fromMe = m.sender_id === profile?.id
                 const time = new Date(m.created_at).toLocaleTimeString(lang === 'fr' ? 'fr-CH' : 'de-CH', { hour: '2-digit', minute: '2-digit' })
                 return (
-                  <div key={m.id || i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flexDirection: fromMe ? 'row-reverse' : 'row' }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: fromMe ? 'var(--blue-bright)' : 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: fromMe ? 11 : 14, fontWeight: fromMe ? 700 : 400, color: fromMe ? '#fff' : 'inherit', flexShrink: 0 }}>
+                  <div key={m.id || i} style={{ display:'flex', alignItems:'flex-end', gap:8, flexDirection: fromMe ? 'row-reverse' : 'row' }}>
+                    <div style={{ width:28, height:28, borderRadius:8, background: fromMe ? '#e63946' : 'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: fromMe ? 11 : 14, fontWeight:700, color:'#fff', flexShrink:0 }}>
                       {fromMe ? (myName?.slice(0, 2) || t.messages.me[lang]) : roleEmoji(activeConv.partnerRole)}
                     </div>
-                    <div style={{ maxWidth: '70%' }}>
-                      <div style={{ background: fromMe ? 'var(--blue-bright)' : '#fff', color: fromMe ? '#fff' : 'var(--text-dark)', border: fromMe ? 'none' : '1px solid var(--border)', padding: '.65rem .95rem', borderRadius: 14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize: 14, lineHeight: 1.5 }}>
+                    <div style={{ maxWidth:'70%' }}>
+                      <div style={{ background: fromMe ? '#e63946' : 'rgba(255,255,255,.08)', color:'#fff', padding:'.65rem .95rem', borderRadius:14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize:14, lineHeight:1.5 }}>
                         {m.text}
                       </div>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, textAlign: fromMe ? 'right' : 'left' }}>{time}</div>
+                      <div style={{ fontSize:10, color:'rgba(255,255,255,.35)', marginTop:3, textAlign: fromMe ? 'right' : 'left' }}>{time}</div>
                     </div>
                   </div>
                 )
@@ -256,10 +256,10 @@ export default function MessagesPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                 placeholder={t.messages.write_pl[lang]}
-                style={{ flex: 1, background: 'var(--gray-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', fontSize: 14, outline: 'none', fontFamily: 'inherit' }}
+                style={{ flex:1, background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:10, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }}
               />
               <button onClick={handleSend} disabled={sending || !input.trim()}
-                style={{ width: 40, height: 40, background: input.trim() ? 'var(--blue-bright)' : 'var(--gray-mid)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 18, cursor: input.trim() ? 'pointer' : 'default', flexShrink: 0, transition: 'background .15s' }}>
+                style={{ width:40, height:40, background: input.trim() ? '#e63946' : 'rgba(255,255,255,.1)', border:'none', borderRadius:10, color:'#fff', fontSize:18, cursor: input.trim() ? 'pointer' : 'default', flexShrink:0, transition:'background .15s' }}>
                 ➤
               </button>
             </div>
@@ -270,11 +270,11 @@ export default function MessagesPage() {
       <style>{`
         .msg-wrap { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 60px - 100px); min-height: 600px; overflow: hidden; }
         @media (max-width: 700px) { .msg-wrap { grid-template-columns: 1fr; height: auto; } .msg-sidebar { max-height: 240px; } }
-        .msg-sidebar { background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-        .msg-main { display: flex; flex-direction: column; background: var(--gray-bg); overflow: hidden; }
-        .msg-header { background: #fff; border-bottom: 1px solid var(--border); padding: .85rem 1.25rem; display: flex; align-items: center; gap: 12px; }
+        .msg-sidebar { background: #061540; border-right: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; overflow: hidden; }
+        .msg-main { display: flex; flex-direction: column; background: #030a24; overflow: hidden; }
+        .msg-header { background: #061540; border-bottom: 1px solid rgba(255,255,255,.07); padding: .85rem 1.25rem; display: flex; align-items: center; gap: 12px; }
         .msg-body { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem; }
-        .msg-input-wrap { background: #fff; border-top: 1px solid var(--border); padding: .85rem 1.25rem; display: flex; align-items: center; gap: 10px; }
+        .msg-input-wrap { background: #061540; border-top: 1px solid rgba(255,255,255,.07); padding: .85rem 1.25rem; display: flex; align-items: center; gap: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>

@@ -73,19 +73,35 @@ input, select, textarea { font-family: inherit; }
   font-size: 16px;
   border: 2px solid rgba(255,255,255,.18);
 }
-.nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: #fff; }
-.nav-brand span { color: var(--red-accent); }
+.nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
 
 .nav-links { display: flex; gap: 4px; }
 .nav-link {
   background: none; border: none;
   color: rgba(255,255,255,.65);
-  font-size: 13px; font-weight: 500;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   padding: 7px 12px; border-radius: 7px;
-  transition: all .15s;
+  transition: all .2s;
   white-space: nowrap;
+  position: relative;
 }
-.nav-link:hover, .nav-link.active { background: rgba(255,255,255,.12); color: #fff; }
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  right: 50%;
+  height: 2px;
+  background: #e63946;
+  border-radius: 2px;
+  transition: left .2s, right .2s;
+}
+.nav-link:hover, .nav-link.active { color: #fff; background: none; }
+.nav-link:hover::after, .nav-link.active::after { left: 12px; right: 12px; }
 
 .nav-right { display: flex; align-items: center; gap: 10px; }
 .nav-icon-btn {

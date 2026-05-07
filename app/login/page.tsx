@@ -124,10 +124,11 @@ function LoginForm() {
   }
 
   const inputStyle = {
-    width: '100%', background: 'var(--gray-bg)', border: '1.5px solid var(--border)',
+    width: '100%', background: 'rgba(255,255,255,.07)', border: '1.5px solid rgba(255,255,255,.12)',
     borderRadius: 9, padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
-    outline: 'none', color: 'var(--text-dark)'
+    outline: 'none', color: '#fff'
   }
+  const lblSt = { fontSize:11, fontWeight:700, color:'rgba(255,255,255,.45)' as string, textTransform:'uppercase' as const, letterSpacing:1, marginBottom:6 }
 
   const features = [
     { i: '👤', t: t.login.feat_players[lang] },
@@ -138,13 +139,14 @@ function LoginForm() {
   ]
 
   return (
-    <div style={{ minHeight: 'calc(100vh - 60px - 100px)', display: 'flex' }}>
+    <div style={{ minHeight:'calc(100vh - 60px - 100px)', display:'flex', background:'#030a24' }}>
 
       {/* LEFT — branding */}
-      <div className="login-left" style={{ flex: 1, background: 'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', padding: '3rem 2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 12, letterSpacing: 3, color: 'rgba(255,255,255,.4)', marginBottom: '.5rem' }}>{t.login.canton[lang]}</div>
-        <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2.5rem,5vw,4rem)', color: '#fff', letterSpacing: 2, lineHeight: 1 }}>
-          TeamUp<span style={{ color: 'var(--red-light)' }}>FR</span>
+      <div className="login-left" style={{ flex:1, background:'linear-gradient(135deg,#030a24,#061540,#0a1f5c)', padding:'3rem 2.5rem', display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', top:'20%', left:'30%', width:400, height:400, borderRadius:'50%', background:'radial-gradient(circle, rgba(230,57,70,.12) 0%, transparent 70%)', pointerEvents:'none' }} />
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:12, letterSpacing:3, color:'rgba(255,255,255,.4)', marginBottom:'.5rem' }}>{t.login.canton[lang]}</div>
+        <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'clamp(2.5rem,5vw,4rem)', color:'#fff', letterSpacing:2, lineHeight:1 }}>
+          <span style={{ color:'#e63946' }}>TeamUp</span><span style={{ color:'#000', WebkitTextStroke:'1px white' }}>F</span><span style={{ color:'#fff' }}>R</span>
         </h1>
         <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,.5)', margin: '.5rem 0 2rem' }}>{t.login.motto[lang]}</p>
         {features.map(f => (
@@ -156,32 +158,32 @@ function LoginForm() {
       </div>
 
       {/* RIGHT — form */}
-      <div style={{ width: 460, flexShrink: 0, background: '#fff', padding: '2rem 2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflowY: 'auto' }}>
+      <div style={{ width:460, flexShrink:0, background:'#061540', padding:'2rem 2.5rem', display:'flex', flexDirection:'column', justifyContent:'center', overflowY:'auto', color:'#fff', borderLeft:'1px solid rgba(255,255,255,.06)' }}>
 
         {/* FORGOT PASSWORD MODE */}
         {mode === 'forgot' ? (
           <>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', letterSpacing: 1, marginBottom: '.25rem' }}>{t.login.forgot_title[lang]}</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', marginBottom: '1.5rem' }}>
               {t.login.forgot_desc[lang]}
             </div>
 
-            {error && <div style={{ background: '#fce8e8', border: '1px solid var(--red)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--red)', marginBottom: '1rem' }}>⚠️ {error}</div>}
-            {success && <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--green)', marginBottom: '1rem' }}>✅ {success}</div>}
+            {error && <div style={{ background: 'rgba(230,57,70,.12)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#ff6b6b', marginBottom: '1rem' }}>⚠️ {error}</div>}
+            {success && <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>✅ {success}</div>}
 
             {!success && (
               <form onSubmit={handleForgot}>
                 <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.email[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.email[lang]}</div>
                   <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ton@email.ch" required />
                 </div>
-                <button type="submit" disabled={loading} style={{ width: '100%', background: 'var(--blue-bright)', color: '#fff', border: 'none', borderRadius: 9, padding: 12, fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .7 : 1, fontFamily: 'inherit' }}>
+                <button type="submit" disabled={loading} style={{ width: '100%', background: '#e63946', color: '#fff', border: 'none', borderRadius: 9, padding: 12, fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .7 : 1, fontFamily: 'inherit' }}>
                   {loading ? t.login.sending[lang] : t.login.forgot_send[lang]}
                 </button>
               </form>
             )}
 
-            <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: 'var(--blue-bright)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: '#e63946', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
               {t.login.back_login[lang]}
             </button>
           </>
@@ -190,24 +192,25 @@ function LoginForm() {
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', letterSpacing: 1, marginBottom: '.25rem' }}>
               {mode === 'login' ? t.login.welcome[lang] : t.login.create[lang]}
             </div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', marginBottom: '1.25rem' }}>
               {mode === 'login' ? t.login.connect[lang] : t.login.join[lang]}
             </div>
 
             {/* SWITCHER */}
-            <div style={{ display: 'flex', background: 'var(--gray-bg)', borderRadius: 10, padding: 4, marginBottom: '1.25rem' }}>
+            <div style={{ display:'flex', background:'rgba(255,255,255,.05)', borderRadius:10, padding:4, marginBottom:'1.25rem' }}>
               {(['login','register'] as const).map(m => (
                 <button key={m} type="button" onClick={() => { setMode(m); setError(''); setSuccess('') }} style={{
-                  flex: 1, background: mode === m ? '#fff' : 'transparent',
-                  color: mode === m ? 'var(--blue-mid)' : 'var(--text-muted)',
-                  border: 'none', padding: 8, borderRadius: 7, fontSize: 14, fontWeight: 600,
-                  boxShadow: mode === m ? '0 1px 4px rgba(0,0,0,.1)' : 'none', cursor: 'pointer', fontFamily: 'inherit'
+                  flex:1, background: mode === m ? 'rgba(230,57,70,.2)' : 'transparent',
+                  color: mode === m ? '#e63946' : 'rgba(255,255,255,.45)',
+                  border: mode === m ? '1px solid rgba(230,57,70,.3)' : '1px solid transparent',
+                  padding:8, borderRadius:7, fontSize:14, fontWeight:600,
+                  cursor:'pointer', fontFamily:'inherit'
                 }}>{m === 'login' ? t.login.connexion[lang] : t.login.inscription[lang]}</button>
               ))}
             </div>
 
-            {error && <div style={{ background: '#fce8e8', border: '1px solid var(--red)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--red)', marginBottom: '1rem' }}>⚠️ {error}</div>}
-            {success && <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--green)', marginBottom: '1rem' }}>✅ {success}</div>}
+            {error && <div style={{ background: 'rgba(230,57,70,.12)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#ff6b6b', marginBottom: '1rem' }}>⚠️ {error}</div>}
+            {success && <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>✅ {success}</div>}
 
             {/* GOOGLE OAUTH — hidden until enabled in Supabase Dashboard */}
 
@@ -216,14 +219,14 @@ function LoginForm() {
               {mode === 'register' && <>
                 {/* ROLE */}
                 <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.you_are[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.you_are[lang]}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                     {(['player','coach','club'] as const).map(r => (
                       <button key={r} type="button" onClick={() => setRole(r)} style={{
-                        background: role === r ? 'var(--blue-light)' : 'var(--gray-bg)',
-                        border: `1.5px solid ${role === r ? 'var(--blue-bright)' : 'var(--border)'}`,
-                        color: role === r ? 'var(--blue-mid)' : 'var(--text-muted)',
-                        borderRadius: 10, padding: '10px 4px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit'
+                        background: role === r ? 'rgba(230,57,70,.2)' : 'rgba(255,255,255,.05)',
+                        border: `1.5px solid ${role === r ? 'rgba(230,57,70,.4)' : 'rgba(255,255,255,.1)'}`,
+                        color: role === r ? '#e63946' : 'rgba(255,255,255,.5)',
+                        borderRadius:10, padding:'10px 4px', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'inherit'
                       }}>{{ player: t.login.player[lang], coach: t.login.coach[lang], club: t.login.club[lang] }[r]}</button>
                     ))}
                   </div>
@@ -231,30 +234,30 @@ function LoginForm() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.firstname[lang]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.firstname[lang]}</div>
                     <input style={inputStyle} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Lucas" required />
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.lastname[lang]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.lastname[lang]}</div>
                     <input style={inputStyle} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Martin" required />
                   </div>
                 </div>
 
                 {role === 'club' && <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.clubname[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.clubname[lang]}</div>
                   <input style={inputStyle} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Bulle" required />
                 </div>}
 
                 {role === 'player' && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.position[lang]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.position[lang]}</div>
                     <select style={inputStyle} value={position} onChange={e => setPosition(e.target.value)} required>
                       <option value="">{t.login.choose[lang]}</option>
                       {POSITIONS.map(p => <option key={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.foot[lang]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.foot[lang]}</div>
                     <select style={inputStyle} value={foot} onChange={e => setFoot(e.target.value)}>
                       <option value="Droit">{t.login.right[lang]}</option>
                       <option value="Gauche">{t.login.left[lang]}</option>
@@ -265,14 +268,14 @@ function LoginForm() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.ligue[lang]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.ligue[lang]}</div>
                     <select style={inputStyle} value={ligue} onChange={e => setLigue(e.target.value)} required>
                       <option value="">{t.login.choose[lang]}</option>
                       {LIGUES.map(l => <option key={l}>{l}</option>)}
                     </select>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.zone[lang]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.zone[lang]}</div>
                     <select style={inputStyle} value={zone} onChange={e => setZone(e.target.value)} required>
                       <option value="">{t.login.choose[lang]}</option>
                       {ZONES.map(z => <option key={z}>{z}</option>)}
@@ -281,7 +284,7 @@ function LoginForm() {
                 </div>
 
                 {role !== 'club' && <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.birthdate[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.birthdate[lang]}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 6 }}>
                     <select style={inputStyle} value={birthDay} onChange={e => setBirthDay(e.target.value)} required>
                       <option value="">{t.login.day[lang]}</option>
@@ -299,21 +302,21 @@ function LoginForm() {
                 </div>}
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.bio[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.bio[lang]}</div>
                   <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 64 }} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.login.bio_ph[lang]} />
                 </div>
               </>}
 
               <div style={{ marginBottom: '1rem' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.email[lang]}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.email[lang]}</div>
                 <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ton@email.ch" required />
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>{t.login.password[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1 }}>{t.login.password[lang]}</div>
                   {mode === 'login' && (
-                    <button type="button" onClick={() => { setMode('forgot'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', color: 'var(--blue-bright)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+                    <button type="button" onClick={() => { setMode('forgot'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', color: '#e63946', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
                       {t.login.forgot[lang]}
                     </button>
                   )}
@@ -323,9 +326,9 @@ function LoginForm() {
 
               {mode === 'register' && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.confirm_pwd[lang]}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.confirm_pwd[lang]}</div>
                   <input
-                    style={{ ...inputStyle, borderColor: confirmPassword && confirmPassword !== password ? 'var(--red)' : undefined }}
+                    style={{ ...inputStyle, borderColor: confirmPassword && confirmPassword !== password ? '#e63946' : undefined }}
                     type="password"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
@@ -334,16 +337,16 @@ function LoginForm() {
                     minLength={6}
                   />
                   {confirmPassword && confirmPassword !== password && (
-                    <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 4 }}>{t.login.error_pwd_match[lang]}</div>
+                    <div style={{ fontSize: 12, color: '#ff6b6b', marginTop: 4 }}>{t.login.error_pwd_match[lang]}</div>
                   )}
                 </div>
               )}
 
               <button type="submit" disabled={loading} style={{
-                width: '100%', marginTop: '1.25rem',
-                background: 'var(--blue-bright)', color: '#fff', border: 'none', borderRadius: 9,
-                padding: 12, fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? .7 : 1, fontFamily: 'inherit'
+                width:'100%', marginTop:'1.25rem',
+                background:'#e63946', color:'#fff', border:'none', borderRadius:9,
+                padding:12, fontSize:15, fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? .7 : 1, fontFamily:'inherit'
               }}>
                 {loading ? t.login.loading_btn[lang] : mode === 'login' ? t.login.btn_login[lang] : t.login.btn_register[lang]}
               </button>

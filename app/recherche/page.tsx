@@ -73,15 +73,22 @@ export default function RecherchePage() {
     ['club', t.search.clubs[lang], counts.club],
   ] as const
 
+  const optSt = { background:'#061540' }
+
   return (
-    <>
+    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+      <style>{`
+        .rech-card:hover { border-color:rgba(230,57,70,.4) !important; background:rgba(255,255,255,.07) !important; }
+        @keyframes spin{to{transform:rotate(360deg);}}
+      `}</style>
+
       {/* HERO */}
-      <div style={{ background:'linear-gradient(135deg, var(--blue-dark), var(--blue-mid))', padding:'2.5rem 1.5rem 1.5rem' }}>
+      <div style={{ background:'linear-gradient(180deg,#030a24 0%,#061540 100%)', padding:'2.5rem 1.5rem 1.5rem' }}>
         <div style={{ maxWidth:900, margin:'0 auto' }}>
           <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:'#fff', letterSpacing:2, marginBottom:'.25rem' }}>
-            {t.search.title[lang]} <span style={{ color:'var(--red-light)' }}>{t.search.advanced[lang]}</span>
+            {t.search.title[lang]} <span style={{ color:'#e63946' }}>{t.search.advanced[lang]}</span>
           </h1>
-          <p style={{ color:'rgba(255,255,255,.6)', fontSize:14, marginBottom:'1.25rem' }}>
+          <p style={{ color:'rgba(255,255,255,.5)', fontSize:14, marginBottom:'1.25rem' }}>
             {t.search.subtitle[lang]}
           </p>
           <div style={{ display:'flex', gap:8 }}>
@@ -89,9 +96,9 @@ export default function RecherchePage() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={t.search.placeholder[lang]}
-              style={{ flex:1, background:'rgba(255,255,255,.95)', border:'none', borderRadius:10, padding:'12px 16px', fontSize:15, outline:'none', fontFamily:'inherit' }}
+              style={{ flex:1, background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:10, padding:'12px 16px', fontSize:15, outline:'none', fontFamily:'inherit' }}
             />
-            <button style={{ background:'var(--red)', color:'#fff', border:'none', borderRadius:10, padding:'12px 22px', fontSize:14, fontWeight:700, fontFamily:'inherit', cursor:'pointer' }}>
+            <button style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:10, padding:'12px 22px', fontSize:14, fontWeight:700, fontFamily:'inherit', cursor:'pointer' }}>
               {t.search.btn[lang]}
             </button>
           </div>
@@ -99,26 +106,26 @@ export default function RecherchePage() {
       </div>
 
       {/* TYPE TABS */}
-      <div style={{ background:'#fff', padding:'.85rem 1.5rem', borderBottom:'1px solid var(--border)', display:'flex', gap:6, overflowX:'auto' }}>
+      <div style={{ background:'#061540', padding:'.85rem 1.5rem', borderBottom:'1px solid rgba(255,255,255,.06)', display:'flex', gap:6, overflowX:'auto' }}>
         {tabs.map(([type, label, count]) => (
           <button key={type} onClick={() => setFilterType(type as FilterType)} style={{
             padding:'7px 18px', borderRadius:8,
-            border:`1.5px solid ${filterType === type ? 'var(--blue-bright)' : 'var(--border)'}`,
-            background: filterType === type ? 'var(--blue-light)' : '#fff',
-            color: filterType === type ? 'var(--blue-mid)' : 'var(--text-muted)',
+            border:`1.5px solid ${filterType === type ? '#e63946' : 'rgba(255,255,255,.12)'}`,
+            background: filterType === type ? 'rgba(230,57,70,.15)' : 'rgba(255,255,255,.04)',
+            color: filterType === type ? '#e63946' : 'rgba(255,255,255,.6)',
             fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit'
           }}>
-            {label} <span style={{ background:'var(--blue-light)', color:'var(--blue-mid)', borderRadius:100, padding:'1px 7px', fontSize:11, marginLeft:4 }}>{count}</span>
+            {label} <span style={{ background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:100, padding:'1px 7px', fontSize:11, marginLeft:4 }}>{count}</span>
           </button>
         ))}
       </div>
 
       {/* FILTERS */}
-      <div style={{ background:'#fff', borderBottom:'1px solid var(--border)', padding:'.85rem 1.5rem', display:'flex', gap:'.75rem', flexWrap:'wrap', alignItems:'center' }}>
+      <div style={{ background:'#061540', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'.85rem 1.5rem', display:'flex', gap:'.75rem', flexWrap:'wrap', alignItems:'center' }}>
         <button onClick={() => setFilterDispo(!filterDispo)} style={{
-          border:`1.5px solid ${filterDispo ? 'var(--blue-bright)' : 'var(--border)'}`,
-          background: filterDispo ? 'var(--blue-light)' : 'var(--gray-bg)',
-          color: filterDispo ? 'var(--blue-mid)' : 'inherit',
+          border:`1.5px solid ${filterDispo ? '#e63946' : 'rgba(255,255,255,.12)'}`,
+          background: filterDispo ? 'rgba(230,57,70,.15)' : 'rgba(255,255,255,.04)',
+          color: filterDispo ? '#e63946' : 'rgba(255,255,255,.6)',
           borderRadius:100, padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit'
         }}>{t.search.available[lang]}</button>
 
@@ -128,15 +135,15 @@ export default function RecherchePage() {
           { value: filterZone, set: setFilterZone, placeholder: t.search.all_zones[lang], options: ZONES },
         ].map((f, i) => (
           <select key={i} value={f.value} onChange={e => f.set(e.target.value)} style={{
-            background:'var(--gray-bg)', border:'1.5px solid var(--border)', borderRadius:100,
+            background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:100,
             padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
           }}>
-            <option value="">{f.placeholder}</option>
-            {f.options.map(o => <option key={o}>{o}</option>)}
+            <option value="" style={optSt}>{f.placeholder}</option>
+            {f.options.map(o => <option key={o} style={optSt}>{o}</option>)}
           </select>
         ))}
 
-        <span style={{ marginLeft:'auto', fontSize:13, color:'var(--text-muted)', fontWeight:500 }}>
+        <span style={{ marginLeft:'auto', fontSize:13, color:'rgba(255,255,255,.5)', fontWeight:500 }}>
           {filtered.length} {filtered.length > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
         </span>
       </div>
@@ -144,15 +151,14 @@ export default function RecherchePage() {
       {/* RESULTS */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:'1rem', padding:'1.5rem' }}>
         {loading ? (
-          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>
-            <div style={{ width:36, height:36, border:'4px solid var(--gray-light)', borderTopColor:'var(--blue-bright)', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
+          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
+            <div style={{ width:36, height:36, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
             {t.search.loading[lang]}
-            <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>
+          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
             <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>😕</div>
-            <div style={{ fontSize:16, fontWeight:500, marginBottom:'.5rem' }}>{t.search.no_results[lang]}</div>
+            <div style={{ fontSize:16, fontWeight:500, marginBottom:'.5rem', color:'#fff' }}>{t.search.no_results[lang]}</div>
             <div style={{ fontSize:14 }}>
               {profiles.length === 0
                 ? t.search.first_register[lang]
@@ -160,7 +166,7 @@ export default function RecherchePage() {
               }
             </div>
             {profiles.length === 0 && (
-              <Link href="/login" className="btn btn-blue" style={{ marginTop:'1rem', display:'inline-flex' }}>
+              <Link href="/login" style={{ marginTop:'1rem', display:'inline-flex', background:'#e63946', color:'#fff', padding:'10px 22px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:14 }}>
                 {t.search.create_profile[lang]}
               </Link>
             )}
@@ -169,7 +175,7 @@ export default function RecherchePage() {
           filtered.map(p => <ProfileCard key={p.id} profile={p} />)
         )}
       </div>
-    </>
+    </div>
   )
 }
 
@@ -207,43 +213,45 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
   const ageSuffix = t.general.age_suffix[lang]
 
+  const avatarBg = p.role === 'player' ? 'rgba(26,111,212,.25)' : p.role === 'coach' ? 'rgba(224,32,32,.2)' : 'rgba(13,122,54,.2)'
+
   return (
-    <div style={{ background:'#fff', borderRadius:14, border:'1px solid var(--border)', padding:'1.25rem', position:'relative', overflow:'hidden' }}>
+    <div className="rech-card" style={{ background:'rgba(255,255,255,.04)', borderRadius:14, border:'1px solid rgba(255,255,255,.08)', padding:'1.25rem', position:'relative', overflow:'hidden', transition:'border-color .2s,background .2s' }}>
       <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:stripeColor }} />
 
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'.85rem' }}>
-        <div style={{ width:46, height:46, borderRadius:12, background:bgColor, display:'flex', alignItems:'center', justifyContent:'center', fontSize:p.avatar_url ? 0 : 18, fontWeight:700, flexShrink:0, overflow:'hidden' }}>
+        <div style={{ width:46, height:46, borderRadius:12, background:avatarBg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:p.avatar_url ? 0 : 18, fontWeight:700, flexShrink:0, overflow:'hidden' }}>
           {p.avatar_url
             ? <img src={p.avatar_url} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             : (initials.length > 2 ? roleEmoji : initials)
           }
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</div>
-          <div style={{ fontSize:12, color:'var(--text-muted)' }}>{p.position || roleLabel}{calcAge(p.birthdate) ? ` · ${calcAge(p.birthdate)}${ageSuffix}` : ''}</div>
+          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#fff' }}>{name}</div>
+          <div style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>{p.position || roleLabel}{calcAge(p.birthdate) ? ` · ${calcAge(p.birthdate)}${ageSuffix}` : ''}</div>
         </div>
-        <span className={`badge ${p.available ? 'badge-green' : 'badge-gray'}`}>
+        <span style={{ background: p.available ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: p.available ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 9px', fontSize:11, fontWeight:600, whiteSpace:'nowrap' }}>
           {p.available ? t.search.dispo[lang] : t.search.indispo[lang]}
         </span>
       </div>
 
       <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginBottom:'.85rem' }}>
-        {p.ligue && <span className="badge badge-blue">{p.ligue}</span>}
-        {p.zone && <span className="badge badge-blue">{p.zone}</span>}
-        {p.foot && <span className="badge badge-gray">{p.foot}</span>}
+        {p.ligue && <span style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.7)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:500 }}>{p.ligue}</span>}
+        {p.zone && <span style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.7)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:500 }}>{p.zone}</span>}
+        {p.foot && <span style={{ background:'rgba(255,255,255,.05)', color:'rgba(255,255,255,.5)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:500 }}>{p.foot}</span>}
       </div>
 
       {p.bio && (
-        <p style={{ fontSize:13, color:'var(--text-muted)', lineHeight:1.5, marginBottom:'.85rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+        <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', lineHeight:1.5, marginBottom:'.85rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
           {p.bio}
         </p>
       )}
 
       <div style={{ display:'flex', gap:6 }}>
-        <Link href="/messages" style={{ flex:1, background:'var(--blue-bright)', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Link href="/messages" style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
           {t.search.contact[lang]}
         </Link>
-        <Link href="/profil" style={{ flex:1, background:'var(--gray-light)', color:'var(--text-muted)', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Link href="/profil" style={{ flex:1, background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
           {t.search.profile[lang]}
         </Link>
       </div>
