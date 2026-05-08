@@ -93,7 +93,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>🇨🇭 Fribourg, Suisse</span>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>Fribourg, Suisse</span>
               </li>
             </ul>
           </div>

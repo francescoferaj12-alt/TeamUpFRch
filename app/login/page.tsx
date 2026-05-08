@@ -6,8 +6,8 @@ import { supabase } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t, months } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
+import { liguesHomme, liguesFemme } from '../../lib/data'
 
-const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 
@@ -45,6 +45,7 @@ function LoginForm() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [position, setPosition] = useState('')
+  const [genre, setGenre] = useState<'homme' | 'femme'>('homme')
   const [ligue, setLigue] = useState('')
   const [zone, setZone] = useState('')
   const [foot, setFoot] = useState('Droit')
@@ -94,6 +95,7 @@ function LoginForm() {
         id: data.user.id, email, role,
         first_name: firstName, last_name: lastName,
         position: role === 'player' ? position : null,
+        genre: role !== 'club' ? genre : null,
         ligue, zone,
         foot: role === 'player' ? foot : null,
         club_name: role === 'club' ? clubName : null,
@@ -232,6 +234,23 @@ function LoginForm() {
                   </div>
                 </div>
 
+                {/* GENRE — player/coach only */}
+                {role !== 'club' && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.genre[lang]}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      {(['homme', 'femme'] as const).map(g => (
+                        <button key={g} type="button" onClick={() => { setGenre(g); setLigue('') }} style={{
+                          background: genre === g ? 'rgba(230,57,70,.2)' : 'rgba(255,255,255,.05)',
+                          border: `1.5px solid ${genre === g ? 'rgba(230,57,70,.4)' : 'rgba(255,255,255,.1)'}`,
+                          color: genre === g ? '#e63946' : 'rgba(255,255,255,.5)',
+                          borderRadius:10, padding:'10px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit'
+                        }}>{g === 'homme' ? t.login.genre_homme[lang] : t.login.genre_femme[lang]}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.firstname[lang]}</div>
@@ -271,7 +290,11 @@ function LoginForm() {
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.ligue[lang]}</div>
                     <select style={inputStyle} value={ligue} onChange={e => setLigue(e.target.value)} required>
                       <option value="">{t.login.choose[lang]}</option>
-                      {LIGUES.map(l => <option key={l}>{l}</option>)}
+                      {(role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
+                        <optgroup key={g.group} label={g.group} style={{ background: '#061540' }}>
+                          {g.items.map(l => <option key={l} style={{ background: '#061540' }}>{l}</option>)}
+                        </optgroup>
+                      ))}
                     </select>
                   </div>
                   <div>

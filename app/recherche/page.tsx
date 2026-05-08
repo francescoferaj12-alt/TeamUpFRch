@@ -22,12 +22,13 @@ export default function RecherchePage() {
   const [filterPos, setFilterPos] = useState('')
   const [filterZone, setFilterZone] = useState('')
   const [filterDispo, setFilterDispo] = useState(false)
+  const [filterGenre, setFilterGenre] = useState('')
 
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id,email,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,birthdate')
+        .select('id,email,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,birthdate,genre')
         .order('created_at', { ascending: false })
         .limit(500)
       if (!error && data) setProfiles(data as Profile[])
@@ -48,6 +49,7 @@ export default function RecherchePage() {
     return profiles.filter(p => {
       if (filterType !== 'all' && p.role !== filterType) return false
       if (filterDispo && !p.available) return false
+      if (filterGenre && p.role !== 'club' && p.genre !== filterGenre) return false
       if (filterLigue && p.ligue !== filterLigue) return false
       if (filterPos && p.position !== filterPos) return false
       if (filterZone && p.zone !== filterZone) return false
@@ -128,6 +130,15 @@ export default function RecherchePage() {
           color: filterDispo ? '#e63946' : 'rgba(255,255,255,.6)',
           borderRadius:100, padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit'
         }}>{t.search.available[lang]}</button>
+
+        <select value={filterGenre} onChange={e => setFilterGenre(e.target.value)} style={{
+          background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:100,
+          padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
+        }}>
+          <option value="" style={optSt}>{t.search.all_genres[lang]}</option>
+          <option value="homme" style={optSt}>♂ {lang === 'fr' ? 'Homme' : 'Mann'}</option>
+          <option value="femme" style={optSt}>♀ {lang === 'fr' ? 'Femme' : 'Frau'}</option>
+        </select>
 
         {[
           { value: filterLigue, set: setFilterLigue, placeholder: t.search.all_ligues[lang], options: LIGUES },

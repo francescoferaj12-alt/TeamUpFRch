@@ -20,7 +20,7 @@ export const t = {
 
   // HOMEPAGE
   home: {
-    badge: { fr: 'Canton de Fribourg · Suisse 🇨🇭', de: 'Kanton Freiburg · Schweiz 🇨🇭' },
+    badge: { fr: 'Canton de Fribourg · Suisse', de: 'Kanton Freiburg · Schweiz' },
     title1: { fr: "IT'S TIME TO", de: 'ES IST ZEIT ZU' },
     title2: { fr: 'PLAY', de: 'SPIELEN' },
     motto: { fr: 'Ton équipe, ton avenir', de: 'Dein Team, deine Zukunft' },
@@ -143,6 +143,9 @@ export const t = {
     day: { fr: 'Jour', de: 'Tag' },
     month: { fr: 'Mois', de: 'Monat' },
     year: { fr: 'Année', de: 'Jahr' },
+    genre: { fr: 'Genre', de: 'Geschlecht' },
+    genre_homme: { fr: '♂ Homme', de: '♂ Mann' },
+    genre_femme: { fr: '♀ Femme', de: '♀ Frau' },
   },
 
   // RECHERCHE
@@ -172,8 +175,11 @@ export const t = {
     dispo: { fr: 'Dispo', de: 'Verfügbar' },
     indispo: { fr: 'Indispo', de: 'Nicht verf.' },
     joueur: { fr: 'Joueur', de: 'Spieler' },
+    joueuse: { fr: 'Joueuse', de: 'Spielerin' },
     coach_label: { fr: 'Coach', de: 'Trainer' },
     club_label: { fr: 'Club', de: 'Verein' },
+    all_genres: { fr: 'Tous genres', de: 'Alle Geschlechter' },
+    genre_filter: { fr: 'Genre', de: 'Geschlecht' },
   },
 
   // PROFIL
@@ -258,6 +264,11 @@ export const t = {
     edit_stats: { fr: 'Modifier mes stats', de: 'Statistiken bearbeiten' },
     edit_strengths: { fr: 'Modifier mes points forts', de: 'Stärken bearbeiten' },
     edit_videos: { fr: 'Modifier mes vidéos', de: 'Videos bearbeiten' },
+    genre_label: { fr: 'Genre', de: 'Geschlecht' },
+    genre_homme: { fr: '♂ Homme', de: '♂ Mann' },
+    genre_femme: { fr: '♀ Femme', de: '♀ Frau' },
+    joueur_f: { fr: 'Joueuse', de: 'Spielerin' },
+    coach_f: { fr: 'Coache', de: 'Trainerin' },
   },
 
   // MESSAGES
@@ -405,22 +416,22 @@ export const t = {
     origin_p1_strong: { fr: 'service innovant', de: 'innovativen Dienst' },
     origin_p2: { fr: "En tant qu'entraîneur, il vivait chaque saison le même problème : trouver des joueurs, c'est une affaire de réseau. Si tu ne connais personne, tu ne trouves personne.", de: "Als Trainer erlebte er jede Saison dasselbe Problem: Spieler zu finden ist eine Frage des Netzwerks. Wenn du niemanden kennst, findest du niemanden." },
     origin_p2_strong: { fr: "trouver des joueurs, c'est une affaire de réseau.", de: 'Spieler zu finden ist eine Frage des Netzwerks.' },
-    origin_p3: { fr: "Francesco, arrivé d'Italie à 14 ans, l'avait vécu de l'autre côté — chercher une équipe dans un pays qu'il découvrait. Trois expériences différentes, un même constat. Un même manque. Une seule solution.", de: "Francesco, der mit 14 Jahren aus Italien kam, hatte es von der anderen Seite erlebt — in einem Land, das er gerade entdeckte, ein Team zu suchen. Drei verschiedene Erfahrungen, eine gemeinsame Erkenntnis. Dasselbe Defizit. Eine einzige Lösung." },
+    origin_p3: { fr: "Francesco avait vécu de l'autre côté — chercher une équipe dans un pays qu'il découvrait. Trois expériences différentes, un même constat. Un même manque. Une seule solution.", de: "Francesco hatte es von der anderen Seite erlebt — in einem Land, das er gerade entdeckte, ein Team zu suchen. Drei verschiedene Erfahrungen, eine gemeinsame Erkenntnis. Dasselbe Defizit. Eine einzige Lösung." },
     quote: { fr: "Dans le football amateur, tu trouves une équipe par les connaissances. Si tu ne connais personne, tu joues nulle part. Ce n'est pas normal.", de: "Im Amateurfussball findest du ein Team durch Beziehungen. Wenn du niemanden kennst, spielst du nirgendwo. Das ist nicht normal." },
     quote_sub: { fr: 'Coach · Co-fondateur · 28 ans', de: 'Trainer · Mitgründer · 28 Jahre' },
     team_badge: { fr: "L'équipe", de: 'Das Team' },
     team_title: { fr: 'Trois origines, une passion', de: 'Drei Ursprünge, eine Leidenschaft' },
-    team_desc: { fr: "Portugais, italo-albanais — tous réunis à Fribourg par le football. C'est peut-être ça qui nous a donné la sensibilité pour ce projet.", de: "Portugiesisch, italo-albanisch — alle in Freiburg durch den Fussball vereint. Vielleicht ist es das, was uns das Gespür für dieses Projekt gegeben hat." },
+    team_desc: { fr: "Tous réunis à Fribourg par le football. C'est peut-être ça qui nous a donné la sensibilité pour ce projet.", de: "Alle in Freiburg durch den Fussball vereint. Vielleicht ist es das, was uns das Gespür für dieses Projekt gegeben hat." },
     tiago_role: { fr: 'Coach & Co-fondateur', de: 'Trainer & Mitgründer' },
-    tiago_origin: { fr: 'Origines portugaises · Né à Fribourg', de: 'Portugiesische Herkunft · In Freiburg geboren' },
+    tiago_origin: { fr: 'Né à Fribourg', de: 'In Freiburg geboren' },
     tiago_desc: { fr: "L'idée originale. En tant qu'entraîneur, il cherchait des joueurs chaque saison sans trouver de solution. Sa frustration est devenue notre mission.", de: "Die ursprüngliche Idee. Als Trainer suchte er jede Saison Spieler, ohne eine Lösung zu finden. Seine Frustration wurde zu unserer Mission." },
     tiago_tag: { fr: "💡 L'idée", de: '💡 Die Idee' },
     fran_role: { fr: 'Joueur & Co-fondateur', de: 'Spieler & Mitgründer' },
-    fran_origin: { fr: "Italo-albanais · Arrivé à Fribourg il y a 7 ans", de: 'Italo-albanisch · Vor 7 Jahren nach Freiburg gekommen' },
+    fran_origin: { fr: "Arrivé à Fribourg il y a 7 ans", de: 'Vor 7 Jahren nach Freiburg gekommen' },
     fran_desc: { fr: "Arrivé en Suisse à 14 ans, il a vécu de l'intérieur la difficulté de trouver une équipe sans réseau dans un pays nouveau. Cette expérience est au cœur du projet.", de: "Mit 14 Jahren in die Schweiz gekommen, erlebte er aus erster Hand die Schwierigkeit, in einem neuen Land ohne Netzwerk ein Team zu finden. Diese Erfahrung steht im Mittelpunkt des Projekts." },
     fran_tag: { fr: '🎯 La vision', de: '🎯 Die Vision' },
     hugo_role: { fr: 'Joueur & Co-fondateur', de: 'Spieler & Mitgründer' },
-    hugo_origin: { fr: 'Origines portugaises · Né à Fribourg', de: 'Portugiesische Herkunft · In Freiburg geboren' },
+    hugo_origin: { fr: 'Né à Fribourg', de: 'In Freiburg geboren' },
     hugo_desc: { fr: "Joueur passionné, il connaît le football amateur fribourgeois de l'intérieur. Son expérience terrain a façonné chaque détail de la plateforme.", de: "Als leidenschaftlicher Spieler kennt er den Freiburger Amateurfussball von innen. Seine Felderfahrung hat jedes Detail der Plattform geprägt." },
     hugo_tag: { fr: "⚡ L'énergie", de: '⚡ Die Energie' },
     age_suffix: { fr: ' ans', de: ' J.' },
@@ -481,12 +492,12 @@ export const t = {
   // FOOTER
   footer: {
     rights: { fr: 'Tous droits réservés', de: 'Alle Rechte vorbehalten' },
-    languages: { fr: '🇫🇷 Français · 🇩🇪 Deutsch', de: '🇩🇪 Deutsch · 🇫🇷 Français' },
+    languages: { fr: 'Français · Deutsch', de: 'Deutsch · Français' },
     platform: { fr: 'Plateforme', de: 'Plattform' },
     about_section: { fr: 'TeamUpFR', de: 'TeamUpFR' },
     contact_section: { fr: 'Contact', de: 'Kontakt' },
     motto: { fr: 'Ton équipe, ton avenir', de: 'Dein Team, deine Zukunft' },
-    location: { fr: '🇨🇭 Canton de Fribourg · Suisse', de: '🇨🇭 Kanton Freiburg · Schweiz' },
+    location: { fr: 'Canton de Fribourg · Suisse', de: 'Kanton Freiburg · Schweiz' },
     clubs_link: { fr: 'Les clubs', de: 'Die Vereine' },
     apropos_link: { fr: 'À propos', de: 'Über uns' },
     privacy_link: { fr: 'Confidentialité', de: 'Datenschutz' },
