@@ -169,6 +169,9 @@ export default function ProfilPage() {
   const [clubWhatsapp, setClubWhatsapp] = useState('')
   const [clubPhonePublic, setClubPhonePublic] = useState('')
   const [clubEmailPublic, setClubEmailPublic] = useState('')
+  const [clubName, setClubName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 55 }, (_, i) => currentYear - 14 - i)
@@ -245,6 +248,9 @@ export default function ProfilPage() {
     setClubWhatsapp(data.club_whatsapp || '')
     setClubPhonePublic(data.club_phone_public || '')
     setClubEmailPublic(data.club_email_public || '')
+    setClubName(data.club_name || '')
+    setFirstName(data.first_name || '')
+    setLastName(data.last_name || '')
   }
 
   function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
@@ -297,6 +303,13 @@ export default function ProfilPage() {
 
     // Base fields that always exist in the DB
     const baseUpdates = {
+      first_name: firstName || null,
+      last_name: lastName || null,
+      ...(profile.role === 'club' ? {
+        club_name: clubName || null,
+        // reset verification if the club name changed
+        ...(clubName && clubName !== profile.club_name ? { verified: false, verification_requested: false } : {}),
+      } : {}),
       bio: bio || null,
       position: position || null,
       genre: profile.role !== 'club' ? genre : null,
@@ -719,6 +732,23 @@ export default function ProfilPage() {
 
           {/* Basic info */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'1rem', marginBottom:'1rem' }}>
+            {/* Club identity */}
+            {profile.role === 'club' && (
+              <div style={{ gridColumn: '1 / -1', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={lblSt}>🏟️ Nom de la société</label>
+                  <input style={inpSt} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Mon Club" />
+                </div>
+                <div>
+                  <label style={lblSt}>Prénom du responsable</label>
+                  <input style={inpSt} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" />
+                </div>
+                <div>
+                  <label style={lblSt}>Nom du responsable</label>
+                  <input style={inpSt} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" />
+                </div>
+              </div>
+            )}
             {profile.role !== 'club' && (
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={lblSt}>{t.profil.genre_label[lang]}</label>
