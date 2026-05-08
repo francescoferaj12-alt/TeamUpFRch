@@ -48,6 +48,22 @@ export type Profile = {
   club_phone_public?: string
   club_email_public?: string
   verification_requested?: boolean
+  // Player extended
+  position_secondary?: string
+  jersey_number?: number
+  height_cm?: number
+  level?: string
+  // Coach extended
+  coach_categories?: string
+  coach_philosophy?: string
+  // Club extended
+  club_founded_year?: number
+  club_teams_count?: number
+  club_stadium_name?: string
+  club_stadium_address?: string
+  club_color_primary?: string
+  club_color_secondary?: string
+  club_categories?: string
   created_at: string
 }
 

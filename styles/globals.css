@@ -643,3 +643,391 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: rgba(255,255,255,0.12);
   color: white;
 }
+
+/* ── Profile edit form (v3) ────────────────────────────────────────────── */
+.pe-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.pe-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  margin-bottom: 8px;
+  color: white;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.pe-subtitle {
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+
+/* Progress bar */
+.pe-progress-wrap {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.pe-progress-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  min-width: 150px;
+}
+.pe-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.pe-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e63946, #ff7a85);
+  border-radius: 100px;
+  transition: width 0.4s ease;
+}
+
+/* Form section */
+.form-section {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 28px 30px;
+  margin-bottom: 18px;
+}
+.form-section-header {
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.form-section-label {
+  display: inline-block;
+  color: #e63946;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 6px;
+  position: relative;
+  padding-left: 22px;
+}
+.form-section-label::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 2px;
+  background: #e63946;
+}
+.form-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: white;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+.form-section-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+}
+.form-section-toggle {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.form-section-toggle:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 7px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.form-group .field-help {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 11px 13px;
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.15s;
+  box-sizing: border-box;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #e63946;
+  box-shadow: 0 0 0 3px rgba(230,57,70,0.18);
+  background: rgba(0,0,0,0.4);
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+.form-group textarea {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.55;
+}
+.form-group select option {
+  background: #061540;
+  color: #fff;
+}
+.form-group input[type="color"] {
+  padding: 4px;
+  height: 44px;
+  cursor: pointer;
+}
+
+/* Multi-select pills (categories, etc.) */
+.pe-multi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pe-multi-chip {
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  transition: all 0.15s;
+}
+.pe-multi-chip:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: white;
+}
+.pe-multi-chip.active {
+  background: rgba(230,57,70,0.2);
+  border-color: #e63946;
+  color: white;
+}
+
+/* Guided about chips */
+.pe-guided {
+  margin-bottom: 12px;
+}
+.pe-guided-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+}
+.pe-guided-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pe-guided-chip {
+  background: rgba(58,140,255,0.1);
+  border: 1px solid rgba(58,140,255,0.3);
+  color: #7eb6ff;
+  border-radius: 100px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.pe-guided-chip:hover {
+  background: rgba(58,140,255,0.2);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Char counter */
+.pe-charcount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-top: 8px;
+  gap: 12px;
+}
+.pe-charcount-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.pe-charcount-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: all 0.2s;
+}
+.pe-charcount-msg {
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Edit/Preview tabs */
+.pe-tabs {
+  display: inline-flex;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+.pe-tab {
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 7px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.pe-tab.active {
+  background: rgba(230,57,70,0.2);
+  color: white;
+}
+
+/* Preview content */
+.pe-preview {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 18px 20px;
+  min-height: 140px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.pe-preview-empty {
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+}
+
+/* Sticky save bar */
+.pe-savebar {
+  position: sticky;
+  bottom: 16px;
+  z-index: 10;
+  background: rgba(3,10,36,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+.pe-savebar-status {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pe-savebar-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4cdb7a;
+}
+.pe-savebar-status.saving .dot { background: #ffb84a; animation: pulse 1.2s infinite; }
+.pe-savebar-status.error .dot { background: #ff6b6b; }
+.pe-savebar-actions {
+  display: flex;
+  gap: 8px;
+}
+.pe-btn-save {
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.pe-btn-save:disabled { opacity: 0.6; cursor: default; }
+.pe-btn-cancel {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+@media (max-width: 700px) {
+  .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+  .form-section { padding: 22px 20px; }
+  .pe-progress-wrap { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .pe-progress-text { min-width: 0; }
+  .pe-savebar { flex-direction: column; align-items: stretch; }
+  .pe-savebar-actions { justify-content: flex-end; }
+  .pe-title { font-size: 32px; }
+}
