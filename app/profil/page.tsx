@@ -674,6 +674,36 @@ export default function ProfilPage() {
         </div>
       )}
 
+      {/* ── CLUB CATEGORIES ── */}
+      {profile.role === 'club' && profile.club_categories && (
+        <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', padding:'1.25rem' }}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:2, color:'#fff', marginBottom:'1rem' }}>
+            ⚽ {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
+          </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+            {profile.club_categories.split(',').map(s => s.trim()).filter(Boolean).map(key => {
+              const labels: Record<string, { fr: string; de: string }> = {
+                cat_seniors_h:  { fr:'Seniors hommes', de:'Senioren Männer' },
+                cat_seniors_f:  { fr:'Seniors femmes', de:'Senioren Frauen' },
+                cat_youth:      { fr:'Youth League',   de:'Youth League' },
+                cat_juniors_a:  { fr:'Juniors A',      de:'Junioren A' },
+                cat_juniors_b:  { fr:'Juniors B',      de:'Junioren B' },
+                cat_juniors_c:  { fr:'Juniors C',      de:'Junioren C' },
+                cat_juniors_d:  { fr:'Juniors D',      de:'Junioren D' },
+                cat_juniores_f: { fr:'Juniors filles', de:'Juniorinnen' },
+                cat_veterans:   { fr:'Vétérans',       de:'Veteranen' },
+              }
+              const color = key.includes('seniors') ? '#3a8cff' : key === 'cat_veterans' ? '#b56cf0' : key === 'cat_juniores_f' ? '#ff8fab' : key === 'cat_youth' ? '#ffb84a' : '#4cdb7a'
+              return (
+                <span key={key} style={{ background:`${color}1a`, border:`1.5px solid ${color}55`, color, borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:700 }}>
+                  {labels[key]?.[lang] || key}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── CAREER SECTION ── */}
       {profile.role !== 'club' && (
         <>
