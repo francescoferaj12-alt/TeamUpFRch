@@ -137,9 +137,15 @@ function VueSection({ profile, onPublish }: { profile: Profile; onPublish: () =>
 
   return (
     <>
-      <div style={{ marginBottom:'1.25rem' }}>
-        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase', marginBottom:4 }}>{t.dash.dashboard_label[lang]}</div>
-        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', letterSpacing:1 }}>{t.dash.overview_title[lang]}</div>
+      <div style={{ marginBottom:'1.25rem', display:'flex', justifyContent:'space-between', alignItems:'flex-end', gap:'1rem', flexWrap:'wrap' }}>
+        <div>
+          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase', marginBottom:4 }}>{t.dash.dashboard_label[lang]}</div>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', letterSpacing:1 }}>{t.dash.overview_title[lang]}</div>
+        </div>
+        <button onClick={onPublish}
+          style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:10, padding:'10px 20px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap' }}>
+          + {t.dash.publish_new[lang]}
+        </button>
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))', gap:'1rem', marginBottom:'1.5rem' }}>
