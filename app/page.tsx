@@ -19,9 +19,9 @@ function useCounters() {
   useEffect(() => {
     async function loadCounts() {
       const [rp, rc, rco] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'player'),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'club'),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'coach'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'player').neq('hidden', true),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'club').neq('hidden', true),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'coach').neq('hidden', true),
       ])
       real.current = {
         players: rp.count ?? 0,

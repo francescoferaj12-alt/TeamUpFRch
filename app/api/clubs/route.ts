@@ -13,6 +13,7 @@ export async function GET() {
     .from('profiles')
     .select('id, club_name, first_name, last_name, zone, avatar_url')
     .eq('role', 'club')
+    .neq('hidden', true)
     .order('created_at', { ascending: true })
 
   if (error) return NextResponse.json([], { status: 200 })

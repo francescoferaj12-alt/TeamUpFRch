@@ -36,6 +36,7 @@ export type Profile = {
   career?: string
   genre?: 'homme' | 'femme'
   verified?: boolean
+  hidden?: boolean
   verification_requested?: boolean
   created_at: string
 }

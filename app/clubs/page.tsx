@@ -22,6 +22,7 @@ export default function ClubsPage() {
         .from('profiles')
         .select('*')
         .eq('role', 'club')
+        .neq('hidden', true)
         .order('created_at', { ascending: false })
       if (data) setClubs(data)
       setLoading(false)
