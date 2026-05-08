@@ -245,8 +245,8 @@ export default function PublicProfilPage() {
               </div>
             )}
 
-            {/* Strengths */}
-            {strengths.length > 0 && (
+            {/* Strengths — hidden for clubs */}
+            {profile.role !== 'club' && strengths.length > 0 && (
               <div style={darkCard}>
                 <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>Points forts</div>
                 <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -259,8 +259,8 @@ export default function PublicProfilPage() {
               </div>
             )}
 
-            {/* Videos */}
-            {videoUrls.length > 0 && (
+            {/* Videos — hidden for clubs */}
+            {profile.role !== 'club' && videoUrls.length > 0 && (
               <div style={darkCard}>
                 <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>Highlights</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
@@ -307,7 +307,7 @@ export default function PublicProfilPage() {
               ))}
             </div>
 
-            {profile.career && (
+            {profile.role !== 'club' && profile.career && (
               <div style={darkCard}>
                 <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>Parcours</div>
                 {profile.career.split('\n').filter(Boolean).map((line, i) => (
