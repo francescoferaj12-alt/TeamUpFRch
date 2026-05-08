@@ -41,6 +41,12 @@ export type Profile = {
   coach_diploma?: string
   coach_specialty?: string
   coach_availability?: string
+  club_website?: string
+  club_instagram?: string
+  club_facebook?: string
+  club_whatsapp?: string
+  club_phone_public?: string
+  club_email_public?: string
   verification_requested?: boolean
   created_at: string
 }

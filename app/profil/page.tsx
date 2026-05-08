@@ -163,6 +163,12 @@ export default function ProfilPage() {
   const [coachDiploma, setCoachDiploma] = useState('')
   const [coachSpecialty, setCoachSpecialty] = useState('')
   const [coachAvailability, setCoachAvailability] = useState('')
+  const [clubWebsite, setClubWebsite] = useState('')
+  const [clubInstagram, setClubInstagram] = useState('')
+  const [clubFacebook, setClubFacebook] = useState('')
+  const [clubWhatsapp, setClubWhatsapp] = useState('')
+  const [clubPhonePublic, setClubPhonePublic] = useState('')
+  const [clubEmailPublic, setClubEmailPublic] = useState('')
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 55 }, (_, i) => currentYear - 14 - i)
@@ -233,6 +239,12 @@ export default function ProfilPage() {
     setCoachDiploma(data.coach_diploma || '')
     setCoachSpecialty(data.coach_specialty || '')
     setCoachAvailability(data.coach_availability || '')
+    setClubWebsite(data.club_website || '')
+    setClubInstagram(data.club_instagram || '')
+    setClubFacebook(data.club_facebook || '')
+    setClubWhatsapp(data.club_whatsapp || '')
+    setClubPhonePublic(data.club_phone_public || '')
+    setClubEmailPublic(data.club_email_public || '')
   }
 
   function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
@@ -326,6 +338,14 @@ export default function ProfilPage() {
         coach_diploma: coachDiploma || null,
         coach_specialty: coachSpecialty || null,
         coach_availability: coachAvailability || null,
+      } : {}),
+      ...(profile.role === 'club' ? {
+        club_website: clubWebsite || null,
+        club_instagram: clubInstagram || null,
+        club_facebook: clubFacebook || null,
+        club_whatsapp: clubWhatsapp || null,
+        club_phone_public: clubPhonePublic || null,
+        club_email_public: clubEmailPublic || null,
       } : {}),
     }
     await supabase.from('profiles').update(newFields).eq('id', profile.id)
@@ -614,6 +634,57 @@ export default function ProfilPage() {
         </div>
       )}
 
+      {/* ── MES ANNONCES ── */}
+      <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1 }}>
+            📢 Mes annonces ({myPosts.length})
+          </div>
+          <button
+            onClick={() => setShowPostModal(true)}
+            style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'5px 12px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+          >
+            + Nouveau
+          </button>
+        </div>
+        {myPosts.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'1rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
+            Aucun post publié.{' '}
+            <button onClick={() => setShowPostModal(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700 }}>
+              Publier →
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:'flex', flexDirection:'column', gap:'.6rem' }}>
+            {myPosts.map(post => (
+              <div key={post.id} style={{ background:'rgba(255,255,255,.03)', borderRadius:10, padding:'.75rem 1rem', borderLeft:`3px solid ${post.status === 'active' ? '#e63946' : 'rgba(255,255,255,.15)'}`, display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontWeight:700, fontSize:14, marginBottom:2, color: post.status === 'active' ? '#fff' : 'rgba(255,255,255,.4)' }}>{post.title}</div>
+                  <div style={{ fontSize:12, color:'rgba(255,255,255,.35)' }}>
+                    {new Date(post.created_at).toLocaleDateString('fr-CH', { day:'numeric', month:'short', year:'numeric' })}
+                    {post.ligue ? ` · ${post.ligue}` : ''}{post.zone ? ` · ${post.zone}` : ''}
+                  </div>
+                </div>
+                <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                  {post.status === 'active' && (
+                    <button onClick={() => setEditingPost(post)} style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>✏️</button>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (!confirm('Supprimer ce post ?')) return
+                      const { error } = await supabase.from('annonces').delete().eq('id', post.id).eq('author_id', profile.id)
+                      if (error) { alert('Erreur: ' + error.message); return }
+                      setMyPosts(prev => prev.filter(p => p.id !== post.id))
+                    }}
+                    style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                  >🗑️</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ── PUNTI FORTI ── */}
       <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
@@ -735,6 +806,39 @@ export default function ProfilPage() {
             <label style={lblSt}>{t.profil.phone[lang]}</label>
             <input style={inpSt} type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
           </div>
+
+          {/* Club contact fields */}
+          {profile.role === 'club' && (
+            <>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .75rem', color:'#3a8cff' }}>Liens & Contact</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1rem' }}>
+                <div>
+                  <label style={lblSt}>🌐 Site web</label>
+                  <input style={inpSt} type="url" value={clubWebsite} onChange={e => setClubWebsite(e.target.value)} placeholder="https://monclub.ch" />
+                </div>
+                <div>
+                  <label style={lblSt}>📷 Instagram</label>
+                  <input style={inpSt} value={clubInstagram} onChange={e => setClubInstagram(e.target.value)} placeholder="https://instagram.com/monclub" />
+                </div>
+                <div>
+                  <label style={lblSt}>📘 Facebook</label>
+                  <input style={inpSt} value={clubFacebook} onChange={e => setClubFacebook(e.target.value)} placeholder="https://facebook.com/monclub" />
+                </div>
+                <div>
+                  <label style={lblSt}>💬 WhatsApp</label>
+                  <input style={inpSt} type="tel" value={clubWhatsapp} onChange={e => setClubWhatsapp(e.target.value)} placeholder="+41 79 000 00 00" />
+                </div>
+                <div>
+                  <label style={lblSt}>📞 Téléphone public</label>
+                  <input style={inpSt} type="tel" value={clubPhonePublic} onChange={e => setClubPhonePublic(e.target.value)} placeholder="+41 26 000 00 00" />
+                </div>
+                <div>
+                  <label style={lblSt}>✉️ Email public</label>
+                  <input style={inpSt} type="email" value={clubEmailPublic} onChange={e => setClubEmailPublic(e.target.value)} placeholder="contact@monclub.ch" />
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Coach-specific fields */}
           {profile.role === 'coach' && (
@@ -893,7 +997,43 @@ export default function ProfilPage() {
             }
           </div>
 
-          <div style={darkCard}>
+          {profile.role === 'club' ? (
+            <div style={darkCard}>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+                Contact & Liens
+              </div>
+              {[
+                { href: profile.club_website,   icon:'🌐', label:'Site web' },
+                { href: profile.club_instagram,  icon:'📷', label:'Instagram' },
+                { href: profile.club_facebook,   icon:'📘', label:'Facebook' },
+                { href: profile.club_whatsapp ? `https://wa.me/${profile.club_whatsapp.replace(/\D/g,'')}` : null, icon:'💬', label:'WhatsApp' },
+                { href: profile.club_phone_public ? `tel:${profile.club_phone_public}` : null, icon:'📞', label: profile.club_phone_public },
+                { href: profile.club_email_public ? `mailto:${profile.club_email_public}` : null, icon:'✉️', label: profile.club_email_public },
+              ].filter(l => l.href).length === 0 ? (
+                <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
+                  Aucun lien ajouté.{' '}
+                  <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>Ajouter →</button>
+                </p>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                  {[
+                    { href: profile.club_website,   icon:'🌐', label:'Site web' },
+                    { href: profile.club_instagram,  icon:'📷', label:'Instagram' },
+                    { href: profile.club_facebook,   icon:'📘', label:'Facebook' },
+                    { href: profile.club_whatsapp ? `https://wa.me/${profile.club_whatsapp.replace(/\D/g,'')}` : null, icon:'💬', label:'WhatsApp' },
+                    { href: profile.club_phone_public ? `tel:${profile.club_phone_public}` : null, icon:'📞', label: profile.club_phone_public },
+                    { href: profile.club_email_public ? `mailto:${profile.club_email_public}` : null, icon:'✉️', label: profile.club_email_public },
+                  ].filter(l => l.href).map(l => (
+                    <a key={l.label} href={l.href!} target={l.href?.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
+                      style={{ display:'flex', alignItems:'center', gap:10, background:'rgba(255,255,255,.05)', borderRadius:10, padding:'10px 14px', textDecoration:'none', color:'rgba(255,255,255,.85)', fontSize:14, fontWeight:600, border:'1px solid rgba(255,255,255,.08)' }}>
+                      <span style={{ fontSize:18 }}>{l.icon}</span>{l.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={darkCard}>
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
               {t.profil.highlights[lang]}
             </div>
@@ -918,12 +1058,7 @@ export default function ProfilPage() {
                   )
                   if (isNativeVideo) return (
                     <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
-                      <video
-                        src={url}
-                        controls
-                        playsInline
-                        style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }}
-                      />
+                      <video src={url} controls playsInline style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }} />
                     </div>
                   )
                   return (
@@ -1001,74 +1136,6 @@ export default function ProfilPage() {
         </div>
       </div>
 
-      {/* ── MES POSTS ── */}
-      <div style={{ marginTop:'1.5rem' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
-          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1 }}>
-            📢 Mes posts ({myPosts.length})
-          </div>
-          <button
-            onClick={() => setShowPostModal(true)}
-            style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'6px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
-          >
-            + Nouveau post
-          </button>
-        </div>
-        {myPosts.length === 0 ? (
-          <div style={{ ...darkCard, textAlign:'center', padding:'2rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
-            Tu n'as pas encore publié de post.{' '}
-            <button onClick={() => setShowPostModal(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700 }}>
-              Publier maintenant →
-            </button>
-          </div>
-        ) : (
-          <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
-            {myPosts.map(post => (
-              <div key={post.id} style={{ ...darkCard, position:'relative', borderLeft:`3px solid ${post.status === 'active' ? '#e63946' : 'rgba(255,255,255,.15)'}` }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontWeight:700, fontSize:15, marginBottom:3, color: post.status === 'active' ? '#fff' : 'rgba(255,255,255,.45)' }}>
-                      {post.title}
-                    </div>
-                    <div style={{ fontSize:13, color:'rgba(255,255,255,.4)', marginBottom:6 }}>
-                      {new Date(post.created_at).toLocaleDateString('fr-CH', { day:'numeric', month:'short', year:'numeric' })}
-                      {post.ligue ? ` · ${post.ligue}` : ''}
-                      {post.zone ? ` · ${post.zone}` : ''}
-                    </div>
-                    <div style={{ fontSize:13, color:'rgba(255,255,255,.6)', lineHeight:1.55 }}>{post.body}</div>
-                  </div>
-                  <div style={{ display:'flex', flexDirection:'column', gap:6, flexShrink:0 }}>
-                    <span style={{ background: post.status === 'active' ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: post.status === 'active' ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 10px', fontSize:11, fontWeight:700, textAlign:'center' }}>
-                      {post.status === 'active' ? '● Actif' : '○ Fermé'}
-                    </span>
-                    <div style={{ display:'flex', gap:6 }}>
-                      {post.status === 'active' && (
-                        <button
-                          onClick={() => setEditingPost(post)}
-                          style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
-                        >
-                          ✏️ Modifier
-                        </button>
-                      )}
-                      <button
-                        onClick={async () => {
-                          if (!confirm('Supprimer ce post ?')) return
-                          const { error } = await supabase.from('annonces').delete().eq('id', post.id).eq('author_id', profile.id)
-                          if (error) { alert('Erreur: ' + error.message); return }
-                          setMyPosts(prev => prev.filter(p => p.id !== post.id))
-                        }}
-                        style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       <style>{`
         .profile-grid { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; }
