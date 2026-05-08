@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile } from '../../../lib/supabase'
+import VerifiedBadge from '../../../components/VerifiedBadge'
 
 function strengthLabel(key: string) {
   const map: Record<string, string> = {
@@ -101,8 +102,9 @@ export default function PublicProfilPage() {
               }
             </div>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6 }}>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6, display:'flex', alignItems:'center', gap:4 }}>
                 {displayName || profile.email}
+                {profile.verified && <VerifiedBadge size={22} />}
               </div>
               <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600 }}>

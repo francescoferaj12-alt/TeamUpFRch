@@ -5,8 +5,11 @@ import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
+import { liguesHomme, liguesFemme } from '../../lib/data'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
-const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
+const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
+const ALL_LIGUES_FLAT = ALL_LIGUE_GROUPS.flatMap(g => g.items)
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 
@@ -140,8 +143,19 @@ export default function RecherchePage() {
           <option value="femme" style={optSt}>♀ {lang === 'fr' ? 'Femme' : 'Frau'}</option>
         </select>
 
+        <select value={filterLigue} onChange={e => setFilterLigue(e.target.value)} style={{
+          background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:100,
+          padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
+        }}>
+          <option value="" style={optSt}>{t.search.all_ligues[lang]}</option>
+          {ALL_LIGUE_GROUPS.map(g => (
+            <optgroup key={g.group} label={g.group} style={{ background:'#061540' }}>
+              {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
+            </optgroup>
+          ))}
+        </select>
+
         {[
-          { value: filterLigue, set: setFilterLigue, placeholder: t.search.all_ligues[lang], options: LIGUES },
           { value: filterPos, set: setFilterPos, placeholder: t.search.all_positions[lang], options: POSITIONS },
           { value: filterZone, set: setFilterZone, placeholder: t.search.all_zones[lang], options: ZONES },
         ].map((f, i) => (
@@ -238,7 +252,10 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
           }
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#fff' }}>{name}</div>
+          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, color:'#fff', display:'flex', alignItems:'center', gap:2, minWidth:0 }}>
+            <span style={{ whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</span>
+            {p.verified && <VerifiedBadge size={15} />}
+          </div>
           <div style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>{p.position || roleLabel}{calcAge(p.birthdate) ? ` · ${calcAge(p.birthdate)}${ageSuffix}` : ''}</div>
         </div>
         <span style={{ background: p.available ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: p.available ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 9px', fontSize:11, fontWeight:600, whiteSpace:'nowrap' }}>

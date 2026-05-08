@@ -3,11 +3,17 @@
 import { useEffect, useState, useRef, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+import VerifiedBadge from '../../components/VerifiedBadge'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
+
+const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
+const VideoUploadInput = dynamic(() => import('../../components/VideoUploadInput'), { ssr: false })
+const PostModal = dynamic(() => import('../../components/PostModal'), { ssr: false })
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
@@ -123,6 +129,11 @@ export default function ProfilPage() {
   const [saveMsg, setSaveMsg] = useState('')
   const [saveError, setSaveError] = useState('')
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [showPostModal, setShowPostModal] = useState(false)
+  const [postSuccess, setPostSuccess] = useState(false)
+  const [myPosts, setMyPosts] = useState<any[]>([])
+  const [editingPost, setEditingPost] = useState<any | null>(null)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -184,6 +195,12 @@ export default function ProfilPage() {
     load()
   }, [authLoading, session, authProfile, router])
 
+  useEffect(() => {
+    if (!profile) return
+    supabase.from('annonces').select('*').eq('author_id', profile.id).order('created_at', { ascending: false })
+      .then(({ data }) => setMyPosts(data || []))
+  }, [profile?.id])
+
   function populateForm(data: Profile) {
     setBio(data.bio || '')
     setPosition(data.position || '')
@@ -210,24 +227,38 @@ export default function ProfilPage() {
     setVideo3(data.video3_url || '')
   }
 
-  async function handlePhotoUpload(e: ChangeEvent<HTMLInputElement>) {
-    if (!profile || !e.target.files?.[0]) return
-    const file = e.target.files[0]
+  function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
     if (!file.type.startsWith('image/')) { alert('Seules les images sont acceptées'); return }
-    if (file.size > 5 * 1024 * 1024) { alert('Max 5 MB'); return }
+    if (file.size > 15 * 1024 * 1024) { alert('Max 15 MB'); return }
+    const url = URL.createObjectURL(file)
+    setCropSrc(url)
+    // reset so same file can be reselected
+    e.target.value = ''
+  }
+
+  async function handleCropConfirm(blob: Blob) {
+    if (!profile) return
     setUploadingPhoto(true)
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
-    const path = `${profile.id}/avatar.${ext}`
+    const path = `${profile.id}/avatar.jpg`
     const { data: uploadData, error } = await supabase.storage
       .from('avatars')
-      .upload(path, file, { upsert: true, contentType: file.type })
+      .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
     if (error) { alert('Erreur upload: ' + error.message); setUploadingPhoto(false); return }
     const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
     const avatar_url = urlData.publicUrl + '?t=' + Date.now()
     await supabase.from('profiles').update({ avatar_url }).eq('id', profile.id)
     setProfile({ ...profile, avatar_url })
     await refreshProfile()
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
     setUploadingPhoto(false)
+  }
+
+  function handleCropCancel() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
   }
 
   async function handleLogout() {
@@ -345,11 +376,42 @@ export default function ProfilPage() {
 
   return (
     <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+      {cropSrc && (
+        <AvatarCropModal
+          src={cropSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+          uploading={uploadingPhoto}
+        />
+      )}
+      {(showPostModal || editingPost) && (
+        <PostModal
+          profile={profile}
+          annonce={editingPost || undefined}
+          onClose={() => { setShowPostModal(false); setEditingPost(null) }}
+          onSuccess={(a) => {
+            if (editingPost) {
+              setMyPosts(prev => prev.map(p => p.id === a.id ? a : p))
+              setEditingPost(null)
+            } else {
+              setMyPosts(prev => [a, ...prev])
+              setShowPostModal(false)
+              setPostSuccess(true)
+              setTimeout(() => setPostSuccess(false), 4000)
+            }
+          }}
+        />
+      )}
       <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
         <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
           ✅ {saveMsg}
+        </div>
+      )}
+      {postSuccess && (
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
+          ✅ Post publié ! Visible dans <a href="/annonces" style={{ color:'#4cdb7a', fontWeight:700 }}>le fil d'annonces</a>.
         </div>
       )}
 
@@ -360,7 +422,7 @@ export default function ProfilPage() {
           {/* AVATAR */}
           <div style={{ position:'relative', flexShrink:0 }}>
             <div
-              style={{ width:100, height:100, borderRadius:18, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
+              style={{ width:100, height:100, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
               onClick={() => fileInputRef.current?.click()}
             >
               {profile.avatar_url
@@ -376,7 +438,7 @@ export default function ProfilPage() {
             >
               {uploadingPhoto ? '⏳' : '📷'}
             </button>
-            <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handlePhotoUpload} />
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFileSelect} />
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
@@ -401,17 +463,21 @@ export default function ProfilPage() {
               <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
-              {profile.verified && (
-                <span style={{ background:'rgba(0,200,130,.2)', border:'1px solid rgba(0,200,130,.4)', color:'#00c882', fontSize:12, padding:'4px 12px', borderRadius:100 }}>✓ Vérifié</span>
-              )}
+              {profile.verified && <VerifiedBadge />}
             </div>
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+            <button
+              onClick={() => setShowPostModal(true)}
+              style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+            >
+              📢 Publier un post
+            </button>
+            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
-            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.6)', border:'1px solid rgba(255,255,255,.12)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
           </div>
@@ -674,14 +740,23 @@ export default function ProfilPage() {
           {/* Videos */}
           <div>
             <label style={lblSt}>{t.profil.video_label[lang]}</label>
+            <p style={{ fontSize:12, color:'rgba(255,255,255,.38)', marginBottom:10 }}>
+              📱 Choisis depuis ta galerie — ou colle un lien YouTube
+            </p>
             {[
-              { v: video1, set: setVideo1, label: t.profil.video1[lang] },
-              { v: video2, set: setVideo2, label: t.profil.video2[lang] },
-              { v: video3, set: setVideo3, label: t.profil.video3[lang] },
-            ].map((f, i) => (
-              <input key={i} style={{ ...inpSt, marginBottom: i < 2 ? 8 : 0 }} value={f.v}
-                onChange={e => f.set(e.target.value)}
-                placeholder={`${f.label} — ${t.profil.video_url_ph[lang]}`} />
+              { v: video1, set: setVideo1, label: t.profil.video1[lang], idx: 1 },
+              { v: video2, set: setVideo2, label: t.profil.video2[lang], idx: 2 },
+              { v: video3, set: setVideo3, label: t.profil.video3[lang], idx: 3 },
+            ].map(f => (
+              <VideoUploadInput
+                key={f.idx}
+                value={f.v}
+                onChange={f.set}
+                placeholder={`${f.label} — YouTube ou vidéo`}
+                profileId={profile.id}
+                index={f.idx}
+                inpSt={inpSt}
+              />
             ))}
           </div>
 
@@ -730,13 +805,25 @@ export default function ProfilPage() {
               <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
                 {videoUrls.map((url, i) => {
                   const embed = getYouTubeEmbed(url)
-                  return embed ? (
+                  const isNativeVideo = !embed && /\.(mp4|mov|webm|mkv|avi)(\?|$)/i.test(url)
+                  if (embed) return (
                     <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
                       <iframe src={embed} title={`Video ${i+1}`} frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
                     </div>
-                  ) : (
+                  )
+                  if (isNativeVideo) return (
+                    <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
+                      <video
+                        src={url}
+                        controls
+                        playsInline
+                        style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }}
+                      />
+                    </div>
+                  )
+                  return (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                       style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'rgba(255,255,255,.05)', borderRadius:10, textDecoration:'none', color:'#3a8cff', fontSize:14, fontWeight:600 }}>
                       🎬 {t.profil.video_label[lang]} {i+1}
@@ -809,6 +896,75 @@ export default function ProfilPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── MES POSTS ── */}
+      <div style={{ marginTop:'1.5rem' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1 }}>
+            📢 Mes posts ({myPosts.length})
+          </div>
+          <button
+            onClick={() => setShowPostModal(true)}
+            style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'6px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+          >
+            + Nouveau post
+          </button>
+        </div>
+        {myPosts.length === 0 ? (
+          <div style={{ ...darkCard, textAlign:'center', padding:'2rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
+            Tu n'as pas encore publié de post.{' '}
+            <button onClick={() => setShowPostModal(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700 }}>
+              Publier maintenant →
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
+            {myPosts.map(post => (
+              <div key={post.id} style={{ ...darkCard, position:'relative', borderLeft:`3px solid ${post.status === 'active' ? '#e63946' : 'rgba(255,255,255,.15)'}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontWeight:700, fontSize:15, marginBottom:3, color: post.status === 'active' ? '#fff' : 'rgba(255,255,255,.45)' }}>
+                      {post.title}
+                    </div>
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.4)', marginBottom:6 }}>
+                      {new Date(post.created_at).toLocaleDateString('fr-CH', { day:'numeric', month:'short', year:'numeric' })}
+                      {post.ligue ? ` · ${post.ligue}` : ''}
+                      {post.zone ? ` · ${post.zone}` : ''}
+                    </div>
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.6)', lineHeight:1.55 }}>{post.body}</div>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6, flexShrink:0 }}>
+                    <span style={{ background: post.status === 'active' ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: post.status === 'active' ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 10px', fontSize:11, fontWeight:700, textAlign:'center' }}>
+                      {post.status === 'active' ? '● Actif' : '○ Fermé'}
+                    </span>
+                    <div style={{ display:'flex', gap:6 }}>
+                      {post.status === 'active' && (
+                        <button
+                          onClick={() => setEditingPost(post)}
+                          style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                        >
+                          ✏️ Modifier
+                        </button>
+                      )}
+                      <button
+                        onClick={async () => {
+                          if (!confirm('Supprimer ce post ?')) return
+                          const { error } = await supabase.from('annonces').delete().eq('id', post.id).eq('author_id', profile.id)
+                          if (error) { alert('Erreur: ' + error.message); return }
+                          setMyPosts(prev => prev.filter(p => p.id !== post.id))
+                        }}
+                        style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <style>{`

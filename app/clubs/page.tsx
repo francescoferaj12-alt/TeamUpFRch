@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState<Profile[]>([])
@@ -119,8 +120,9 @@ export default function ClubsPage() {
                         : '🏟️'
                       }
                     </div>
-                    <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.4rem', color:'#fff', letterSpacing:1 }}>
+                    <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.4rem', color:'#fff', letterSpacing:1, display:'flex', alignItems:'center', justifyContent:'center', gap:4 }}>
                       {club.club_name || 'Club'}
+                      {club.verified && <VerifiedBadge />}
                     </div>
                     {club.available && (
                       <div style={{ position:'absolute', top:10, right:10, background:'rgba(13,122,54,.3)', border:'1px solid rgba(76,219,122,.3)', color:'#4cdb7a', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:100 }}>
