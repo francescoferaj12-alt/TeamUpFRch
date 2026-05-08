@@ -405,10 +405,7 @@ export default function HomePage() {
           .hp-stats-grid { grid-template-columns: repeat(2, 1fr) !important; max-width: 100% !important; }
         }
         @media (max-width: 900px) {
-          .hero-map { max-width: 400px; margin: 0 auto; }
-        }
-        @media (max-width: 540px) {
-          .hp-hero-card-wrap { display: none !important; }
+          .hero-map { max-width: 360px; margin: 0 auto; }
         }
 
         /* ── Hero map ── */
