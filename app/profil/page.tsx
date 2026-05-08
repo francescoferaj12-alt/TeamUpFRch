@@ -1071,6 +1071,8 @@ export default function ProfilPage() {
               </div>
             )}
           </div>
+          )}
+
         </div>
 
         {/* RIGHT SIDEBAR — Info · Career · Actions · Tip */}
