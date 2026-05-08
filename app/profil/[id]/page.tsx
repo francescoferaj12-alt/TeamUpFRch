@@ -9,6 +9,26 @@ import CareerSection from '../../../components/CareerSection'
 import { strengthIcon } from '../../../lib/strength-icons'
 import { useLang } from '../../../lib/lang-context'
 
+const CATEGORY_LABELS: Record<string, { fr: string; de: string }> = {
+  cat_seniors_h:  { fr: 'Seniors hommes', de: 'Senioren Männer' },
+  cat_seniors_f:  { fr: 'Seniors femmes', de: 'Senioren Frauen' },
+  cat_youth:      { fr: 'Youth League',   de: 'Youth League' },
+  cat_juniors_a:  { fr: 'Juniors A',      de: 'Junioren A' },
+  cat_juniors_b:  { fr: 'Juniors B',      de: 'Junioren B' },
+  cat_juniors_c:  { fr: 'Juniors C',      de: 'Junioren C' },
+  cat_juniors_d:  { fr: 'Juniors D',      de: 'Junioren D' },
+  cat_juniores_f: { fr: 'Juniors filles', de: 'Juniorinnen' },
+  cat_veterans:   { fr: 'Vétérans',       de: 'Veteranen' },
+}
+
+function catColor(key: string): string {
+  if (key.includes('seniors')) return '#3a8cff'
+  if (key === 'cat_veterans') return '#b56cf0'
+  if (key === 'cat_juniores_f') return '#ff8fab'
+  if (key === 'cat_youth') return '#ffb84a'
+  return '#4cdb7a'
+}
+
 function strengthLabel(key: string) {
   const map: Record<string, string> = {
     fast:'Rapide', technical:'Technique', physical:'Physique', dribbling:'Dribble',
@@ -294,7 +314,27 @@ export default function PublicProfilPage() {
               </div>
             )}
 
-            {/* Strengths moved to header */}
+            {/* Club categories */}
+            {profile.role === 'club' && (profile as any).club_categories && (
+              <div style={darkCard}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+                  ⚽ {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
+                </div>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                  {((profile as any).club_categories as string)
+                    .split(',').map((s: string) => s.trim()).filter(Boolean)
+                    .map((key: string) => {
+                      const label = CATEGORY_LABELS[key]?.[lang] || key
+                      const color = catColor(key)
+                      return (
+                        <span key={key} style={{ background:`${color}1a`, border:`1.5px solid ${color}55`, color, borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:700 }}>
+                          {label}
+                        </span>
+                      )
+                    })}
+                </div>
+              </div>
+            )}
 
             {/* Videos — hidden for clubs */}
             {profile.role !== 'club' && videoUrls.length > 0 && (

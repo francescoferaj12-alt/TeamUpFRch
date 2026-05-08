@@ -141,16 +141,18 @@ const COMMUNE_COORDS: Record<string, [number, number]> = {
 }
 
 const ZONE_CENTERS: Record<string, [number, number]> = {
-  'Sarine': [7.1555, 46.8065],
-  'Saane': [7.1555, 46.8065],
-  'Gruyère': [7.0571, 46.5880],
-  'Veveyse': [6.9013, 46.5267],
-  'Glâne': [6.9200, 46.6967],
-  'Broye': [6.9988, 46.8875],
-  'Lac': [7.1190, 46.9258],
-  'See': [7.1190, 46.9258],
-  'Singine': [7.2723, 46.8250],
-  'Sense': [7.2723, 46.8250],
+  'Fribourg-Ville': [7.1555, 46.8065],
+  'Sarine':         [7.1555, 46.8065],
+  'Saane':          [7.1555, 46.8065],
+  'Gruyère':        [7.0571, 46.5880],
+  'Veveyse':        [6.9013, 46.5267],
+  'Glâne':          [6.9200, 46.6967],
+  'Broye':          [6.9988, 46.8875],
+  'Lac':            [7.1190, 46.9258],
+  'See':            [7.1190, 46.9258],
+  'Sensebezirk':    [7.2723, 46.8250],
+  'Singine':        [7.2723, 46.8250],
+  'Sense':          [7.2723, 46.8250],
 }
 
 // Canton center as fallback

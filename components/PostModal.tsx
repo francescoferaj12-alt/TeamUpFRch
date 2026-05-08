@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { supabase, Profile, Annonce } from '../lib/supabase'
 import { liguesHomme, liguesFemme } from '../lib/data'
 
@@ -21,6 +21,9 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
   const [zone, setZone] = useState(annonce?.zone || profile.zone || '')
   const [publishing, setPublishing] = useState(false)
   const [error, setError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const titleRef = useRef<HTMLInputElement>(null)
+  const bodyRef = useRef<HTMLTextAreaElement>(null)
 
   const editing = !!annonce
 
@@ -29,8 +32,17 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
     : `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
 
   async function handlePublish() {
-    if (!title.trim()) { setError('Le titre est requis.'); return }
-    if (!body.trim()) { setError('Le texte est requis.'); return }
+    setSubmitted(true)
+    if (!title.trim()) {
+      setError('Le titre est requis.')
+      setTimeout(() => titleRef.current?.focus(), 0)
+      return
+    }
+    if (!body.trim()) {
+      setError('Le texte est requis.')
+      setTimeout(() => bodyRef.current?.focus(), 0)
+      return
+    }
     setPublishing(true)
     setError('')
 
@@ -105,26 +117,34 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
 
         {/* Title */}
         <div style={{ marginBottom:'0.75rem' }}>
-          <label style={lblSt}>Titre</label>
+          <label style={lblSt}>Titre <span style={{ color:'#e63946' }}>*</span></label>
           <input
+            ref={titleRef}
             autoFocus
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => { setTitle(e.target.value); if (error) setError('') }}
             placeholder="Ex: Je cherche un club pour la saison prochaine"
-            style={inpSt}
+            style={{ ...inpSt, borderColor: submitted && !title.trim() ? '#e63946' : 'rgba(255,255,255,.12)' }}
           />
+          {submitted && !title.trim() && (
+            <div style={{ fontSize:12, color:'#e63946', marginTop:4 }}>⚠ Titre requis</div>
+          )}
         </div>
 
         {/* Body */}
         <div style={{ marginBottom:'1rem' }}>
-          <label style={lblSt}>Message</label>
+          <label style={lblSt}>Message <span style={{ color:'#e63946' }}>*</span></label>
           <textarea
+            ref={bodyRef}
             rows={4}
             value={body}
-            onChange={e => setBody(e.target.value)}
+            onChange={e => { setBody(e.target.value); if (error) setError('') }}
             placeholder="Décris ta situation, tes attentes, ta disponibilité…"
-            style={{ ...inpSt, resize:'vertical' }}
+            style={{ ...inpSt, resize:'vertical', borderColor: submitted && !body.trim() ? '#e63946' : 'rgba(255,255,255,.12)' }}
           />
+          {submitted && !body.trim() && (
+            <div style={{ fontSize:12, color:'#e63946', marginTop:4 }}>⚠ Message requis</div>
+          )}
         </div>
 
         {/* Optional fields */}
