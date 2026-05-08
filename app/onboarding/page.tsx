@@ -75,7 +75,14 @@ export default function OnboardingPage() {
               </button>
             )}
             <button
-              onClick={() => isLast ? router.push('/profil') : setStep(step + 1)}
+              onClick={() => {
+                if (isLast) {
+                  localStorage.setItem('teamupfr-onboarded', 'true')
+                  router.push('/profil')
+                } else {
+                  setStep(step + 1)
+                }
+              }}
               style={{
                 background: isLast ? 'var(--red)' : 'var(--blue-bright)',
                 color: '#fff', border: 'none', borderRadius: 10,
@@ -91,7 +98,7 @@ export default function OnboardingPage() {
           </div>
 
           {step < steps.length - 1 && (
-            <button onClick={() => router.push('/profil')} style={{
+            <button onClick={() => { localStorage.setItem('teamupfr-onboarded', 'true'); router.push('/profil') }} style={{
               background: 'none', border: 'none', color: 'var(--text-muted)',
               fontSize: 13, cursor: 'pointer', marginTop: '1rem', fontFamily: 'inherit'
             }}>
