@@ -19,7 +19,7 @@ export default function LangSwitcher() {
           transition: 'all .15s'
         }}
       >
-        🇫🇷 FR
+        FR
       </button>
       <button
         onClick={() => setLang('de')}
@@ -33,7 +33,7 @@ export default function LangSwitcher() {
           transition: 'all .15s'
         }}
       >
-        🇩🇪 DE
+        DE
       </button>
     </div>
   )

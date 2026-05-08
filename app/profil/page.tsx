@@ -8,13 +8,13 @@ import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
+import { liguesHomme, liguesFemme } from '../../lib/data'
 
 const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
 const VideoUploadInput = dynamic(() => import('../../components/VideoUploadInput'), { ssr: false })
 const PostModal = dynamic(() => import('../../components/PostModal'), { ssr: false })
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
-const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
 // ── Role-specific strength tags ──────────────────────────────────────────────
@@ -138,6 +138,7 @@ export default function ProfilPage() {
 
   const [bio, setBio] = useState('')
   const [position, setPosition] = useState('')
+  const [genre, setGenre] = useState<'homme' | 'femme'>('homme')
   const [ligue, setLigue] = useState('')
   const [zone, setZone] = useState('')
   const [foot, setFoot] = useState('Droit')
@@ -202,6 +203,7 @@ export default function ProfilPage() {
   function populateForm(data: Profile) {
     setBio(data.bio || '')
     setPosition(data.position || '')
+    setGenre(data.genre || 'homme')
     setLigue(data.ligue || '')
     setZone(data.zone || '')
     setFoot(data.foot || 'Droit')
@@ -276,6 +278,7 @@ export default function ProfilPage() {
     const baseUpdates = {
       bio: bio || null,
       position: position || null,
+      genre: profile.role !== 'club' ? genre : null,
       ligue: ligue || null,
       zone: zone || null,
       foot: foot || null,
@@ -340,7 +343,11 @@ export default function ProfilPage() {
   const initials = `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
   const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
-  const roleLabel = profile.role === 'player' ? t.profil.role_player[lang] : profile.role === 'coach' ? t.profil.role_coach[lang] : t.profil.role_club[lang]
+  const roleLabel = profile.role === 'player'
+    ? (profile.genre === 'femme' ? t.profil.joueur_f[lang] : t.profil.role_player[lang])
+    : profile.role === 'coach'
+    ? (profile.genre === 'femme' ? t.profil.coach_f[lang] : t.profil.role_coach[lang])
+    : t.profil.role_club[lang]
   const displayAge = calcAge(profile.birthdate)
   const ageSuffix = t.general.age_suffix[lang]
   const strengthKeys = parseStrengths(profile.strengths)
@@ -578,6 +585,21 @@ export default function ProfilPage() {
 
           {/* Basic info */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'1rem', marginBottom:'1rem' }}>
+            {profile.role !== 'club' && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={lblSt}>{t.profil.genre_label[lang]}</label>
+                <div style={{ display:'flex', gap:8 }}>
+                  {(['homme', 'femme'] as const).map(g => (
+                    <button key={g} type="button" onClick={() => { setGenre(g); setLigue('') }} style={{
+                      flex:1, background: genre === g ? 'rgba(230,57,70,.2)' : 'rgba(255,255,255,.05)',
+                      border:`1.5px solid ${genre === g ? 'rgba(230,57,70,.4)' : 'rgba(255,255,255,.1)'}`,
+                      color: genre === g ? '#e63946' : 'rgba(255,255,255,.5)',
+                      borderRadius:9, padding:'9px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit'
+                    }}>{g === 'homme' ? t.profil.genre_homme[lang] : t.profil.genre_femme[lang]}</button>
+                  ))}
+                </div>
+              </div>
+            )}
             {profile.role === 'player' && (
               <div>
                 <label style={lblSt}>{t.profil.position[lang]}</label>
@@ -601,7 +623,11 @@ export default function ProfilPage() {
               <label style={lblSt}>{t.profil.ligue[lang]}</label>
               <select style={inpSt} value={ligue} onChange={e => setLigue(e.target.value)}>
                 <option value="" style={optSt}>—</option>
-                {LIGUES.map(l => <option key={l} style={optSt}>{l}</option>)}
+                {(profile.role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
+                  <optgroup key={g.group} label={g.group} style={{ background:'#061540' }}>
+                    {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
+                  </optgroup>
+                ))}
               </select>
             </div>
             <div>

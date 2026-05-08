@@ -279,6 +279,21 @@ export const ligues = [
   { group: 'Juniors C', items: ['Junior C Promotion', 'Junior C'] }
 ];
 
+export const liguesHomme = [
+  { group: 'Actifs Hommes', items: ['2ème Ligue', '3ème Ligue', '4ème Ligue', '5ème Ligue'] },
+  { group: 'Juniors Garçons', items: [
+    'Juniors A - Promotion', 'Juniors A - 1er degré', 'Juniors A - 2ème degré',
+    'Juniors B - Promotion', 'Juniors B - 1er degré', 'Juniors B - 2ème degré', 'Juniors B - 3ème degré',
+    'Juniors C - Promotion', 'Juniors C - 1er degré', 'Juniors C - 2ème degré', 'Juniors C - 3ème degré',
+    'Juniors D-9',
+  ]},
+]
+
+export const liguesFemme = [
+  { group: 'Actives Femmes', items: ['2ème Ligue Féminine', '3ème Ligue Féminine', '4ème Ligue Féminine'] },
+  { group: 'Juniores Filles', items: ['FF-19', 'FF-17', 'FF-14', 'FF-11'] },
+]
+
 export const zones = ['Fribourg-Ville', 'Gruyère', 'Broye', 'Glâne', 'Sensebezirk', 'Veveyse', 'Lac'];
 
 export const positions = ['Attaquant', 'Milieu offensif', 'Milieu défensif', 'Défenseur central', 'Défenseur latéral', 'Gardien'];

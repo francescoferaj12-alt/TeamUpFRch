@@ -34,6 +34,7 @@ export type Profile = {
   rating?: number
   phone?: string
   career?: string
+  genre?: 'homme' | 'femme'
   verified?: boolean
   verification_requested?: boolean
   created_at: string

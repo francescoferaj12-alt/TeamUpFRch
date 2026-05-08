@@ -72,7 +72,11 @@ export default function PublicProfilPage() {
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
   const displayName = profile.role === 'club' ? profile.club_name : fullName
   const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
-  const roleLabel = profile.role === 'player' ? 'Joueur' : profile.role === 'coach' ? 'Coach' : 'Club'
+  const roleLabel = profile.role === 'player'
+    ? (profile.genre === 'femme' ? 'Joueuse' : 'Joueur')
+    : profile.role === 'coach'
+    ? (profile.genre === 'femme' ? 'Coache' : 'Coach')
+    : 'Club'
   const strengths = (profile.strengths || '').split(',').map(s => s.trim()).filter(Boolean)
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
 
