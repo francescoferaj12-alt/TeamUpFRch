@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: NextRequest) {
   const { clubName, clubEmail, verified } = await req.json()
 
   if (!clubEmail) return NextResponse.json({ error: 'No email' }, { status: 400 })
+  if (!process.env.RESEND_API_KEY) return NextResponse.json({ ok: true, skipped: true })
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
 
   const subject = verified
     ? `✓ Votre club "${clubName}" a été vérifié sur TeamUp FR`
