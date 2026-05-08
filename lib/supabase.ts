@@ -56,7 +56,6 @@ export type Profile = {
   // Coach extended
   coach_categories?: string
   coach_philosophy?: string
-  coach_certificates?: string
   // Club extended
   club_founded_year?: number
   club_teams_count?: number
@@ -80,6 +79,14 @@ export type Annonce = {
   zone: string
   status: 'active' | 'closed'
   type?: 'club_cherche_joueur' | 'joueur_cherche_club' | 'coach_cherche_club' | 'club_cherche_coach' | 'coach_cherche_joueurs'
+  created_at: string
+}
+
+export type CoachCertificate = {
+  id: string
+  coach_id: string
+  name: string
+  year?: string | null
   created_at: string
 }
 
