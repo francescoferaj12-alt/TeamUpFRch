@@ -20,8 +20,11 @@ export default function AnnoncesPage() {
   const { profile: currentUser } = useAuth()
 
   useEffect(() => {
-    supabase.from('annonces').select('*').eq('status', 'active').order('created_at', { ascending: false })
-      .then(({ data }) => { setAnnonces(data || []); setLoading(false) })
+    supabase.from('annonces')
+      .select('*, profiles!author_id(id, avatar_url)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { setAnnonces((data || []) as Annonce[]); setLoading(false) })
   }, [])
 
   const filtered = useMemo(() => {
@@ -166,25 +169,37 @@ const selectStyle: React.CSSProperties = {
   fontFamily: 'inherit'
 }
 
-function AnnonceCard({ annonce, currentUser, onPostuler }: { annonce: Annonce; currentUser: Profile | null; onPostuler: () => void }) {
-  const typeEmoji = annonce.author_type === 'club' ? '🏟️' : annonce.author_type === 'coach' ? '🧑‍🏫' : '👤'
+function AnnonceCard({ annonce, currentUser, onPostuler }: { annonce: Annonce & { profiles?: { id: string; avatar_url?: string } }; currentUser: Profile | null; onPostuler: () => void }) {
+  const typeEmoji = annonce.author_type === 'club' ? '🏟️' : annonce.author_type === 'coach' ? '🎽' : '⚽'
   const bgType = annonce.author_type === 'club' ? 'rgba(13,122,54,.2)' : annonce.author_type === 'coach' ? 'rgba(230,57,70,.15)' : 'rgba(26,111,212,.2)'
   const stripeColor = annonce.author_type === 'club' ? '#4cdb7a' : annonce.author_type === 'coach' ? '#e63946' : '#5b9eff'
   const dateStr = new Date(annonce.created_at).toLocaleDateString('fr-CH', { day: 'numeric', month: 'short', year: 'numeric' })
   const canApply = currentUser && currentUser.role !== 'club'
+  const avatarUrl = annonce.profiles?.avatar_url
+  const authorId = annonce.profiles?.id || annonce.author_id
+  const initials = annonce.author_name.slice(0, 2).toUpperCase()
 
   return (
     <div className="ann-card" style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, padding:'1.5rem', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', top:0, left:0, width:4, bottom:0, background:stripeColor }} />
       <div style={{ paddingLeft:'1rem' }}>
         <div style={{ display:'flex', alignItems:'flex-start', gap:12, marginBottom:12, flexWrap:'wrap' }}>
-          <div style={{ width:46, height:46, borderRadius:12, background:bgType, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>
-            {typeEmoji}
-          </div>
+          {/* Avatar */}
+          <Link href={`/profil/${authorId}`} style={{ textDecoration:'none', flexShrink:0 }}>
+            <div style={{ width:46, height:46, borderRadius:'50%', background:bgType, border:'2px solid rgba(255,255,255,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: avatarUrl ? 0 : 16, fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : (initials || typeEmoji)
+              }
+            </div>
+          </Link>
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ fontWeight:700, fontSize:16, marginBottom:2, color:'#fff' }}>{annonce.title}</div>
-            <div style={{ fontSize:13, color:'rgba(255,255,255,.45)' }}>
-              {annonce.author_name} · {dateStr}
+            <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+              <span style={{ fontSize:13, color:'rgba(255,255,255,.45)' }}>{annonce.author_name} · {dateStr}</span>
+              <Link href={`/profil/${authorId}`} style={{ fontSize:12, color:'#3a8cff', fontWeight:600, textDecoration:'none', background:'rgba(58,140,255,.1)', padding:'2px 9px', borderRadius:100 }}>
+                Voir le profil →
+              </Link>
             </div>
           </div>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>

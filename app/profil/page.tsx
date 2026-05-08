@@ -131,6 +131,8 @@ export default function ProfilPage() {
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [showPostModal, setShowPostModal] = useState(false)
   const [postSuccess, setPostSuccess] = useState(false)
+  const [myPosts, setMyPosts] = useState<any[]>([])
+  const [editingPost, setEditingPost] = useState<any | null>(null)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -190,6 +192,12 @@ export default function ProfilPage() {
     }
     load()
   }, [authLoading, session, authProfile, router])
+
+  useEffect(() => {
+    if (!profile) return
+    supabase.from('annonces').select('*').eq('author_id', profile.id).order('created_at', { ascending: false })
+      .then(({ data }) => setMyPosts(data || []))
+  }, [profile?.id])
 
   function populateForm(data: Profile) {
     setBio(data.bio || '')
@@ -368,14 +376,21 @@ export default function ProfilPage() {
           uploading={uploadingPhoto}
         />
       )}
-      {showPostModal && (
+      {(showPostModal || editingPost) && (
         <PostModal
           profile={profile}
-          onClose={() => setShowPostModal(false)}
-          onSuccess={() => {
-            setShowPostModal(false)
-            setPostSuccess(true)
-            setTimeout(() => setPostSuccess(false), 4000)
+          annonce={editingPost || undefined}
+          onClose={() => { setShowPostModal(false); setEditingPost(null) }}
+          onSuccess={(a) => {
+            if (editingPost) {
+              setMyPosts(prev => prev.map(p => p.id === a.id ? a : p))
+              setEditingPost(null)
+            } else {
+              setMyPosts(prev => [a, ...prev])
+              setShowPostModal(false)
+              setPostSuccess(true)
+              setTimeout(() => setPostSuccess(false), 4000)
+            }
           }}
         />
       )}
@@ -856,6 +871,74 @@ export default function ProfilPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── MES POSTS ── */}
+      <div style={{ marginTop:'1.5rem' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1 }}>
+            📢 Mes posts ({myPosts.length})
+          </div>
+          <button
+            onClick={() => setShowPostModal(true)}
+            style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'6px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+          >
+            + Nouveau post
+          </button>
+        </div>
+        {myPosts.length === 0 ? (
+          <div style={{ ...darkCard, textAlign:'center', padding:'2rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
+            Tu n'as pas encore publié de post.{' '}
+            <button onClick={() => setShowPostModal(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700 }}>
+              Publier maintenant →
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
+            {myPosts.map(post => (
+              <div key={post.id} style={{ ...darkCard, position:'relative', borderLeft:`3px solid ${post.status === 'active' ? '#e63946' : 'rgba(255,255,255,.15)'}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontWeight:700, fontSize:15, marginBottom:3, color: post.status === 'active' ? '#fff' : 'rgba(255,255,255,.45)' }}>
+                      {post.title}
+                    </div>
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.4)', marginBottom:6 }}>
+                      {new Date(post.created_at).toLocaleDateString('fr-CH', { day:'numeric', month:'short', year:'numeric' })}
+                      {post.ligue ? ` · ${post.ligue}` : ''}
+                      {post.zone ? ` · ${post.zone}` : ''}
+                    </div>
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.6)', lineHeight:1.55 }}>{post.body}</div>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6, flexShrink:0 }}>
+                    <span style={{ background: post.status === 'active' ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: post.status === 'active' ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 10px', fontSize:11, fontWeight:700, textAlign:'center' }}>
+                      {post.status === 'active' ? '● Actif' : '○ Fermé'}
+                    </span>
+                    <div style={{ display:'flex', gap:6 }}>
+                      {post.status === 'active' && (
+                        <button
+                          onClick={() => setEditingPost(post)}
+                          style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                        >
+                          ✏️ Modifier
+                        </button>
+                      )}
+                      <button
+                        onClick={async () => {
+                          if (!confirm('Supprimer ce post ?')) return
+                          await supabase.from('annonces').delete().eq('id', post.id)
+                          setMyPosts(prev => prev.filter(p => p.id !== post.id))
+                        }}
+                        style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <style>{`

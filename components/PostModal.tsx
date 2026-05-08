@@ -1,47 +1,64 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase, Profile } from '../lib/supabase'
+import { supabase, Profile, Annonce } from '../lib/supabase'
 
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
 const ZONES  = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
 interface Props {
   profile: Profile
+  annonce?: Annonce        // if provided → edit mode
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (a: Annonce) => void
 }
 
-export default function PostModal({ profile, onClose, onSuccess }: Props) {
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [ligue, setLigue] = useState(profile.ligue || '')
-  const [zone, setZone] = useState(profile.zone || '')
+export default function PostModal({ profile, annonce, onClose, onSuccess }: Props) {
+  const [title, setTitle] = useState(annonce?.title || '')
+  const [body, setBody] = useState(annonce?.body || '')
+  const [ligue, setLigue] = useState(annonce?.ligue || profile.ligue || '')
+  const [zone, setZone] = useState(annonce?.zone || profile.zone || '')
   const [publishing, setPublishing] = useState(false)
   const [error, setError] = useState('')
+
+  const editing = !!annonce
 
   const authorName = profile.role === 'club'
     ? (profile.club_name || profile.email)
     : `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
 
   async function handlePublish() {
-    if (!body.trim()) { setError('Écris quelque chose avant de publier.'); return }
+    if (!title.trim()) { setError('Le titre est requis.'); return }
+    if (!body.trim()) { setError('Le texte est requis.'); return }
     setPublishing(true)
     setError('')
-    const { error: err } = await supabase.from('annonces').insert({
-      author_id: profile.id,
-      author_name: authorName,
-      author_type: profile.role,
-      title: title.trim() || body.trim().slice(0, 60),
-      body: body.trim(),
-      ligue: ligue || null,
-      position: profile.position || null,
-      zone: zone || profile.zone || '',
-      status: 'active',
-    })
-    setPublishing(false)
-    if (err) { setError('Erreur lors de la publication. Réessaie.'); return }
-    onSuccess()
+
+    if (editing) {
+      const { data, error: err } = await supabase
+        .from('annonces')
+        .update({ title: title.trim(), body: body.trim(), ligue: ligue || null, zone: zone || null })
+        .eq('id', annonce!.id)
+        .select()
+        .single()
+      setPublishing(false)
+      if (err) { setError('Erreur lors de la modification.'); return }
+      onSuccess(data)
+    } else {
+      const { data, error: err } = await supabase.from('annonces').insert({
+        author_id: profile.id,
+        author_name: authorName,
+        author_type: profile.role,
+        title: title.trim(),
+        body: body.trim(),
+        ligue: ligue || null,
+        position: profile.position || null,
+        zone: zone || profile.zone || '',
+        status: 'active',
+      }).select().single()
+      setPublishing(false)
+      if (err) { setError('Erreur lors de la publication. Réessaie.'); return }
+      onSuccess(data)
+    }
   }
 
   const inpSt: React.CSSProperties = {
@@ -67,8 +84,11 @@ export default function PostModal({ profile, onClose, onSuccess }: Props) {
       >
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:'1.25rem' }}>
-          <div style={{ width:44, height:44, borderRadius:12, background:'linear-gradient(135deg,#e63946,#0a1f5c)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>
-            {profile.role === 'club' ? '🏟️' : profile.role === 'coach' ? '🎽' : '⚽'}
+          <div style={{ width:44, height:44, borderRadius:'50%', overflow:'hidden', background:'linear-gradient(135deg,#e63946,#0a1f5c)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              : (profile.role === 'club' ? '🏟️' : profile.role === 'coach' ? '🎽' : '⚽')
+            }
           </div>
           <div>
             <div style={{ fontWeight:700, fontSize:15 }}>{authorName}</div>
@@ -77,21 +97,36 @@ export default function PostModal({ profile, onClose, onSuccess }: Props) {
               {profile.zone ? ` · ${profile.zone}` : ''}
             </div>
           </div>
+          <div style={{ marginLeft:'auto', fontSize:13, color:'rgba(255,255,255,.4)' }}>
+            {editing ? '✏️ Modifier' : '📢 Nouveau post'}
+          </div>
         </div>
 
-        {/* Body — main text */}
-        <div style={{ marginBottom:'1rem' }}>
-          <textarea
+        {/* Title */}
+        <div style={{ marginBottom:'0.75rem' }}>
+          <label style={lblSt}>Titre</label>
+          <input
             autoFocus
-            rows={5}
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Ex: Je cherche un club pour la saison prochaine"
+            style={inpSt}
+          />
+        </div>
+
+        {/* Body */}
+        <div style={{ marginBottom:'1rem' }}>
+          <label style={lblSt}>Message</label>
+          <textarea
+            rows={4}
             value={body}
             onChange={e => setBody(e.target.value)}
-            placeholder="Quoi de neuf ? Partage ta recherche, ton annonce, ton message…&#10;&#10;Ex : « Je cherche un club pour la saison prochaine, disponible dès juin. »"
+            placeholder="Décris ta situation, tes attentes, ta disponibilité…"
             style={{ ...inpSt, resize:'vertical' }}
           />
         </div>
 
-        {/* Optional fields — collapsed into a row */}
+        {/* Optional fields */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem', marginBottom:'1rem' }}>
           <div>
             <label style={lblSt}>Ligue (optionnel)</label>
@@ -118,10 +153,10 @@ export default function PostModal({ profile, onClose, onSuccess }: Props) {
         <div style={{ display:'flex', gap:8 }}>
           <button
             onClick={handlePublish}
-            disabled={publishing || !body.trim()}
-            style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'12px', fontSize:14, fontWeight:700, cursor: publishing || !body.trim() ? 'not-allowed' : 'pointer', opacity: publishing || !body.trim() ? 0.6 : 1, fontFamily:'inherit' }}
+            disabled={publishing || !title.trim() || !body.trim()}
+            style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'12px', fontSize:14, fontWeight:700, cursor: publishing || !title.trim() || !body.trim() ? 'not-allowed' : 'pointer', opacity: publishing || !title.trim() || !body.trim() ? 0.6 : 1, fontFamily:'inherit' }}
           >
-            {publishing ? '⏳ Publication…' : '📢 Publier'}
+            {publishing ? '⏳ En cours…' : editing ? '💾 Enregistrer' : '📢 Publier'}
           </button>
           <button
             onClick={onClose}

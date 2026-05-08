@@ -1,0 +1,227 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { supabase, Profile } from '../../../lib/supabase'
+
+function strengthLabel(key: string) {
+  const map: Record<string, string> = {
+    fast:'Rapide', technical:'Technique', physical:'Physique', dribbling:'Dribble',
+    shooting:'Frappe puissante', finishing:'Finition', passing:'Passes précises',
+    vision:'Vision du jeu', aerial:'Jeu aérien', onevsone:'1 contre 1',
+    sprint:'Vitesse de pointe', pressing:'Pressing', defensive:'Défensif',
+    offensive:'Offensif', leadership:'Leadership', hardworking:'Travailleur',
+    composed:'Calme', precise:'Précis', tactical:'Tactique', motivator:'Motivateur',
+    communication:'Communication', experienced:'Expérimenté', video:'Analyse vidéo',
+    youth:'Formation des jeunes', defense:'Défense organisée', counter:'Contre-attaque',
+    possession:'Jeu de possession', innovative:'Innovateur', fitness:'Préparation physique',
+    infrastructure:'Infrastructure de qualité', family:'Esprit familial',
+    ambition:'Ambition sportive', competitive:'Équipe compétitive',
+    atmosphere:'Bonne ambiance', professional:'Structure sérieuse',
+    social:'Vie sociale active', equipment:'Bons équipements',
+    local:'Ancrage local', growing:'Club en développement', welcoming:'Accueil ouvert',
+  }
+  return map[key] || key
+}
+
+function getYouTubeEmbed(url: string): string | null {
+  try {
+    const u = new URL(url)
+    if (u.hostname === 'youtu.be') return `https://www.youtube.com/embed/${u.pathname.slice(1)}`
+    if (u.hostname.includes('youtube.com')) {
+      const v = u.searchParams.get('v')
+      if (v) return `https://www.youtube.com/embed/${v}`
+    }
+    return null
+  } catch { return null }
+}
+
+export default function PublicProfilPage() {
+  const { id } = useParams<{ id: string }>()
+  const router = useRouter()
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+
+  useEffect(() => {
+    supabase.from('profiles').select('*').eq('id', id).single()
+      .then(({ data, error }) => {
+        if (error || !data) { setNotFound(true); setLoading(false); return }
+        setProfile(data)
+        setLoading(false)
+      })
+  }, [id])
+
+  if (loading) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', background:'#030a24' }}>
+      <div style={{ width:36, height:36, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
+    </div>
+  )
+
+  if (notFound || !profile) return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', background:'#030a24', color:'#fff', gap:16 }}>
+      <div style={{ fontSize:'3rem' }}>😔</div>
+      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem' }}>Profil introuvable</div>
+      <Link href="/recherche" style={{ color:'#e63946', textDecoration:'none', fontWeight:700 }}>← Voir tous les profils</Link>
+    </div>
+  )
+
+  const initials = `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
+  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+  const displayName = profile.role === 'club' ? profile.club_name : fullName
+  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
+  const roleLabel = profile.role === 'player' ? 'Joueur' : profile.role === 'coach' ? 'Coach' : 'Club'
+  const strengths = (profile.strengths || '').split(',').map(s => s.trim()).filter(Boolean)
+  const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
+
+  const darkCard: React.CSSProperties = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, padding:'1.25rem' }
+
+  return (
+    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+      <div style={{ maxWidth:860, margin:'0 auto', padding:'1.5rem' }}>
+
+        {/* Back */}
+        <Link href="/annonces" style={{ display:'inline-flex', alignItems:'center', gap:6, color:'rgba(255,255,255,.5)', textDecoration:'none', fontSize:13, marginBottom:'1.25rem' }}>
+          ← Retour aux annonces
+        </Link>
+
+        {/* Hero */}
+        <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'1.5rem', flexWrap:'wrap' }}>
+            <div style={{ width:90, height:90, borderRadius:16, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2rem', fontWeight:700, overflow:'hidden', flexShrink:0 }}>
+              {profile.avatar_url
+                ? <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : (initials || roleEmoji)
+              }
+            </div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6 }}>
+                {displayName || profile.email}
+              </div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
+                <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600 }}>
+                  {roleEmoji} {profile.position || roleLabel}
+                </span>
+                {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
+                {profile.zone && <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>📍 {profile.zone}</span>}
+                <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
+                  {profile.available ? '🟢 Disponible' : '🔴 Non disponible'}
+                </span>
+              </div>
+            </div>
+            <Link href="/messages" style={{ background:'#e63946', color:'#fff', borderRadius:10, padding:'10px 20px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0 }}>
+              💬 Envoyer un message
+            </Link>
+          </div>
+        </div>
+
+        {/* Stats (player/coach) */}
+        {profile.role !== 'club' && (profile.goals || profile.assists || profile.matches) ? (
+          <div style={{ ...darkCard, marginBottom:'1.25rem', display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
+            {[
+              { v: profile.goals ?? 0, k: 'Buts', color:'#e02020' },
+              { v: profile.assists ?? 0, k: 'Assists', color:'#1a6fd4' },
+              { v: profile.matches ?? 0, k: 'Matchs', color:'#0a7c3e' },
+            ].map((s, i) => (
+              <div key={s.k} style={{ padding:'1rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none' }}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:s.color, lineHeight:1 }}>{s.v}</div>
+                <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:4, fontWeight:700 }}>{s.k}</div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:'1.25rem' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
+
+            {/* Bio */}
+            {profile.bio && (
+              <div style={darkCard}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>À propos</div>
+                <p style={{ fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.7 }}>{profile.bio}</p>
+              </div>
+            )}
+
+            {/* Strengths */}
+            {strengths.length > 0 && (
+              <div style={darkCard}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>Points forts</div>
+                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                  {strengths.map(k => (
+                    <span key={k} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.8)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
+                      {strengthLabel(k)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Videos */}
+            {videoUrls.length > 0 && (
+              <div style={darkCard}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>Highlights</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+                  {videoUrls.map((url, i) => {
+                    const embed = getYouTubeEmbed(url)
+                    const isNative = !embed && /\.(mp4|mov|webm)(\?|$)/i.test(url)
+                    if (embed) return (
+                      <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
+                        <iframe src={embed} title={`Video ${i+1}`} frameBorder="0" allowFullScreen
+                          style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
+                      </div>
+                    )
+                    if (isNative) return (
+                      <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
+                        <video src={url} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
+                      </div>
+                    )
+                    return null
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
+            <div style={darkCard}>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>Informations</div>
+              {[
+                profile.role !== 'club' && profile.foot ? ['Pied', profile.foot] : null,
+                profile.zone ? ['Zone', profile.zone] : null,
+                profile.ligue ? ['Ligue', profile.ligue] : null,
+                profile.position ? ['Position', profile.position] : null,
+                profile.club_name && profile.role !== 'club' ? ['Club', profile.club_name] : null,
+              ].filter((r): r is [string, string] => Array.isArray(r)).map(([k, v]) => (
+                <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
+                  <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
+                  <span style={{ fontWeight:600, color:'#fff' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            {profile.career && (
+              <div style={darkCard}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>Parcours</div>
+                {profile.career.split('\n').filter(Boolean).map((line, i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.4rem 0', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
+                    <div style={{ width:7, height:7, borderRadius:'50%', background:'#3a8cff', flexShrink:0, marginTop:5 }} />
+                    <div style={{ fontSize:13, color:'rgba(255,255,255,.8)', lineHeight:1.5 }}>{line}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <style>{`
+          @media (max-width: 640px) {
+            .pub-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
+      </div>
+    </div>
+  )
+}
