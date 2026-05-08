@@ -915,11 +915,13 @@ export default function ProfilPage() {
             <textarea style={{ ...inpSt, resize:'vertical' }} rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.profil.bio_ph[lang]} />
           </div>
 
-          {/* Career */}
+          {/* Career — hidden for clubs */}
+          {profile.role !== 'club' && (
           <div>
             <label style={lblSt}>{t.profil.career_label[lang]}</label>
             <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={career} onChange={e => setCareer(e.target.value)} placeholder={t.profil.career_ph[lang]} />
           </div>
+          )}
 
           {/* Strengths — role-specific tags */}
           <div>
@@ -944,7 +946,8 @@ export default function ProfilPage() {
             </div>
           </div>
 
-          {/* Videos */}
+          {/* Videos — hidden for clubs */}
+          {profile.role !== 'club' && (
           <div>
             <label style={lblSt}>{t.profil.video_label[lang]}</label>
             <p style={{ fontSize:12, color:'rgba(255,255,255,.38)', marginBottom:10 }}>
@@ -966,6 +969,7 @@ export default function ProfilPage() {
               />
             ))}
           </div>
+          )}
 
           <div style={{ display:'flex', gap:8, marginTop:'1rem' }}>
             <button onClick={handleSave} disabled={saving} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity: saving ? .7 : 1 }}>
