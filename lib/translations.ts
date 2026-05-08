@@ -54,6 +54,8 @@ export const t = {
     how_subtitle: { fr: "Quatre étapes pour trouver ton équipe ou tes futurs coéquipiers.", de: "Vier Schritte, um dein Team oder zukünftige Teamkollegen zu finden." },
     ligues_subtitle: { fr: 'Toutes les catégories du football fribourgeois, des seniors aux juniors.', de: 'Alle Kategorien des Freiburger Fussballs, von den Senioren bis zu den Junioren.' },
     ligues_all: { fr: 'Toutes', de: 'Alle' },
+    ligues_homme: { fr: 'Hommes', de: 'Männer' },
+    ligues_femme: { fr: 'Femmes', de: 'Frauen' },
     ligues_seniors: { fr: 'Seniors', de: 'Senioren' },
     ligues_youth: { fr: 'Youth League', de: 'Youth League' },
     ligues_juniors: { fr: 'Juniors', de: 'Junioren' },

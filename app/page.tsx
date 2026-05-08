@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import HeroMap from '../components/HeroMap'
-import { ligues } from '../lib/data'
+import { liguesHomme, liguesFemme } from '../lib/data'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../lib/lang-context'
 import { t, tagsByRole } from '../lib/translations'
@@ -97,13 +97,11 @@ function useCounters() {
 }
 
 
-type LigueTab = 'all' | 'senior' | 'youth' | 'junior'
+type LigueTab = 'all' | 'homme' | 'femme'
 
 const allLigueItems = [
-  ...ligues[0].items.map(item => ({ item, cat: 'senior' as LigueTab })),
-  ...ligues[1].items.map(item => ({ item, cat: 'youth' as LigueTab })),
-  ...ligues[2].items.map(item => ({ item, cat: 'junior' as LigueTab })),
-  ...ligues[3].items.map(item => ({ item, cat: 'junior' as LigueTab })),
+  ...liguesHomme.flatMap(g => g.items.map(item => ({ item, cat: 'homme' as LigueTab, group: g.group }))),
+  ...liguesFemme.flatMap(g => g.items.map(item => ({ item, cat: 'femme' as LigueTab, group: g.group }))),
 ]
 
 
@@ -165,10 +163,9 @@ export default function HomePage() {
   ]
 
   const ligueTabs: { key: LigueTab; label: string }[] = [
-    { key: 'all',    label: t.home.ligues_all[lang] },
-    { key: 'senior', label: t.home.ligues_seniors[lang] },
-    { key: 'youth',  label: t.home.ligues_youth[lang] },
-    { key: 'junior', label: t.home.ligues_juniors[lang] },
+    { key: 'all',   label: t.home.ligues_all[lang] },
+    { key: 'homme', label: t.home.ligues_homme[lang] },
+    { key: 'femme', label: t.home.ligues_femme[lang] },
   ]
 
   return (
@@ -324,7 +321,7 @@ export default function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
             {filteredLigues.map(l => (
               <div key={l.item} className="hp-ligue-item">
-                <div style={{ width: 8, height: 8, background: '#4ade80', borderRadius: '50%', flexShrink: 0 }} />
+                <div style={{ width: 8, height: 8, background: l.cat === 'femme' ? '#e63946' : '#4ade80', borderRadius: '50%', flexShrink: 0 }} />
                 <span style={{ fontWeight: 600, fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>{l.item}</span>
               </div>
             ))}
