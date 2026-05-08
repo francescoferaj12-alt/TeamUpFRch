@@ -277,6 +277,38 @@ export const t = {
     coach_f: { fr: 'Coache', de: 'Trainerin' },
   },
 
+  // CAREER SECTION
+  career_section: {
+    title:       { fr: 'Parcours',                       de: 'Werdegang' },
+    label:       { fr: 'Carrière',                       de: 'Karriere' },
+    tab_all:     { fr: 'Tout',                           de: 'Alle' },
+    tab_current: { fr: 'En cours',                       de: 'Aktuell' },
+    tab_past:    { fr: 'Passé',                          de: 'Vergangen' },
+    badge_cur:   { fr: 'Actuel',                         de: 'Aktuell' },
+    present:     { fr: 'Présent',                        de: 'Heute' },
+    empty_text:  { fr: "Ajoute ton parcours pour augmenter tes chances d'être recruté", de: 'Füge deinen Werdegang hinzu, um deine Chancen zu erhöhen' },
+    add_exp:     { fr: '+ Ajouter une expérience',       de: '+ Erfahrung hinzufügen' },
+    matches:     { fr: 'Matchs',                         de: 'Spiele' },
+    goals:       { fr: 'Buts',                           de: 'Tore' },
+    assists:     { fr: 'Assists',                        de: 'Vorlagen' },
+    wins:        { fr: 'Victoires',                      de: 'Siege' },
+    win_rate:    { fr: 'Win rate',                       de: 'Win rate' },
+    add_title:   { fr: 'Ajouter une expérience',         de: 'Erfahrung hinzufügen' },
+    edit_title:  { fr: 'Modifier une expérience',        de: 'Erfahrung bearbeiten' },
+    club_name:   { fr: 'Nom du club *',                  de: 'Vereinsname *' },
+    ligue:       { fr: 'Ligue / Championnat',            de: 'Liga / Meisterschaft' },
+    position:    { fr: 'Position',                       de: 'Position' },
+    jersey:      { fr: 'N° maillot',                     de: 'Trikotnummer' },
+    coach_role:  { fr: "Rôle d'entraîneur",              de: 'Trainerfunktion' },
+    start:       { fr: 'Début (mois/année)',              de: 'Beginn (Monat/Jahr)' },
+    end:         { fr: 'Fin (mois/année)',                de: 'Ende (Monat/Jahr)' },
+    is_current:  { fr: 'Club actuel (pas de date de fin)', de: 'Aktueller Verein (kein Enddatum)' },
+    description: { fr: 'Description (optionnel)',         de: 'Beschreibung (optional)' },
+    save:        { fr: 'Enregistrer',                    de: 'Speichern' },
+    saving:      { fr: 'Enregistrement…',                de: 'Speichern…' },
+    delete_confirm: { fr: 'Supprimer cette expérience ?', de: 'Erfahrung löschen?' },
+  },
+
   // MESSAGES
   messages: {
     title: { fr: 'Messages', de: 'Nachrichten' },
