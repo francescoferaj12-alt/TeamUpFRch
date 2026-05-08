@@ -60,6 +60,8 @@ export default function MessagesPage() {
       setConversations(prev => prev.map(c =>
         c.partnerId === pid ? { ...c, unread: 0 } : c
       ))
+      // Notify Navbar directly so badge clears immediately
+      window.dispatchEvent(new Event('messages-read'))
     })()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePartnerId, profile?.id])
@@ -318,6 +320,7 @@ export default function MessagesPage() {
     await supabase.from('messages').update({ read: true })
       .eq('sender_id', partnerId).eq('receiver_id', profile.id).eq('read', false)
     setConversations(prev => prev.map(c => c.partnerId === partnerId ? { ...c, unread: 0 } : c))
+    window.dispatchEvent(new Event('messages-read'))
   }
 
   const activeConv = conversations.find(c => c.partnerId === activePartnerId)
