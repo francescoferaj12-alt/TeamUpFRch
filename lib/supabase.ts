@@ -99,6 +99,9 @@ export type Message = {
   text: string
   read: boolean
   created_at: string
+  file_url?: string
+  file_type?: string
+  file_name?: string
 }
 
 export type CareerExperience = {

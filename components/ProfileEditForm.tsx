@@ -177,7 +177,7 @@ function Section({ title, desc, children, defaultOpen = true, lang }: SectionPro
 type Props = {
   profile: Profile
   lang: Lang
-  onSaved: (updated: Profile) => void
+  onSaved: (updated: Profile, silent: boolean) => void
   onCancel: () => void
 }
 export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Props) {
@@ -355,7 +355,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       }
       setHasChanges(false)
       setSaveStatus('saved')
-      onSaved({ ...profile, ...base, ...ext } as Profile)
+      onSaved({ ...profile, ...base, ...ext } as Profile, silent)
       if (silent) {
         setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2200)
       }
