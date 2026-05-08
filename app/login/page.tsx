@@ -95,6 +95,10 @@ function LoginForm() {
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
 
     if (data.user) {
+      const birthdate = (birthDay && birthMonth && birthYear)
+        ? `${birthYear}-${birthMonth.toString().padStart(2,'0')}-${birthDay.toString().padStart(2,'0')}`
+        : null
+
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id, email, role,
         first_name: firstName, last_name: lastName,
@@ -105,6 +109,7 @@ function LoginForm() {
         foot: role === 'player' ? foot : null,
         club_name: role === 'club' ? clubName : null,
         bio: role !== 'coach' ? bio : null,
+        birthdate,
         available: true,
         ...(role === 'coach' ? {
           coach_experience: coachExperience,
@@ -113,12 +118,31 @@ function LoginForm() {
           coach_availability: coachAvailability,
         } : {})
       })
-      if (profileError) { setError('Erreur profil: ' + profileError.message); setLoading(false); return }
-
-      // Save birthdate separately (requires migration column — fails silently if not yet applied)
-      if (birthDay && birthMonth && birthYear) {
-        const bd = `${birthYear}-${birthMonth.toString().padStart(2,'0')}-${birthDay.toString().padStart(2,'0')}`
-        await supabase.from('profiles').update({ birthdate: bd }).eq('id', data.user.id)
+      if (profileError) {
+        // Fallback: retry without birthdate if column doesn't exist
+        if (profileError.message?.includes('birthdate')) {
+          const { error: retry } = await supabase.from('profiles').insert({
+            id: data.user.id, email, role,
+            first_name: firstName, last_name: lastName,
+            position: role === 'player' ? position : null,
+            genre: role !== 'club' ? genre : null,
+            ligue: role !== 'coach' ? ligue : null,
+            zone,
+            foot: role === 'player' ? foot : null,
+            club_name: role === 'club' ? clubName : null,
+            bio: role !== 'coach' ? bio : null,
+            available: true,
+            ...(role === 'coach' ? {
+              coach_experience: coachExperience,
+              coach_diploma: coachDiploma,
+              coach_specialty: coachSpecialty,
+              coach_availability: coachAvailability,
+            } : {})
+          })
+          if (retry) { setError('Erreur profil: ' + retry.message); setLoading(false); return }
+        } else {
+          setError('Erreur profil: ' + profileError.message); setLoading(false); return
+        }
       }
     }
 
