@@ -17,10 +17,7 @@ async function getCroppedBlob(imageSrc: string, pixelCrop: CropArea): Promise<Bl
   canvas.width = pixelCrop.width
   canvas.height = pixelCrop.height
   const ctx = canvas.getContext('2d')!
-  // Circular clip
-  ctx.beginPath()
-  ctx.arc(pixelCrop.width / 2, pixelCrop.height / 2, pixelCrop.width / 2, 0, Math.PI * 2)
-  ctx.clip()
+  // Square crop — CSS handles the circle shape, JPEG stays clean (no black corners)
   ctx.drawImage(img, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height)
   return new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error('toBlob failed')), 'image/jpeg', 0.92))
 }

@@ -414,7 +414,7 @@ export default function ProfilPage() {
           {/* AVATAR */}
           <div style={{ position:'relative', flexShrink:0 }}>
             <div
-              style={{ width:100, height:100, borderRadius:18, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
+              style={{ width:100, height:100, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2.2rem', fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}
               onClick={() => fileInputRef.current?.click()}
             >
               {profile.avatar_url

@@ -90,7 +90,7 @@ export default function PublicProfilPage() {
         {/* Hero */}
         <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'1.5rem', flexWrap:'wrap' }}>
-            <div style={{ width:90, height:90, borderRadius:16, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2rem', fontWeight:700, overflow:'hidden', flexShrink:0 }}>
+            <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2rem', fontWeight:700, overflow:'hidden', flexShrink:0 }}>
               {profile.avatar_url
                 ? <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                 : (initials || roleEmoji)
@@ -118,20 +118,68 @@ export default function PublicProfilPage() {
         </div>
 
         {/* Stats (player/coach) */}
-        {profile.role !== 'club' && (profile.goals || profile.assists || profile.matches) ? (
-          <div style={{ ...darkCard, marginBottom:'1.25rem', display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
-            {[
-              { v: profile.goals ?? 0, k: 'Buts', color:'#e02020' },
-              { v: profile.assists ?? 0, k: 'Assists', color:'#1a6fd4' },
-              { v: profile.matches ?? 0, k: 'Matchs', color:'#0a7c3e' },
-            ].map((s, i) => (
-              <div key={s.k} style={{ padding:'1rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none' }}>
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:s.color, lineHeight:1 }}>{s.v}</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:4, fontWeight:700 }}>{s.k}</div>
+        {profile.role !== 'club' && (() => {
+          const now = new Date()
+          const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
+          const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
+          const seasonPrev = `${sy - 1} – ${String(sy).slice(2)}`
+          const hasCurrent = profile.goals || profile.assists || profile.matches
+          const hasPrev    = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
+          if (!hasCurrent && !hasPrev) return null
+          const currentStats = [
+            { v: profile.goals ?? 0,   k: 'Buts',   color:'#e02020' },
+            { v: profile.assists ?? 0, k: 'Assists', color:'#1a6fd4' },
+            { v: profile.matches ?? 0, k: 'Matchs',  color:'#0a7c3e' },
+          ]
+          const prevStats = [
+            { v: profile.goals_prev,   k: 'Buts',   color:'#e02020' },
+            { v: profile.assists_prev, k: 'Assists', color:'#1a6fd4' },
+            { v: profile.matches_prev, k: 'Matchs',  color:'#0a7c3e' },
+          ]
+          return (
+            <div style={{ ...darkCard, marginBottom:'1.25rem', overflow:'hidden', padding:0 }}>
+              {/* Current season */}
+              <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Saison actuelle</span>
+                <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', fontWeight:600 }}>{seasonNow}</span>
               </div>
-            ))}
-          </div>
-        ) : null}
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
+                {currentStats.map((s, i) => {
+                  const prev = prevStats[i].v
+                  const delta = prev != null ? s.v - prev : null
+                  return (
+                    <div key={s.k} style={{ padding:'1.2rem .5rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none' }}>
+                      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.8rem', color:s.color, lineHeight:1 }}>{s.v}</div>
+                      <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:4, fontWeight:700 }}>{s.k}</div>
+                      {delta !== null && (
+                        <div style={{ marginTop:6, fontSize:11, fontWeight:700, color: delta > 0 ? '#4cdb7a' : delta < 0 ? '#ff6b6b' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,107,107,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 8px', display:'inline-block' }}>
+                          {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              {/* Previous season */}
+              {hasPrev && (
+                <>
+                  <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
+                    <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Saison précédente</span>
+                    <span style={{ fontSize:11, color:'rgba(255,255,255,.55)', fontWeight:600 }}>{seasonPrev}</span>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
+                    {prevStats.map((s, i) => (
+                      <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', background:'rgba(255,255,255,.02)' }}>
+                        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2rem', color:s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
+                        <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:4, fontWeight:700 }}>{s.k}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        })()}
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:'1.25rem' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
