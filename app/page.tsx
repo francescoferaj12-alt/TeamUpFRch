@@ -3,32 +3,88 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import HeroMap from '../components/HeroMap'
-import { annonces, ligues } from '../lib/data'
+import { ligues } from '../lib/data'
+import { supabase } from '../lib/supabase'
 import { useLang } from '../lib/lang-context'
 import { t, tagsByRole } from '../lib/translations'
 
 function useCounters() {
   const [counts, setCounts] = useState({ players: 0, clubs: 0, coaches: 0 })
+  const real = useRef({ players: 0, clubs: 0, coaches: 0 })
+  const displayed = useRef({ players: 0, clubs: 0, coaches: 0 })
   const ref = useRef<HTMLDivElement>(null)
-  const animated = useRef(false)
+  const visible = useRef(false)
 
+  // Load real counts from DB and subscribe to changes
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting || animated.current) return
-      animated.current = true
-      observer.disconnect()
+    async function loadCounts() {
+      const [rp, rc, rco] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'player'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'club'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'coach'),
+      ])
+      real.current = {
+        players: rp.count ?? 0,
+        clubs: rc.count ?? 0,
+        coaches: rco.count ?? 0,
+      }
+      if (visible.current) animateToReal()
+    }
+
+    function animateToReal() {
+      const from = { ...displayed.current }
+      const to = { ...real.current }
       const start = performance.now()
       const dur = 1500
       function frame(now: number) {
         const progress = Math.min((now - start) / dur, 1)
         const ease = 1 - Math.pow(1 - progress, 3)
-        setCounts({
-          players: Math.round(340 * ease),
-          clubs: Math.round(52 * ease),
-          coaches: Math.round(18 * ease),
-        })
+        const next = {
+          players: Math.round(from.players + (to.players - from.players) * ease),
+          clubs: Math.round(from.clubs + (to.clubs - from.clubs) * ease),
+          coaches: Math.round(from.coaches + (to.coaches - from.coaches) * ease),
+        }
+        displayed.current = next
+        setCounts({ ...next })
+        if (progress < 1) requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+    }
+
+    loadCounts()
+
+    // Realtime: re-fetch counts on any profile insert/delete
+    const channel = supabase
+      .channel('hp-stats')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles' }, loadCounts)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'profiles' }, loadCounts)
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
+  // Trigger animation when section enters viewport
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || visible.current) return
+      visible.current = true
+      observer.disconnect()
+      // animate from 0 to whatever real.current is
+      const to = { ...real.current }
+      const start = performance.now()
+      const dur = 1500
+      function frame(now: number) {
+        const progress = Math.min((now - start) / dur, 1)
+        const ease = 1 - Math.pow(1 - progress, 3)
+        const next = {
+          players: Math.round(to.players * ease),
+          clubs: Math.round(to.clubs * ease),
+          coaches: Math.round(to.coaches * ease),
+        }
+        displayed.current = next
+        setCounts({ ...next })
         if (progress < 1) requestAnimationFrame(frame)
       }
       requestAnimationFrame(frame)
@@ -40,6 +96,7 @@ function useCounters() {
   return [counts, ref] as const
 }
 
+
 type LigueTab = 'all' | 'senior' | 'youth' | 'junior'
 
 const allLigueItems = [
@@ -49,11 +106,6 @@ const allLigueItems = [
   ...ligues[3].items.map(item => ({ item, cat: 'junior' as LigueTab })),
 ]
 
-function shieldColor(type: string) {
-  if (type === 'club') return '#e63946'
-  if (type === 'coach') return '#0a1f5c'
-  return '#1a1a1a'
-}
 
 export default function HomePage() {
   const { lang } = useLang()
@@ -216,63 +268,6 @@ export default function HomePage() {
                   {card.cta} →
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ ANNONCES ═══════════════════════ */}
-      <section style={{ background: '#030a24', padding: '100px 0' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 60, flexWrap: 'wrap', gap: 20 }}>
-            <div>
-              <span className="hp-section-label">{t.home.annonces_badge[lang]}</span>
-              <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1, color: '#fff' }}>
-                {t.home.annonces_title[lang]}
-              </h2>
-            </div>
-            <Link href="/recherche" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
-              {t.home.annonces_link[lang]}
-            </Link>
-          </div>
-
-          <div className="hp-3col-grid">
-            {annonces.slice(0, 3).map(a => (
-              <div key={a.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, position: 'relative' }}>
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 44, height: 50, background: shieldColor(a.authorType), clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue', sans-serif", fontSize: 17, paddingBottom: 12, color: '#fff', flexShrink: 0 }}>
-                      {a.authorName.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>{a.authorName}</div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{a.createdAt}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.15)', color: '#4ade80', padding: '4px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', flexShrink: 0 }}>
-                    <span style={{ width: 6, height: 6, background: '#4ade80', borderRadius: '50%', animation: 'hp-pulse-green 2s infinite', flexShrink: 0 }} />
-                    Active
-                  </div>
-                </div>
-
-                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, lineHeight: 1.55, marginBottom: 16 }}>{a.body}</p>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                  <span style={{ background: 'rgba(70,140,255,0.12)', color: '#88b4ff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{a.ligue}</span>
-                  {a.position && <span style={{ background: 'rgba(230,57,70,0.12)', color: '#ff8590', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{a.position}</span>}
-                  <span style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{a.zone}</span>
-                </div>
-
-                <div style={{ display: 'flex', gap: 8, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
-                  <Link href="/login" style={{ flex: 1, background: '#e63946', color: '#fff', borderRadius: 8, padding: '9px', fontSize: 13, fontWeight: 700, textAlign: 'center', textDecoration: 'none', display: 'block', boxShadow: '0 4px 14px rgba(230,57,70,0.3)' }}>
-                    {t.home.postuler[lang]}
-                  </Link>
-                  <Link href="/messages" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 15, textDecoration: 'none' }}>
-                    💬
-                  </Link>
-                </div>
-              </div>
             ))}
           </div>
         </div>
