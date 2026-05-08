@@ -151,7 +151,7 @@ export default function ClubsPage() {
                       <Link href={`/club/${club.id}`} style={{ flex:1, background:'#e63946', color:'#fff', borderRadius:8, padding:'8px', fontSize:13, fontWeight:700, textAlign:'center', textDecoration:'none' }}>
                         {t.clubs.view_club[lang]}
                       </Link>
-                      <Link href="/messages" style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:8, padding:'8px 14px', fontSize:13, fontWeight:700, textDecoration:'none' }}>
+                      <Link href={`/messages?partner=${club.id}`} style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:8, padding:'8px 14px', fontSize:13, fontWeight:700, textDecoration:'none' }}>
                         💬
                       </Link>
                     </div>

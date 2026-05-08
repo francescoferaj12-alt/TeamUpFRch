@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, Profile, Message } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
@@ -28,6 +28,8 @@ export default function MessagesPage() {
   const [search, setSearch] = useState('')
   const bodyRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const partnerParam = searchParams.get('partner')
   const { session, profile: authProfile, authLoading } = useAuth()
 
   useEffect(() => {
@@ -46,6 +48,18 @@ export default function MessagesPage() {
       .order('created_at', { ascending: true })
 
     if (!msgs || msgs.length === 0) {
+      if (partnerParam) {
+        const { data: partner } = await supabase.from('profiles').select('id,first_name,last_name,club_name,role').eq('id', partnerParam).single()
+        if (partner) {
+          setConversations([{
+            partnerId: partner.id,
+            partnerName: partner.role === 'club' ? (partner.club_name || '—') : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
+            partnerRole: partner.role,
+            lastMessage: '', lastTime: '', unread: 0, messages: [],
+          }])
+          setActivePartnerId(partnerParam)
+        }
+      }
       setLoading(false)
       return
     }
@@ -87,8 +101,37 @@ export default function MessagesPage() {
       return bLast.localeCompare(aLast)
     })
 
-    setConversations(convList)
-    if (convList.length > 0 && !activePartnerId) setActivePartnerId(convList[0].partnerId)
+    // If coming from a profile/club link with ?partner=ID
+    if (partnerParam) {
+      const existing = convList.find(c => c.partnerId === partnerParam)
+      if (existing) {
+        setConversations(convList)
+        setActivePartnerId(partnerParam)
+        await supabase.from('messages').update({ read: true }).eq('sender_id', partnerParam).eq('receiver_id', prof.id).eq('read', false)
+      } else {
+        // New conversation — fetch partner profile and create virtual entry
+        const { data: partner } = await supabase.from('profiles').select('id,first_name,last_name,club_name,role').eq('id', partnerParam).single()
+        if (partner) {
+          const virtualConv: Conversation = {
+            partnerId: partner.id,
+            partnerName: partner.role === 'club' ? (partner.club_name || '—') : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
+            partnerRole: partner.role,
+            lastMessage: '',
+            lastTime: '',
+            unread: 0,
+            messages: [],
+          }
+          setConversations([virtualConv, ...convList])
+          setActivePartnerId(partnerParam)
+        } else {
+          setConversations(convList)
+          if (convList.length > 0 && !activePartnerId) setActivePartnerId(convList[0].partnerId)
+        }
+      }
+    } else {
+      setConversations(convList)
+      if (convList.length > 0 && !activePartnerId) setActivePartnerId(convList[0].partnerId)
+    }
     setLoading(false)
   }
 
@@ -126,13 +169,18 @@ export default function MessagesPage() {
     if (newMsg) {
       setConversations((prev) => {
         const existing = prev.find((c) => c.partnerId === activePartnerId)
+        const timeStr = new Date().toLocaleTimeString(lang === 'fr' ? 'fr-CH' : 'de-CH', { hour: '2-digit', minute: '2-digit' })
         if (existing) {
           return prev.map((c) => c.partnerId === activePartnerId
-            ? { ...c, messages: [...c.messages, newMsg], lastMessage: txt, lastTime: new Date().toLocaleTimeString(lang === 'fr' ? 'fr-CH' : 'de-CH', { hour: '2-digit', minute: '2-digit' }) }
+            ? { ...c, messages: [...c.messages, newMsg], lastMessage: txt, lastTime: timeStr }
             : c
           )
         }
-        return prev
+        // First message in a new conversation — update the virtual entry
+        return prev.map((c) => c.partnerId === activePartnerId
+          ? { ...c, messages: [newMsg], lastMessage: txt, lastTime: timeStr }
+          : c
+        )
       })
     }
     setInput('')

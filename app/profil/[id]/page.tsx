@@ -118,7 +118,7 @@ export default function PublicProfilPage() {
                 </span>
               </div>
             </div>
-            <Link href="/messages" style={{ background:'#e63946', color:'#fff', borderRadius:10, padding:'10px 20px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0 }}>
+            <Link href={`/messages?partner=${id}`} style={{ background:'#e63946', color:'#fff', borderRadius:10, padding:'10px 20px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0 }}>
               💬 Envoyer un message
             </Link>
           </div>
