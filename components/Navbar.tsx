@@ -63,7 +63,18 @@ export default function Navbar() {
     return () => { supabase.removeChannel(channel) }
   }, [session])
 
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  useEffect(() => {
+    setMenuOpen(false)
+    // Re-count unread when navigating away from /messages (messages may have been read)
+    if (!session) return
+    const uid = session.user.id
+    supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', uid)
+      .eq('read', false)
+      .then(({ count }) => setUnread(count || 0))
+  }, [pathname, session])
 
   async function handleLogout() {
     await supabase.auth.signOut()

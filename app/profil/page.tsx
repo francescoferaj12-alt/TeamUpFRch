@@ -201,7 +201,7 @@ export default function ProfilPage() {
           last_name: meta.last_name || meta.family_name || meta.full_name?.split(' ').slice(1).join(' ') || '',
           available: true,
         }
-        const { data: inserted } = await supabase.from('profiles').insert(newProfile).select().single()
+        const { data: inserted } = await supabase.from('profiles').upsert(newProfile, { onConflict: 'id' }).select().single()
         data = inserted
         await refreshProfile()
       }

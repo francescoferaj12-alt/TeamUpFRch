@@ -56,6 +56,7 @@ export type Profile = {
   // Coach extended
   coach_categories?: string
   coach_philosophy?: string
+  coach_certificates?: string
   // Club extended
   club_founded_year?: number
   club_teams_count?: number
