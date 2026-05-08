@@ -68,7 +68,7 @@ export default function DashboardPage() {
 
       {/* MAIN */}
       <div className="dash-main">
-        {section === 'vue' && <VueSection profile={profile} />}
+        {section === 'vue' && <VueSection profile={profile} onPublish={() => setSection('annonces')} />}
         {section === 'candidatures' && <CandidaturesSection profile={profile} />}
         {section === 'annonces' && <AnnoncesSection profile={profile} />}
         {section === 'messages' && <MessagesSection />}
@@ -108,7 +108,7 @@ function SidebarLink({ icon, label, active, onClick, badge }: { icon: string; la
   )
 }
 
-function VueSection({ profile }: { profile: Profile }) {
+function VueSection({ profile, onPublish }: { profile: Profile; onPublish: () => void }) {
   const { lang } = useLang()
   const [annonces, setAnnonces] = useState<Annonce[]>([])
   const [apps, setApps] = useState<AppWithAnnonce[]>([])
@@ -153,7 +153,7 @@ function VueSection({ profile }: { profile: Profile }) {
           <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.dash.last_annonces[lang]}</div>
           {annonces.length === 0 ? (
             <p style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>
-              {t.dash.no_annonce[lang]} <button onClick={() => {}} style={{ color:'#5b9eff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit' }}>{t.dash.publish_link[lang]}</button>
+              {t.dash.no_annonce[lang]} <button onClick={onPublish} style={{ color:'#5b9eff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit' }}>{t.dash.publish_link[lang]}</button>
             </p>
           ) : annonces.slice(0, 3).map((a) => (
             <div key={a.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'.65rem 0', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
@@ -365,7 +365,7 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
           <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t.dash.desc_ph[lang]} />
         </div>
 
-        <button onClick={handlePublish} disabled={publishing} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'11px 22px', fontSize:14, fontWeight:700, cursor:'pointer', opacity:publishing?.7:1, fontFamily:'inherit' }}>
+        <button onClick={handlePublish} disabled={publishing} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'11px 22px', fontSize:14, fontWeight:700, cursor:'pointer', opacity: publishing ? .7 : 1, fontFamily:'inherit' }}>
           {publishing ? t.dash.publishing[lang] : t.dash.publish_btn[lang]}
         </button>
       </div>
@@ -464,7 +464,7 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
           <textarea style={{ ...inpSt, resize:'vertical' }} rows={4} value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t.dash.bio_ph[lang]} />
         </div>
         <div style={{ display:'flex', gap:8 }}>
-          <button onClick={handleSave} disabled={saving} style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, cursor:'pointer', opacity:saving?.7:1, fontFamily:'inherit' }}>
+          <button onClick={handleSave} disabled={saving} style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, cursor:'pointer', opacity: saving ? .7 : 1, fontFamily:'inherit' }}>
             {saving ? t.dash.saving_btn[lang] : t.dash.save_btn[lang]}
           </button>
           <Link href="/profil" style={{ display:'inline-flex', background:'transparent', color:'rgba(255,255,255,.5)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, textDecoration:'none', alignItems:'center' }}>{t.dash.see_profile[lang]}</Link>

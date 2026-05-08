@@ -6,6 +6,7 @@ import { LangProvider } from '../lib/lang-context';
 import { AuthProvider } from '../lib/auth-context';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://teamupfr.ch'),
   title: 'TeamUpFR — Ton équipe, ton avenir',
   description: 'La plateforme qui connecte joueurs, coachs et clubs de football amateurs du canton de Fribourg.',
   keywords: ['football', 'Fribourg', 'amateur', 'club', 'recrutement', 'coach', 'joueur', 'Freiburg', 'Fussball'],
