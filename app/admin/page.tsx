@@ -35,21 +35,20 @@ export default function AdminPage() {
 
   async function setVerified(clubId: string, value: boolean) {
     setBusy(clubId)
-    const { data: clubData, error } = await supabase
+    const club = clubs.find(c => c.id === clubId)
+    const { error } = await supabase
       .from('profiles')
       .update({ verified: value })
       .eq('id', clubId)
-      .select('club_name, email')
-      .single()
     if (error) {
       alert('Erreur: ' + error.message)
     } else {
       setClubs(prev => prev.map(c => c.id === clubId ? { ...c, verified: value } : c))
-      if (clubData?.email) {
+      if (club?.email) {
         await fetch('/api/send-verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clubName: clubData.club_name, clubEmail: clubData.email, verified: value }),
+          body: JSON.stringify({ clubName: club.club_name, clubEmail: club.email, verified: value }),
         })
       }
     }
