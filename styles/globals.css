@@ -44,6 +44,12 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; }
 
+/* ── SELECT OPTION VISIBILITY (cross-browser fix) ── */
+select option, select optgroup {
+  background-color: #ffffff;
+  color: #0d1a3a;
+}
+
 /* ── NAV ── */
 .nav {
   background: rgba(3, 10, 36, 0.88);
