@@ -685,8 +685,8 @@ export default function ProfilPage() {
         )}
       </div>
 
-      {/* ── PUNTI FORTI ── */}
-      <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
+      {/* ── PUNTI FORTI — hidden for clubs ── */}
+      {profile.role !== 'club' && <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
         {strengthKeys.length === 0 ? (
           <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
@@ -702,7 +702,7 @@ export default function ProfilPage() {
             ))}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* ── EDIT FORM ── */}
       {editing && (
@@ -1001,42 +1001,7 @@ export default function ProfilPage() {
             }
           </div>
 
-          {profile.role === 'club' ? (
-            <div style={darkCard}>
-              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
-                Contact & Liens
-              </div>
-              {[
-                { href: profile.club_website,   icon:'🌐', label:'Site web' },
-                { href: profile.club_instagram,  icon:'📷', label:'Instagram' },
-                { href: profile.club_facebook,   icon:'📘', label:'Facebook' },
-                { href: profile.club_whatsapp ? `https://wa.me/${profile.club_whatsapp.replace(/\D/g,'')}` : null, icon:'💬', label:'WhatsApp' },
-                { href: profile.club_phone_public ? `tel:${profile.club_phone_public}` : null, icon:'📞', label: profile.club_phone_public },
-                { href: profile.club_email_public ? `mailto:${profile.club_email_public}` : null, icon:'✉️', label: profile.club_email_public },
-              ].filter(l => l.href).length === 0 ? (
-                <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
-                  Aucun lien ajouté.{' '}
-                  <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>Ajouter →</button>
-                </p>
-              ) : (
-                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                  {[
-                    { href: profile.club_website,   icon:'🌐', label:'Site web' },
-                    { href: profile.club_instagram,  icon:'📷', label:'Instagram' },
-                    { href: profile.club_facebook,   icon:'📘', label:'Facebook' },
-                    { href: profile.club_whatsapp ? `https://wa.me/${profile.club_whatsapp.replace(/\D/g,'')}` : null, icon:'💬', label:'WhatsApp' },
-                    { href: profile.club_phone_public ? `tel:${profile.club_phone_public}` : null, icon:'📞', label: profile.club_phone_public },
-                    { href: profile.club_email_public ? `mailto:${profile.club_email_public}` : null, icon:'✉️', label: profile.club_email_public },
-                  ].filter(l => l.href).map(l => (
-                    <a key={l.label} href={l.href!} target={l.href?.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
-                      style={{ display:'flex', alignItems:'center', gap:10, background:'rgba(255,255,255,.05)', borderRadius:10, padding:'10px 14px', textDecoration:'none', color:'rgba(255,255,255,.85)', fontSize:14, fontWeight:600, border:'1px solid rgba(255,255,255,.08)' }}>
-                      <span style={{ fontSize:18 }}>{l.icon}</span>{l.label}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
+          {profile.role !== 'club' && (
             <div style={darkCard}>
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
               {t.profil.highlights[lang]}
