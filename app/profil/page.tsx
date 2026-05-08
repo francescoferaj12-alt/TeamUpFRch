@@ -1095,7 +1095,8 @@ export default function ProfilPage() {
             ))}
           </div>
 
-          {/* Parcours — entre Info et Actions */}
+          {/* Parcours — hidden for clubs */}
+          {profile.role !== 'club' && (
           <div style={darkCard}>
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.career[lang]}</div>
             {profile.career ? (
@@ -1116,6 +1117,7 @@ export default function ProfilPage() {
               </p>
             )}
           </div>
+          )}
 
           {/* Actions rapides */}
           <div style={darkCard}>
