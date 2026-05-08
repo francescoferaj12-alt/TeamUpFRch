@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase, Profile, Annonce, Application } from '../../lib/supabase'
+import { supabase, Profile, Annonce, Application, avatarSrc } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
@@ -190,7 +190,7 @@ function VueSection({ profile, onPublish }: { profile: Profile; onPublish: () =>
             <div key={a.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'.65rem 0', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
               <Link href={`/profil/${a.applicant_id}`} style={{ width:36, height:36, borderRadius:9, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, textDecoration:'none', background: avatarMap[a.applicant_id] ? 'transparent' : 'rgba(26,111,212,.2)', fontSize:16 }}>
                 {avatarMap[a.applicant_id]
-                  ? <img src={avatarMap[a.applicant_id]!} alt="" style={{ width:36, height:36, objectFit:'cover' }} />
+                  ? <img src={avatarSrc(avatarMap[a.applicant_id])!} alt="" style={{ width:36, height:36, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                   : '👤'
                 }
               </Link>
@@ -266,7 +266,7 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                   <Link href={`/profil/${a.applicant_id}`} style={{ width:40, height:40, borderRadius:10, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, textDecoration:'none', background: avatarMap[a.applicant_id] ? 'transparent' : 'rgba(26,111,212,.2)', fontSize:18 }}>
                     {avatarMap[a.applicant_id]
-                      ? <img src={avatarMap[a.applicant_id]!} alt="" style={{ width:40, height:40, objectFit:'cover' }} />
+                      ? <img src={avatarSrc(avatarMap[a.applicant_id])!} alt="" style={{ width:40, height:40, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                       : '👤'
                     }
                   </Link>
