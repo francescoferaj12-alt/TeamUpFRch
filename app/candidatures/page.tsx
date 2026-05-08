@@ -96,6 +96,7 @@ function ClubView({ profile }: { profile: Profile }) {
   const [filter, setFilter] = useState<Status>('all')
   const [annonces, setAnnonces] = useState<Annonce[]>([])
   const [filterAnnonce, setFilterAnnonce] = useState('')
+  const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({})
   const { lang } = useLang()
 
   useEffect(() => {
@@ -118,6 +119,16 @@ function ClubView({ profile }: { profile: Profile }) {
         const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
         if (unseenIds.length > 0) {
           supabase.from('applications').update({ seen_by_owner: true }).in('id', unseenIds)
+        }
+        // Batch-fetch applicant avatars
+        if (mapped.length > 0) {
+          const ids = [...new Set(mapped.map(a => a.applicant_id))]
+          supabase.from('profiles').select('id,avatar_url').in('id', ids)
+            .then(({ data }) => {
+              const map: Record<string, string | null> = {}
+              for (const p of (data || [])) map[p.id] = p.avatar_url || null
+              setAvatarMap(map)
+            })
         }
       })
   }, [profile.id])
@@ -209,7 +220,12 @@ function ClubView({ profile }: { profile: Profile }) {
               <div key={a.id} style={{ background: CARD_BG, border: CARD_BORDER, borderRadius: 16, padding:'1.25rem' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.85rem' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                    <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none' }}>👤</Link>
+                    <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.applicant_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
+                      {avatarMap[a.applicant_id]
+                        ? <img src={avatarMap[a.applicant_id]!} alt="" style={{ width:46, height:46, objectFit:'cover' }} />
+                        : '👤'
+                      }
+                    </Link>
                     <div>
                       <Link href={`/profil/${a.applicant_id}`} style={{ fontWeight:700, fontSize:15, color:'#7eb6ff', textDecoration:'none', borderBottom:'1.5px solid rgba(126,182,255,.35)', paddingBottom:1 }}>
                         {a.applicant_name}

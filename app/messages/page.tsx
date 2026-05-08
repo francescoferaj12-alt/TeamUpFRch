@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, Profile, Message } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
@@ -12,6 +13,7 @@ type Conversation = {
   partnerName: string
   partnerRole: string
   partnerEmail: string
+  partnerAvatar: string | null
   lastMessage: string
   lastTime: string
   unread: number
@@ -85,7 +87,7 @@ export default function MessagesPage() {
       if (partnerParam) {
         const { data: partner } = await supabase
           .from('profiles')
-          .select('id,first_name,last_name,club_name,role,email')
+          .select('id,first_name,last_name,club_name,role,email,avatar_url')
           .eq('id', partnerParam).single()
         if (partner) {
           setConversations([{
@@ -95,6 +97,7 @@ export default function MessagesPage() {
               : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
             partnerRole: partner.role,
             partnerEmail: partner.email || '',
+            partnerAvatar: partner.avatar_url || null,
             lastMessage: '', lastTime: '', unread: 0, messages: [],
           }])
           setActivePartnerId(partnerParam)
@@ -107,10 +110,10 @@ export default function MessagesPage() {
     const partnerIds = [...new Set(msgs.map((m: Message) => m.sender_id === prof.id ? m.receiver_id : m.sender_id))]
     const { data: partners } = await supabase
       .from('profiles')
-      .select('id,first_name,last_name,club_name,role,email')
+      .select('id,first_name,last_name,club_name,role,email,avatar_url')
       .in('id', partnerIds)
 
-    const partnerMap: Record<string, { name: string; role: string; email: string }> = {}
+    const partnerMap: Record<string, { name: string; role: string; email: string; avatar: string | null }> = {}
     for (const p of (partners || [])) {
       partnerMap[p.id] = {
         name: p.role === 'club'
@@ -118,6 +121,7 @@ export default function MessagesPage() {
           : `${p.first_name || ''} ${p.last_name || ''}`.trim() || '—',
         role: p.role,
         email: p.email || '',
+        avatar: p.avatar_url || null,
       }
     }
 
@@ -130,6 +134,7 @@ export default function MessagesPage() {
           partnerName: partnerMap[partnerId]?.name || '—',
           partnerRole: partnerMap[partnerId]?.role || '',
           partnerEmail: partnerMap[partnerId]?.email || '',
+          partnerAvatar: partnerMap[partnerId]?.avatar || null,
           lastMessage: '',
           lastTime: '',
           unread: 0,
@@ -161,7 +166,7 @@ export default function MessagesPage() {
       } else {
         const { data: partner } = await supabase
           .from('profiles')
-          .select('id,first_name,last_name,club_name,role,email')
+          .select('id,first_name,last_name,club_name,role,email,avatar_url')
           .eq('id', partnerParam).single()
         if (partner) {
           const virtualConv: Conversation = {
@@ -171,6 +176,7 @@ export default function MessagesPage() {
               : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
             partnerRole: partner.role,
             partnerEmail: partner.email || '',
+            partnerAvatar: partner.avatar_url || null,
             lastMessage: '',
             lastTime: '',
             unread: 0,
@@ -365,11 +371,14 @@ export default function MessagesPage() {
           ) : filteredConvs.map(c => {
             const isActive = c.partnerId === activePartnerId
             return (
-              <button key={c.partnerId} onClick={() => selectConversation(c.partnerId)}
-                style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#e63946' : 'transparent'}`, background: isActive ? 'rgba(230,57,70,.12)' : 'transparent', width:'100%', border:'none', borderBottom:'1px solid rgba(255,255,255,.06)', textAlign:'left' }}>
-                <div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(230,57,70,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0, color:'#fff' }}>
-                  {roleEmoji(c.partnerRole)}
-                </div>
+              <div key={c.partnerId} onClick={() => selectConversation(c.partnerId)}
+                style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#e63946' : 'transparent'}`, background: isActive ? 'rgba(230,57,70,.12)' : 'transparent', width:'100%', borderBottom:'1px solid rgba(255,255,255,.06)', textAlign:'left' }}>
+                <Link href={`/profil/${c.partnerId}`} onClick={e => e.stopPropagation()} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42 }}>
+                  {c.partnerAvatar
+                    ? <img src={c.partnerAvatar} alt="" style={{ width:42, height:42, borderRadius:12, objectFit:'cover', display:'block' }} />
+                    : <div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(230,57,70,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:'#fff' }}>{roleEmoji(c.partnerRole)}</div>
+                  }
+                </Link>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontWeight:600, fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#fff' }}>{c.partnerName}</div>
                   <div style={{ fontSize:12, color:'rgba(255,255,255,.4)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.lastMessage}</div>
@@ -382,7 +391,7 @@ export default function MessagesPage() {
                     </span>
                   )}
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>
@@ -402,11 +411,14 @@ export default function MessagesPage() {
         ) : (
           <>
             <div className="msg-header">
-              <div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>
-                {roleEmoji(activeConv.partnerRole)}
-              </div>
+              <Link href={`/profil/${activeConv.partnerId}`} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42 }}>
+                {activeConv.partnerAvatar
+                  ? <img src={activeConv.partnerAvatar} alt="" style={{ width:42, height:42, borderRadius:12, objectFit:'cover', display:'block' }} />
+                  : <div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>{roleEmoji(activeConv.partnerRole)}</div>
+                }
+              </Link>
               <div style={{ flex:1 }}>
-                <div style={{ fontWeight:700, fontSize:15, color:'#fff' }}>{activeConv.partnerName}</div>
+                <Link href={`/profil/${activeConv.partnerId}`} style={{ fontWeight:700, fontSize:15, color:'#fff', textDecoration:'none' }}>{activeConv.partnerName}</Link>
                 <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{roleLabel(activeConv.partnerRole)}</div>
               </div>
             </div>
@@ -423,9 +435,15 @@ export default function MessagesPage() {
 
                 return (
                   <div key={m.id || i} style={{ display:'flex', alignItems:'flex-end', gap:8, flexDirection: fromMe ? 'row-reverse' : 'row' }}>
-                    <div style={{ width:28, height:28, borderRadius:8, background: fromMe ? '#e63946' : 'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: fromMe ? 11 : 14, fontWeight:700, color:'#fff', flexShrink:0 }}>
-                      {fromMe ? (myName?.slice(0, 2) || t.messages.me[lang]) : roleEmoji(activeConv.partnerRole)}
-                    </div>
+                    {fromMe ? (
+                      profile?.avatar_url
+                        ? <img src={profile.avatar_url} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} />
+                        : <div style={{ width:28, height:28, borderRadius:8, background:'#e63946', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>{myName?.slice(0, 2) || t.messages.me[lang]}</div>
+                    ) : (
+                      activeConv.partnerAvatar
+                        ? <img src={activeConv.partnerAvatar} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} />
+                        : <div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>{roleEmoji(activeConv.partnerRole)}</div>
+                    )}
                     <div style={{ maxWidth:'70%' }}>
                       <div style={{ background: fromMe ? '#e63946' : 'rgba(255,255,255,.08)', color:'#fff', padding: hasFile ? '.65rem .95rem' : '.65rem .95rem', borderRadius:14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize:14, lineHeight:1.5 }}>
                         {hasText && <div>{m.text}</div>}

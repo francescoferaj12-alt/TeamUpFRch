@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
 import { useLang } from '../lib/lang-context'
@@ -18,6 +18,8 @@ export default function Navbar() {
   const [unread, setUnread] = useState(0)
   const [unreadApps, setUnreadApps] = useState(0)
   const [scrolled, setScrolled] = useState(false)
+  const pathnameRef = useRef(pathname)
+  useEffect(() => { pathnameRef.current = pathname }, [pathname])
 
   const user = profile
     ? {
@@ -49,6 +51,7 @@ export default function Navbar() {
     if (!session) { setUnread(0); return }
     const uid = session.user.id
     const refresh = () => {
+      if (pathnameRef.current === '/messages') { setUnread(0); return }
       supabase
         .from('messages')
         .select('id', { count: 'exact', head: true })
