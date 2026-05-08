@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
+import { useAuth } from '../../lib/auth-context'
 import { t } from '../../lib/translations'
 import VerifiedBadge from '../../components/VerifiedBadge'
 
@@ -13,6 +14,7 @@ export default function ClubsPage() {
   const [search, setSearch] = useState('')
   const [filterZone, setFilterZone] = useState('')
   const { lang } = useLang()
+  const { profile: currentUser } = useAuth()
 
   const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
@@ -31,6 +33,7 @@ export default function ClubsPage() {
   }, [])
 
   const filtered = clubs.filter(c => {
+    if (currentUser && c.id === currentUser.id) return false
     if (filterZone && c.zone !== filterZone) return false
     if (search) {
       const q = search.toLowerCase()

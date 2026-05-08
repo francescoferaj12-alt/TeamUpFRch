@@ -7,6 +7,7 @@ import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import { useAuth } from '../../lib/auth-context'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
 const ALL_LIGUES_FLAT = ALL_LIGUE_GROUPS.flatMap(g => g.items)
@@ -17,6 +18,7 @@ type FilterType = 'all' | 'player' | 'coach' | 'club'
 
 export default function RecherchePage() {
   const { lang } = useLang()
+  const { profile: currentUser } = useAuth()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -51,6 +53,7 @@ export default function RecherchePage() {
   const filtered = useMemo(() => {
     const q = debouncedQuery.toLowerCase()
     return profiles.filter(p => {
+      if (currentUser && p.id === currentUser.id) return false
       if (filterType !== 'all' && p.role !== filterType) return false
       if (filterDispo && !p.available) return false
       if (filterGenre && p.role !== 'club' && p.genre !== filterGenre) return false
@@ -63,7 +66,7 @@ export default function RecherchePage() {
       }
       return true
     })
-  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, debouncedQuery])
+  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, debouncedQuery, currentUser])
 
   const counts = {
     all: filtered.length,
