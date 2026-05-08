@@ -245,8 +245,8 @@ export default function PublicProfilPage() {
               </div>
             )}
 
-            {/* Strengths — hidden for clubs */}
-            {profile.role !== 'club' && strengths.length > 0 && (
+            {/* Strengths — players only */}
+            {profile.role === 'player' && strengths.length > 0 && (
               <div style={darkCard}>
                 <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>Points forts</div>
                 <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
