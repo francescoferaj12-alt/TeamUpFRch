@@ -90,6 +90,7 @@ export type Application = {
   applicant_name: string
   message: string
   status: 'pending' | 'accepted' | 'rejected'
+  seen_by_owner?: boolean
   created_at: string
 }
 

@@ -114,6 +114,11 @@ function ClubView({ profile }: { profile: Profile }) {
         }))
         setApps(mapped)
         setLoading(false)
+        // Mark all unseen candidatures as seen
+        const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
+        if (unseenIds.length > 0) {
+          supabase.from('applications').update({ seen_by_owner: true }).in('id', unseenIds)
+        }
       })
   }, [profile.id])
 

@@ -16,6 +16,7 @@ export default function Navbar() {
   const { session, profile } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [unread, setUnread] = useState(0)
+  const [unreadApps, setUnreadApps] = useState(0)
   const [scrolled, setScrolled] = useState(false)
 
   const user = profile
@@ -58,20 +59,17 @@ export default function Navbar() {
     refresh()
     const channel = supabase
       .channel(`nav-unread-${uid}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, refresh)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, refresh)
       .subscribe()
-    // Listen for direct notification from messages page when messages are marked read
-    window.addEventListener('messages-read', refresh)
-    return () => {
-      supabase.removeChannel(channel)
-      window.removeEventListener('messages-read', refresh)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [session])
 
   useEffect(() => {
     setMenuOpen(false)
-    // Re-count unread when navigating away from /messages (messages may have been read)
     if (!session) return
+    // While on /messages the user is actively reading — hide badge immediately
+    if (pathname === '/messages') { setUnread(0); return }
+    // On every other page, re-query the real count from DB
     const uid = session.user.id
     supabase
       .from('messages')
@@ -80,6 +78,20 @@ export default function Navbar() {
       .eq('read', false)
       .then(({ count }) => setUnread(count || 0))
   }, [pathname, session])
+
+  // Unseen candidatures badge (club/coach only)
+  useEffect(() => {
+    if (!session || !profile) return
+    if (profile.role !== 'club' && profile.role !== 'coach') return
+    if (pathname === '/candidatures') { setUnreadApps(0); return }
+    const uid = session.user.id
+    supabase
+      .from('applications')
+      .select('annonces!inner(author_id)', { count: 'exact', head: true })
+      .eq('annonces.author_id', uid)
+      .or('seen_by_owner.is.null,seen_by_owner.eq.false')
+      .then(({ count }) => setUnreadApps(count || 0))
+  }, [pathname, session, profile?.role])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -120,6 +132,9 @@ export default function Navbar() {
               {l.label}
               {l.href === '/messages' && unread > 0 && (
                 <span style={badgeStyle}>{unread > 9 ? '9+' : unread}</span>
+              )}
+              {l.href === '/candidatures' && unreadApps > 0 && (
+                <span style={badgeStyle}>{unreadApps > 9 ? '9+' : unreadApps}</span>
               )}
             </Link>
           ))}
@@ -181,6 +196,9 @@ export default function Navbar() {
                 {l.label}
                 {l.href === '/messages' && unread > 0 && (
                   <span style={badgeStyle}>{unread > 9 ? '9+' : unread}</span>
+                )}
+                {l.href === '/candidatures' && unreadApps > 0 && (
+                  <span style={badgeStyle}>{unreadApps > 9 ? '9+' : unreadApps}</span>
                 )}
               </Link>
             ))}
