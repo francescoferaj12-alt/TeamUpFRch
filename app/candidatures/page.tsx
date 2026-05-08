@@ -100,37 +100,54 @@ function ClubView({ profile }: { profile: Profile }) {
   const { lang } = useLang()
 
   useEffect(() => {
-    supabase.from('annonces').select('*').eq('author_id', profile.id)
-      .then(({ data }) => setAnnonces(data || []))
+    let cancelled = false
+    ;(async () => {
+      const { data: annoncesData } = await supabase
+        .from('annonces').select('*').eq('author_id', profile.id)
+      if (!cancelled) setAnnonces(annoncesData || [])
 
-    supabase.from('applications')
-      .select('*, annonces!inner(title, author_id, ligue)')
-      .eq('annonces.author_id', profile.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        const mapped = (data || []).map((a: Application & { annonces: { title: string; ligue: string } }) => ({
-          ...a,
-          annonce_title: a.annonces?.title,
-          annonce_ligue: a.annonces?.ligue
-        }))
-        setApps(mapped)
-        setLoading(false)
-        // Mark all unseen candidatures as seen
-        const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
-        if (unseenIds.length > 0) {
-          supabase.from('applications').update({ seen_by_owner: true }).in('id', unseenIds)
+      const { data } = await supabase.from('applications')
+        .select('*, annonces!inner(title, author_id, ligue)')
+        .eq('annonces.author_id', profile.id)
+        .order('created_at', { ascending: false })
+
+      const mapped = (data || []).map((a: Application & { annonces: { title: string; ligue: string } }) => ({
+        ...a,
+        annonce_title: a.annonces?.title,
+        annonce_ligue: a.annonces?.ligue
+      }))
+      if (cancelled) return
+      setApps(mapped)
+      setLoading(false)
+
+      // Mark all unseen candidatures as seen — AWAIT it so the DB write
+      // actually happens (a fire-and-forget builder is never executed),
+      // then notify the Navbar so it doesn't re-query and find stale data.
+      // NB: we dispatch the event regardless of `cancelled`. The DB write
+      // has been awaited and is durable, so even if the user has navigated
+      // away the Navbar (still mounted) needs to know the badge is clear.
+      const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
+      if (unseenIds.length > 0) {
+        const { error: updErr } = await supabase.from('applications')
+          .update({ seen_by_owner: true })
+          .in('id', unseenIds)
+        if (!updErr && typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('candidatures-seen'))
         }
-        // Batch-fetch applicant avatars
-        if (mapped.length > 0) {
-          const ids = [...new Set(mapped.map(a => a.applicant_id))]
-          supabase.from('profiles').select('id,avatar_url').in('id', ids)
-            .then(({ data }) => {
-              const map: Record<string, string | null> = {}
-              for (const p of (data || [])) map[p.id] = p.avatar_url || null
-              setAvatarMap(map)
-            })
-        }
-      })
+      }
+
+      // Batch-fetch applicant avatars
+      if (mapped.length > 0) {
+        const ids = [...new Set(mapped.map(a => a.applicant_id))]
+        const { data: avatars } = await supabase
+          .from('profiles').select('id,avatar_url').in('id', ids)
+        if (cancelled) return
+        const map: Record<string, string | null> = {}
+        for (const p of (avatars || [])) map[p.id] = p.avatar_url || null
+        setAvatarMap(map)
+      }
+    })()
+    return () => { cancelled = true }
   }, [profile.id])
 
   async function updateStatus(id: string, status: 'pending' | 'accepted' | 'rejected') {

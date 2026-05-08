@@ -77,6 +77,15 @@ export default function Navbar() {
     if (pathname === '/messages') setUnread(0)
   }, [pathname])
 
+  // Listen for explicit "I just marked my messages as read" event from the
+  // /messages page. This is the authoritative signal — clears the badge even
+  // if a stale realtime/session-refresh re-query happens to race in.
+  useEffect(() => {
+    const handler = () => setUnread(0)
+    window.addEventListener('messages-read', handler)
+    return () => window.removeEventListener('messages-read', handler)
+  }, [])
+
   // ── Candidatures badge (club / coach only) ──────────────────────────────────
   useEffect(() => {
     if (!session || !profile) return
@@ -103,6 +112,14 @@ export default function Navbar() {
   useEffect(() => {
     if (pathname === '/candidatures') setUnreadApps(0)
   }, [pathname])
+
+  // Listen for explicit "I just marked candidatures as seen" event from the
+  // /candidatures page. Authoritative signal that survives navigation away.
+  useEffect(() => {
+    const handler = () => setUnreadApps(0)
+    window.addEventListener('candidatures-seen', handler)
+    return () => window.removeEventListener('candidatures-seen', handler)
+  }, [])
 
   async function handleLogout() {
     await supabase.auth.signOut()
