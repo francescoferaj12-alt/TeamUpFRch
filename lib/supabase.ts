@@ -8,24 +8,32 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 /**
  * Normalise an avatar URL for display.
  *
- * - Returns null/undefined for empty input.
- * - For Supabase storage URLs, strips any existing `?t=...` query param and
- *   appends a fresh cache-buster (`?cb=2`). This forces browsers to bypass
- *   any cached 403 responses that were returned BEFORE the `avatars` bucket
- *   was made public (migration v9). Without this, browsers that previously
- *   cached the 403 will keep showing a broken image even though the URL is
- *   now valid.
- * - Use this helper everywhere an `<img src={...}>` tag displays an avatar
- *   loaded from `profiles.avatar_url`.
+ * Returns null for empty input. For Supabase storage URLs, guarantees that a
+ * cache-busting query param is present so the browser does NOT serve a stale
+ * 403 response cached from BEFORE the `avatars` bucket was made public
+ * (migration v9). Without this, some browsers keep showing a broken image
+ * even though the URL is now valid.
+ *
+ * Behaviour:
+ *  - If the URL already contains a `?t=...` (added at upload time by
+ *    `app/profil/page.tsx`), we keep it — that timestamp is unique per
+ *    upload and is the strongest possible cache-buster.
+ *  - Otherwise we append a stable `?cb=2` ("v2 = public bucket") which is
+ *    cacheable across renders but different from any pre-v9 cached 403.
+ *  - For non-Supabase URLs we return the URL unchanged.
+ *
+ * Use this helper EVERYWHERE an `<img src={...}>` tag renders an avatar
+ * loaded from `profiles.avatar_url`.
  */
 export function avatarSrc(url: string | null | undefined): string | null {
   if (!url) return null
-  // Only mangle Supabase-served URLs; leave any other (e.g. external) URLs alone.
+  // Only mangle Supabase-served URLs; leave external URLs alone.
   if (!/supabase\.(co|in)\/storage/i.test(url)) return url
-  // Strip any existing `?t=...` or `?cb=...` query that might have been baked in.
+  // If a per-upload timestamp is already present, keep the URL as-is — it's
+  // already the freshest possible cache-buster.
+  if (/[?&]t=\d+/.test(url)) return url
+  // Otherwise add the migration-v9 cache buster. Strip any other query first.
   const clean = url.split('?')[0]
-  // Use a stable cache-buster ("v2 = public bucket") so the URL is still
-  // cacheable across renders, but different from any cached 403 response.
   return `${clean}?cb=2`
 }
 

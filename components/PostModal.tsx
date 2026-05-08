@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { supabase, Profile, Annonce } from '../lib/supabase'
+import { supabase, Profile, Annonce, avatarSrc } from '../lib/supabase'
 import { liguesHomme, liguesFemme } from '../lib/data'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
@@ -99,7 +99,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:'1.25rem' }}>
           <div style={{ width:44, height:44, borderRadius:'50%', overflow:'hidden', background:'linear-gradient(135deg,#e63946,#0a1f5c)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
             {profile.avatar_url
-              ? <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
               : (profile.role === 'club' ? '🏟️' : profile.role === 'coach' ? '🎽' : '⚽')
             }
           </div>

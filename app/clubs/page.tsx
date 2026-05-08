@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase, Profile } from '../../lib/supabase'
+import { supabase, Profile, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t } from '../../lib/translations'
@@ -120,7 +120,7 @@ export default function ClubsPage() {
                   <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', padding:'1.5rem', textAlign:'center', position:'relative' }}>
                     <div style={{ width:64, height:64, borderRadius:14, background:'rgba(255,255,255,.1)', border:'2px solid rgba(255,255,255,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'2rem', margin:'0 auto .75rem' }}>
                       {club.avatar_url
-                        ? <img src={club.avatar_url} alt={club.club_name || ''} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:12 }} />
+                        ? <img src={avatarSrc(club.avatar_url)!} alt={club.club_name || ''} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:12 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : '🏟️'
                       }
                     </div>

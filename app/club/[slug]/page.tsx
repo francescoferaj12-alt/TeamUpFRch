@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, Profile, Annonce } from '../../../lib/supabase'
+import { supabase, Profile, Annonce, avatarSrc } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 
 export default function ClubPage() {
@@ -77,7 +77,7 @@ export default function ClubPage() {
           <div style={{ display:'flex', alignItems:'center', gap:'1.5rem', flexWrap:'wrap' }}>
             <div style={{ width:80, height:80, borderRadius:16, background:'rgba(255,255,255,.1)', border:'2px solid rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: club.avatar_url ? 0 : '2.5rem', overflow:'hidden', flexShrink:0 }}>
               {club.avatar_url
-                ? <img src={club.avatar_url} alt={club.club_name || ''} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:14 }} />
+                ? <img src={avatarSrc(club.avatar_url)!} alt={club.club_name || ''} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:14 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                 : '🏟️'
               }
             </div>

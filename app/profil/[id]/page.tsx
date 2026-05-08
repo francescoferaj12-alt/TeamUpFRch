@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, Profile, CareerExperience, CoachCertificate } from '../../../lib/supabase'
+import { supabase, Profile, CareerExperience, CoachCertificate, avatarSrc } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import CareerSection from '../../../components/CareerSection'
 import { strengthIcon } from '../../../lib/strength-icons'
@@ -129,7 +129,7 @@ export default function PublicProfilPage() {
           <div style={{ display:'flex', alignItems:'center', gap:'1.5rem', flexWrap:'wrap' }}>
             <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2rem', fontWeight:700, overflow:'hidden', flexShrink:0 }}>
               {profile.avatar_url
-                ? <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                 : (initials || roleEmoji)
               }
             </div>

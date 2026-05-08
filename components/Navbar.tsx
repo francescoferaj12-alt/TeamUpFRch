@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, avatarSrc } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
 import { useLang } from '../lib/lang-context'
 import { t } from '../lib/translations'
@@ -179,7 +179,7 @@ export default function Navbar() {
                 style={{ textDecoration: 'none', overflow: 'hidden', padding: user.avatar_url ? 0 : undefined }}
               >
                 {user.avatar_url
-                  ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={avatarSrc(user.avatar_url)!} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                   : user.initials
                 }
               </Link>

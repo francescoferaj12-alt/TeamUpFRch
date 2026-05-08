@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase, Annonce, Profile } from '../../lib/supabase'
+import { supabase, Annonce, Profile, avatarSrc } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
 import { useAuth } from '../../lib/auth-context'
 import VerifiedBadge from '../../components/VerifiedBadge'
@@ -189,7 +189,7 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: { annonce: Annonce & 
           <Link href={`/profil/${authorId}`} style={{ textDecoration:'none', flexShrink:0 }}>
             <div style={{ width:46, height:46, borderRadius:'50%', background:bgType, border:'2px solid rgba(255,255,255,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: avatarUrl ? 0 : 16, fontWeight:700, color:'#fff', overflow:'hidden', cursor:'pointer' }}>
               {avatarUrl
-                ? <img src={avatarUrl} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                ? <img src={avatarSrc(avatarUrl)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                 : (initials || typeEmoji)
               }
             </div>
