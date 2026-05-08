@@ -370,7 +370,7 @@ function LoginForm() {
                       <div style={lblSt}>Spécialité</div>
                       <select style={inputStyle} value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)} required>
                         <option value="">Choisir…</option>
-                        {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens','Analyste vidéo'].map(v => <option key={v}>{v}</option>)}
+                        {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens'].map(v => <option key={v}>{v}</option>)}
                       </select>
                     </div>
                     <div>

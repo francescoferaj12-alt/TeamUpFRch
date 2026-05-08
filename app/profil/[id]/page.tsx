@@ -188,6 +188,29 @@ export default function PublicProfilPage() {
           )
         })()}
 
+        {/* Coach info card */}
+        {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
+          <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
+            <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem' }}>
+              <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Entraîneur</span>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
+              {[
+                { label:'Expérience', value:profile.coach_experience, color:'#e02020' },
+                { label:'Diplôme',    value:profile.coach_diploma,    color:'#1a6fd4' },
+                { label:'Spécialité', value:profile.coach_specialty,  color:'#0a7c3e' },
+                { label:'Statut',     value:profile.coach_availability, color:'#b56cf0' },
+              ].filter(s => s.value).map((s, i, arr) => (
+                <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
+                  <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
+                  <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                  <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:'1.25rem' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
