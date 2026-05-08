@@ -375,7 +375,7 @@ export default function MessagesPage() {
                 style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#e63946' : 'transparent'}`, background: isActive ? 'rgba(230,57,70,.12)' : 'transparent', width:'100%', borderBottom:'1px solid rgba(255,255,255,.06)', textAlign:'left' }}>
                 <Link href={`/profil/${c.partnerId}`} onClick={e => e.stopPropagation()} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42 }}>
                   {c.partnerAvatar
-                    ? <img src={c.partnerAvatar} alt="" style={{ width:42, height:42, borderRadius:12, objectFit:'cover', display:'block' }} />
+                    ? <img src={c.partnerAvatar} alt="" style={{ width:42, height:42, borderRadius:12, objectFit:'cover', display:'block' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                     : <div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(230,57,70,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:'#fff' }}>{roleEmoji(c.partnerRole)}</div>
                   }
                 </Link>
@@ -413,7 +413,7 @@ export default function MessagesPage() {
             <div className="msg-header">
               <Link href={`/profil/${activeConv.partnerId}`} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42 }}>
                 {activeConv.partnerAvatar
-                  ? <img src={activeConv.partnerAvatar} alt="" style={{ width:42, height:42, borderRadius:12, objectFit:'cover', display:'block' }} />
+                  ? <img src={activeConv.partnerAvatar} alt="" style={{ width:42, height:42, borderRadius:12, objectFit:'cover', display:'block' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                   : <div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>{roleEmoji(activeConv.partnerRole)}</div>
                 }
               </Link>
@@ -437,11 +437,11 @@ export default function MessagesPage() {
                   <div key={m.id || i} style={{ display:'flex', alignItems:'flex-end', gap:8, flexDirection: fromMe ? 'row-reverse' : 'row' }}>
                     {fromMe ? (
                       profile?.avatar_url
-                        ? <img src={profile.avatar_url} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} />
+                        ? <img src={profile.avatar_url} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : <div style={{ width:28, height:28, borderRadius:8, background:'#e63946', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>{myName?.slice(0, 2) || t.messages.me[lang]}</div>
                     ) : (
                       activeConv.partnerAvatar
-                        ? <img src={activeConv.partnerAvatar} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} />
+                        ? <img src={activeConv.partnerAvatar} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : <div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>{roleEmoji(activeConv.partnerRole)}</div>
                     )}
                     <div style={{ maxWidth:'70%' }}>

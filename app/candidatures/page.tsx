@@ -8,7 +8,7 @@ import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
 
-type AppWithAnnonce = Application & { annonce_title?: string; annonce_author?: string; annonce_ligue?: string }
+type AppWithAnnonce = Application & { annonce_title?: string; annonce_author?: string; annonce_author_id?: string; annonce_ligue?: string; applicant_avatar?: string | null }
 type Status = 'all' | 'pending' | 'accepted' | 'rejected'
 
 const PAGE_BG = '#030a24'
@@ -106,26 +106,31 @@ function ClubView({ profile }: { profile: Profile }) {
         .from('annonces').select('*').eq('author_id', profile.id)
       if (!cancelled) setAnnonces(annoncesData || [])
 
+      // Include applicant avatar directly via FK join — no separate round-trip
       const { data } = await supabase.from('applications')
-        .select('*, annonces!inner(title, author_id, ligue)')
+        .select('*, annonces!inner(title, author_id, ligue), profiles!applicant_id(avatar_url)')
         .eq('annonces.author_id', profile.id)
         .order('created_at', { ascending: false })
 
-      const mapped = (data || []).map((a: Application & { annonces: { title: string; ligue: string } }) => ({
+      const mapped = (data || []).map((a: Application & {
+        annonces: { title: string; ligue: string }
+        profiles?: { avatar_url?: string | null }
+      }) => ({
         ...a,
         annonce_title: a.annonces?.title,
-        annonce_ligue: a.annonces?.ligue
+        annonce_ligue: a.annonces?.ligue,
+        applicant_avatar: a.profiles?.avatar_url || null,
       }))
       if (cancelled) return
       setApps(mapped)
       setLoading(false)
 
-      // Mark all unseen candidatures as seen — AWAIT it so the DB write
-      // actually happens (a fire-and-forget builder is never executed),
-      // then notify the Navbar so it doesn't re-query and find stale data.
-      // NB: we dispatch the event regardless of `cancelled`. The DB write
-      // has been awaited and is durable, so even if the user has navigated
-      // away the Navbar (still mounted) needs to know the badge is clear.
+      // Build avatarMap from the already-joined data (no extra fetch needed)
+      const map: Record<string, string | null> = {}
+      for (const a of mapped) map[a.applicant_id] = a.applicant_avatar
+      setAvatarMap(map)
+
+      // Mark all unseen candidatures as seen
       const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
       if (unseenIds.length > 0) {
         const { error: updErr } = await supabase.from('applications')
@@ -134,17 +139,6 @@ function ClubView({ profile }: { profile: Profile }) {
         if (!updErr && typeof window !== 'undefined') {
           window.dispatchEvent(new Event('candidatures-seen'))
         }
-      }
-
-      // Batch-fetch applicant avatars
-      if (mapped.length > 0) {
-        const ids = [...new Set(mapped.map(a => a.applicant_id))]
-        const { data: avatars } = await supabase
-          .from('profiles').select('id,avatar_url').in('id', ids)
-        if (cancelled) return
-        const map: Record<string, string | null> = {}
-        for (const p of (avatars || [])) map[p.id] = p.avatar_url || null
-        setAvatarMap(map)
       }
     })()
     return () => { cancelled = true }
@@ -239,7 +233,7 @@ function ClubView({ profile }: { profile: Profile }) {
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                     <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.applicant_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
                       {avatarMap[a.applicant_id]
-                        ? <img src={avatarMap[a.applicant_id]!} alt="" style={{ width:46, height:46, objectFit:'cover' }} />
+                        ? <img src={avatarMap[a.applicant_id]!} alt="" style={{ width:46, height:46, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : '👤'
                       }
                     </Link>
@@ -313,22 +307,33 @@ function PlayerView({ profile }: { profile: Profile }) {
   const [apps, setApps] = useState<AppWithAnnonce[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Status>('all')
+  const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({})
   const { lang } = useLang()
 
   useEffect(() => {
     supabase.from('applications')
-      .select('*, annonces(title, author_name, ligue, zone)')
+      .select('*, annonces(id, title, author_id, author_name, ligue, zone)')
       .eq('applicant_id', profile.id)
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        const mapped = (data || []).map((a: Application & { annonces: { title: string; author_name: string; ligue: string } }) => ({
+      .then(async ({ data }) => {
+        const mapped = (data || []).map((a: Application & { annonces: { id: string; title: string; author_id: string; author_name: string; ligue: string } }) => ({
           ...a,
           annonce_title: a.annonces?.title,
           annonce_author: a.annonces?.author_name,
+          annonce_author_id: a.annonces?.author_id,
           annonce_ligue: a.annonces?.ligue
         }))
         setApps(mapped)
         setLoading(false)
+
+        // Fetch author avatars
+        const authorIds = [...new Set(mapped.map(a => a.annonce_author_id).filter(Boolean))]
+        if (authorIds.length > 0) {
+          const { data: profiles } = await supabase.from('profiles').select('id,avatar_url').in('id', authorIds)
+          const map: Record<string, string | null> = {}
+          for (const p of (profiles || [])) map[p.id] = p.avatar_url || null
+          setAvatarMap(map)
+        }
       })
   }, [profile.id])
 
@@ -409,13 +414,23 @@ function PlayerView({ profile }: { profile: Profile }) {
               return (
                 <div key={a.id} style={{ background: CARD_BG, border: CARD_BORDER, borderLeft: `4px solid ${accent}`, borderRadius: 16, padding: '1.25rem' }}>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.65rem' }}>
-                    <div>
-                      <div style={{ fontWeight:700, fontSize:15, color:'#fff' }}>{a.annonce_title || t.cands.annonce_label[lang]}</div>
-                      <div style={{ fontSize:13, color: TEXT_DIM, marginTop:2 }}>
-                        {a.annonce_author}{a.annonce_ligue ? ` · ${a.annonce_ligue}` : ''}
-                      </div>
-                      <div style={{ fontSize:11, color: TEXT_MUTE, marginTop:2 }}>
-                        {t.cands.sent_on[lang]} {new Date(a.created_at).toLocaleDateString(dateLocale, { day:'numeric', month:'long', year:'numeric' })}
+                    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                      {a.annonce_author_id && (
+                        <Link href={`/profil/${a.annonce_author_id}`} style={{ width:44, height:44, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.annonce_author_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
+                          {avatarMap[a.annonce_author_id]
+                            ? <img src={avatarMap[a.annonce_author_id]!} alt="" style={{ width:44, height:44, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                            : '🏟️'
+                          }
+                        </Link>
+                      )}
+                      <div>
+                        <div style={{ fontWeight:700, fontSize:15, color:'#fff' }}>{a.annonce_title || t.cands.annonce_label[lang]}</div>
+                        <div style={{ fontSize:13, color: TEXT_DIM, marginTop:2 }}>
+                          {a.annonce_author}{a.annonce_ligue ? ` · ${a.annonce_ligue}` : ''}
+                        </div>
+                        <div style={{ fontSize:11, color: TEXT_MUTE, marginTop:2 }}>
+                          {t.cands.sent_on[lang]} {new Date(a.created_at).toLocaleDateString(dateLocale, { day:'numeric', month:'long', year:'numeric' })}
+                        </div>
                       </div>
                     </div>
                     <StatusBadge status={a.status} />

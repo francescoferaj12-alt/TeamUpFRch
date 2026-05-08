@@ -70,7 +70,7 @@ export default function Navbar() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, queryUnread)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [session])
+  }, [session?.user?.id])
 
   // Clear badge immediately when the user lands on /messages
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function Navbar() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'applications' }, queryApps)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [session, profile?.id, profile?.role])
+  }, [session?.user?.id, profile?.id, profile?.role])
 
   // Clear badge immediately when the user lands on /candidatures
   useEffect(() => {
