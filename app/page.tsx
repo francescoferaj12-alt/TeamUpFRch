@@ -97,11 +97,13 @@ function useCounters() {
 }
 
 
-type LigueTab = 'all' | 'homme' | 'femme'
+type LigueTab = 'all' | 'actifs_h' | 'juniors_g' | 'actives_f' | 'juniores_f'
 
 const allLigueItems = [
-  ...liguesHomme.flatMap(g => g.items.map(item => ({ item, cat: 'homme' as LigueTab, group: g.group }))),
-  ...liguesFemme.flatMap(g => g.items.map(item => ({ item, cat: 'femme' as LigueTab, group: g.group }))),
+  ...liguesHomme[0].items.map(item => ({ item, cat: 'actifs_h'  as LigueTab })),
+  ...liguesHomme[1].items.map(item => ({ item, cat: 'juniors_g' as LigueTab })),
+  ...liguesFemme[0].items.map(item => ({ item, cat: 'actives_f' as LigueTab })),
+  ...liguesFemme[1].items.map(item => ({ item, cat: 'juniores_f' as LigueTab })),
 ]
 
 
@@ -163,9 +165,11 @@ export default function HomePage() {
   ]
 
   const ligueTabs: { key: LigueTab; label: string }[] = [
-    { key: 'all',   label: t.home.ligues_all[lang] },
-    { key: 'homme', label: t.home.ligues_homme[lang] },
-    { key: 'femme', label: t.home.ligues_femme[lang] },
+    { key: 'all',        label: t.home.ligues_all[lang] },
+    { key: 'actifs_h',   label: t.home.ligues_actifs_h[lang] },
+    { key: 'juniors_g',  label: t.home.ligues_juniors_g[lang] },
+    { key: 'actives_f',  label: t.home.ligues_actives_f[lang] },
+    { key: 'juniores_f', label: t.home.ligues_juniores_f[lang] },
   ]
 
   return (
@@ -321,7 +325,7 @@ export default function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
             {filteredLigues.map(l => (
               <div key={l.item} className="hp-ligue-item">
-                <div style={{ width: 8, height: 8, background: l.cat === 'femme' ? '#e63946' : '#4ade80', borderRadius: '50%', flexShrink: 0 }} />
+                <div style={{ width: 8, height: 8, background: l.cat === 'actives_f' || l.cat === 'juniores_f' ? '#e63946' : '#4ade80', borderRadius: '50%', flexShrink: 0 }} />
                 <span style={{ fontWeight: 600, fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>{l.item}</span>
               </div>
             ))}
