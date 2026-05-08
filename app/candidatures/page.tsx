@@ -204,9 +204,9 @@ function ClubView({ profile }: { profile: Profile }) {
               <div key={a.id} style={{ background: CARD_BG, border: CARD_BORDER, borderRadius: 16, padding:'1.25rem' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.85rem' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                    <div style={{ width:46, height:46, borderRadius:12, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>👤</div>
+                    <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none' }}>👤</Link>
                     <div>
-                      <Link href={`/profil/${a.applicant_id}`} style={{ fontWeight:700, fontSize:15, color:'#fff', textDecoration:'none' }}>
+                      <Link href={`/profil/${a.applicant_id}`} style={{ fontWeight:700, fontSize:15, color:'#7eb6ff', textDecoration:'none', borderBottom:'1.5px solid rgba(126,182,255,.35)', paddingBottom:1 }}>
                         {a.applicant_name}
                       </Link>
                       <div style={{ fontSize:12, color: TEXT_DIM, marginTop:2 }}>
