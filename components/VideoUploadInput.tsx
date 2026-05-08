@@ -1,0 +1,128 @@
+'use client'
+
+import { useRef, useState, ChangeEvent } from 'react'
+import { supabase } from '../lib/supabase'
+
+interface Props {
+  value: string
+  onChange: (url: string) => void
+  placeholder: string
+  profileId: string
+  index: number
+  inpSt: React.CSSProperties
+}
+
+export default function VideoUploadInput({ value, onChange, placeholder, profileId, index, inpSt }: Props) {
+  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function handleFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('video/')) { alert('Seuls les fichiers vidéo sont acceptés'); return }
+    if (file.size > 200 * 1024 * 1024) { alert('Max 200 MB'); return }
+
+    setUploading(true)
+    setProgress(0)
+    e.target.value = ''
+
+    const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4'
+    const path = `${profileId}/video_${index}.${ext}`
+
+    // Supabase JS doesn't expose upload progress natively — fake it smoothly
+    let fakeP = 0
+    const fakeInterval = setInterval(() => {
+      fakeP = Math.min(fakeP + Math.random() * 12, 88)
+      setProgress(Math.round(fakeP))
+    }, 300)
+
+    const { data, error } = await supabase.storage
+      .from('videos')
+      .upload(path, file, { upsert: true, contentType: file.type })
+
+    clearInterval(fakeInterval)
+
+    if (error) {
+      alert('Erreur upload: ' + error.message)
+      setUploading(false)
+      setProgress(0)
+      return
+    }
+
+    setProgress(100)
+    const { data: urlData } = supabase.storage.from('videos').getPublicUrl(data.path)
+    onChange(urlData.publicUrl + '?t=' + Date.now())
+    setTimeout(() => { setUploading(false); setProgress(0) }, 600)
+  }
+
+  const isVideo = value && !value.includes('youtube') && !value.includes('youtu.be')
+
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <input
+          style={{ ...inpSt, flex: 1 }}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          title="Choisir depuis la galerie"
+          style={{
+            flexShrink: 0, width: 40, height: 40,
+            background: uploading ? 'rgba(230,57,70,.15)' : 'rgba(255,255,255,.08)',
+            border: '1.5px solid rgba(255,255,255,.15)',
+            borderRadius: 9, cursor: uploading ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 17, transition: 'all .2s',
+          }}
+        >
+          {uploading ? '⏳' : '📱'}
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="video/*"
+          style={{ display: 'none' }}
+          onChange={handleFile}
+        />
+      </div>
+
+      {/* Progress bar */}
+      {uploading && (
+        <div style={{ marginTop: 6, height: 3, background: 'rgba(255,255,255,.08)', borderRadius: 3, overflow: 'hidden' }}>
+          <div style={{
+            height: '100%', borderRadius: 3,
+            background: 'linear-gradient(90deg, #e63946, #ff6b7a)',
+            width: `${progress}%`, transition: 'width .3s ease',
+          }} />
+        </div>
+      )}
+
+      {/* Mini video preview once uploaded */}
+      {isVideo && !uploading && (
+        <div style={{ marginTop: 8, borderRadius: 10, overflow: 'hidden', background: '#000', position: 'relative', maxHeight: 80 }}>
+          <video
+            src={value}
+            muted
+            style={{ width: '100%', maxHeight: 80, objectFit: 'cover', display: 'block' }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 22 }}>▶</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,.6)', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

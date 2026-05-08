@@ -10,6 +10,7 @@ import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
 
 const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
+const VideoUploadInput = dynamic(() => import('../../components/VideoUploadInput'), { ssr: false })
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
@@ -674,14 +675,23 @@ export default function ProfilPage() {
           {/* Videos */}
           <div>
             <label style={lblSt}>{t.profil.video_label[lang]}</label>
+            <p style={{ fontSize:12, color:'rgba(255,255,255,.38)', marginBottom:10 }}>
+              📱 Choisis depuis ta galerie — ou colle un lien YouTube
+            </p>
             {[
-              { v: video1, set: setVideo1, label: t.profil.video1[lang] },
-              { v: video2, set: setVideo2, label: t.profil.video2[lang] },
-              { v: video3, set: setVideo3, label: t.profil.video3[lang] },
-            ].map((f, i) => (
-              <input key={i} style={{ ...inpSt, marginBottom: i < 2 ? 8 : 0 }} value={f.v}
-                onChange={e => f.set(e.target.value)}
-                placeholder={`${f.label} — ${t.profil.video_url_ph[lang]}`} />
+              { v: video1, set: setVideo1, label: t.profil.video1[lang], idx: 1 },
+              { v: video2, set: setVideo2, label: t.profil.video2[lang], idx: 2 },
+              { v: video3, set: setVideo3, label: t.profil.video3[lang], idx: 3 },
+            ].map(f => (
+              <VideoUploadInput
+                key={f.idx}
+                value={f.v}
+                onChange={f.set}
+                placeholder={`${f.label} — YouTube ou vidéo`}
+                profileId={profile.id}
+                index={f.idx}
+                inpSt={inpSt}
+              />
             ))}
           </div>
 
@@ -730,13 +740,25 @@ export default function ProfilPage() {
               <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
                 {videoUrls.map((url, i) => {
                   const embed = getYouTubeEmbed(url)
-                  return embed ? (
+                  const isNativeVideo = !embed && /\.(mp4|mov|webm|mkv|avi)(\?|$)/i.test(url)
+                  if (embed) return (
                     <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
                       <iframe src={embed} title={`Video ${i+1}`} frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
                     </div>
-                  ) : (
+                  )
+                  if (isNativeVideo) return (
+                    <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
+                      <video
+                        src={url}
+                        controls
+                        playsInline
+                        style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }}
+                      />
+                    </div>
+                  )
+                  return (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                       style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'rgba(255,255,255,.05)', borderRadius:10, textDecoration:'none', color:'#3a8cff', fontSize:14, fontWeight:600 }}>
                       🎬 {t.profil.video_label[lang]} {i+1}
