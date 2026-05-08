@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase, Profile, CareerExperience } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import CareerSection from '../../../components/CareerSection'
+import { strengthIcon } from '../../../lib/strength-icons'
 import { useLang } from '../../../lib/lang-context'
 
 function strengthLabel(key: string) {
@@ -124,6 +125,20 @@ export default function PublicProfilPage() {
                   {profile.available ? '🟢 Disponible' : '🔴 Non disponible'}
                 </span>
               </div>
+
+              {strengths.length > 0 && (
+                <div className="strengths-row">
+                  {strengths.slice(0, 5).map(k => (
+                    <span key={k} className="strength-tag">
+                      <span className="strength-icon">{strengthIcon(k)}</span>
+                      {strengthLabel(k)}
+                    </span>
+                  ))}
+                  {strengths.length > 5 && (
+                    <span className="strength-tag strength-more">+{strengths.length - 5}</span>
+                  )}
+                </div>
+              )}
             </div>
             <Link href={`/messages?partner=${id}`} style={{ background:'#e63946', color:'#fff', borderRadius:10, padding:'10px 20px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0 }}>
               💬 Envoyer un message
@@ -257,19 +272,7 @@ export default function PublicProfilPage() {
               </div>
             )}
 
-            {/* Strengths — visible for all roles */}
-            {strengths.length > 0 && (
-              <div style={darkCard}>
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.75rem' }}>Points forts</div>
-                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-                  {strengths.map(k => (
-                    <span key={k} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.8)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
-                      {strengthLabel(k)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Strengths moved to header */}
 
             {/* Videos — hidden for clubs */}
             {profile.role !== 'club' && videoUrls.length > 0 && (
