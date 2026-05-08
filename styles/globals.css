@@ -594,3 +594,52 @@ textarea.input { resize: vertical; min-height: 80px; }
   .career-stats { gap: 14px; }
   .career-stat .v { font-size: 22px; }
 }
+
+/* ── Header strengths row ─────────────────────────────────────── */
+.strengths-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.strength-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(230, 57, 70, 0.12);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  color: #ffb3bb;
+  padding: 5px 11px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.strength-tag:hover {
+  background: rgba(230, 57, 70, 0.2);
+  border-color: #e63946;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.strength-tag .strength-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.strength-more {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+}
+
+.strength-more:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+}

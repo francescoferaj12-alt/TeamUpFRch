@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import { strengthIcon } from '../../lib/strength-icons'
 import { supabase, Profile, CareerExperience } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
@@ -523,6 +524,20 @@ export default function ProfilPage() {
               </span>
               {profile.verified && <VerifiedBadge />}
             </div>
+
+            {strengthKeys.length > 0 && (
+              <div className="strengths-row">
+                {strengthKeys.slice(0, 5).map(key => (
+                  <span key={key} className="strength-tag">
+                    <span className="strength-icon">{strengthIcon(key)}</span>
+                    {strengthLabel(key, lang)}
+                  </span>
+                ))}
+                {strengthKeys.length > 5 && (
+                  <span className="strength-tag strength-more">+{strengthKeys.length - 5}</span>
+                )}
+              </div>
+            )}
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -737,24 +752,7 @@ export default function ProfilPage() {
         )}
       </div>
 
-      {/* ── PUNTI FORTI — visible for all roles ── */}
-      <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
-        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
-        {strengthKeys.length === 0 ? (
-          <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
-            {t.profil.no_strengths[lang]}{' '}
-            <button onClick={() => setEditing(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
-          </p>
-        ) : (
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            {strengthKeys.map(key => (
-              <span key={key} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.8)', fontSize:13, fontWeight:600, padding:'5px 14px', borderRadius:100 }}>
-                {strengthLabel(key, lang)}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* PUNTI FORTI — moved to header, edit via Modifier */}
 
       {/* ── EDIT FORM ── */}
       {editing && (
