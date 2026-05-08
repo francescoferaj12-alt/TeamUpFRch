@@ -254,17 +254,17 @@ function LoginForm() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.firstname[lang]}</div>
-                    <input style={inputStyle} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Lucas" required />
+                    <input style={inputStyle} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Prénom" required />
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.lastname[lang]}</div>
-                    <input style={inputStyle} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Martin" required />
+                    <input style={inputStyle} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Nom" required />
                   </div>
                 </div>
 
                 {role === 'club' && <div style={{ marginBottom: '1rem' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.clubname[lang]}</div>
-                  <input style={inputStyle} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Bulle" required />
+                  <input style={inputStyle} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="Nom du club" required />
                 </div>}
 
                 {role === 'player' && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
