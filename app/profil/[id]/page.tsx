@@ -73,6 +73,7 @@ export default function PublicProfilPage() {
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
   const displayName = profile.role === 'club' ? profile.club_name : fullName
   const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
+  const coachBadge = profile.role === 'coach' ? (profile.coach_specialty || null) : null
   const roleLabel = profile.role === 'player'
     ? (profile.genre === 'femme' ? 'Joueuse' : 'Joueur')
     : profile.role === 'coach'
@@ -108,7 +109,7 @@ export default function PublicProfilPage() {
               </div>
               <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600 }}>
-                  {roleEmoji} {profile.position || roleLabel}
+                  {roleEmoji} {coachBadge || profile.position || roleLabel}
                 </span>
                 {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
                 {profile.zone && <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>📍 {profile.zone}</span>}
@@ -123,8 +124,8 @@ export default function PublicProfilPage() {
           </div>
         </div>
 
-        {/* Stats (player/coach) */}
-        {profile.role !== 'club' && (() => {
+        {/* Stats (player only) */}
+        {profile.role === 'player' && (() => {
           const now = new Date()
           const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
           const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
@@ -243,11 +244,15 @@ export default function PublicProfilPage() {
             <div style={darkCard}>
               <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>Informations</div>
               {[
-                profile.role !== 'club' && profile.foot ? ['Pied', profile.foot] : null,
+                profile.role === 'player' && profile.foot ? ['Pied', profile.foot] : null,
                 profile.zone ? ['Zone', profile.zone] : null,
-                profile.ligue ? ['Ligue', profile.ligue] : null,
-                profile.position ? ['Position', profile.position] : null,
+                profile.role !== 'coach' && profile.ligue ? ['Ligue', profile.ligue] : null,
+                profile.role === 'player' && profile.position ? ['Position', profile.position] : null,
                 profile.club_name && profile.role !== 'club' ? ['Club', profile.club_name] : null,
+                profile.role === 'coach' && profile.coach_experience ? ['Expérience', profile.coach_experience] : null,
+                profile.role === 'coach' && profile.coach_diploma ? ['Diplôme', profile.coach_diploma] : null,
+                profile.role === 'coach' && profile.coach_specialty ? ['Spécialité', profile.coach_specialty] : null,
+                profile.role === 'coach' && profile.coach_availability ? ['Disponibilité', profile.coach_availability] : null,
               ].filter((r): r is [string, string] => Array.isArray(r)).map(([k, v]) => (
                 <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
                   <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>

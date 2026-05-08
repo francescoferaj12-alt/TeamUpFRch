@@ -159,6 +159,10 @@ export default function ProfilPage() {
   const [video1, setVideo1] = useState('')
   const [video2, setVideo2] = useState('')
   const [video3, setVideo3] = useState('')
+  const [coachExperience, setCoachExperience] = useState('')
+  const [coachDiploma, setCoachDiploma] = useState('')
+  const [coachSpecialty, setCoachSpecialty] = useState('')
+  const [coachAvailability, setCoachAvailability] = useState('')
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 55 }, (_, i) => currentYear - 14 - i)
@@ -225,6 +229,10 @@ export default function ProfilPage() {
     setVideo1(data.video1_url || '')
     setVideo2(data.video2_url || '')
     setVideo3(data.video3_url || '')
+    setCoachExperience(data.coach_experience || '')
+    setCoachDiploma(data.coach_diploma || '')
+    setCoachSpecialty(data.coach_specialty || '')
+    setCoachAvailability(data.coach_availability || '')
   }
 
   function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
@@ -313,6 +321,12 @@ export default function ProfilPage() {
       video1_url: video1 || null,
       video2_url: video2 || null,
       video3_url: video3 || null,
+      ...(profile.role === 'coach' ? {
+        coach_experience: coachExperience || null,
+        coach_diploma: coachDiploma || null,
+        coach_specialty: coachSpecialty || null,
+        coach_availability: coachAvailability || null,
+      } : {}),
     }
     await supabase.from('profiles').update(newFields).eq('id', profile.id)
 
@@ -359,12 +373,16 @@ export default function ProfilPage() {
     [t.profil.email_k[lang], profile.email],
     displayAge ? [t.profil.age_k[lang], `${displayAge}${ageSuffix}`] : null,
     profile.birthdate ? [t.profil.birth_k[lang], new Date(profile.birthdate).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH', { day: 'numeric', month: 'long', year: 'numeric' })] : null,
-    profile.foot ? [t.profil.foot_k[lang], translateFoot(profile.foot, lang)] : null,
+    profile.role === 'player' && profile.foot ? [t.profil.foot_k[lang], translateFoot(profile.foot, lang)] : null,
     profile.zone ? [t.profil.zone_k[lang], profile.zone] : null,
-    profile.ligue ? [t.profil.ligue_k[lang], profile.ligue] : null,
-    profile.position ? [t.profil.position_k[lang], profile.position] : null,
+    profile.role !== 'coach' && profile.ligue ? [t.profil.ligue_k[lang], profile.ligue] : null,
+    profile.role === 'player' && profile.position ? [t.profil.position_k[lang], profile.position] : null,
     profile.club_name ? [t.profil.club_k[lang], profile.club_name] : null,
     profile.phone ? [t.profil.phone_k[lang], profile.phone] : null,
+    profile.role === 'coach' && profile.coach_experience ? ['Expérience', profile.coach_experience] : null,
+    profile.role === 'coach' && profile.coach_diploma ? ['Diplôme', profile.coach_diploma] : null,
+    profile.role === 'coach' && profile.coach_specialty ? ['Spécialité', profile.coach_specialty] : null,
+    profile.role === 'coach' && profile.coach_availability ? ['Disponibilité', profile.coach_availability] : null,
   ]
 
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
@@ -447,7 +465,7 @@ export default function ProfilPage() {
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
               <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
-                {roleEmoji} {profile.position || roleLabel}
+                {roleEmoji} {profile.role === 'coach' ? (profile.coach_specialty || roleLabel) : (profile.position || roleLabel)}
               </span>
               {profile.foot && (
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
@@ -484,8 +502,8 @@ export default function ProfilPage() {
         </div>
       </div>
 
-      {/* ── STATS (joueur / coach uniquement) ── */}
-      {profile.role !== 'club' && (() => {
+      {/* ── STATS (joueur uniquement) ── */}
+      {profile.role === 'player' && (() => {
         const now = new Date()
         const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
         const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
@@ -618,17 +636,19 @@ export default function ProfilPage() {
                 </select>
               </div>
             )}
-            <div>
-              <label style={lblSt}>{t.profil.ligue[lang]}</label>
-              <select style={inpSt} value={ligue} onChange={e => setLigue(e.target.value)}>
-                <option value="" style={optSt}>—</option>
-                {(profile.role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
-                  <optgroup key={g.group} label={g.group} style={{ background:'#061540' }}>
-                    {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
+            {profile.role !== 'coach' && (
+              <div>
+                <label style={lblSt}>{t.profil.ligue[lang]}</label>
+                <select style={inpSt} value={ligue} onChange={e => setLigue(e.target.value)}>
+                  <option value="" style={optSt}>—</option>
+                  {(profile.role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
+                    <optgroup key={g.group} label={g.group} style={{ background:'#061540' }}>
+                      {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label style={lblSt}>{t.profil.zone[lang]}</label>
               <select style={inpSt} value={zone} onChange={e => setZone(e.target.value)}>
@@ -670,8 +690,45 @@ export default function ProfilPage() {
             <input style={inpSt} type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+41 79 000 00 00" />
           </div>
 
+          {/* Coach-specific fields */}
+          {profile.role === 'coach' && (
+            <>
+              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .75rem', color:'#3a8cff' }}>Informations coach</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1rem' }}>
+                <div>
+                  <label style={lblSt}>Expérience</label>
+                  <select style={inpSt} value={coachExperience} onChange={e => setCoachExperience(e.target.value)}>
+                    <option value="" style={optSt}>—</option>
+                    {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v} style={optSt}>{v}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={lblSt}>Diplôme</label>
+                  <select style={inpSt} value={coachDiploma} onChange={e => setCoachDiploma(e.target.value)}>
+                    <option value="" style={optSt}>—</option>
+                    {['Sans diplôme','UEFA C','UEFA B','UEFA A','UEFA Pro','Diplôme CFE','BBaby','BFut'].map(v => <option key={v} style={optSt}>{v}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={lblSt}>Spécialité</label>
+                  <select style={inpSt} value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)}>
+                    <option value="" style={optSt}>—</option>
+                    {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens','Analyste vidéo'].map(v => <option key={v} style={optSt}>{v}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={lblSt}>Disponibilité</label>
+                  <select style={inpSt} value={coachAvailability} onChange={e => setCoachAvailability(e.target.value)}>
+                    <option value="" style={optSt}>—</option>
+                    {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v} style={optSt}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Stats */}
-          {profile.role !== 'club' && (
+          {profile.role === 'player' && (
             <>
               <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:1, margin:'1rem 0 .5rem', color:'#3a8cff' }}>{t.profil.current_season[lang]}</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
@@ -700,7 +757,7 @@ export default function ProfilPage() {
                 ))}
               </div>
             </>
-          )}
+          )}{/* end stats */}
 
           {/* Bio */}
           <div style={{ marginTop:'1rem' }}>
