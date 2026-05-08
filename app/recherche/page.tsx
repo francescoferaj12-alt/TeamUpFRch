@@ -6,6 +6,7 @@ import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
+import VerifiedBadge from '../../components/VerifiedBadge'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
 const ALL_LIGUES_FLAT = ALL_LIGUE_GROUPS.flatMap(g => g.items)
@@ -251,7 +252,10 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
           }
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#fff' }}>{name}</div>
+          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, color:'#fff', display:'flex', alignItems:'center', gap:2, minWidth:0 }}>
+            <span style={{ whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</span>
+            {p.verified && <VerifiedBadge size={15} />}
+          </div>
           <div style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>{p.position || roleLabel}{calcAge(p.birthdate) ? ` · ${calcAge(p.birthdate)}${ageSuffix}` : ''}</div>
         </div>
         <span style={{ background: p.available ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: p.available ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 9px', fontSize:11, fontWeight:600, whiteSpace:'nowrap' }}>

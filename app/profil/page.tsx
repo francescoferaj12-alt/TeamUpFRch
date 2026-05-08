@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import VerifiedBadge from '../../components/VerifiedBadge'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
@@ -462,9 +463,7 @@ export default function ProfilPage() {
               <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
-              {profile.verified && (
-                <span style={{ background:'rgba(0,200,130,.2)', border:'1px solid rgba(0,200,130,.4)', color:'#00c882', fontSize:12, padding:'4px 12px', borderRadius:100 }}>✓ Vérifié</span>
-              )}
+              {profile.verified && <VerifiedBadge />}
             </div>
           </div>
 
