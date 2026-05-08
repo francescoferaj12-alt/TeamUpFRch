@@ -88,7 +88,7 @@ function LoginForm() {
       email, password,
       options: {
         data: { first_name: firstName, last_name: lastName, role },
-        emailRedirectTo: 'https://team-up-f-rch.vercel.app/profil'
+        emailRedirectTo: 'https://teamupfr.ch/profil'
       }
     })
 
@@ -130,7 +130,7 @@ function LoginForm() {
     e.preventDefault()
     setLoading(true); setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://team-up-f-rch.vercel.app/reset-password'
+      redirectTo: 'https://teamupfr.ch/reset-password'
     })
     if (error) { setError(error.message); setLoading(false); return }
     setSuccess(t.login.success_forgot[lang])
