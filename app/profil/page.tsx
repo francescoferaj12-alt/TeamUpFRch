@@ -3,10 +3,13 @@
 import { useEffect, useState, useRef, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { supabase, Profile } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
+
+const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
@@ -123,6 +126,7 @@ export default function ProfilPage() {
   const [saveMsg, setSaveMsg] = useState('')
   const [saveError, setSaveError] = useState('')
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -208,24 +212,38 @@ export default function ProfilPage() {
     setVideo3(data.video3_url || '')
   }
 
-  async function handlePhotoUpload(e: ChangeEvent<HTMLInputElement>) {
-    if (!profile || !e.target.files?.[0]) return
-    const file = e.target.files[0]
+  function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
     if (!file.type.startsWith('image/')) { alert('Seules les images sont acceptées'); return }
-    if (file.size > 5 * 1024 * 1024) { alert('Max 5 MB'); return }
+    if (file.size > 15 * 1024 * 1024) { alert('Max 15 MB'); return }
+    const url = URL.createObjectURL(file)
+    setCropSrc(url)
+    // reset so same file can be reselected
+    e.target.value = ''
+  }
+
+  async function handleCropConfirm(blob: Blob) {
+    if (!profile) return
     setUploadingPhoto(true)
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
-    const path = `${profile.id}/avatar.${ext}`
+    const path = `${profile.id}/avatar.jpg`
     const { data: uploadData, error } = await supabase.storage
       .from('avatars')
-      .upload(path, file, { upsert: true, contentType: file.type })
+      .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
     if (error) { alert('Erreur upload: ' + error.message); setUploadingPhoto(false); return }
     const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
     const avatar_url = urlData.publicUrl + '?t=' + Date.now()
     await supabase.from('profiles').update({ avatar_url }).eq('id', profile.id)
     setProfile({ ...profile, avatar_url })
     await refreshProfile()
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
     setUploadingPhoto(false)
+  }
+
+  function handleCropCancel() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
   }
 
   async function handleLogout() {
@@ -338,6 +356,14 @@ export default function ProfilPage() {
 
   return (
     <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+      {cropSrc && (
+        <AvatarCropModal
+          src={cropSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+          uploading={uploadingPhoto}
+        />
+      )}
       <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
@@ -369,7 +395,7 @@ export default function ProfilPage() {
             >
               {uploadingPhoto ? '⏳' : '📷'}
             </button>
-            <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handlePhotoUpload} />
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFileSelect} />
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
