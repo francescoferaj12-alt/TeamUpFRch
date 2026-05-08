@@ -60,7 +60,12 @@ export default function Navbar() {
       .channel(`nav-unread-${uid}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, refresh)
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    // Listen for direct notification from messages page when messages are marked read
+    window.addEventListener('messages-read', refresh)
+    return () => {
+      supabase.removeChannel(channel)
+      window.removeEventListener('messages-read', refresh)
+    }
   }, [session])
 
   useEffect(() => {
