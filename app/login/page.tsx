@@ -55,6 +55,10 @@ function LoginForm() {
   const [clubName, setClubName] = useState('')
   const [bio, setBio] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [coachExperience, setCoachExperience] = useState('')
+  const [coachDiploma, setCoachDiploma] = useState('')
+  const [coachSpecialty, setCoachSpecialty] = useState('')
+  const [coachAvailability, setCoachAvailability] = useState('')
 
   const regYear = new Date().getFullYear()
   const regYears = Array.from({ length: 55 }, (_, i) => regYear - 14 - i)
@@ -96,10 +100,18 @@ function LoginForm() {
         first_name: firstName, last_name: lastName,
         position: role === 'player' ? position : null,
         genre: role !== 'club' ? genre : null,
-        ligue, zone,
+        ligue: role !== 'coach' ? ligue : null,
+        zone,
         foot: role === 'player' ? foot : null,
         club_name: role === 'club' ? clubName : null,
-        bio, available: true
+        bio: role !== 'coach' ? bio : null,
+        available: true,
+        ...(role === 'coach' ? {
+          coach_experience: coachExperience,
+          coach_diploma: coachDiploma,
+          coach_specialty: coachSpecialty,
+          coach_availability: coachAvailability,
+        } : {})
       })
       if (profileError) { setError('Erreur profil: ' + profileError.message); setLoading(false); return }
 
@@ -285,29 +297,40 @@ function LoginForm() {
                   </div>
                 </div>}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.ligue[lang]}</div>
-                    <select style={inputStyle} value={ligue} onChange={e => setLigue(e.target.value)} required>
-                      <option value="">{t.login.choose[lang]}</option>
-                      {(role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
-                        <optgroup key={g.group} label={g.group} style={{ background: '#061540' }}>
-                          {g.items.map(l => <option key={l} style={{ background: '#061540' }}>{l}</option>)}
-                        </optgroup>
-                      ))}
-                    </select>
+                {/* LIGUE + ZONE — not shown for coach */}
+                {role !== 'coach' ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <div style={lblSt}>{t.login.ligue[lang]}</div>
+                      <select style={inputStyle} value={ligue} onChange={e => setLigue(e.target.value)} required>
+                        <option value="">{t.login.choose[lang]}</option>
+                        {(role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
+                          <optgroup key={g.group} label={g.group} style={{ background: '#061540' }}>
+                            {g.items.map(l => <option key={l} style={{ background: '#061540' }}>{l}</option>)}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <div style={lblSt}>{t.login.zone[lang]}</div>
+                      <select style={inputStyle} value={zone} onChange={e => setZone(e.target.value)} required>
+                        <option value="">{t.login.choose[lang]}</option>
+                        {ZONES.map(z => <option key={z}>{z}</option>)}
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.zone[lang]}</div>
+                ) : (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={lblSt}>{t.login.zone[lang]}</div>
                     <select style={inputStyle} value={zone} onChange={e => setZone(e.target.value)} required>
                       <option value="">{t.login.choose[lang]}</option>
                       {ZONES.map(z => <option key={z}>{z}</option>)}
                     </select>
                   </div>
-                </div>
+                )}
 
                 {role !== 'club' && <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.birthdate[lang]}</div>
+                  <div style={lblSt}>{t.login.birthdate[lang]}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 6 }}>
                     <select style={inputStyle} value={birthDay} onChange={e => setBirthDay(e.target.value)} required>
                       <option value="">{t.login.day[lang]}</option>
@@ -324,10 +347,46 @@ function LoginForm() {
                   </div>
                 </div>}
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.bio[lang]}</div>
+                {/* COACH-SPECIFIC FIELDS */}
+                {role === 'coach' && <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <div style={lblSt}>Expérience</div>
+                      <select style={inputStyle} value={coachExperience} onChange={e => setCoachExperience(e.target.value)} required>
+                        <option value="">Choisir…</option>
+                        {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v}>{v}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <div style={lblSt}>Diplôme</div>
+                      <select style={inputStyle} value={coachDiploma} onChange={e => setCoachDiploma(e.target.value)} required>
+                        <option value="">Choisir…</option>
+                        {['Sans diplôme','UEFA C','UEFA B','UEFA A','UEFA Pro','Diplôme CFE','BBaby','BFut'].map(v => <option key={v}>{v}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <div style={lblSt}>Spécialité</div>
+                      <select style={inputStyle} value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)} required>
+                        <option value="">Choisir…</option>
+                        {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens','Analyste vidéo'].map(v => <option key={v}>{v}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <div style={lblSt}>Disponibilité</div>
+                      <select style={inputStyle} value={coachAvailability} onChange={e => setCoachAvailability(e.target.value)} required>
+                        <option value="">Choisir…</option>
+                        {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v}>{v}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </>}
+
+                {role !== 'coach' && <div style={{ marginBottom: '1rem' }}>
+                  <div style={lblSt}>{t.login.bio[lang]}</div>
                   <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 64 }} value={bio} onChange={e => setBio(e.target.value)} placeholder={t.login.bio_ph[lang]} />
-                </div>
+                </div>}
               </>}
 
               <div style={{ marginBottom: '1rem' }}>

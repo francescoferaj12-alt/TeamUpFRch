@@ -37,6 +37,10 @@ export type Profile = {
   genre?: 'homme' | 'femme'
   verified?: boolean
   hidden?: boolean
+  coach_experience?: string
+  coach_diploma?: string
+  coach_specialty?: string
+  coach_availability?: string
   verification_requested?: boolean
   created_at: string
 }
