@@ -283,9 +283,9 @@ export const liguesHomme = [
   { group: 'Actifs Hommes', items: ['2ème Ligue', '3ème Ligue', '4ème Ligue', '5ème Ligue'] },
   { group: 'Juniors Garçons', items: [
     'Juniors A - Promotion', 'Juniors A - 1er degré', 'Juniors A - 2ème degré',
-    'Juniors B - Promotion', 'Juniors B - 1er degré', 'Juniors B - 2ème degré', 'Juniors B - 3ème degré',
-    'Juniors C - Promotion', 'Juniors C - 1er degré', 'Juniors C - 2ème degré', 'Juniors C - 3ème degré',
-    'Juniors D-9',
+    'Juniors B - Promotion', 'Juniors B - 1er degré', 'Juniors B - 2ème degré',
+    'Juniors C - Promotion', 'Juniors C - 1er degré', 'Juniors C - 2ème degré',
+    'Juniors D-9 - Promotion', 'Juniors D-9 - 1er degré', 'Juniors D-9 - 2ème degré', 'Juniors D-9 - 3ème degré',
   ]},
 ]
 
