@@ -951,7 +951,8 @@ export default function ProfilPage() {
                       <button
                         onClick={async () => {
                           if (!confirm('Supprimer ce post ?')) return
-                          await supabase.from('annonces').delete().eq('id', post.id)
+                          const { error } = await supabase.from('annonces').delete().eq('id', post.id).eq('author_id', profile.id)
+                          if (error) { alert('Erreur: ' + error.message); return }
                           setMyPosts(prev => prev.filter(p => p.id !== post.id))
                         }}
                         style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'5px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
