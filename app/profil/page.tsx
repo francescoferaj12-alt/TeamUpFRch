@@ -737,8 +737,8 @@ export default function ProfilPage() {
         )}
       </div>
 
-      {/* ── PUNTI FORTI — hidden for clubs and coaches ── */}
-      {profile.role === 'player' && <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
+      {/* ── PUNTI FORTI — hidden for clubs only ── */}
+      {profile.role !== 'club' && <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'.85rem' }}>{t.profil.strengths_label[lang]}</div>
         {strengthKeys.length === 0 ? (
           <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
