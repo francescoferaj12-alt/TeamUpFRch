@@ -148,15 +148,17 @@ function ClubView({ profile }: { profile: Profile }) {
       setAvatarMap(map)
       setLoading(false)
 
-      // Mark all unseen candidatures as seen
+      // Mark all unseen candidatures as seen; always dispatch the event so the
+      // Navbar badge clears even if all rows were already seen or the UPDATE
+      // returns 0 rows (which PostgREST does silently without an error).
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('candidatures-seen'))
+      }
       const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
       if (unseenIds.length > 0) {
-        const { error: updErr } = await supabase.from('applications')
+        await supabase.from('applications')
           .update({ seen_by_owner: true })
           .in('id', unseenIds)
-        if (!updErr && typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('candidatures-seen'))
-        }
       }
     })()
     return () => { cancelled = true }
