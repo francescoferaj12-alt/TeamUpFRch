@@ -396,8 +396,13 @@ export default function ProfilPage() {
 
   if (!profile) return null
 
-  const initials = `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
+  const initials = profile.role === 'club'
+    ? (profile.club_name?.slice(0, 2).toUpperCase() || '🏟️')
+    : `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+  const displayName = profile.role === 'club'
+    ? (profile.club_name || profile.email)
+    : (fullName || profile.email)
   const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
   const roleLabel = profile.role === 'player'
     ? (profile.genre === 'femme' ? t.profil.joueur_f[lang] : t.profil.role_player[lang])
@@ -502,7 +507,7 @@ export default function ProfilPage() {
 
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6 }}>
-              {fullName || profile.club_name || profile.email}
+              {displayName}
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
               <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
@@ -760,12 +765,14 @@ export default function ProfilPage() {
           <ProfileEditForm
             profile={profile}
             lang={lang}
-            onSaved={async (updated) => {
+            onSaved={async (updated, silent) => {
               setProfile(updated)
-              setEditing(false)
+              if (!silent) {
+                setEditing(false)
+                setSaveMsg(t.profil.saved[lang])
+                setTimeout(() => setSaveMsg(''), 3000)
+              }
               await refreshProfile()
-              setSaveMsg(t.profil.saved[lang])
-              setTimeout(() => setSaveMsg(''), 3000)
             }}
             onCancel={() => setEditing(false)}
           />
