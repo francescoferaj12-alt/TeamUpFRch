@@ -49,14 +49,18 @@ export default function MessagesPage() {
   // Mark messages as read whenever the active conversation changes (covers auto-select too)
   useEffect(() => {
     if (!activePartnerId || !profile) return
-    supabase.from('messages')
-      .update({ read: true })
-      .eq('sender_id', activePartnerId)
-      .eq('receiver_id', profile.id)
-      .eq('read', false)
-    setConversations(prev => prev.map(c =>
-      c.partnerId === activePartnerId ? { ...c, unread: 0 } : c
-    ))
+    const pid = activePartnerId
+    const rid = profile.id
+    ;(async () => {
+      await supabase.from('messages')
+        .update({ read: true })
+        .eq('sender_id', pid)
+        .eq('receiver_id', rid)
+        .eq('read', false)
+      setConversations(prev => prev.map(c =>
+        c.partnerId === pid ? { ...c, unread: 0 } : c
+      ))
+    })()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePartnerId, profile?.id])
 
