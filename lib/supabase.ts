@@ -5,6 +5,30 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+/**
+ * Normalise an avatar URL for display.
+ *
+ * - Returns null/undefined for empty input.
+ * - For Supabase storage URLs, strips any existing `?t=...` query param and
+ *   appends a fresh cache-buster (`?cb=2`). This forces browsers to bypass
+ *   any cached 403 responses that were returned BEFORE the `avatars` bucket
+ *   was made public (migration v9). Without this, browsers that previously
+ *   cached the 403 will keep showing a broken image even though the URL is
+ *   now valid.
+ * - Use this helper everywhere an `<img src={...}>` tag displays an avatar
+ *   loaded from `profiles.avatar_url`.
+ */
+export function avatarSrc(url: string | null | undefined): string | null {
+  if (!url) return null
+  // Only mangle Supabase-served URLs; leave any other (e.g. external) URLs alone.
+  if (!/supabase\.(co|in)\/storage/i.test(url)) return url
+  // Strip any existing `?t=...` or `?cb=...` query that might have been baked in.
+  const clean = url.split('?')[0]
+  // Use a stable cache-buster ("v2 = public bucket") so the URL is still
+  // cacheable across renders, but different from any cached 403 response.
+  return `${clean}?cb=2`
+}
+
 export type Profile = {
   id: string
   email: string

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, Profile, Application, Annonce } from '../../lib/supabase'
+import { supabase, Profile, Application, Annonce, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
@@ -106,29 +106,46 @@ function ClubView({ profile }: { profile: Profile }) {
         .from('annonces').select('*').eq('author_id', profile.id)
       if (!cancelled) setAnnonces(annoncesData || [])
 
-      // Include applicant avatar directly via FK join — no separate round-trip
+      // Fetch applications WITHOUT trying to embed the applicant profile.
+      // The previous `profiles!applicant_id(avatar_url)` embed was unreliable
+      // (PostgREST embed names rely on the FK constraint name, not the column
+      // name, and the `applications` table has multiple paths to `profiles`
+      // via `annonces.author_id`, which made the embed silently return null
+      // for every row). We now do a clean two-step fetch like /recherche does
+      // — that pattern is known to work.
       const { data } = await supabase.from('applications')
-        .select('*, annonces!inner(title, author_id, ligue), profiles!applicant_id(avatar_url)')
+        .select('*, annonces!inner(title, author_id, ligue)')
         .eq('annonces.author_id', profile.id)
         .order('created_at', { ascending: false })
 
-      const mapped = (data || []).map((a: Application & {
+      const baseMapped = (data || []).map((a: Application & {
         annonces: { title: string; ligue: string }
-        profiles?: { avatar_url?: string | null }
       }) => ({
         ...a,
         annonce_title: a.annonces?.title,
         annonce_ligue: a.annonces?.ligue,
-        applicant_avatar: a.profiles?.avatar_url || null,
+        applicant_avatar: null as string | null,
       }))
       if (cancelled) return
-      setApps(mapped)
-      setLoading(false)
 
-      // Build avatarMap from the already-joined data (no extra fetch needed)
+      // Now fetch every applicant's avatar in a single round-trip.
+      const applicantIds = [...new Set(baseMapped.map(a => a.applicant_id).filter(Boolean))]
       const map: Record<string, string | null> = {}
-      for (const a of mapped) map[a.applicant_id] = a.applicant_avatar
+      if (applicantIds.length > 0) {
+        const { data: applicantProfiles } = await supabase
+          .from('profiles')
+          .select('id,avatar_url')
+          .in('id', applicantIds)
+        for (const p of (applicantProfiles || [])) {
+          map[p.id] = p.avatar_url || null
+        }
+      }
+      if (cancelled) return
+
+      const mapped = baseMapped.map(a => ({ ...a, applicant_avatar: map[a.applicant_id] || null }))
+      setApps(mapped)
       setAvatarMap(map)
+      setLoading(false)
 
       // Mark all unseen candidatures as seen
       const unseenIds = mapped.filter(a => !a.seen_by_owner).map(a => a.id)
@@ -233,7 +250,7 @@ function ClubView({ profile }: { profile: Profile }) {
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                     <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.applicant_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
                       {avatarMap[a.applicant_id]
-                        ? <img src={avatarMap[a.applicant_id]!} alt="" style={{ width:46, height:46, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                        ? <img src={avatarSrc(avatarMap[a.applicant_id])!} alt="" style={{ width:46, height:46, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : '👤'
                       }
                     </Link>
@@ -418,7 +435,7 @@ function PlayerView({ profile }: { profile: Profile }) {
                       {a.annonce_author_id && (
                         <Link href={`/profil/${a.annonce_author_id}`} style={{ width:44, height:44, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.annonce_author_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
                           {avatarMap[a.annonce_author_id]
-                            ? <img src={avatarMap[a.annonce_author_id]!} alt="" style={{ width:44, height:44, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                            ? <img src={avatarSrc(avatarMap[a.annonce_author_id])!} alt="" style={{ width:44, height:44, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                             : '🏟️'
                           }
                         </Link>

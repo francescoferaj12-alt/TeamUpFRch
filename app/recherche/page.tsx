@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { supabase, Profile } from '../../lib/supabase'
+import { supabase, Profile, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
@@ -251,7 +251,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'.85rem' }}>
         <div style={{ width:46, height:46, borderRadius:12, background:avatarBg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:p.avatar_url ? 0 : 18, fontWeight:700, flexShrink:0, overflow:'hidden' }}>
           {p.avatar_url
-            ? <img src={p.avatar_url} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            ? <img src={avatarSrc(p.avatar_url)!} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             : (initials.length > 2 ? roleEmoji : initials)
           }
         </div>
