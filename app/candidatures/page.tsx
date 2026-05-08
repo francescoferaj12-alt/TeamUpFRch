@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile, Application, Annonce, avatarSrc } from '../../lib/supabase'
+import UserAvatar from '../../components/UserAvatar'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
@@ -248,11 +249,10 @@ function ClubView({ profile }: { profile: Profile }) {
               <div key={a.id} style={{ background: CARD_BG, border: CARD_BORDER, borderRadius: 16, padding:'1.25rem' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.85rem' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                    <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.applicant_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
-                      {avatarMap[a.applicant_id]
-                        ? <img src={avatarSrc(avatarMap[a.applicant_id])!} alt="" style={{ width:46, height:46, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                        : '👤'
-                      }
+                    <Link href={`/profil/${a.applicant_id}`} style={{ width:46, height:46, borderRadius:12, flexShrink:0, textDecoration:'none', overflow:'hidden', display:'block' }}>
+                      <UserAvatar userId={a.applicant_id} size={46} radius={12}
+                        fallback={<div style={{ width:46, height:46, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>👤</div>}
+                      />
                     </Link>
                     <div>
                       <Link href={`/profil/${a.applicant_id}`} style={{ fontWeight:700, fontSize:15, color:'#7eb6ff', textDecoration:'none', borderBottom:'1.5px solid rgba(126,182,255,.35)', paddingBottom:1 }}>
@@ -433,11 +433,10 @@ function PlayerView({ profile }: { profile: Profile }) {
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.65rem' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                       {a.annonce_author_id && (
-                        <Link href={`/profil/${a.annonce_author_id}`} style={{ width:44, height:44, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0, textDecoration:'none', overflow:'hidden', background: avatarMap[a.annonce_author_id] ? 'transparent' : 'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>
-                          {avatarMap[a.annonce_author_id]
-                            ? <img src={avatarSrc(avatarMap[a.annonce_author_id])!} alt="" style={{ width:44, height:44, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                            : '🏟️'
-                          }
+                        <Link href={`/profil/${a.annonce_author_id}`} style={{ width:44, height:44, borderRadius:12, flexShrink:0, textDecoration:'none', overflow:'hidden', display:'block' }}>
+                          <UserAvatar userId={a.annonce_author_id} size={44} radius={12}
+                            fallback={<div style={{ width:44, height:44, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, background:'linear-gradient(135deg,#3a8cff,#1a5fb4)' }}>🏟️</div>}
+                          />
                         </Link>
                       )}
                       <div>
