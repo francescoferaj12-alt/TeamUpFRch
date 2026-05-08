@@ -132,7 +132,7 @@ function computeCompletion(p: Partial<Profile> & Record<string, any>): number {
   } else if (role === 'coach') {
     checks.push(!!p.first_name, !!p.last_name, !!p.birthdate,
       !!p.coach_specialty, !!p.coach_diploma, !!p.coach_experience,
-      !!p.coach_categories, !!p.coach_philosophy)
+      !!p.coach_categories, !!p.coach_philosophy, !!p.coach_certificates)
   } else {
     checks.push(!!p.first_name, !!p.last_name, !!p.birthdate, !!p.position,
       !!p.foot, !!p.ligue, !!p.level)
@@ -212,6 +212,11 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [coachAvailability, setCoachAvailability] = useState(profile.coach_availability || '')
   const [coachCategories, setCoachCategories] = useState<string[]>(parseList((profile as any).coach_categories))
   const [coachPhilosophy, setCoachPhilosophy] = useState((profile as any).coach_philosophy || '')
+  const [coachCertificates, setCoachCertificates] = useState<{name:string;year:string}[]>(() => {
+    try { return JSON.parse(profile.coach_certificates || '[]') } catch { return [] }
+  })
+  const [newCertName, setNewCertName] = useState('')
+  const [newCertYear, setNewCertYear] = useState('')
   const [clubWebsite, setClubWebsite] = useState(profile.club_website || '')
   const [clubInstagram, setClubInstagram] = useState(profile.club_instagram || '')
   const [clubFacebook, setClubFacebook] = useState(profile.club_facebook || '')
@@ -256,7 +261,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   }, [bio, position, positionSecondary, genre, ligue, zone, foot, available, phone, career,
       birthDay, birthMonth, birthYear, goals, assists, matches, goalsPrev, assistsPrev, matchesPrev,
       selectedStrengths, video1, video2, video3, coachExperience, coachDiploma, coachSpecialty,
-      coachAvailability, coachCategories, coachPhilosophy, clubWebsite, clubInstagram, clubFacebook,
+      coachAvailability, coachCategories, coachPhilosophy, coachCertificates, clubWebsite, clubInstagram, clubFacebook,
       clubWhatsapp, clubPhonePublic, clubEmailPublic, clubName, firstName, lastName, jerseyNumber,
       heightCm, level, clubFoundedYear, clubTeamsCount, clubStadiumName, clubStadiumAddress,
       clubColorPrimary, clubColorSecondary, clubCategories])
@@ -312,6 +317,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       ext.coach_availability = coachAvailability || null
       ext.coach_categories = coachCategories.join(',') || null
       ext.coach_philosophy = coachPhilosophy || null
+      ext.coach_certificates = coachCertificates.length ? JSON.stringify(coachCertificates) : null
     }
     if (profile.role === 'club') {
       ext.club_website = clubWebsite || null
@@ -710,6 +716,76 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     )
   }
 
+  function renderCertificates() {
+    if (role !== 'coach') return null
+    return (
+      <Section
+        title={lang === 'fr' ? '🎓 Certificats & Diplômes' : '🎓 Zertifikate & Diplome'}
+        desc={lang === 'fr' ? 'Ajoute tes licences UEFA, diplômes SFV et autres certifications.' : 'Füge deine UEFA-Lizenzen, SFV-Diplome und andere Zertifikate hinzu.'}
+        defaultOpen={false}
+        lang={lang}
+      >
+        {/* Existing certificates */}
+        {coachCertificates.length > 0 && (
+          <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:16 }}>
+            {coachCertificates.map((cert, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:10, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.2)', borderRadius:9, padding:'9px 14px' }}>
+                <span style={{ fontSize:16 }}>🎓</span>
+                <span style={{ flex:1, fontWeight:600, fontSize:14, color:'#fff' }}>{cert.name}</span>
+                {cert.year && <span style={{ fontSize:12, color:'rgba(255,255,255,.45)', fontWeight:600 }}>{cert.year}</span>}
+                <button
+                  type="button"
+                  onClick={() => setCoachCertificates(prev => prev.filter((_, j) => j !== i))}
+                  style={{ background:'rgba(230,57,70,.15)', border:'1px solid rgba(230,57,70,.3)', color:'#e63946', borderRadius:6, padding:'4px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                >✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add new certificate */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 100px auto', gap:8, alignItems:'end' }}>
+          <div className="form-group" style={{ marginBottom:0 }}>
+            <label>{lang === 'fr' ? 'Nom du certificat' : 'Zertifikatname'}</label>
+            <input
+              value={newCertName}
+              onChange={e => setNewCertName(e.target.value)}
+              placeholder={lang === 'fr' ? 'Ex: UEFA B, UEFA Pro…' : 'z.B. UEFA B, UEFA Pro…'}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && newCertName.trim()) {
+                  e.preventDefault()
+                  setCoachCertificates(prev => [...prev, { name: newCertName.trim(), year: newCertYear.trim() }])
+                  setNewCertName(''); setNewCertYear('')
+                }
+              }}
+            />
+          </div>
+          <div className="form-group" style={{ marginBottom:0 }}>
+            <label>{lang === 'fr' ? 'Année' : 'Jahr'}</label>
+            <input
+              value={newCertYear}
+              onChange={e => setNewCertYear(e.target.value)}
+              placeholder="2022"
+              maxLength={4}
+            />
+          </div>
+          <button
+            type="button"
+            disabled={!newCertName.trim()}
+            onClick={() => {
+              if (!newCertName.trim()) return
+              setCoachCertificates(prev => [...prev, { name: newCertName.trim(), year: newCertYear.trim() }])
+              setNewCertName(''); setNewCertYear('')
+            }}
+            style={{ height:42, background: newCertName.trim() ? 'rgba(58,140,255,.2)' : 'rgba(255,255,255,.05)', border:`1px solid ${newCertName.trim() ? 'rgba(58,140,255,.4)' : 'rgba(255,255,255,.1)'}`, color: newCertName.trim() ? '#7eb6ff' : 'rgba(255,255,255,.3)', borderRadius:9, padding:'0 16px', fontWeight:700, fontSize:14, cursor: newCertName.trim() ? 'pointer' : 'not-allowed', fontFamily:'inherit', whiteSpace:'nowrap', marginTop:20 }}
+          >
+            + {lang === 'fr' ? 'Ajouter' : 'Hinzufügen'}
+          </button>
+        </div>
+      </Section>
+    )
+  }
+
   function renderAbout() {
     const aboutTitle = role === 'club' ? t.profil.sec_about_club[lang] : t.profil.sec_about[lang]
     const philosophyBlock = role === 'coach' && (
@@ -954,6 +1030,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       {renderIdentity()}
       {renderResponsable()}
       {renderSportProfile()}
+      {renderCertificates()}
       {renderStats()}
       {renderAbout()}
       {renderContact()}

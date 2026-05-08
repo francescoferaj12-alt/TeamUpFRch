@@ -27,6 +27,9 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showResend, setShowResend] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSent, setResendSent] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/profil'
@@ -67,11 +70,30 @@ function LoginForm() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true); setError('')
+    setLoading(true); setError(''); setShowResend(false)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(t.login.error_login[lang]); setLoading(false); return }
+    if (error) {
+      const notConfirmed = error.message?.toLowerCase().includes('not confirmed') || error.message?.toLowerCase().includes('email')
+      if (notConfirmed) {
+        setError(t.login.error_not_confirmed[lang])
+        setShowResend(true)
+      } else {
+        setError(t.login.error_login[lang])
+      }
+      setLoading(false)
+      return
+    }
     loginTriggered.current = true
     // useEffect will redirect once authLoading is false and session is set
+  }
+
+  async function handleResend() {
+    if (!email) return
+    setResendLoading(true)
+    await supabase.auth.resend({ type: 'signup', email })
+    setResendLoading(false)
+    setResendSent(true)
+    setTimeout(() => setResendSent(false), 5000)
   }
 
   async function handleRegister(e: React.FormEvent) {
@@ -99,7 +121,7 @@ function LoginForm() {
         ? `${birthYear}-${birthMonth.toString().padStart(2,'0')}-${birthDay.toString().padStart(2,'0')}`
         : null
 
-      const { error: profileError } = await supabase.from('profiles').insert({
+      const profileData = {
         id: data.user.id, email, role,
         first_name: firstName, last_name: lastName,
         position: role === 'player' ? position : null,
@@ -117,28 +139,13 @@ function LoginForm() {
           coach_specialty: coachSpecialty,
           coach_availability: coachAvailability,
         } : {})
-      })
+      }
+
+      const { error: profileError } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' })
       if (profileError) {
-        // Fallback: retry without birthdate if column doesn't exist
         if (profileError.message?.includes('birthdate')) {
-          const { error: retry } = await supabase.from('profiles').insert({
-            id: data.user.id, email, role,
-            first_name: firstName, last_name: lastName,
-            position: role === 'player' ? position : null,
-            genre: role !== 'club' ? genre : null,
-            ligue: role !== 'coach' ? ligue : null,
-            zone,
-            foot: role === 'player' ? foot : null,
-            club_name: role === 'club' ? clubName : null,
-            bio: role !== 'coach' ? bio : null,
-            available: true,
-            ...(role === 'coach' ? {
-              coach_experience: coachExperience,
-              coach_diploma: coachDiploma,
-              coach_specialty: coachSpecialty,
-              coach_availability: coachAvailability,
-            } : {})
-          })
+          const { birthdate: _bd, ...profileWithoutBirthdate } = profileData
+          const { error: retry } = await supabase.from('profiles').upsert(profileWithoutBirthdate, { onConflict: 'id' })
           if (retry) { setError('Erreur profil: ' + retry.message); setLoading(false); return }
         } else {
           setError('Erreur profil: ' + profileError.message); setLoading(false); return
@@ -147,6 +154,7 @@ function LoginForm() {
     }
 
     setSuccess(t.login.success_register[lang])
+    setShowResend(true)
     setLoading(false)
   }
 
@@ -249,6 +257,22 @@ function LoginForm() {
 
             {error && <div style={{ background: 'rgba(230,57,70,.12)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#ff6b6b', marginBottom: '1rem' }}>⚠️ {error}</div>}
             {success && <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>✅ {success}</div>}
+
+            {showResend && (
+              <div style={{ marginBottom: '1rem', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 9, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)' }}>📧 {resendSent ? t.login.resend_confirm_sent[lang] : 'Tu n\'as pas reçu l\'email ?'}</div>
+                {!resendSent && (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendLoading || !email}
+                    style={{ background: 'rgba(230,57,70,.15)', color: '#e63946', border: '1px solid rgba(230,57,70,.3)', borderRadius: 7, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: resendLoading || !email ? 'not-allowed' : 'pointer', opacity: resendLoading || !email ? .6 : 1, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  >
+                    {resendLoading ? '⏳…' : t.login.resend_confirm[lang]}
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* GOOGLE OAUTH — hidden until enabled in Supabase Dashboard */}
 
