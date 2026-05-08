@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { supabase, Profile, Annonce } from '../lib/supabase'
+import { liguesHomme, liguesFemme } from '../lib/data'
 
-const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
+const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
 const ZONES  = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
 interface Props {
@@ -132,7 +133,11 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
             <label style={lblSt}>Ligue (optionnel)</label>
             <select style={inpSt} value={ligue} onChange={e => setLigue(e.target.value)}>
               <option value="" style={optSt}>—</option>
-              {LIGUES.map(l => <option key={l} value={l} style={optSt}>{l}</option>)}
+              {ALL_LIGUE_GROUPS.map(g => (
+                <optgroup key={g.group} label={g.group} style={{ background: '#061540' }}>
+                  {g.items.map(l => <option key={l} value={l} style={optSt}>{l}</option>)}
+                </optgroup>
+              ))}
             </select>
           </div>
           <div>
