@@ -84,3 +84,24 @@ export type Message = {
   read: boolean
   created_at: string
 }
+
+export type CareerExperience = {
+  id: string
+  user_id: string
+  club_name: string
+  club_logo_url?: string
+  league?: string
+  position?: string
+  jersey_number?: number
+  coach_role?: string
+  start_date: string
+  end_date?: string
+  is_current: boolean
+  matches?: number
+  goals?: number
+  assists?: number
+  wins?: number
+  win_rate?: number
+  description?: string
+  created_at: string
+}

@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, Profile } from '../../../lib/supabase'
+import { supabase, Profile, CareerExperience } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import CareerSection from '../../../components/CareerSection'
+import { useLang } from '../../../lib/lang-context'
 
 function strengthLabel(key: string) {
   const map: Record<string, string> = {
@@ -41,17 +43,22 @@ function getYouTubeEmbed(url: string): string | null {
 export default function PublicProfilPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const { lang } = useLang()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [experiences, setExperiences] = useState<CareerExperience[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
-    supabase.from('profiles').select('*').eq('id', id).single()
-      .then(({ data, error }) => {
-        if (error || !data) { setNotFound(true); setLoading(false); return }
-        setProfile(data)
-        setLoading(false)
-      })
+    Promise.all([
+      supabase.from('profiles').select('*').eq('id', id).single(),
+      supabase.from('career_experiences').select('*').eq('user_id', id).order('start_date', { ascending: false }),
+    ]).then(([{ data, error }, { data: exps }]) => {
+      if (error || !data) { setNotFound(true); setLoading(false); return }
+      setProfile(data)
+      setExperiences(exps || [])
+      setLoading(false)
+    })
   }, [id])
 
   if (loading) return (
@@ -123,6 +130,11 @@ export default function PublicProfilPage() {
             </Link>
           </div>
         </div>
+
+        {/* Career section — player & coach only */}
+        {profile.role !== 'club' && (
+          <CareerSection experiences={experiences} role={profile.role as 'player'|'coach'} lang={lang} />
+        )}
 
         {/* Stats (player only) */}
         {profile.role === 'player' && (() => {
@@ -307,17 +319,6 @@ export default function PublicProfilPage() {
               ))}
             </div>
 
-            {profile.role !== 'club' && profile.career && (
-              <div style={darkCard}>
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>Parcours</div>
-                {profile.career.split('\n').filter(Boolean).map((line, i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.4rem 0', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
-                    <div style={{ width:7, height:7, borderRadius:'50%', background:'#3a8cff', flexShrink:0, marginTop:5 }} />
-                    <div style={{ fontSize:13, color:'rgba(255,255,255,.8)', lineHeight:1.5 }}>{line}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 

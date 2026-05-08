@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import VerifiedBadge from '../../components/VerifiedBadge'
-import { supabase, Profile } from '../../lib/supabase'
+import { supabase, Profile, CareerExperience } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
@@ -14,6 +14,8 @@ import { liguesHomme, liguesFemme } from '../../lib/data'
 const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
 const VideoUploadInput = dynamic(() => import('../../components/VideoUploadInput'), { ssr: false })
 const PostModal = dynamic(() => import('../../components/PostModal'), { ssr: false })
+const CareerSection = dynamic(() => import('../../components/CareerSection'), { ssr: false })
+const CareerExperienceModal = dynamic(() => import('../../components/CareerExperienceModal'), { ssr: false })
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
@@ -134,6 +136,9 @@ export default function ProfilPage() {
   const [postSuccess, setPostSuccess] = useState(false)
   const [myPosts, setMyPosts] = useState<any[]>([])
   const [editingPost, setEditingPost] = useState<any | null>(null)
+  const [experiences, setExperiences] = useState<CareerExperience[]>([])
+  const [showCareerModal, setShowCareerModal] = useState(false)
+  const [editingExp, setEditingExp] = useState<CareerExperience | null>(null)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -212,6 +217,8 @@ export default function ProfilPage() {
     if (!profile) return
     supabase.from('annonces').select('*').eq('author_id', profile.id).order('created_at', { ascending: false })
       .then(({ data }) => setMyPosts(data || []))
+    supabase.from('career_experiences').select('*').eq('user_id', profile.id).order('start_date', { ascending: false })
+      .then(({ data }) => setExperiences(data || []))
   }, [profile?.id])
 
   function populateForm(data: Profile) {
@@ -645,6 +652,38 @@ export default function ProfilPage() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* ── CAREER SECTION ── */}
+      {profile.role !== 'club' && (
+        <>
+          {(showCareerModal || editingExp) && (
+            <CareerExperienceModal
+              userId={profile.id}
+              role={profile.role as 'player'|'coach'}
+              lang={lang}
+              experience={editingExp}
+              onClose={() => { setShowCareerModal(false); setEditingExp(null) }}
+              onSaved={(exp) => {
+                setExperiences(prev => editingExp ? prev.map(e => e.id === exp.id ? exp : e) : [exp, ...prev])
+                setShowCareerModal(false); setEditingExp(null)
+              }}
+              onDeleted={(id) => { setExperiences(prev => prev.filter(e => e.id !== id)); setEditingExp(null) }}
+            />
+          )}
+          <CareerSection
+            experiences={experiences}
+            role={profile.role as 'player'|'coach'}
+            lang={lang}
+            canEdit
+            onAdd={() => setShowCareerModal(true)}
+            onEdit={(exp) => setEditingExp(exp)}
+            onDelete={async (id) => {
+              await supabase.from('career_experiences').delete().eq('id', id)
+              setExperiences(prev => prev.filter(e => e.id !== id))
+            }}
+          />
+        </>
       )}
 
       {/* ── MES ANNONCES ── */}
@@ -1093,30 +1132,6 @@ export default function ProfilPage() {
               </div>
             ))}
           </div>
-
-          {/* Parcours — hidden for clubs */}
-          {profile.role !== 'club' && (
-          <div style={darkCard}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.career[lang]}</div>
-            {profile.career ? (
-              <div style={{ display:'flex', flexDirection:'column' }}>
-                {profile.career.split('\n').filter(Boolean).map((line, i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'.5rem 0', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
-                    <div style={{ width:8, height:8, borderRadius:'50%', background:'#3a8cff', flexShrink:0, marginTop:5 }} />
-                    <div style={{ fontSize:13, color:'rgba(255,255,255,.8)', lineHeight:1.5 }}>{line}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p style={{ fontSize:13, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
-                {t.profil.no_career[lang]}{' '}
-                <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13 }}>
-                  {t.profil.add_career[lang]}
-                </button>
-              </p>
-            )}
-          </div>
-          )}
 
           {/* Actions rapides */}
           <div style={darkCard}>
