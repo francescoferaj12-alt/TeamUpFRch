@@ -11,6 +11,7 @@ import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translati
 
 const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
 const VideoUploadInput = dynamic(() => import('../../components/VideoUploadInput'), { ssr: false })
+const PostModal = dynamic(() => import('../../components/PostModal'), { ssr: false })
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const LIGUES = ['2ème Ligue','3ème Ligue','4ème Ligue','5ème Ligue','Junior A','Junior B','Junior C']
@@ -128,6 +129,8 @@ export default function ProfilPage() {
   const [saveError, setSaveError] = useState('')
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [showPostModal, setShowPostModal] = useState(false)
+  const [postSuccess, setPostSuccess] = useState(false)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -365,11 +368,27 @@ export default function ProfilPage() {
           uploading={uploadingPhoto}
         />
       )}
+      {showPostModal && (
+        <PostModal
+          profile={profile}
+          onClose={() => setShowPostModal(false)}
+          onSuccess={() => {
+            setShowPostModal(false)
+            setPostSuccess(true)
+            setTimeout(() => setPostSuccess(false), 4000)
+          }}
+        />
+      )}
       <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
         <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
           ✅ {saveMsg}
+        </div>
+      )}
+      {postSuccess && (
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
+          ✅ Post publié ! Visible dans <a href="/annonces" style={{ color:'#4cdb7a', fontWeight:700 }}>le fil d'annonces</a>.
         </div>
       )}
 
@@ -428,10 +447,16 @@ export default function ProfilPage() {
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+            <button
+              onClick={() => setShowPostModal(true)}
+              style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+            >
+              📢 Publier un post
+            </button>
+            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
-            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.6)', border:'1px solid rgba(255,255,255,.12)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
           </div>

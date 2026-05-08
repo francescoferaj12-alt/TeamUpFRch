@@ -98,8 +98,11 @@ export default function AnnoncesPage() {
         <span style={{ marginLeft:'auto', fontSize:13, color:'rgba(255,255,255,.4)' }}>
           {loading ? 'Chargement…' : `${filtered.length} annonce${filtered.length !== 1 ? 's' : ''}`}
         </span>
-        {currentUser?.role !== 'player' && (
-          <Link href="/dashboard" style={{ background:'#e63946', color:'#fff', padding:'6px 14px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:13 }}>+ Publier une annonce</Link>
+        {currentUser && (
+          <Link href="/profil" style={{ background:'#e63946', color:'#fff', padding:'6px 14px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:13 }}>+ Publier un post</Link>
+        )}
+        {!currentUser && (
+          <Link href="/login" style={{ background:'#e63946', color:'#fff', padding:'6px 14px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:13 }}>+ Publier un post</Link>
         )}
       </div>
 

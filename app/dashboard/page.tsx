@@ -272,7 +272,7 @@ function AnnoncesSection({ profile }: { profile: Profile }) {
   }, [profile.id])
 
   async function handlePublish() {
-    if (!form.title.trim() || !form.body.trim() || !form.ligue) {
+    if (!form.body.trim()) {
       setError(t.dash.error_required[lang])
       return
     }
