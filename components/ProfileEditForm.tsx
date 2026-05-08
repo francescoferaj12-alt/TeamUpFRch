@@ -331,29 +331,36 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     return { base, ext }
   }
 
+  const savingRef = useRef(false)
+
   async function doSave(silent: boolean) {
     if (!hasChanges && silent) return
+    if (savingRef.current) return
+    savingRef.current = true
     setSaveStatus('saving')
     setSaveError('')
-    const { base, ext } = buildPayload()
-    const { error: e1 } = await supabase.from('profiles').update(base).eq('id', profile.id)
-    if (e1) {
-      setSaveStatus('error')
-      setSaveError(e1.message)
-      return
-    }
-    // Try extended fields - if columns don't exist yet, ignore the error silently for autosave
-    const { error: e2 } = await supabase.from('profiles').update(ext).eq('id', profile.id)
-    if (e2 && !silent) {
-      setSaveStatus('error')
-      setSaveError(e2.message)
-      return
-    }
-    setHasChanges(false)
-    setSaveStatus('saved')
-    onSaved({ ...profile, ...base, ...ext } as Profile)
-    if (silent) {
-      setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2200)
+    try {
+      const { base, ext } = buildPayload()
+      const { error: e1 } = await supabase.from('profiles').update(base).eq('id', profile.id)
+      if (e1) {
+        setSaveStatus('error')
+        setSaveError([e1.message, e1.details, e1.hint].filter(Boolean).join(' — '))
+        return
+      }
+      const { error: e2 } = await supabase.from('profiles').update(ext).eq('id', profile.id)
+      if (e2 && !silent) {
+        setSaveStatus('error')
+        setSaveError([e2.message, e2.details, e2.hint].filter(Boolean).join(' — '))
+        return
+      }
+      setHasChanges(false)
+      setSaveStatus('saved')
+      onSaved({ ...profile, ...base, ...ext } as Profile)
+      if (silent) {
+        setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2200)
+      }
+    } finally {
+      savingRef.current = false
     }
   }
 

@@ -762,6 +762,7 @@ export default function ProfilPage() {
             lang={lang}
             onSaved={async (updated) => {
               setProfile(updated)
+              setEditing(false)
               await refreshProfile()
               setSaveMsg(t.profil.saved[lang])
               setTimeout(() => setSaveMsg(''), 3000)
