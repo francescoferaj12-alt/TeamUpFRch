@@ -121,6 +121,28 @@ export default function PublicProfilPage() {
                 </span>
                 {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
                 {profile.zone && <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>📍 {profile.zone}</span>}
+
+                {/* Player extras */}
+                {profile.role === 'player' && profile.foot && (
+                  <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🦶 {profile.foot}</span>
+                )}
+                {profile.role === 'player' && (profile as any).jersey_number != null && (
+                  <span style={{ background:'rgba(230,57,70,.18)', border:'1px solid rgba(230,57,70,.4)', color:'#ffb3bb', fontSize:12, padding:'4px 12px', borderRadius:100, fontWeight:700 }}>#{(profile as any).jersey_number}</span>
+                )}
+
+                {/* Coach extras */}
+                {profile.role === 'coach' && profile.coach_diploma && (
+                  <span style={{ background:'rgba(58,140,255,.15)', border:'1px solid rgba(58,140,255,.35)', color:'#7eb6ff', fontSize:12, padding:'4px 12px', borderRadius:100, fontWeight:700 }}>🎓 {profile.coach_diploma}</span>
+                )}
+
+                {/* Club extras */}
+                {profile.role === 'club' && (profile as any).club_founded_year != null && (
+                  <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>📅 Fondé en {(profile as any).club_founded_year}</span>
+                )}
+                {profile.role === 'club' && (profile as any).club_teams_count != null && (
+                  <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>👥 {(profile as any).club_teams_count} équipes</span>
+                )}
+
                 <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
                   {profile.available ? '🟢 Disponible' : '🔴 Non disponible'}
                 </span>
@@ -306,6 +328,9 @@ export default function PublicProfilPage() {
               <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>Informations</div>
               {[
                 profile.role === 'player' && profile.foot ? ['Pied', profile.foot] : null,
+                profile.role === 'player' && (profile as any).position_secondary ? ['Position 2', (profile as any).position_secondary] : null,
+                profile.role === 'player' && (profile as any).height_cm ? ['Taille', `${(profile as any).height_cm} cm`] : null,
+                profile.role === 'player' && (profile as any).level ? ['Niveau', (profile as any).level] : null,
                 profile.zone ? ['Zone', profile.zone] : null,
                 profile.role !== 'coach' && profile.ligue ? ['Ligue', profile.ligue] : null,
                 profile.role === 'player' && profile.position ? ['Position', profile.position] : null,
@@ -314,6 +339,8 @@ export default function PublicProfilPage() {
                 profile.role === 'coach' && profile.coach_diploma ? ['Diplôme', profile.coach_diploma] : null,
                 profile.role === 'coach' && profile.coach_specialty ? ['Spécialité', profile.coach_specialty] : null,
                 profile.role === 'coach' && profile.coach_availability ? ['Disponibilité', profile.coach_availability] : null,
+                profile.role === 'club' && (profile as any).club_stadium_name ? ['Stade', (profile as any).club_stadium_name] : null,
+                profile.role === 'club' && (profile as any).club_stadium_address ? ['Adresse', (profile as any).club_stadium_address] : null,
               ].filter((r): r is [string, string] => Array.isArray(r)).map(([k, v]) => (
                 <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
                   <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
