@@ -30,9 +30,12 @@ function LoginForm() {
   const [showResend, setShowResend] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
   const [resendSent, setResendSent] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/profil'
+  const resetSuccess = searchParams.get('reset') === '1'
   const loginTriggered = useRef(false)
 
   // Redirect once auth is ready after login
@@ -158,6 +161,17 @@ function LoginForm() {
     setLoading(false)
   }
 
+  function startCooldown() {
+    if (cooldownRef.current) clearInterval(cooldownRef.current)
+    setCooldown(60)
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) { clearInterval(cooldownRef.current!); return 0 }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
@@ -165,8 +179,19 @@ function LoginForm() {
       redirectTo: 'https://teamupfr.ch/reset-password'
     })
     if (error) { setError(error.message); setLoading(false); return }
-    setSuccess(t.login.success_forgot[lang])
+    setSuccess('sent')
+    startCooldown()
     setLoading(false)
+  }
+
+  async function handleResendForgot() {
+    if (cooldown > 0 || !email) return
+    setLoading(true)
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://teamupfr.ch/reset-password'
+    })
+    setLoading(false)
+    startCooldown()
   }
 
   const inputStyle = {
@@ -208,16 +233,37 @@ function LoginForm() {
 
         {/* FORGOT PASSWORD MODE */}
         {mode === 'forgot' ? (
-          <>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', letterSpacing: 1, marginBottom: '.25rem' }}>{t.login.forgot_title[lang]}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', marginBottom: '1.5rem' }}>
-              {t.login.forgot_desc[lang]}
+          success === 'sent' ? (
+            /* ── Check inbox state ── */
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📧</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', letterSpacing: 1, marginBottom: '.5rem' }}>
+                {t.login.forgot_check_inbox[lang]}
+              </div>
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,.5)', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+                {t.login.forgot_check_inbox_desc[lang]}
+              </div>
+              <button
+                onClick={handleResendForgot}
+                disabled={cooldown > 0 || loading}
+                style={{ width: '100%', background: 'rgba(230,57,70,.12)', color: '#e63946', border: '1px solid rgba(230,57,70,.3)', borderRadius: 9, padding: '11px', fontSize: 14, fontWeight: 700, cursor: cooldown > 0 ? 'not-allowed' : 'pointer', opacity: cooldown > 0 ? .6 : 1, fontFamily: 'inherit', marginBottom: '1rem' }}
+              >
+                {cooldown > 0 ? `${t.login.forgot_resend_wait[lang]} ${cooldown}s…` : t.login.forgot_resend[lang]}
+              </button>
+              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.4)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {t.login.back_login[lang]}
+              </button>
             </div>
+          ) : (
+            /* ── Forgot form ── */
+            <>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', letterSpacing: 1, marginBottom: '.25rem' }}>{t.login.forgot_title[lang]}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', marginBottom: '1.5rem' }}>
+                {t.login.forgot_desc[lang]}
+              </div>
 
-            {error && <div style={{ background: 'rgba(230,57,70,.12)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#ff6b6b', marginBottom: '1rem' }}>⚠️ {error}</div>}
-            {success && <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>✅ {success}</div>}
+              {error && <div style={{ background: 'rgba(230,57,70,.12)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#ff6b6b', marginBottom: '1rem' }}>⚠️ {error}</div>}
 
-            {!success && (
               <form onSubmit={handleForgot}>
                 <div style={{ marginBottom: '1rem' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.email[lang]}</div>
@@ -227,12 +273,12 @@ function LoginForm() {
                   {loading ? t.login.sending[lang] : t.login.forgot_send[lang]}
                 </button>
               </form>
-            )}
 
-            <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: '#e63946', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
-              {t.login.back_login[lang]}
-            </button>
-          </>
+              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: '#e63946', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {t.login.back_login[lang]}
+              </button>
+            </>
+          )
         ) : (
           <>
             <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.6rem', letterSpacing: 1, marginBottom: '.25rem' }}>
@@ -255,8 +301,13 @@ function LoginForm() {
               ))}
             </div>
 
+            {resetSuccess && mode === 'login' && (
+              <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>
+                ✅ {t.login.login_reset_success[lang]}
+              </div>
+            )}
             {error && <div style={{ background: 'rgba(230,57,70,.12)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#ff6b6b', marginBottom: '1rem' }}>⚠️ {error}</div>}
-            {success && <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>✅ {success}</div>}
+            {success && success !== 'sent' && <div style={{ background: 'rgba(13,122,54,.15)', border: '1px solid rgba(76,219,122,.25)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4cdb7a', marginBottom: '1rem' }}>✅ {success}</div>}
 
             {showResend && (
               <div style={{ marginBottom: '1rem', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 9, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
