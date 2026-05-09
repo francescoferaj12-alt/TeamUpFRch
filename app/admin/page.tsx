@@ -9,7 +9,7 @@ const ADMIN_EMAIL = 'teamupfr.ch@gmail.com'
 export default function AdminPage() {
   const [authChecked, setAuthChecked] = useState(false)
   const [authorized, setAuthorized] = useState(false)
-  const [clubs, setClubs] = useState<Profile[]>([])
+  const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
 
@@ -17,38 +17,41 @@ export default function AdminPage() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.email === ADMIN_EMAIL) {
         setAuthorized(true)
-        loadClubs()
+        loadProfiles()
       }
       setAuthChecked(true)
     })
   }, [])
 
-  async function loadClubs() {
+  async function loadProfiles() {
     const { data } = await supabase
       .from('profiles')
       .select('*')
-      .eq('role', 'club')
+      .in('role', ['club', 'coach', 'player'])
       .order('created_at', { ascending: false })
-    if (data) setClubs(data)
+    if (data) setProfiles(data)
     setLoading(false)
   }
 
-  async function setVerified(clubId: string, value: boolean) {
-    setBusy(clubId)
-    const club = clubs.find(c => c.id === clubId)
+  async function setVerified(profileId: string, value: boolean) {
+    setBusy(profileId)
+    const profile = profiles.find(c => c.id === profileId)
     const { error } = await supabase
       .from('profiles')
       .update({ verified: value })
-      .eq('id', clubId)
+      .eq('id', profileId)
     if (error) {
       alert('Erreur: ' + error.message)
     } else {
-      setClubs(prev => prev.map(c => c.id === clubId ? { ...c, verified: value } : c))
-      if (club?.email) {
+      setProfiles(prev => prev.map(c => c.id === profileId ? { ...c, verified: value } : c))
+      const displayName = profile?.role === 'club'
+        ? profile.club_name
+        : `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
+      if (profile?.email) {
         await fetch('/api/send-verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clubName: club.club_name, clubEmail: club.email, verified: value }),
+          body: JSON.stringify({ clubName: displayName, clubEmail: profile.email, verified: value }),
         })
       }
     }
@@ -70,8 +73,8 @@ export default function AdminPage() {
     </div>
   )
 
-  const verified = clubs.filter(c => c.verified)
-  const pending = clubs.filter(c => !c.verified)
+  const verified = profiles.filter(c => c.verified)
+  const pending = profiles.filter(c => !c.verified)
 
   return (
     <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff', padding:'2rem' }}>
@@ -81,15 +84,15 @@ export default function AdminPage() {
           <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', letterSpacing:2, marginBottom:'.25rem' }}>
             ADMINISTRATION
           </div>
-          <p style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>Gestion des clubs — vérification des badges</p>
+          <p style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>Gestion des profils — vérification des badges</p>
         </div>
 
         {/* Stats */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem', marginBottom:'2rem' }}>
           {[
-            { label:'Total clubs', value:clubs.length, color:'#3a8cff' },
-            { label:'Vérifiés', value:verified.length, color:'#1d9bf0' },
-            { label:'En attente', value:pending.length, color:'#e63946' },
+            { label:'Total profils', value:profiles.length, color:'#3a8cff' },
+            { label:'Vérifiés', value:verified.length, color:'#e63946' },
+            { label:'En attente', value:pending.length, color:'rgba(255,255,255,.4)' },
           ].map(s => (
             <div key={s.label} style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, padding:'1.25rem', textAlign:'center' }}>
               <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:s.color }}>{s.value}</div>
@@ -112,8 +115,8 @@ export default function AdminPage() {
                   EN ATTENTE ({pending.length})
                 </div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
-                  {pending.map(club => (
-                    <ClubRow key={club.id} club={club} busy={busy} onVerify={() => setVerified(club.id, true)} onRefuse={null} />
+                  {pending.map(profile => (
+                    <ProfileRow key={profile.id} profile={profile} busy={busy} onVerify={() => setVerified(profile.id, true)} onRefuse={null} />
                   ))}
                 </div>
               </section>
@@ -122,20 +125,20 @@ export default function AdminPage() {
             {/* Verified */}
             {verified.length > 0 && (
               <section>
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1, marginBottom:'1rem', color:'#1d9bf0' }}>
+                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1, marginBottom:'1rem', color:'#e63946' }}>
                   VÉRIFIÉS ({verified.length})
                 </div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
-                  {verified.map(club => (
-                    <ClubRow key={club.id} club={club} busy={busy} onVerify={null} onRefuse={() => setVerified(club.id, false)} />
+                  {verified.map(profile => (
+                    <ProfileRow key={profile.id} profile={profile} busy={busy} onVerify={null} onRefuse={() => setVerified(profile.id, false)} />
                   ))}
                 </div>
               </section>
             )}
 
-            {clubs.length === 0 && (
+            {profiles.length === 0 && (
               <div style={{ textAlign:'center', padding:'4rem', color:'rgba(255,255,255,.4)' }}>
-                Aucun club inscrit.
+                Aucun profil inscrit.
               </div>
             )}
           </>
@@ -145,30 +148,37 @@ export default function AdminPage() {
   )
 }
 
-function ClubRow({ club, busy, onVerify, onRefuse }: {
-  club: Profile
+function ProfileRow({ profile, busy, onVerify, onRefuse }: {
+  profile: Profile
   busy: string | null
   onVerify: (() => void) | null
   onRefuse: (() => void) | null
 }) {
-  const isBusy = busy === club.id
+  const isBusy = busy === profile.id
+  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
+  const displayName = profile.role === 'club'
+    ? (profile.club_name || 'Club sans nom')
+    : `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || (profile.role === 'coach' ? 'Coach sans nom' : 'Joueur sans nom')
+  const roleLabel = profile.role === 'club' ? 'Club' : profile.role === 'coach' ? 'Coach' : 'Joueur'
+
   return (
     <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1rem 1.25rem', display:'flex', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
       <div style={{ width:48, height:48, borderRadius:10, background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.5rem', overflow:'hidden', flexShrink:0 }}>
-        {club.avatar_url
-          ? <img src={avatarSrc(club.avatar_url)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:9 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-          : '🏟️'
+        {profile.avatar_url
+          ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:9 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+          : roleEmoji
         }
       </div>
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
-          <span style={{ fontWeight:700, fontSize:15 }}>{club.club_name || 'Club sans nom'}</span>
-          {club.verified && <VerifiedBadge size={16} />}
+          <span style={{ fontWeight:700, fontSize:15 }}>{displayName}</span>
+          {profile.verified && <VerifiedBadge size={16} />}
+          <span style={{ fontSize:11, color:'rgba(255,255,255,.4)', background:'rgba(255,255,255,.08)', borderRadius:100, padding:'2px 8px', fontWeight:600 }}>{roleLabel}</span>
         </div>
         <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-          {club.zone && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>📍 {club.zone}</span>}
-          {club.ligue && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>🏆 {club.ligue}</span>}
-          {club.email && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{club.email}</span>}
+          {profile.zone && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>📍 {profile.zone}</span>}
+          {profile.ligue && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>🏆 {profile.ligue}</span>}
+          {profile.email && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{profile.email}</span>}
         </div>
       </div>
       <div style={{ display:'flex', gap:8, flexShrink:0 }}>
@@ -176,7 +186,7 @@ function ClubRow({ club, busy, onVerify, onRefuse }: {
           <button
             onClick={onVerify}
             disabled={isBusy}
-            style={{ background:'#1d9bf0', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:700, fontSize:13, cursor:isBusy ? 'not-allowed' : 'pointer', opacity:isBusy ? .6 : 1, fontFamily:'inherit' }}
+            style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:700, fontSize:13, cursor:isBusy ? 'not-allowed' : 'pointer', opacity:isBusy ? .6 : 1, fontFamily:'inherit' }}
           >
             {isBusy ? '…' : '✓ Vérifier'}
           </button>
