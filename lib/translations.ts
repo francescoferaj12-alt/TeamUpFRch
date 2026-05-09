@@ -63,6 +63,10 @@ export const t = {
     ligues_seniors: { fr: 'Seniors', de: 'Senioren' },
     ligues_youth: { fr: 'Youth League', de: 'Youth League' },
     ligues_juniors: { fr: 'Juniors', de: 'Junioren' },
+    stats_launch_players: { fr: 'Sois parmi les premiers', de: 'Sei unter den Ersten' },
+    stats_launch_clubs:   { fr: 'Lance le mouvement', de: 'Starte die Bewegung' },
+    stats_launch_coaches: { fr: 'Rejoins la communauté', de: 'Tritt der Community bei' },
+    stats_launch_free:    { fr: '100% Gratuit · Toujours', de: '100% Kostenlos · Immer' },
   },
 
   // USER TYPES
