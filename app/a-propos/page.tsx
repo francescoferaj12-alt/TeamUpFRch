@@ -93,7 +93,9 @@ export default function AProposPage() {
               </h2>
               <p style={{ fontSize:16, color:'rgba(255,255,255,.6)', lineHeight:1.8, marginBottom:'1.25rem' }}>{t.apropos.origin_p1[lang]}</p>
               <p style={{ fontSize:16, color:'rgba(255,255,255,.6)', lineHeight:1.8, marginBottom:'1.25rem' }}>{t.apropos.origin_p2[lang]}</p>
-              <p style={{ fontSize:16, color:'rgba(255,255,255,.6)', lineHeight:1.8 }}>{t.apropos.origin_p3[lang]}</p>
+              <p style={{ fontSize:16, color:'rgba(255,255,255,.6)', lineHeight:1.8, marginBottom:'1.25rem' }}>{t.apropos.origin_p3[lang]}</p>
+              <p style={{ fontSize:16, color:'rgba(255,255,255,.6)', lineHeight:1.8, marginBottom:'1.25rem' }}>{t.apropos.origin_p4[lang]}</p>
+              <p style={{ fontSize:16, color:'rgba(255,255,255,.6)', lineHeight:1.8 }}>{t.apropos.origin_p5[lang]}</p>
             </div>
             <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:20, padding:'2.5rem', position:'relative' }}>
               <div style={{ position:'absolute', top:-16, right:-16, width:60, height:60, background:'#e63946', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.8rem', boxShadow:'0 8px 24px rgba(230,57,70,.3)' }}>
