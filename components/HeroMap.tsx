@@ -302,7 +302,7 @@ export default function HeroMap() {
       {/* Floating badges */}
       <div className="floating-badge badge-top">
         <span className="badge-dot" />
-        {loading ? '…' : `${clubs.length} clubs inscrits`}
+        {loading ? '🚀 Lancement !' : clubs.length > 0 ? `${clubs.length} clubs inscrits` : '🚀 Lancement !'}
       </div>
       <div className="floating-badge badge-bottom">
         📍 Canton de Fribourg

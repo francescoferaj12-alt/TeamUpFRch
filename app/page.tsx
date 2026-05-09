@@ -8,6 +8,9 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../lib/lang-context'
 import { t, tagsByRole } from '../lib/translations'
 
+// Set NEXT_PUBLIC_SHOW_LIVE_COUNTS=true in .env.local when enough users exist
+const SHOW_LIVE_COUNTS = process.env.NEXT_PUBLIC_SHOW_LIVE_COUNTS === 'true'
+
 function useCounters() {
   const [counts, setCounts] = useState({ players: 0, clubs: 0, coaches: 0 })
   const real = useRef({ players: 0, clubs: 0, coaches: 0 })
@@ -206,21 +209,26 @@ export default function HomePage() {
                 <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: '#e63946', color: '#fff', boxShadow: '0 8px 24px rgba(230,57,70,0.4)' }}>
                   ⚽ {t.home.cta_primary[lang]}
                 </Link>
-                <Link href="/recherche" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
+                <Link href="#how-it-works" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>
                   🔍 {t.home.cta_secondary[lang]}
                 </Link>
               </div>
 
-              {/* Stat counters */}
+              {/* Stat counters — shows real counts when SHOW_LIVE_COUNTS=true, else motivational cards */}
               <div ref={statsRef} className="hp-stats-grid">
-                {[
+                {(SHOW_LIVE_COUNTS ? [
                   { value: String(counts.players), label: t.home.stats_players[lang] },
                   { value: String(counts.clubs),   label: t.home.stats_clubs[lang] },
                   { value: String(counts.coaches), label: t.home.stats_coaches[lang] },
                   { value: '100%',                 label: t.home.stats_free[lang] },
-                ].map((s, i) => (
+                ] : [
+                  { value: '⚽', label: t.home.stats_launch_players[lang] },
+                  { value: '🏟️', label: t.home.stats_launch_clubs[lang] },
+                  { value: '🧑‍🏫', label: t.home.stats_launch_coaches[lang] },
+                  { value: '🚀', label: t.home.stats_launch_free[lang] },
+                ]).map((s, i) => (
                   <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '18px 14px', textAlign: 'center', transition: 'all 0.3s' }}>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 36, color: '#fff', lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
+                    <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{s.label}</div>
                   </div>
                 ))}
@@ -275,7 +283,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */}
-      <section style={{ background: 'linear-gradient(180deg, #030a24 0%, #061540 100%)', padding: '100px 0' }}>
+      <section id="how-it-works" style={{ background: 'linear-gradient(180deg, #030a24 0%, #061540 100%)', padding: '100px 0' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
           <span className="hp-section-label">{t.home.how_badge[lang]}</span>
           <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1, marginBottom: 20, color: '#fff' }}>
@@ -347,7 +355,7 @@ export default function HomePage() {
             <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 30px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', background: '#e63946', color: '#fff', boxShadow: '0 8px 24px rgba(230,57,70,0.4)' }}>
               ⚽ {t.home.signup[lang]}
             </Link>
-            <Link href="/recherche" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 30px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', background: '#fff', color: '#0a1f5c' }}>
+            <Link href="/a-propos" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 30px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', background: '#fff', color: '#0a1f5c' }}>
               {t.home.explore[lang]}
             </Link>
           </div>

@@ -212,9 +212,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [coachAvailability, setCoachAvailability] = useState(profile.coach_availability || '')
   const [coachCategories, setCoachCategories] = useState<string[]>(parseList((profile as any).coach_categories))
   const [coachPhilosophy, setCoachPhilosophy] = useState((profile as any).coach_philosophy || '')
-  const [coachCertificates, setCoachCertificates] = useState<{name:string;year:string}[]>(() => {
-    try { return JSON.parse(profile.coach_certificates || '[]') } catch { return [] }
-  })
+  const [coachCertificates, setCoachCertificates] = useState<{name:string;year:string}[]>([])
   const [newCertName, setNewCertName] = useState('')
   const [newCertYear, setNewCertYear] = useState('')
   const [clubWebsite, setClubWebsite] = useState(profile.club_website || '')
@@ -247,11 +245,31 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [hasChanges, setHasChanges] = useState(false)
   const dirtyRef = useRef(false)
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Prevent cert load from triggering autosave
+  const skipCertDirty = useRef(0)
+
+  // Load coach certificates from the proper table on mount
+  useEffect(() => {
+    if (profile.role !== 'coach') return
+    supabase
+      .from('coach_certificates')
+      .select('name,year')
+      .eq('coach_id', profile.id)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          skipCertDirty.current++
+          setCoachCertificates(data.map(c => ({ name: c.name, year: c.year || '' })))
+        }
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.id])
 
   // Once any setter is called (excluding initial render), mark dirty
   // We do this by watching all values.
   useEffect(() => {
     if (!dirtyRef.current) { dirtyRef.current = true; return }
+    if (skipCertDirty.current > 0) { skipCertDirty.current--; return }
     setHasChanges(true)
     setSaveStatus('idle')
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
@@ -317,7 +335,6 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       ext.coach_availability = coachAvailability || null
       ext.coach_categories = coachCategories.join(',') || null
       ext.coach_philosophy = coachPhilosophy || null
-      ext.coach_certificates = coachCertificates.length ? JSON.stringify(coachCertificates) : null
     }
     if (profile.role === 'club') {
       ext.club_website = clubWebsite || null
@@ -359,6 +376,15 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
         setSaveError([e2.message, e2.details, e2.hint].filter(Boolean).join(' — '))
         return
       }
+      // Sync coach certificates — delete all then re-insert current list
+      if (profile.role === 'coach') {
+        await supabase.from('coach_certificates').delete().eq('coach_id', profile.id)
+        if (coachCertificates.length > 0) {
+          await supabase.from('coach_certificates').insert(
+            coachCertificates.map(c => ({ coach_id: profile.id, name: c.name, year: c.year || null }))
+          )
+        }
+      }
       setHasChanges(false)
       setSaveStatus('saved')
       onSaved({ ...profile, ...base, ...ext } as Profile, silent)
@@ -392,11 +418,12 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     birthdate: birthDay && birthMonth && birthYear ? `${birthYear}-${birthMonth}-${birthDay}` : '',
     coach_specialty: coachSpecialty, coach_diploma: coachDiploma, coach_experience: coachExperience,
     coach_categories: coachCategories.join(','), coach_philosophy: coachPhilosophy,
+    coach_certificates: coachCertificates.length > 0 ? 'yes' : null,
     club_founded_year: clubFoundedYear as any, club_teams_count: clubTeamsCount as any,
     club_stadium_name: clubStadiumName, club_categories: clubCategories.join(','), club_website: clubWebsite,
   }), [profile, bio, zone, phone, selectedStrengths, available, firstName, lastName, clubName,
        ligue, position, foot, level, birthDay, birthMonth, birthYear, coachSpecialty, coachDiploma,
-       coachExperience, coachCategories, coachPhilosophy, clubFoundedYear, clubTeamsCount,
+       coachExperience, coachCategories, coachPhilosophy, coachCertificates, clubFoundedYear, clubTeamsCount,
        clubStadiumName, clubCategories, clubWebsite])
 
   const charInfo = charZone(bio.length, lang)

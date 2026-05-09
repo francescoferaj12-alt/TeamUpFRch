@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase, Profile, Annonce, Application } from '../../lib/supabase'
+import { supabase, Profile, Annonce, Application, avatarSrc } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
@@ -112,6 +112,7 @@ function VueSection({ profile, onPublish }: { profile: Profile; onPublish: () =>
   const { lang } = useLang()
   const [annonces, setAnnonces] = useState<Annonce[]>([])
   const [apps, setApps] = useState<AppWithAnnonce[]>([])
+  const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({})
 
   useEffect(() => {
     supabase.from('annonces').select('*').eq('author_id', profile.id).order('created_at', { ascending: false })
@@ -129,6 +130,15 @@ function VueSection({ profile, onPublish }: { profile: Profile; onPublish: () =>
             annonce_title: a.annonces?.title
           }))
           setApps(mapped)
+          if (mapped.length > 0) {
+            const ids = [...new Set(mapped.map(a => a.applicant_id))]
+            supabase.from('profiles').select('id,avatar_url').in('id', ids)
+              .then(({ data: pdata }) => {
+                const map: Record<string, string | null> = {}
+                for (const p of (pdata || [])) map[p.id] = p.avatar_url || null
+                setAvatarMap(map)
+              })
+          }
         })
     }
   }, [profile.id, profile.role])
@@ -178,9 +188,14 @@ function VueSection({ profile, onPublish }: { profile: Profile; onPublish: () =>
             <p style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.dash.no_apps[lang]}</p>
           ) : apps.map((a) => (
             <div key={a.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'.65rem 0', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
-              <div style={{ width:36, height:36, borderRadius:9, background:'rgba(26,111,212,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>👤</div>
+              <Link href={`/profil/${a.applicant_id}`} style={{ width:36, height:36, borderRadius:9, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, textDecoration:'none', background: avatarMap[a.applicant_id] ? 'transparent' : 'rgba(26,111,212,.2)', fontSize:16 }}>
+                {avatarMap[a.applicant_id]
+                  ? <img src={avatarSrc(avatarMap[a.applicant_id])!} alt="" style={{ width:36, height:36, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                  : '👤'
+                }
+              </Link>
               <div style={{ flex:1 }}>
-                <div style={{ fontWeight:600, fontSize:14 }}>{a.applicant_name}</div>
+                <Link href={`/profil/${a.applicant_id}`} style={{ fontWeight:600, fontSize:14, color:'#7eb6ff', textDecoration:'none' }}>{a.applicant_name}</Link>
                 <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{a.annonce_title}</div>
               </div>
             </div>
@@ -200,6 +215,7 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
   const { lang } = useLang()
   const [apps, setApps] = useState<AppWithAnnonce[]>([])
   const [loading, setLoading] = useState(true)
+  const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({})
 
   useEffect(() => {
     supabase.from('applications')
@@ -213,6 +229,15 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
         }))
         setApps(mapped)
         setLoading(false)
+        if (mapped.length > 0) {
+          const ids = [...new Set(mapped.map(a => a.applicant_id))]
+          supabase.from('profiles').select('id,avatar_url').in('id', ids)
+            .then(({ data: pdata }) => {
+              const map: Record<string, string | null> = {}
+              for (const p of (pdata || [])) map[p.id] = p.avatar_url || null
+              setAvatarMap(map)
+            })
+        }
       })
   }, [profile.id])
 
@@ -238,10 +263,18 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
           {apps.map((a) => (
             <div key={a.id} style={darkCard}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'.5rem', marginBottom:'.75rem' }}>
-                <div>
-                  <div style={{ fontWeight:700, fontSize:15 }}>{a.applicant_name}</div>
-                  <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>
-                    {t.dash.for_annonce[lang]} {a.annonce_title} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <Link href={`/profil/${a.applicant_id}`} style={{ width:40, height:40, borderRadius:10, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, textDecoration:'none', background: avatarMap[a.applicant_id] ? 'transparent' : 'rgba(26,111,212,.2)', fontSize:18 }}>
+                    {avatarMap[a.applicant_id]
+                      ? <img src={avatarSrc(avatarMap[a.applicant_id])!} alt="" style={{ width:40, height:40, objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                      : '👤'
+                    }
+                  </Link>
+                  <div>
+                    <Link href={`/profil/${a.applicant_id}`} style={{ fontWeight:700, fontSize:15, color:'#7eb6ff', textDecoration:'none' }}>{a.applicant_name}</Link>
+                    <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>
+                      {t.dash.for_annonce[lang]} {a.annonce_title} · {new Date(a.created_at).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH')}
+                    </div>
                   </div>
                 </div>
                 <StatusBadge status={a.status} />

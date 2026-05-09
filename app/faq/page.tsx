@@ -55,6 +55,28 @@ const faqs: { category: { fr: string; de: string }; icon: string; items: FAQ[] }
     ]
   },
   {
+    category: { fr: 'Coachs', de: 'Trainer' },
+    icon: '🧑‍🏫',
+    items: [
+      {
+        q: { fr: 'Comment ajouter mes certifications UEFA ?', de: 'Wie füge ich meine UEFA-Lizenzen hinzu?' },
+        a: { fr: "Tu peux ajouter tes licences UEFA (D, C, B, A, PRO) directement depuis ton dashboard, dans la section 'Modifier mon profil'. Précise aussi tes années d'expérience et tes catégories préférées.", de: "Du kannst deine UEFA-Lizenzen (D, C, B, A, PRO) direkt in deinem Dashboard unter 'Profil bearbeiten' hinzufügen. Gib auch deine Erfahrungsjahre und bevorzugten Kategorien an." }
+      },
+      {
+        q: { fr: 'Comment décrire ma philosophie de jeu ?', de: 'Wie beschreibe ich meine Spielphilosophie?' },
+        a: { fr: "Dans la section 'À propos' de ton profil, tu trouveras des questions guides pour t'aider à structurer ta philosophie. Sois authentique : les clubs cherchent un style qui correspond à leur projet.", de: "Im Bereich 'Über mich' deines Profils findest du Leitfragen, die dir helfen, deine Philosophie zu strukturieren. Sei authentisch: Vereine suchen einen Stil, der zu ihrem Projekt passt." }
+      },
+      {
+        q: { fr: 'Un club peut-il me contacter directement ?', de: 'Kann ein Verein mich direkt kontaktieren?' },
+        a: { fr: "Oui. Tout club inscrit sur TeamUpFR peut t'envoyer un message via la messagerie ou voir ton profil complet. Tu peux toi aussi postuler aux annonces des clubs qui recrutent.", de: "Ja. Jeder bei TeamUpFR registrierte Verein kann dir eine Nachricht senden oder dein vollständiges Profil ansehen. Du kannst dich auch auf Anzeigen von Vereinen bewerben, die rekrutieren." }
+      },
+      {
+        q: { fr: 'Puis-je avoir un profil joueur ET coach ?', de: 'Kann ich ein Spieler- UND Trainerprofil haben?' },
+        a: { fr: "Pour l'instant, un seul profil par compte. Si tu joues encore, tu peux mentionner ton parcours joueur dans la section 'À propos' de ton profil coach.", de: "Derzeit ist nur ein Profil pro Konto möglich. Wenn du noch spielst, kannst du deinen Spielerwerdegang im Bereich 'Über mich' deines Trainerprofils erwähnen." }
+      },
+    ]
+  },
+  {
     category: { fr: 'Clubs', de: 'Vereine' },
     icon: '🏟️',
     items: [
@@ -79,6 +101,14 @@ const faqs: { category: { fr: string; de: string }; icon: string; items: FAQ[] }
       {
         q: { fr: 'Comment supprimer mon profil ?', de: 'Wie lösche ich mein Profil?' },
         a: { fr: "Pour supprimer ton compte, envoie un email à teamupfr.ch@gmail.com avec ton adresse email. Nous supprimerons toutes tes données dans les 48 heures conformément à la LPD suisse.", de: "Um dein Konto zu löschen, sende eine E-Mail an teamupfr.ch@gmail.com mit deiner E-Mail-Adresse. Wir löschen alle deine Daten innerhalb von 48 Stunden gemäss dem Schweizer DSG." }
+      },
+      {
+        q: { fr: 'Comment changer mon mot de passe ?', de: 'Wie ändere ich mein Passwort?' },
+        a: { fr: "Va dans Dashboard > Paramètres > Sécurité, et clique sur 'Changer le mot de passe'. Tu devras saisir ton ancien mot de passe et le nouveau.", de: "Gehe zu Dashboard > Einstellungen > Sicherheit und klicke auf 'Passwort ändern'. Du musst dein altes und neues Passwort eingeben." }
+      },
+      {
+        q: { fr: 'Comment changer la langue de mon compte ?', de: 'Wie ändere ich die Sprache meines Kontos?' },
+        a: { fr: "Le sélecteur de langue (FR / DE) est disponible en haut à droite de chaque page. Ton choix est mémorisé pour les prochaines visites.", de: "Der Sprachauswahl (FR / DE) ist oben rechts auf jeder Seite verfügbar. Deine Auswahl wird für zukünftige Besuche gespeichert." }
       },
     ]
   },

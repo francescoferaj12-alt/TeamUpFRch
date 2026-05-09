@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase, Profile } from '../../lib/supabase'
+import { supabase, Profile, avatarSrc } from '../../lib/supabase'
+import EmptyState from '../../components/EmptyState'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t } from '../../lib/translations'
@@ -101,18 +102,13 @@ export default function ClubsPage() {
               {t.clubs.loading[lang]}
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'4rem', background:'rgba(255,255,255,.03)', borderRadius:20, border:'1px solid rgba(255,255,255,.07)' }}>
-              <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🏟️</div>
-              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.5rem', letterSpacing:1, marginBottom:'.5rem', color:'#fff' }}>
-                {t.clubs.none_found[lang]}
-              </div>
-              <p style={{ color:'rgba(255,255,255,.4)', fontSize:14, marginBottom:'1.5rem' }}>
-                {t.clubs.none_desc[lang]}
-              </p>
-              <Link href="/login" style={{ background:'#e63946', color:'#fff', padding:'12px 28px', borderRadius:10, fontWeight:700, textDecoration:'none', fontSize:14 }}>
-                {t.clubs.register[lang]}
-              </Link>
-            </div>
+            <EmptyState
+              icon="🏟️"
+              title={t.clubs.none_found[lang]}
+              message={t.clubs.none_desc[lang]}
+              ctaText={t.clubs.register[lang]}
+              ctaHref="/login"
+            />
           ) : (
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'1.25rem' }}>
               {filtered.map(club => (
@@ -120,7 +116,7 @@ export default function ClubsPage() {
                   <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', padding:'1.5rem', textAlign:'center', position:'relative' }}>
                     <div style={{ width:64, height:64, borderRadius:14, background:'rgba(255,255,255,.1)', border:'2px solid rgba(255,255,255,.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'2rem', margin:'0 auto .75rem' }}>
                       {club.avatar_url
-                        ? <img src={club.avatar_url} alt={club.club_name || ''} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:12 }} />
+                        ? <img src={avatarSrc(club.avatar_url)!} alt={club.club_name || ''} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:12 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                         : '🏟️'
                       }
                     </div>
