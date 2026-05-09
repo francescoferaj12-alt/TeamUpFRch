@@ -436,11 +436,10 @@ export default function MessagesPage() {
           {t.messages.title[lang]}
         </div>
         <button
+          className="msg-plus-btn"
           onClick={() => setMobileView('newChat')}
           title={t.messages.new_msg_btn[lang]}
-          style={{ width:36, height:36, background:'#e63946', border:'none', borderRadius:'50%', color:'#fff', fontSize:22, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 14px rgba(230,57,70,.4)', flexShrink:0, lineHeight:1, transition:'transform .15s,background .15s' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)' }}
+          aria-label={t.messages.new_msg_btn[lang]}
         >
           +
         </button>
@@ -531,7 +530,7 @@ export default function MessagesPage() {
                 ←
               </button>
             )}
-            <Link href={`/profil/${activeConv.partnerId}`} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }}>
+            <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }} title={activeConv.partnerName}>
               <UserAvatar userId={activeConv.partnerId} size={42} radius={12}
                 fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>{roleEmoji(activeConv.partnerRole)}</div>}
               />
@@ -563,11 +562,11 @@ export default function MessagesPage() {
                       ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                       : <div style={{ width:28, height:28, borderRadius:8, background:'#e63946', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>{myName?.slice(0, 2) || t.messages.me[lang]}</div>
                   ) : (
-                    <div style={{ width:28, height:28, borderRadius:8, overflow:'hidden', flexShrink:0 }}>
+                    <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ width:28, height:28, borderRadius:8, overflow:'hidden', flexShrink:0, display:'block', textDecoration:'none' }} title={activeConv.partnerName}>
                       <UserAvatar userId={activeConv.partnerId} size={28} radius={8}
                         fallback={<div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>{roleEmoji(activeConv.partnerRole)}</div>}
                       />
-                    </div>
+                    </Link>
                   )}
                   <div style={{ maxWidth:'70%' }}>
                     <div style={{ background: fromMe ? '#e63946' : 'rgba(255,255,255,.08)', color:'#fff', padding:'.65rem .95rem', borderRadius:14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize:14, lineHeight:1.5 }}>
@@ -815,6 +814,37 @@ export default function MessagesPage() {
         .msg-user-result:hover {
           background: rgba(230,57,70,.1) !important;
           border-color: rgba(230,57,70,.3) !important;
+        }
+        .msg-avatar-link {
+          cursor: pointer;
+          transition: opacity .15s, transform .15s;
+          display: block;
+        }
+        .msg-avatar-link:hover {
+          opacity: .82;
+          transform: scale(1.06);
+        }
+        .msg-plus-btn {
+          width: 36px; height: 36px;
+          background: #e63946;
+          border: none;
+          border-radius: 50%;
+          color: #fff;
+          font-size: 22px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 14px rgba(230,57,70,.5);
+          flex-shrink: 0;
+          line-height: 1;
+          transition: transform .15s, background .15s, box-shadow .15s;
+        }
+        .msg-plus-btn:hover {
+          transform: scale(1.1);
+          background: #ff2d4a;
+          box-shadow: 0 6px 20px rgba(230,57,70,.7);
         }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
