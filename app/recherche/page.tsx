@@ -8,6 +8,7 @@ import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import { useAuth } from '../../lib/auth-context'
+import EmptyState from '../../components/EmptyState'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
 const ALL_LIGUES_FLAT = ALL_LIGUE_GROUPS.flatMap(g => g.items)
@@ -185,19 +186,21 @@ export default function RecherchePage() {
             {t.search.loading[lang]}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
-            <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>😕</div>
-            <div style={{ fontSize:16, fontWeight:500, marginBottom:'.5rem', color:'#fff' }}>{t.search.no_results[lang]}</div>
-            <div style={{ fontSize:14 }}>
-              {profiles.length === 0
-                ? t.search.first_register[lang]
-                : t.search.no_filter[lang]
-              }
-            </div>
-            {profiles.length === 0 && (
-              <Link href="/login" style={{ marginTop:'1rem', display:'inline-flex', background:'#e63946', color:'#fff', padding:'10px 22px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:14 }}>
-                {t.search.create_profile[lang]}
-              </Link>
+          <div style={{ gridColumn:'1/-1' }}>
+            {profiles.length === 0 ? (
+              <EmptyState
+                icon="🔍"
+                title={t.search.empty_title[lang]}
+                message={t.search.empty_msg[lang]}
+                ctaText={t.search.create_profile[lang]}
+                ctaHref="/login"
+              />
+            ) : (
+              <div style={{ textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
+                <div style={{ fontSize:'2rem', marginBottom:'.75rem' }}>😕</div>
+                <div style={{ fontSize:15, color:'#fff', marginBottom:'.5rem' }}>{t.search.no_results[lang]}</div>
+                <div style={{ fontSize:13 }}>{t.search.no_filter[lang]}</div>
+              </div>
             )}
           </div>
         ) : (
