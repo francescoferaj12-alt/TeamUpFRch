@@ -542,6 +542,10 @@ export const t = {
     accepted_msg: { fr: '🎉 Candidature acceptée ! Contacte le club pour la suite.', de: '🎉 Bewerbung akzeptiert! Kontaktiere den Verein für das Weitere.' },
     sent_on: { fr: 'Envoyée le', de: 'Gesendet am' },
     annonce_label: { fr: 'Annonce', de: 'Anzeige' },
+    tab_received: { fr: 'Reçues', de: 'Erhalten' },
+    tab_sent: { fr: 'Envoyées', de: 'Gesendet' },
+    cancel_cand_btn: { fr: '✕ Annuler', de: '✕ Stornieren' },
+    view_annonce_btn: { fr: "Voir l'annonce", de: 'Anzeige ansehen' },
   },
 
   // CLUBS
