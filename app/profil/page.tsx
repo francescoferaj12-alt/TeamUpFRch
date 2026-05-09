@@ -6,7 +6,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import { strengthIcon } from '../../lib/strength-icons'
-import { supabase, Profile, CareerExperience } from '../../lib/supabase'
+import { supabase, Profile, CareerExperience, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
@@ -490,7 +490,7 @@ export default function ProfilPage() {
               onClick={() => fileInputRef.current?.click()}
             >
               {profile.avatar_url
-                ? <img src={profile.avatar_url} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                ? <img src={avatarSrc(profile.avatar_url)!} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                 : (initials || roleEmoji)
               }
             </div>

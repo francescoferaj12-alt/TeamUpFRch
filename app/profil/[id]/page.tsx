@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, Profile, CareerExperience } from '../../../lib/supabase'
+import { supabase, Profile, CareerExperience, CoachCertificate, avatarSrc } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import CareerSection from '../../../components/CareerSection'
 import { strengthIcon } from '../../../lib/strength-icons'
@@ -67,6 +67,7 @@ export default function PublicProfilPage() {
   const { lang } = useLang()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [experiences, setExperiences] = useState<CareerExperience[]>([])
+  const [certificates, setCertificates] = useState<CoachCertificate[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -74,10 +75,12 @@ export default function PublicProfilPage() {
     Promise.all([
       supabase.from('profiles').select('*').eq('id', id).single(),
       supabase.from('career_experiences').select('*').eq('user_id', id).order('start_date', { ascending: false }),
-    ]).then(([{ data, error }, { data: exps }]) => {
+      supabase.from('coach_certificates').select('*').eq('coach_id', id).order('created_at', { ascending: true }),
+    ]).then(([{ data, error }, { data: exps }, { data: certs }]) => {
       if (error || !data) { setNotFound(true); setLoading(false); return }
       setProfile(data)
       setExperiences(exps || [])
+      setCertificates(certs || [])
       setLoading(false)
     })
   }, [id])
@@ -126,7 +129,7 @@ export default function PublicProfilPage() {
           <div style={{ display:'flex', alignItems:'center', gap:'1.5rem', flexWrap:'wrap' }}>
             <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: profile.avatar_url ? 0 : '2rem', fontWeight:700, overflow:'hidden', flexShrink:0 }}>
               {profile.avatar_url
-                ? <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                 : (initials || roleEmoji)
               }
             </div>
@@ -304,29 +307,24 @@ export default function PublicProfilPage() {
         )}
 
         {/* Coach certificates */}
-        {profile.role === 'coach' && profile.coach_certificates && (() => {
-          let certs: {name:string;year:string}[] = []
-          try { certs = JSON.parse(profile.coach_certificates) } catch {}
-          if (!certs.length) return null
-          return (
-            <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
-              <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem' }}>
-                <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>
-                  🎓 {lang === 'fr' ? 'Certificats & Diplômes' : 'Zertifikate & Diplome'}
-                </span>
-              </div>
-              <div style={{ padding:'1rem 1.25rem', display:'flex', flexWrap:'wrap', gap:10 }}>
-                {certs.map((c, i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(58,140,255,.1)', border:'1px solid rgba(58,140,255,.25)', borderRadius:10, padding:'8px 16px' }}>
-                    <span style={{ fontSize:16 }}>🎓</span>
-                    <span style={{ fontWeight:700, fontSize:14, color:'#fff' }}>{c.name}</span>
-                    {c.year && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)', fontWeight:600 }}>{c.year}</span>}
-                  </div>
-                ))}
-              </div>
+        {profile.role === 'coach' && certificates.length > 0 && (
+          <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
+            <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem' }}>
+              <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>
+                🎓 {lang === 'fr' ? 'Certificats & Diplômes' : 'Zertifikate & Diplome'}
+              </span>
             </div>
-          )
-        })()}
+            <div style={{ padding:'1rem 1.25rem', display:'flex', flexWrap:'wrap', gap:10 }}>
+              {certificates.map(c => (
+                <div key={c.id} style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(58,140,255,.1)', border:'1px solid rgba(58,140,255,.25)', borderRadius:10, padding:'8px 16px' }}>
+                  <span style={{ fontSize:16 }}>🎓</span>
+                  <span style={{ fontWeight:700, fontSize:14, color:'#fff' }}>{c.name}</span>
+                  {c.year && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)', fontWeight:600 }}>{c.year}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:'1.25rem' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>

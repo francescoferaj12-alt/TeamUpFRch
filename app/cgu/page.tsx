@@ -9,7 +9,7 @@ export default function CGUPage() {
     fr: {
       badge: "Conditions d'utilisation",
       title: "Règles de la plateforme",
-      updated: 'En vigueur depuis : Mai 2025',
+      updated: 'En vigueur depuis : Mai 2026',
       intro: "En utilisant TeamUpFR, vous acceptez les présentes conditions. Veuillez les lire attentivement. TeamUpFR est une plateforme gratuite dédiée au football amateur du canton de Fribourg, Suisse.",
       sections: [
         { title: '1. Acceptation des conditions', content: "En créant un compte sur TeamUpFR, vous acceptez les présentes Conditions Générales d'Utilisation. Si vous n'acceptez pas ces conditions, vous ne pouvez pas utiliser la plateforme." },
@@ -22,12 +22,13 @@ export default function CGUPage() {
         { title: '8. Propriété intellectuelle', content: "Le nom, le logo et l'identité visuelle de TeamUpFR sont la propriété exclusive de ses fondateurs. Vous conservez les droits sur le contenu que vous publiez, mais accordez à TeamUpFR une licence d'affichage sur la plateforme." },
         { title: '9. Modifications', content: "TeamUpFR se réserve le droit de modifier les présentes conditions à tout moment. Les utilisateurs seront informés par email en cas de modification importante." },
         { title: '10. Droit applicable', content: "Les présentes conditions sont soumises au droit suisse. Tout litige sera soumis aux tribunaux compétents du canton de Fribourg, Suisse." },
+        { title: '11. Modération et messagerie', content: "La messagerie de TeamUpFR est destinée à la mise en relation sportive entre joueurs, coachs et clubs. Sont interdits :\n— les messages à caractère sexuel, harcelant, raciste ou discriminatoire\n— les sollicitations commerciales non liées au football amateur\n— l'envoi de spam ou de liens malveillants\n— la diffusion de coordonnées d'autrui sans consentement\n\nTout utilisateur peut signaler un message ou un compte abusif en contactant teamupfr.ch@gmail.com. Notre équipe examine chaque signalement dans un délai de 48 heures et peut suspendre ou supprimer un compte en cas de violation.\n\nNous nous réservons le droit de modérer ou supprimer tout contenu contraire aux présentes conditions, sans préavis." },
       ]
     },
     de: {
       badge: 'Nutzungsbedingungen',
       title: 'Plattformregeln',
-      updated: 'Gültig ab: Mai 2025',
+      updated: 'Gültig ab: Mai 2026',
       intro: "Durch die Nutzung von TeamUpFR stimmen Sie diesen Bedingungen zu. Bitte lesen Sie sie sorgfältig durch. TeamUpFR ist eine kostenlose Plattform für den Amateurfussball im Kanton Freiburg, Schweiz.",
       sections: [
         { title: '1. Annahme der Bedingungen', content: "Durch die Erstellung eines Kontos auf TeamUpFR akzeptieren Sie diese Allgemeinen Nutzungsbedingungen. Wenn Sie diese Bedingungen nicht akzeptieren, können Sie die Plattform nicht nutzen." },
@@ -40,6 +41,7 @@ export default function CGUPage() {
         { title: '8. Geistiges Eigentum', content: "Name, Logo und visuelle Identität von TeamUpFR sind ausschliessliches Eigentum der Gründer. Sie behalten die Rechte an den von Ihnen veröffentlichten Inhalten, gewähren TeamUpFR jedoch eine Anzeigelizenz auf der Plattform." },
         { title: '9. Änderungen', content: "TeamUpFR behält sich das Recht vor, diese Bedingungen jederzeit zu ändern. Benutzer werden bei wesentlichen Änderungen per E-Mail informiert." },
         { title: '10. Anwendbares Recht', content: "Diese Bedingungen unterliegen dem Schweizer Recht. Alle Streitigkeiten werden den zuständigen Gerichten des Kantons Freiburg, Schweiz, vorgelegt." },
+        { title: '11. Moderation und Messaging', content: "Das Messaging von TeamUpFR dient der sportlichen Vernetzung zwischen Spielern, Trainern und Vereinen. Verboten sind:\n— Nachrichten sexueller, belästigender, rassistischer oder diskriminierender Natur\n— kommerzielle Werbung ohne Bezug zum Amateurfussball\n— das Versenden von Spam oder schädlichen Links\n— die Weitergabe personenbezogener Daten Dritter ohne Einwilligung\n\nJeder Nutzer kann einen missbräuchlichen Account oder eine Nachricht melden, indem er teamupfr.ch@gmail.com kontaktiert. Unser Team prüft jeden Hinweis innerhalb von 48 Stunden und kann bei einem Verstoss ein Konto sperren oder löschen.\n\nWir behalten uns das Recht vor, Inhalte, die gegen diese Bedingungen verstossen, ohne Vorankündigung zu moderieren oder zu entfernen." },
       ]
     }
   }

@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     fr: {
       badge: 'Politique de confidentialité',
       title: 'Vos données, votre vie privée',
-      updated: 'Dernière mise à jour : Mai 2025',
+      updated: 'Dernière mise à jour : Mai 2026',
       intro: "TeamUpFR s'engage à protéger vos données personnelles conformément à la Loi fédérale sur la protection des données (LPD) suisse. Cette politique explique quelles données nous collectons, pourquoi, et comment vous pouvez les contrôler.",
       sections: [
         {
@@ -51,13 +51,17 @@ export default function PrivacyPage() {
         {
           title: '10. Contact',
           content: "Pour toute question relative à vos données personnelles : teamupfr.ch@gmail.com"
+        },
+        {
+          title: '11. Protection des mineurs',
+          content: "TeamUpFR est ouvert dès 14 ans. Les mineurs de moins de 18 ans doivent obtenir l'accord de leurs parents ou tuteurs légaux pour s'inscrire. Nous ne collectons sciemment aucune donnée d'enfant de moins de 14 ans. Si vous pensez qu'un mineur de moins de 14 ans s'est inscrit, contactez-nous immédiatement à teamupfr.ch@gmail.com et nous supprimerons le compte.\n\nPour les utilisateurs de 14 à 17 ans, les parents/tuteurs peuvent demander à tout moment l'accès aux données de leur enfant ou la suppression du compte en nous écrivant."
         }
       ]
     },
     de: {
       badge: 'Datenschutzrichtlinie',
       title: 'Ihre Daten, Ihre Privatsphäre',
-      updated: 'Letzte Aktualisierung: Mai 2025',
+      updated: 'Letzte Aktualisierung: Mai 2026',
       intro: "TeamUpFR verpflichtet sich, Ihre personenbezogenen Daten gemäss dem Schweizer Datenschutzgesetz (DSG) zu schützen. Diese Richtlinie erklärt, welche Daten wir erheben, warum und wie Sie diese kontrollieren können.",
       sections: [
         {
@@ -99,6 +103,10 @@ export default function PrivacyPage() {
         {
           title: '10. Kontakt',
           content: "Bei Fragen zu Ihren personenbezogenen Daten: teamupfr.ch@gmail.com"
+        },
+        {
+          title: '11. Schutz Minderjähriger',
+          content: "TeamUpFR steht ab 14 Jahren offen. Minderjährige unter 18 Jahren müssen die Zustimmung ihrer Eltern oder gesetzlichen Vormund einholen, um sich zu registrieren. Wir erheben wissentlich keine Daten von Kindern unter 14 Jahren. Wenn Sie glauben, dass sich ein Kind unter 14 Jahren registriert hat, kontaktieren Sie uns umgehend unter teamupfr.ch@gmail.com und wir löschen das Konto.\n\nFür Nutzer zwischen 14 und 17 Jahren können Eltern/Erziehungsberechtigte jederzeit den Zugang zu den Daten ihres Kindes oder die Kontolöschung anfordern, indem sie uns schreiben."
         }
       ]
     }

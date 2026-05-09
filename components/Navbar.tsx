@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useEffect, useRef, useState } from 'react'
+import { supabase, avatarSrc } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
 import { useLang } from '../lib/lang-context'
 import { t } from '../lib/translations'
@@ -18,6 +18,8 @@ export default function Navbar() {
   const [unread, setUnread] = useState(0)
   const [unreadApps, setUnreadApps] = useState(0)
   const [scrolled, setScrolled] = useState(false)
+  const pathnameRef = useRef(pathname)
+  useEffect(() => { pathnameRef.current = pathname }, [pathname])
 
   const user = profile
     ? {
@@ -44,11 +46,17 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Unread message badge
+  // Close mobile menu on navigation
+  useEffect(() => { setMenuOpen(false) }, [pathname])
+
+  // ── Messages badge ──────────────────────────────────────────────────────────
+  // Strategy: query once on session load + Realtime for new arrivals.
+  // Never re-query just because pathname changed — that races against mark-as-read.
   useEffect(() => {
     if (!session) { setUnread(0); return }
     const uid = session.user.id
-    const refresh = () => {
+    const queryUnread = () => {
+      if (pathnameRef.current === '/messages') { setUnread(0); return }
       supabase
         .from('messages')
         .select('id', { count: 'exact', head: true })
@@ -56,33 +64,62 @@ export default function Navbar() {
         .eq('read', false)
         .then(({ count }) => setUnread(count || 0))
     }
-    refresh()
+    queryUnread()
     const channel = supabase
       .channel(`nav-unread-${uid}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, refresh)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, queryUnread)
       .subscribe()
-    // Listen for direct notification from messages page when messages are marked read
-    window.addEventListener('messages-read', refresh)
-    return () => {
-      supabase.removeChannel(channel)
-      window.removeEventListener('messages-read', refresh)
-    }
-  }, [session])
+    return () => { supabase.removeChannel(channel) }
+  }, [session?.user?.id])
 
+  // Clear badge immediately when the user lands on /messages
   useEffect(() => {
-    setMenuOpen(false)
-    if (!session) return
-    // While on /messages the user is actively reading — hide badge immediately
-    if (pathname === '/messages') { setUnread(0); return }
-    // On every other page, re-query the real count from DB
+    if (pathname === '/messages') setUnread(0)
+  }, [pathname])
+
+  // Listen for explicit "I just marked my messages as read" event from the
+  // /messages page. This is the authoritative signal — clears the badge even
+  // if a stale realtime/session-refresh re-query happens to race in.
+  useEffect(() => {
+    const handler = () => setUnread(0)
+    window.addEventListener('messages-read', handler)
+    return () => window.removeEventListener('messages-read', handler)
+  }, [])
+
+  // ── Candidatures badge (club / coach only) ──────────────────────────────────
+  useEffect(() => {
+    if (!session || !profile) return
+    if (profile.role !== 'club' && profile.role !== 'coach') return
     const uid = session.user.id
-    supabase
-      .from('messages')
-      .select('id', { count: 'exact', head: true })
-      .eq('receiver_id', uid)
-      .eq('read', false)
-      .then(({ count }) => setUnread(count || 0))
-  }, [pathname, session])
+    const queryApps = () => {
+      if (pathnameRef.current === '/candidatures') { setUnreadApps(0); return }
+      supabase
+        .from('applications')
+        .select('annonces!inner(author_id)', { count: 'exact', head: true })
+        .eq('annonces.author_id', uid)
+        .or('seen_by_owner.is.null,seen_by_owner.eq.false')
+        .then(({ count }) => setUnreadApps(count || 0))
+    }
+    queryApps()
+    const channel = supabase
+      .channel(`nav-apps-${uid}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'applications' }, queryApps)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [session?.user?.id, profile?.id, profile?.role])
+
+  // Clear badge immediately when the user lands on /candidatures
+  useEffect(() => {
+    if (pathname === '/candidatures') setUnreadApps(0)
+  }, [pathname])
+
+  // Listen for explicit "I just marked candidatures as seen" event from the
+  // /candidatures page. Authoritative signal that survives navigation away.
+  useEffect(() => {
+    const handler = () => setUnreadApps(0)
+    window.addEventListener('candidatures-seen', handler)
+    return () => window.removeEventListener('candidatures-seen', handler)
+  }, [])
 
   // Unseen candidatures badge (club/coach only)
   useEffect(() => {
@@ -156,7 +193,7 @@ export default function Navbar() {
                 style={{ textDecoration: 'none', overflow: 'hidden', padding: user.avatar_url ? 0 : undefined }}
               >
                 {user.avatar_url
-                  ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={avatarSrc(user.avatar_url)!} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
                   : user.initials
                 }
               </Link>
