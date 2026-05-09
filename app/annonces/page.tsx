@@ -220,7 +220,9 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: { annonce: Annonce & 
           ) : !currentUser ? (
             <Link href="/login" style={{ background:'#e63946', color:'#fff', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, textDecoration:'none' }}>📋 Postuler</Link>
           ) : null}
-          <Link href="/messages" style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, textDecoration:'none' }}>💬 Message</Link>
+          {(!currentUser || currentUser.id !== annonce.author_id) && (
+            <Link href={`/messages?partner=${annonce.author_id}`} style={{ background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, textDecoration:'none' }}>💬 Message</Link>
+          )}
         </div>
       </div>
     </div>

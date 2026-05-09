@@ -96,7 +96,7 @@ export default function ClubPage() {
                 </span>
               </div>
             </div>
-            <Link href="/messages" style={{ background:'#e63946', color:'#fff', borderRadius:10, padding:'10px 20px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0 }}>
+            <Link href={`/messages?partner=${club?.id}`} style={{ background:'#e63946', color:'#fff', borderRadius:10, padding:'10px 20px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0 }}>
               💬 Contacter
             </Link>
           </div>
@@ -190,7 +190,7 @@ export default function ClubPage() {
               ))}
             </div>
 
-            <Link href="/messages" style={{ background:'#e63946', color:'#fff', borderRadius:12, padding:'12px 16px', fontWeight:700, fontSize:14, textDecoration:'none', textAlign:'center', display:'block' }}>
+            <Link href={`/messages?partner=${club?.id}`} style={{ background:'#e63946', color:'#fff', borderRadius:12, padding:'12px 16px', fontWeight:700, fontSize:14, textDecoration:'none', textAlign:'center', display:'block' }}>
               💬 Envoyer un message
             </Link>
 

@@ -40,6 +40,7 @@ export default function MessagesPage() {
   const [uploadingFile, setUploadingFile] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const activePartnerRef = useRef<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -48,6 +49,13 @@ export default function MessagesPage() {
 
   // Keep ref in sync for realtime handler
   useEffect(() => { activePartnerRef.current = activePartnerId }, [activePartnerId])
+
+  // Auto-focus input when landing via ?partner= link
+  useEffect(() => {
+    if (partnerParam && activePartnerId === partnerParam) {
+      inputRef.current?.focus()
+    }
+  }, [partnerParam, activePartnerId])
 
   // Mark messages as read whenever the active conversation changes (covers auto-select too)
   useEffect(() => {
@@ -526,6 +534,7 @@ export default function MessagesPage() {
                 {uploadingFile ? '⏳' : '📎'}
               </button>
               <input
+                ref={inputRef}
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}

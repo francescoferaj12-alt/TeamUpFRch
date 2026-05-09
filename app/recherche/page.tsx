@@ -280,7 +280,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
       )}
 
       <div style={{ display:'flex', gap:6 }}>
-        <Link href="/messages" style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Link href={`/messages?partner=${p.id}`} style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
           {t.search.contact[lang]}
         </Link>
         <Link href="/profil" style={{ flex:1, background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
