@@ -140,6 +140,7 @@ export default function ProfilPage() {
   const [experiences, setExperiences] = useState<CareerExperience[]>([])
   const [showCareerModal, setShowCareerModal] = useState(false)
   const [editingExp, setEditingExp] = useState<CareerExperience | null>(null)
+  const [showAllStrengths, setShowAllStrengths] = useState(false)
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -513,7 +514,7 @@ export default function ProfilPage() {
               <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
                 {roleEmoji} {profile.role === 'coach' ? (profile.coach_specialty || roleLabel) : (profile.position || roleLabel)}
               </span>
-              {profile.role !== 'coach' && profile.foot && (
+              {profile.role === 'player' && profile.foot && (
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
                   {footDisplay(profile.foot, lang)}
                 </span>
@@ -532,14 +533,20 @@ export default function ProfilPage() {
 
             {strengthKeys.length > 0 && (
               <div className="strengths-row">
-                {strengthKeys.slice(0, 5).map(key => (
+                {(showAllStrengths ? strengthKeys : strengthKeys.slice(0, 5)).map(key => (
                   <span key={key} className="strength-tag">
                     <span className="strength-icon">{strengthIcon(key)}</span>
                     {strengthLabel(key, lang)}
                   </span>
                 ))}
-                {strengthKeys.length > 5 && (
-                  <span className="strength-tag strength-more">+{strengthKeys.length - 5}</span>
+                {strengthKeys.length > 5 && !showAllStrengths && (
+                  <button
+                    onClick={() => setShowAllStrengths(true)}
+                    className="strength-tag strength-more"
+                    style={{ cursor:'pointer', border:'none', fontFamily:'inherit' }}
+                  >
+                    +{strengthKeys.length - 5} de plus
+                  </button>
                 )}
               </div>
             )}
@@ -693,9 +700,8 @@ export default function ProfilPage() {
                 cat_juniores_f: { fr:'Juniors filles', de:'Juniorinnen' },
                 cat_veterans:   { fr:'Vétérans',       de:'Veteranen' },
               }
-              const color = key.includes('seniors') ? '#3a8cff' : key === 'cat_veterans' ? '#b56cf0' : key === 'cat_juniores_f' ? '#ff8fab' : key === 'cat_youth' ? '#ffb84a' : '#4cdb7a'
               return (
-                <span key={key} style={{ background:`${color}1a`, border:`1.5px solid ${color}55`, color, borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:700 }}>
+                <span key={key} style={{ background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:600 }}>
                   {labels[key]?.[lang] || key}
                 </span>
               )

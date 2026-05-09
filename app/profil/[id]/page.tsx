@@ -21,14 +21,6 @@ const CATEGORY_LABELS: Record<string, { fr: string; de: string }> = {
   cat_veterans:   { fr: 'Vétérans',       de: 'Veteranen' },
 }
 
-function catColor(key: string): string {
-  if (key.includes('seniors')) return '#3a8cff'
-  if (key === 'cat_veterans') return '#b56cf0'
-  if (key === 'cat_juniores_f') return '#ff8fab'
-  if (key === 'cat_youth') return '#ffb84a'
-  return '#4cdb7a'
-}
-
 function strengthLabel(key: string) {
   const map: Record<string, string> = {
     fast:'Rapide', technical:'Technique', physical:'Physique', dribbling:'Dribble',
@@ -70,6 +62,7 @@ export default function PublicProfilPage() {
   const [certificates, setCertificates] = useState<CoachCertificate[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [showAllStrengths, setShowAllStrengths] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -173,14 +166,20 @@ export default function PublicProfilPage() {
 
               {strengths.length > 0 && (
                 <div className="strengths-row">
-                  {strengths.slice(0, 5).map(k => (
+                  {(showAllStrengths ? strengths : strengths.slice(0, 5)).map(k => (
                     <span key={k} className="strength-tag">
                       <span className="strength-icon">{strengthIcon(k)}</span>
                       {strengthLabel(k)}
                     </span>
                   ))}
-                  {strengths.length > 5 && (
-                    <span className="strength-tag strength-more">+{strengths.length - 5}</span>
+                  {strengths.length > 5 && !showAllStrengths && (
+                    <button
+                      onClick={() => setShowAllStrengths(true)}
+                      className="strength-tag strength-more"
+                      style={{ cursor:'pointer', border:'none', fontFamily:'inherit' }}
+                    >
+                      +{strengths.length - 5} de plus
+                    </button>
                   )}
                 </div>
               )}
@@ -348,9 +347,8 @@ export default function PublicProfilPage() {
                     .split(',').map((s: string) => s.trim()).filter(Boolean)
                     .map((key: string) => {
                       const label = CATEGORY_LABELS[key]?.[lang] || key
-                      const color = catColor(key)
                       return (
-                        <span key={key} style={{ background:`${color}1a`, border:`1.5px solid ${color}55`, color, borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:700 }}>
+                        <span key={key} style={{ background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:600 }}>
                           {label}
                         </span>
                       )
