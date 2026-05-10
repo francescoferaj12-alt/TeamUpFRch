@@ -248,60 +248,32 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
       ? currentUser.club_name
       : `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.email
 
-    const { error: err } = await supabase.from('applications').insert({
-      annonce_id: annonce.id,
-      applicant_id: currentUser.id,
-      applicant_name: applicantName,
-      message: message.trim(),
-      status: 'pending'
-    })
-
-    setSending(false)
-    if (err) { setError('Erreur lors de la candidature. Réessaie.'); return }
-    setDone(true)
-    setTimeout(onSuccess, 2000)
-    // Fire-and-forget: notify annonce author
-    ;(async () => {
-      try {
-        console.log('🟢 [POSTULER] Starting email notify — annonce:', annonce.id, 'author_id:', annonce.author_id)
-        const { data: author, error: authorErr } = await supabase
-          .from('profiles')
-          .select('email,first_name,last_name,club_name,role,zone')
-          .eq('id', annonce.author_id).single()
-        console.log('🟢 [POSTULER] Author query result:', { author, authorErr })
-        if (authorErr || !author?.email) {
-          console.log('🔴 [POSTULER] Aborting — authorErr or missing email:', { authorErr, email: author?.email })
-          return
-        }
-        const { data: ns, error: nsErr } = await supabase
-          .from('profiles').select('notification_settings').eq('id', annonce.author_id).single()
-        console.log('🟢 [POSTULER] notification_settings query:', { ns, nsErr })
-        if (ns?.notification_settings?.newApplication === false) {
-          console.log('🟢 [POSTULER] Skipping — author disabled newApplication notifications')
-          return
-        }
-        const toName = author.role === 'club'
-          ? (author.club_name || 'Club')
-          : `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.email
-        console.log('🟢 [POSTULER] About to POST /api/send-application-notification → toEmail:', author.email)
-        const res = await fetch('/api/send-application-notification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            toEmail: author.email,
-            toName,
-            applicantName,
-            applicantRole: currentUser.role,
-            annonceTitle: annonce.title,
-            applicantId: currentUser.id,
-            annonceId: annonce.id,
-            receiverZone: author.zone,
-          }),
-        })
-        const json = await res.json()
-        console.log('🟢 [POSTULER] API response:', res.status, json)
-      } catch (e) { console.error('🔴 [POSTULER] Exception in email flow:', e) }
-    })()
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/applications/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({
+          annonce_id: annonce.id,
+          message: message.trim(),
+          applicant_name: applicantName,
+          applicant_role: currentUser.role,
+        }),
+      })
+      const json = await res.json()
+      console.log('🟢 [POSTULER] API response:', res.status, json)
+      setSending(false)
+      if (!res.ok) { setError('Erreur lors de la candidature. Réessaie.'); return }
+      setDone(true)
+      setTimeout(onSuccess, 2000)
+    } catch (e) {
+      console.error('🔴 [POSTULER] Network error:', e)
+      setSending(false)
+      setError('Erreur réseau. Réessaie.')
+    }
   }
 
   return (

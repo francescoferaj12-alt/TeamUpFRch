@@ -242,53 +242,27 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
   }, [profile.id])
 
   async function updateStatus(id: string, status: 'accepted' | 'rejected') {
-    await supabase.from('applications').update({ status }).eq('id', id)
+    console.log('🟢 [DASH/STATUS] updateStatus called:', id, status)
     setApps((prev) => prev.map((a) => a.id === id ? { ...a, status } : a))
-    // Fire-and-forget: notify applicant
-    const app = apps.find(a => a.id === id)
-    if (!app) return
-    ;(async () => {
-      try {
-        console.log('🟢 [STATUS] Starting email notify — app id:', id, 'applicant_id:', app.applicant_id, 'status:', status)
-        const { data: applicant, error: applicantErr } = await supabase
-          .from('profiles')
-          .select('email,first_name,last_name,club_name,role,zone')
-          .eq('id', app.applicant_id).single()
-        console.log('🟢 [STATUS] Applicant query result:', { applicant, applicantErr })
-        if (applicantErr || !applicant?.email) {
-          console.log('🔴 [STATUS] Aborting — applicantErr or missing email:', { applicantErr, email: applicant?.email })
-          return
-        }
-        const { data: ns, error: nsErr } = await supabase
-          .from('profiles').select('notification_settings').eq('id', app.applicant_id).single()
-        console.log('🟢 [STATUS] notification_settings query:', { ns, nsErr })
-        if (ns?.notification_settings?.applicationStatus === false) {
-          console.log('🟢 [STATUS] Skipping — applicant disabled applicationStatus notifications')
-          return
-        }
-        const toName = applicant.role === 'club'
-          ? (applicant.club_name || 'Club')
-          : `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim() || applicant.email
-        const clubName = profile.role === 'club'
-          ? (profile.club_name || 'Club')
-          : `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
-        console.log('🟢 [STATUS] About to POST /api/send-application-status → toEmail:', applicant.email)
-        const res = await fetch('/api/send-application-status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            toEmail: applicant.email,
-            toName,
-            status,
-            clubName,
-            annonceTitle: app.annonce_title || '',
-            receiverZone: applicant.zone,
-          }),
-        })
-        const json = await res.json()
-        console.log('🟢 [STATUS] API response:', res.status, json)
-      } catch (e) { console.error('🔴 [STATUS] Exception in email flow:', e) }
-    })()
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`/api/applications/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ status }),
+      })
+      const json = await res.json()
+      console.log('🟢 [DASH/STATUS] API response:', res.status, json)
+      if (!res.ok) {
+        setApps((prev) => prev.map((a) => a.id === id ? { ...a, status: 'pending' } : a))
+      }
+    } catch (e) {
+      console.error('🔴 [DASH/STATUS] Network error:', e)
+      setApps((prev) => prev.map((a) => a.id === id ? { ...a, status: 'pending' } : a))
+    }
   }
 
   const darkCard = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }
