@@ -91,6 +91,7 @@ export default function CandidaturesPage() {
   useEffect(() => {
     if (authLoading) return
     if (!session) { router.push('/login'); return }
+    if (!session.user.email_confirmed_at) { router.push('/verify-email-pending'); return }
     if (authProfile) { setProfile(authProfile); setPageLoading(false) }
   }, [authLoading, session, authProfile, router])
 

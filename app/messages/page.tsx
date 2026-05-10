@@ -109,6 +109,7 @@ export default function MessagesPage() {
   useEffect(() => {
     if (authLoading) return
     if (!session || !authProfile) { router.push('/login'); return }
+    if (!session.user.email_confirmed_at) { router.push('/verify-email-pending'); return }
     setProfile(authProfile)
     loadMessages(authProfile)
   // eslint-disable-next-line react-hooks/exhaustive-deps
