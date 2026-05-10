@@ -69,8 +69,11 @@ export default function PublicProfilPage() {
       supabase.from('profiles').select('*').eq('id', id).single(),
       supabase.from('career_experiences').select('*').eq('user_id', id).order('start_date', { ascending: false }),
       supabase.from('coach_certificates').select('*').eq('coach_id', id).order('created_at', { ascending: true }),
-    ]).then(([{ data, error }, { data: exps }, { data: certs }]) => {
+      supabase.auth.getUser(),
+    ]).then(([{ data, error }, { data: exps }, { data: certs }, { data: auth }]) => {
       if (error || !data) { setNotFound(true); setLoading(false); return }
+      // Block access to hidden (unverified) profiles unless it's the user's own profile
+      if (data.hidden && auth.user?.id !== data.id) { setNotFound(true); setLoading(false); return }
       setProfile(data)
       setExperiences(exps || [])
       setCertificates(certs || [])

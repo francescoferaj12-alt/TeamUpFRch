@@ -24,20 +24,21 @@ export default function VerifyEmailPage() {
 
     timeoutRef.current = setTimeout(() => setState('invalid'), 10000)
 
-    const markVerified = () => {
+    const markVerified = async (userId: string) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      await supabase.from('profiles').update({ hidden: false }).eq('id', userId)
       setState('success')
       sessionStorage.removeItem('pendingVerifyEmail')
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user?.email_confirmed_at) {
-        markVerified()
+        markVerified(session.user.id)
       }
     })
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email_confirmed_at) markVerified()
+      if (session?.user?.email_confirmed_at) markVerified(session.user.id)
     })
 
     return () => {

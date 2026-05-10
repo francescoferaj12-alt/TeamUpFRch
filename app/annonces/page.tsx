@@ -22,10 +22,14 @@ export default function AnnoncesPage() {
 
   useEffect(() => {
     supabase.from('annonces')
-      .select('*, profiles!author_id(id, avatar_url, verified)')
+      .select('*, profiles!author_id(id, avatar_url, verified, hidden)')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
-      .then(({ data }) => { setAnnonces((data || []) as Annonce[]); setLoading(false) })
+      .then(({ data }) => {
+        const visible = (data || []).filter((a: any) => !a.profiles?.hidden)
+        setAnnonces(visible as Annonce[])
+        setLoading(false)
+      })
   }, [])
 
   const filtered = useMemo(() => {

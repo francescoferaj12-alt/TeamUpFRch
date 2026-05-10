@@ -136,6 +136,7 @@ function LoginForm() {
         bio: role !== 'coach' ? bio : null,
         birthdate,
         available: true,
+        hidden: true,
         ...(role === 'coach' ? {
           coach_experience: coachExperience,
           coach_diploma: coachDiploma,

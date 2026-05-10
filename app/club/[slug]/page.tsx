@@ -17,14 +17,14 @@ export default function ClubPage() {
   useEffect(() => {
     async function load() {
       // slug is a profile UUID
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', slug)
-        .eq('role', 'club')
-        .single()
+      const [{ data, error }, { data: auth }] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', slug).eq('role', 'club').single(),
+        supabase.auth.getUser(),
+      ])
 
       if (error || !data) { setNotFound(true); setLoading(false); return }
+      // Block access to hidden (unverified) club pages unless it's the club's own page
+      if (data.hidden && auth.user?.id !== data.id) { setNotFound(true); setLoading(false); return }
       setClub(data)
 
       const { data: ann } = await supabase
