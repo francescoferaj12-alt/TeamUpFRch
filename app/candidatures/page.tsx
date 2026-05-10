@@ -145,6 +145,48 @@ export default function CandidaturesPage() {
   async function updateStatus(id: string, status: 'pending' | 'accepted' | 'rejected') {
     await supabase.from('applications').update({ status }).eq('id', id)
     setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status } : a))
+    if (status === 'pending') return
+    const app = receivedApps.find(a => a.id === id)
+    if (!app) return
+    console.log('🟢 [CAND/STATUS] Firing email notify — app:', id, 'status:', status, 'applicant_id:', app.applicant_id)
+    ;(async () => {
+      try {
+        const { data: applicant, error: applicantErr } = await supabase
+          .from('profiles')
+          .select('email,first_name,last_name,club_name,role,zone')
+          .eq('id', app.applicant_id).single()
+        console.log('🟢 [CAND/STATUS] Applicant query:', { applicant, applicantErr })
+        if (applicantErr || !applicant?.email) {
+          console.log('🔴 [CAND/STATUS] Aborting — no email:', { applicantErr, email: applicant?.email })
+          return
+        }
+        const { data: ns } = await supabase
+          .from('profiles').select('notification_settings').eq('id', app.applicant_id).single()
+        console.log('🟢 [CAND/STATUS] notification_settings:', ns?.notification_settings)
+        if (ns?.notification_settings?.applicationStatus === false) return
+        const toName = applicant.role === 'club'
+          ? (applicant.club_name || 'Club')
+          : `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim() || applicant.email
+        const clubName = profile?.role === 'club'
+          ? (profile.club_name || 'Club')
+          : `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
+        console.log('🟢 [CAND/STATUS] About to POST /api/send-application-status → toEmail:', applicant.email)
+        const res = await fetch('/api/send-application-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            toEmail: applicant.email,
+            toName,
+            status,
+            clubName,
+            annonceTitle: app.annonce_title || '',
+            receiverZone: applicant.zone,
+          }),
+        })
+        const json = await res.json()
+        console.log('🟢 [CAND/STATUS] API response:', res.status, json)
+      } catch (e) { console.error('🔴 [CAND/STATUS] Exception:', e) }
+    })()
   }
 
   async function cancelApplication(id: string) {

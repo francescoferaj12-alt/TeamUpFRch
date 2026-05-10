@@ -240,6 +240,7 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
   const [error, setError] = useState('')
 
   async function handleSubmit() {
+    console.log('🟢 [POSTULER] handleSubmit called — annonce:', annonce.id)
     if (!message.trim()) { setError('Merci d\'écrire un message de motivation.'); return }
     setSending(true)
     setError('')
