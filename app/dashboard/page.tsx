@@ -249,22 +249,31 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
     if (!app) return
     ;(async () => {
       try {
+        console.log('🟢 [STATUS] Starting email notify — app id:', id, 'applicant_id:', app.applicant_id, 'status:', status)
         const { data: applicant, error: applicantErr } = await supabase
           .from('profiles')
           .select('email,first_name,last_name,club_name,role,zone')
           .eq('id', app.applicant_id).single()
-        if (applicantErr || !applicant?.email) return
-        // Fetch notification_settings separately so a missing column doesn't null out applicant
-        const { data: ns } = await supabase
+        console.log('🟢 [STATUS] Applicant query result:', { applicant, applicantErr })
+        if (applicantErr || !applicant?.email) {
+          console.log('🔴 [STATUS] Aborting — applicantErr or missing email:', { applicantErr, email: applicant?.email })
+          return
+        }
+        const { data: ns, error: nsErr } = await supabase
           .from('profiles').select('notification_settings').eq('id', app.applicant_id).single()
-        if (ns?.notification_settings?.applicationStatus === false) return
+        console.log('🟢 [STATUS] notification_settings query:', { ns, nsErr })
+        if (ns?.notification_settings?.applicationStatus === false) {
+          console.log('🟢 [STATUS] Skipping — applicant disabled applicationStatus notifications')
+          return
+        }
         const toName = applicant.role === 'club'
           ? (applicant.club_name || 'Club')
           : `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim() || applicant.email
         const clubName = profile.role === 'club'
           ? (profile.club_name || 'Club')
           : `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
-        await fetch('/api/send-application-status', {
+        console.log('🟢 [STATUS] About to POST /api/send-application-status → toEmail:', applicant.email)
+        const res = await fetch('/api/send-application-status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -276,7 +285,9 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
             receiverZone: applicant.zone,
           }),
         })
-      } catch (e) { console.error('[application status notify]', e) }
+        const json = await res.json()
+        console.log('🟢 [STATUS] API response:', res.status, json)
+      } catch (e) { console.error('🔴 [STATUS] Exception in email flow:', e) }
     })()
   }
 

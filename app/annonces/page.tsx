@@ -262,19 +262,28 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
     // Fire-and-forget: notify annonce author
     ;(async () => {
       try {
+        console.log('🟢 [POSTULER] Starting email notify — annonce:', annonce.id, 'author_id:', annonce.author_id)
         const { data: author, error: authorErr } = await supabase
           .from('profiles')
           .select('email,first_name,last_name,club_name,role,zone')
           .eq('id', annonce.author_id).single()
-        if (authorErr || !author?.email) return
-        // Fetch notification_settings separately so a missing column doesn't null out author
-        const { data: ns } = await supabase
+        console.log('🟢 [POSTULER] Author query result:', { author, authorErr })
+        if (authorErr || !author?.email) {
+          console.log('🔴 [POSTULER] Aborting — authorErr or missing email:', { authorErr, email: author?.email })
+          return
+        }
+        const { data: ns, error: nsErr } = await supabase
           .from('profiles').select('notification_settings').eq('id', annonce.author_id).single()
-        if (ns?.notification_settings?.newApplication === false) return
+        console.log('🟢 [POSTULER] notification_settings query:', { ns, nsErr })
+        if (ns?.notification_settings?.newApplication === false) {
+          console.log('🟢 [POSTULER] Skipping — author disabled newApplication notifications')
+          return
+        }
         const toName = author.role === 'club'
           ? (author.club_name || 'Club')
           : `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.email
-        await fetch('/api/send-application-notification', {
+        console.log('🟢 [POSTULER] About to POST /api/send-application-notification → toEmail:', author.email)
+        const res = await fetch('/api/send-application-notification', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -288,7 +297,9 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
             receiverZone: author.zone,
           }),
         })
-      } catch (e) { console.error('[application notify]', e) }
+        const json = await res.json()
+        console.log('🟢 [POSTULER] API response:', res.status, json)
+      } catch (e) { console.error('🔴 [POSTULER] Exception in email flow:', e) }
     })()
   }
 
