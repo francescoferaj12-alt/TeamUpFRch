@@ -55,7 +55,6 @@ export default function ResetPasswordPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) markReady()
     })
-
     return () => {
       subscription.unsubscribe()
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
