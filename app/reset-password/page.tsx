@@ -28,14 +28,32 @@ export default function ResetPasswordPage() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    // Show "link invalid" if Supabase doesn't fire PASSWORD_RECOVERY within 10s
+    // 1. Check URL hash immediately for Supabase error (e.g. token already consumed by email scanner)
+    const hashParams = new URLSearchParams(window.location.hash.slice(1))
+    if (hashParams.get('error')) {
+      setExpired(true)
+      return
+    }
+
+    // 2. Start timeout — only triggered if no valid session is found
     timeoutRef.current = setTimeout(() => setExpired(true), 10000)
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setReady(true)
-        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    const markReady = () => {
+      setReady(true)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+
+    // 3. Subscribe to future auth events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
+        markReady()
       }
+    })
+
+    // 4. Fallback: check if Supabase already processed the token before we subscribed
+    //    (PASSWORD_RECOVERY event fires on Supabase init, before React's useEffect runs)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) markReady()
     })
     return () => {
       subscription.unsubscribe()
