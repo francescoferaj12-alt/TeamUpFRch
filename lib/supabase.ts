@@ -80,6 +80,11 @@ export type Profile = {
   club_phone_public?: string
   club_email_public?: string
   verification_requested?: boolean
+  notification_settings?: {
+    newMessage?: boolean
+    newApplication?: boolean
+    applicationStatus?: boolean
+  }
   // Player extended
   position_secondary?: string
   jersey_number?: number

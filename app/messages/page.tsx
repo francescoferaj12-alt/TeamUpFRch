@@ -335,9 +335,10 @@ export default function MessagesPage() {
       ;(async () => {
         try {
           const { data: receiver } = await supabase.from('profiles')
-            .select('email,first_name,last_name,club_name,role')
+            .select('email,first_name,last_name,club_name,role,zone,notification_settings')
             .eq('id', _pid).single()
           if (!receiver?.email) return
+          if (receiver.notification_settings?.newMessage === false) return
           const senderName = profile.role === 'club'
             ? (profile.club_name || 'Un club')
             : `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Un utilisateur'
@@ -351,7 +352,9 @@ export default function MessagesPage() {
               receiverEmail: receiver.email,
               receiverName,
               senderName,
+              senderUserId: profile.id,
               messagePreview: _txt.slice(0, 120) || (_pf ? `[Fichier: ${_pf.name}]` : ''),
+              receiverZone: receiver.zone,
             }),
           })
         } catch {}

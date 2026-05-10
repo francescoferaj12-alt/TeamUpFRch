@@ -259,6 +259,34 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
     if (err) { setError('Erreur lors de la candidature. Réessaie.'); return }
     setDone(true)
     setTimeout(onSuccess, 2000)
+    // Fire-and-forget: notify annonce author
+    ;(async () => {
+      try {
+        const { data: author } = await supabase
+          .from('profiles')
+          .select('email,first_name,last_name,club_name,role,zone,notification_settings')
+          .eq('id', annonce.author_id).single()
+        if (!author?.email) return
+        if (author.notification_settings?.newApplication === false) return
+        const toName = author.role === 'club'
+          ? (author.club_name || 'Club')
+          : `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.email
+        await fetch('/api/send-application-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            toEmail: author.email,
+            toName,
+            applicantName,
+            applicantRole: currentUser.role,
+            annonceTitle: annonce.title,
+            applicantId: currentUser.id,
+            annonceId: annonce.id,
+            receiverZone: author.zone,
+          }),
+        })
+      } catch {}
+    })()
   }
 
   return (

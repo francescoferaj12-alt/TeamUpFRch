@@ -244,6 +244,37 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
   async function updateStatus(id: string, status: 'accepted' | 'rejected') {
     await supabase.from('applications').update({ status }).eq('id', id)
     setApps((prev) => prev.map((a) => a.id === id ? { ...a, status } : a))
+    // Fire-and-forget: notify applicant
+    const app = apps.find(a => a.id === id)
+    if (!app) return
+    ;(async () => {
+      try {
+        const { data: applicant } = await supabase
+          .from('profiles')
+          .select('email,first_name,last_name,club_name,role,zone,notification_settings')
+          .eq('id', app.applicant_id).single()
+        if (!applicant?.email) return
+        if (applicant.notification_settings?.applicationStatus === false) return
+        const toName = applicant.role === 'club'
+          ? (applicant.club_name || 'Club')
+          : `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim() || applicant.email
+        const clubName = profile.role === 'club'
+          ? (profile.club_name || 'Club')
+          : `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+        await fetch('/api/send-application-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            toEmail: applicant.email,
+            toName,
+            status,
+            clubName,
+            annonceTitle: app.annonce_title || '',
+            receiverZone: applicant.zone,
+          }),
+        })
+      } catch {}
+    })()
   }
 
   const darkCard = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem' }
@@ -455,6 +486,11 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
 
+  const defaultNotif = { newMessage: true, newApplication: true, applicationStatus: true }
+  const [notif, setNotif] = useState({ ...defaultNotif, ...(profile.notification_settings || {}) })
+  const [savingNotif, setSavingNotif] = useState(false)
+  const [notifMsg, setNotifMsg] = useState('')
+
   async function handleSave() {
     setSaving(true)
     const updates: Partial<Profile> = { bio, ligue, zone }
@@ -462,6 +498,14 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
     const { error } = await supabase.from('profiles').update(updates).eq('id', profile.id)
     setSaving(false)
     if (!error) { onSaved({ ...profile, ...updates }); setMsg(t.dash.saved_ok[lang]); setTimeout(() => setMsg(''), 3000) }
+  }
+
+  async function handleSaveNotif() {
+    setSavingNotif(true)
+    await supabase.from('profiles').update({ notification_settings: notif }).eq('id', profile.id)
+    setSavingNotif(false)
+    setNotifMsg(t.dash.notif_saved[lang])
+    setTimeout(() => setNotifMsg(''), 3000)
   }
 
   const optSt = { background:'#061540' }
@@ -507,6 +551,39 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
             {saving ? t.dash.saving_btn[lang] : t.dash.save_btn[lang]}
           </button>
           <Link href="/profil" style={{ display:'inline-flex', background:'transparent', color:'rgba(255,255,255,.5)', border:'1px solid rgba(255,255,255,.1)', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:600, textDecoration:'none', alignItems:'center' }}>{t.dash.see_profile[lang]}</Link>
+        </div>
+      </div>
+
+      {/* Notification settings */}
+      <div style={{ marginTop:'1.5rem' }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:'rgba(255,255,255,.35)', textTransform:'uppercase' as const, marginBottom:4 }}>{t.dash.settings_title[lang]}</div>
+        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.8rem', letterSpacing:1, marginBottom:'.25rem' }}>{t.dash.notif_title[lang]}</div>
+        <p style={{ color:'rgba(255,255,255,.4)', fontSize:13, marginBottom:'1rem' }}>{t.dash.notif_desc[lang]}</p>
+        <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'1.25rem', display:'flex', flexDirection:'column' as const, gap:'.85rem' }}>
+          {notifMsg && <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', color:'#4cdb7a', borderRadius:10, padding:'9px 14px', fontSize:13 }}>{notifMsg}</div>}
+          {[
+            { key:'newMessage', label:t.dash.notif_new_message[lang], desc:t.dash.notif_new_message_desc[lang] },
+            ...(profile.role === 'club' ? [{ key:'newApplication', label:t.dash.notif_new_app[lang], desc:t.dash.notif_new_app_desc[lang] }] : []),
+            ...(profile.role !== 'club' ? [{ key:'applicationStatus', label:t.dash.notif_app_status[lang], desc:t.dash.notif_app_status_desc[lang] }] : []),
+          ].map(({ key, label, desc }) => (
+            <label key={key} style={{ display:'flex', alignItems:'flex-start', gap:12, cursor:'pointer' }}>
+              <div style={{ position:'relative' as const, flexShrink:0, marginTop:2 }}>
+                <input
+                  type="checkbox"
+                  checked={notif[key as keyof typeof notif] !== false}
+                  onChange={e => setNotif(prev => ({ ...prev, [key]: e.target.checked }))}
+                  style={{ width:18, height:18, accentColor:'#e63946', cursor:'pointer' }}
+                />
+              </div>
+              <div>
+                <div style={{ fontWeight:700, fontSize:14, color:'rgba(255,255,255,.85)', marginBottom:2 }}>{label}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>{desc}</div>
+              </div>
+            </label>
+          ))}
+          <button onClick={handleSaveNotif} disabled={savingNotif} style={{ alignSelf:'flex-start', background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'9px 20px', fontSize:13, fontWeight:700, cursor:savingNotif ? 'not-allowed' : 'pointer', opacity:savingNotif ? .7 : 1, fontFamily:'inherit', marginTop:4 }}>
+            {savingNotif ? t.dash.notif_saving[lang] : t.dash.notif_save[lang]}
+          </button>
         </div>
       </div>
     </>

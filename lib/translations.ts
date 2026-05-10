@@ -568,6 +568,17 @@ export const t = {
     role_player: { fr: 'Joueur', de: 'Spieler' },
     role_coach: { fr: 'Coach', de: 'Trainer' },
     role_club: { fr: 'Club · Admin', de: 'Verein · Admin' },
+    notif_title: { fr: 'Notifications email', de: 'E-Mail-Benachrichtigungen' },
+    notif_desc: { fr: 'Choisis les événements pour lesquels tu veux recevoir un email.', de: 'Wähle, für welche Ereignisse du eine E-Mail erhalten möchtest.' },
+    notif_new_message: { fr: 'Nouveaux messages', de: 'Neue Nachrichten' },
+    notif_new_message_desc: { fr: 'Recevoir un email quand quelqu\'un t\'écrit.', de: 'E-Mail erhalten, wenn jemand schreibt.' },
+    notif_new_app: { fr: 'Nouvelles candidatures', de: 'Neue Bewerbungen' },
+    notif_new_app_desc: { fr: '(Club) Email pour chaque nouvelle candidature à tes annonces.', de: '(Verein) E-Mail für jede neue Bewerbung auf deine Anzeigen.' },
+    notif_app_status: { fr: 'Réponses à mes candidatures', de: 'Antworten auf meine Bewerbungen' },
+    notif_app_status_desc: { fr: 'Email quand un club accepte ou refuse ta candidature.', de: 'E-Mail wenn ein Verein deine Bewerbung annimmt oder ablehnt.' },
+    notif_save: { fr: '💾 Enregistrer les préférences', de: '💾 Präferenzen speichern' },
+    notif_saving: { fr: '⏳ Enregistrement…', de: '⏳ Speichern…' },
+    notif_saved: { fr: '✅ Préférences enregistrées !', de: '✅ Präferenzen gespeichert!' },
   },
 
   // CANDIDATURES
