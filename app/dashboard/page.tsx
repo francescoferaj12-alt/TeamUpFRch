@@ -249,12 +249,15 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
     if (!app) return
     ;(async () => {
       try {
-        const { data: applicant } = await supabase
+        const { data: applicant, error: applicantErr } = await supabase
           .from('profiles')
-          .select('email,first_name,last_name,club_name,role,zone,notification_settings')
+          .select('email,first_name,last_name,club_name,role,zone')
           .eq('id', app.applicant_id).single()
-        if (!applicant?.email) return
-        if (applicant.notification_settings?.applicationStatus === false) return
+        if (applicantErr || !applicant?.email) return
+        // Fetch notification_settings separately so a missing column doesn't null out applicant
+        const { data: ns } = await supabase
+          .from('profiles').select('notification_settings').eq('id', app.applicant_id).single()
+        if (ns?.notification_settings?.applicationStatus === false) return
         const toName = applicant.role === 'club'
           ? (applicant.club_name || 'Club')
           : `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim() || applicant.email
@@ -273,7 +276,7 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
             receiverZone: applicant.zone,
           }),
         })
-      } catch {}
+      } catch (e) { console.error('[application status notify]', e) }
     })()
   }
 

@@ -262,12 +262,15 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
     // Fire-and-forget: notify annonce author
     ;(async () => {
       try {
-        const { data: author } = await supabase
+        const { data: author, error: authorErr } = await supabase
           .from('profiles')
-          .select('email,first_name,last_name,club_name,role,zone,notification_settings')
+          .select('email,first_name,last_name,club_name,role,zone')
           .eq('id', annonce.author_id).single()
-        if (!author?.email) return
-        if (author.notification_settings?.newApplication === false) return
+        if (authorErr || !author?.email) return
+        // Fetch notification_settings separately so a missing column doesn't null out author
+        const { data: ns } = await supabase
+          .from('profiles').select('notification_settings').eq('id', annonce.author_id).single()
+        if (ns?.notification_settings?.newApplication === false) return
         const toName = author.role === 'club'
           ? (author.club_name || 'Club')
           : `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.email
@@ -285,7 +288,7 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
             receiverZone: author.zone,
           }),
         })
-      } catch {}
+      } catch (e) { console.error('[application notify]', e) }
     })()
   }
 
