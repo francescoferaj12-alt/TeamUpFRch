@@ -107,7 +107,18 @@ export type Profile = {
   onboarding_skipped?: boolean
   onboarding_completed_at?: string
   club_contact_role?: string
+  // AFF
+  aff_club_id?: number | null
   created_at: string
+}
+
+export type AffClub = {
+  id: number
+  aff_number: number
+  name: string
+  name_normalized: string
+  region?: string | null
+  created_at?: string
 }
 
 export type Annonce = {
