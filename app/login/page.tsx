@@ -7,6 +7,7 @@ import { useLang } from '../../lib/lang-context'
 import { t, months } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
 import { liguesHomme, liguesFemme } from '../../lib/data'
+import AffClubSelector from '../../components/AffClubSelector'
 
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
@@ -59,6 +60,8 @@ function LoginForm() {
   const [birthMonth, setBirthMonth] = useState('')
   const [birthYear, setBirthYear] = useState('')
   const [clubName, setClubName] = useState('')
+  const [selectedAffClubId, setSelectedAffClubId] = useState<number | null>(null)
+  const [affClubError, setAffClubError] = useState('')
   const [bio, setBio] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [coachExperience, setCoachExperience] = useState('')
@@ -109,6 +112,12 @@ function LoginForm() {
       return
     }
 
+    if (role === 'club' && selectedAffClubId === null) {
+      setAffClubError(t.login.club_selector_error_required[lang])
+      setLoading(false)
+      return
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email, password,
       options: {
@@ -133,6 +142,7 @@ function LoginForm() {
         zone,
         foot: role === 'player' ? foot : null,
         club_name: role === 'club' ? clubName : null,
+        aff_club_id: role === 'club' ? selectedAffClubId : null,
         bio: role !== 'coach' ? bio : null,
         birthdate,
         available: true,
@@ -375,8 +385,19 @@ function LoginForm() {
                 </div>
 
                 {role === 'club' && <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.clubname[lang]}</div>
-                  <input style={inputStyle} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="Nom du club" required />
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.club_selector_label[lang]}</div>
+                  <AffClubSelector
+                    value={selectedAffClubId}
+                    onChange={(clubId, name) => {
+                      setSelectedAffClubId(clubId)
+                      setClubName(name)
+                      if (clubId !== null) setAffClubError('')
+                    }}
+                    required
+                    language={lang}
+                    inputStyle={inputStyle}
+                    error={affClubError}
+                  />
                 </div>}
 
                 {role === 'player' && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
