@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { LangProvider } from '../lib/lang-context';
 import { AuthProvider } from '../lib/auth-context'
 import EmailVerificationBanner from '../components/EmailVerificationBanner';
+import IncompleteProfileBanner from '../components/IncompleteProfileBanner';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://teamupfr.ch'),
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             <Navbar />
             <EmailVerificationBanner />
+            <IncompleteProfileBanner />
             <main>{children}</main>
             <Footer />
           </AuthProvider>

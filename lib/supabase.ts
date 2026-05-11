@@ -101,6 +101,12 @@ export type Profile = {
   club_color_primary?: string
   club_color_secondary?: string
   club_categories?: string
+  // Onboarding
+  onboarding_step?: number
+  profile_completed?: boolean
+  onboarding_skipped?: boolean
+  onboarding_completed_at?: string
+  club_contact_role?: string
   created_at: string
 }
 

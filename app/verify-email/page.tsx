@@ -14,6 +14,7 @@ export default function VerifyEmailPage() {
   const router = useRouter()
   const [state, setState] = useState<State>('loading')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const redirectTarget = useRef<string>('/profil')
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.slice(1))
@@ -29,6 +30,15 @@ export default function VerifyEmailPage() {
       await supabase.from('profiles').update({ hidden: false }).eq('id', userId)
       setState('success')
       sessionStorage.removeItem('pendingVerifyEmail')
+      // Check onboarding status to decide redirect target
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('profile_completed, onboarding_skipped')
+        .eq('id', userId)
+        .single()
+      if (profile && profile.profile_completed === false && profile.onboarding_skipped !== true) {
+        redirectTarget.current = '/onboarding'
+      }
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -49,8 +59,8 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     if (state === 'success') {
-      const t = setTimeout(() => router.push('/profil'), 3000)
-      return () => clearTimeout(t)
+      const timer = setTimeout(() => router.push(redirectTarget.current), 3000)
+      return () => clearTimeout(timer)
     }
   }, [state, router])
 
@@ -85,7 +95,7 @@ export default function VerifyEmailPage() {
                 {t.login.verify_success_desc[lang]}
               </p>
               <button
-                onClick={() => router.push('/profil')}
+                onClick={() => router.push(redirectTarget.current)}
                 style={{ width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: '#e63946', color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 {t.login.verify_success_btn[lang]}
