@@ -240,7 +240,6 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
   const [error, setError] = useState('')
 
   async function handleSubmit() {
-    console.log('🟢 [POSTULER] handleSubmit called — annonce:', annonce.id)
     if (!message.trim()) { setError('Merci d\'écrire un message de motivation.'); return }
     setSending(true)
     setError('')
@@ -264,13 +263,12 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
         }),
       })
       const json = await res.json()
-      console.log('🟢 [POSTULER] API response:', res.status, json)
       setSending(false)
       if (!res.ok) { setError('Erreur lors de la candidature. Réessaie.'); return }
       setDone(true)
       setTimeout(onSuccess, 2000)
     } catch (e) {
-      console.error('🔴 [POSTULER] Network error:', e)
+      console.error('Application submit network error:', e)
       setSending(false)
       setError('Erreur réseau. Réessaie.')
     }

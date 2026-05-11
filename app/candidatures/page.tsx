@@ -143,7 +143,6 @@ export default function CandidaturesPage() {
   }, [profile?.id])
 
   async function updateStatus(id: string, status: 'pending' | 'accepted' | 'rejected') {
-    console.log('🟢 [CAND/STATUS] updateStatus called:', id, status)
     setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status } : a))
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -155,14 +154,11 @@ export default function CandidaturesPage() {
         },
         body: JSON.stringify({ status }),
       })
-      const json = await res.json()
-      console.log('🟢 [CAND/STATUS] API response:', res.status, json)
       if (!res.ok) {
-        // Roll back optimistic update on error
         setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status: 'pending' } : a))
       }
     } catch (e) {
-      console.error('🔴 [CAND/STATUS] Network error:', e)
+      console.error('Application status network error:', e)
       setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status: 'pending' } : a))
     }
   }

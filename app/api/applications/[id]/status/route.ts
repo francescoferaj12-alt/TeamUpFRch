@@ -8,7 +8,6 @@ const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const appId = params.id
-  console.log('🟢 [API/app-status] PATCH received for app:', appId)
   try {
     const token = req.headers.get('Authorization')?.replace('Bearer ', '')
     const supabase = createClient(
@@ -19,7 +18,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     const { data: { user }, error: authErr } = await supabase.auth.getUser()
     if (authErr || !user) {
-      console.log('🔴 [API/app-status] Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -28,7 +26,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
-    // Update status
     const { data: app, error: updateErr } = await supabase
       .from('applications')
       .update({ status })
@@ -37,12 +34,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       .single()
 
     if (updateErr) {
-      console.log('🔴 [API/app-status] Update error:', updateErr)
       return NextResponse.json({ error: updateErr.message }, { status: 500 })
     }
-    console.log('🟢 [API/app-status] Updated app', app.id, '→', status)
 
-    // Email notification for accepted/rejected
     if (status !== 'pending' && process.env.RESEND_API_KEY) {
       try {
         const [{ data: applicant, error: applicantErr }, { data: annonce }] = await Promise.all([
@@ -53,7 +47,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             .select('title,author_id')
             .eq('id', app.annonce_id).single(),
         ])
-        console.log('🟢 [API/app-status] Applicant email:', applicant?.email, 'err:', applicantErr?.message)
 
         if (!applicantErr && applicant?.email && applicant.notification_settings?.applicationStatus !== false) {
           if (!isThrottled(applicant.email, `appStatus:${status}`)) {
@@ -72,8 +65,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             const lang = zoneLang(applicant.zone)
             const isAccepted = status === 'accepted'
             const resend = new Resend(process.env.RESEND_API_KEY)
-            console.log('🟡 [API/app-status] Sending to', applicant.email)
-            const { data: sent, error: sendErr } = await resend.emails.send({
+            const { error: sendErr } = await resend.emails.send({
               from: FROM,
               to: applicant.email,
               subject: isAccepted
@@ -81,24 +73,17 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
                 : (lang === 'de' ? `Antwort von ${clubName} auf deine Bewerbung` : `Réponse de ${clubName} à ta candidature`),
               html: applicationStatusHtml({ toName, status, clubName, annonceTitle: annonce?.title || '', lang }),
             })
-            if (sendErr) console.error('🔴 [API/app-status] Resend error:', sendErr)
-            else console.log('🟡 [API/app-status] Email sent, id:', sent?.id)
-          } else {
-            console.log('🟡 [API/app-status] Throttled for', applicant.email)
+            if (sendErr) console.error('Application status email failed:', sendErr)
           }
-        } else {
-          console.log('🟡 [API/app-status] Skipping email — no address, error, or opted out')
         }
       } catch (emailErr) {
-        console.error('🔴 [API/app-status] Email flow error:', emailErr)
+        console.error('Application status email flow error:', emailErr)
       }
-    } else if (!process.env.RESEND_API_KEY) {
-      console.log('🔴 [API/app-status] RESEND_API_KEY not set')
     }
 
     return NextResponse.json({ ok: true })
   } catch (e: any) {
-    console.error('🔴 [API/app-status] Unhandled error:', e)
+    console.error('Application status unhandled error:', e)
     return NextResponse.json({ error: e.message || 'Internal error' }, { status: 500 })
   }
 }
