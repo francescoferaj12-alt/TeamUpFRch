@@ -22,10 +22,14 @@ export default function AnnoncesPage() {
 
   useEffect(() => {
     supabase.from('annonces')
-      .select('*, profiles!author_id(id, avatar_url, verified)')
+      .select('*, profiles!author_id(id, avatar_url, verified, hidden)')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
-      .then(({ data }) => { setAnnonces((data || []) as Annonce[]); setLoading(false) })
+      .then(({ data }) => {
+        const visible = (data || []).filter((a: any) => !a.profiles?.hidden)
+        setAnnonces(visible as Annonce[])
+        setLoading(false)
+      })
   }, [])
 
   const filtered = useMemo(() => {
@@ -236,6 +240,7 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
   const [error, setError] = useState('')
 
   async function handleSubmit() {
+    console.log('🟢 [POSTULER] handleSubmit called — annonce:', annonce.id)
     if (!message.trim()) { setError('Merci d\'écrire un message de motivation.'); return }
     setSending(true)
     setError('')
@@ -243,18 +248,32 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: { annonce: 
       ? currentUser.club_name
       : `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.email
 
-    const { error: err } = await supabase.from('applications').insert({
-      annonce_id: annonce.id,
-      applicant_id: currentUser.id,
-      applicant_name: applicantName,
-      message: message.trim(),
-      status: 'pending'
-    })
-
-    setSending(false)
-    if (err) { setError('Erreur lors de la candidature. Réessaie.'); return }
-    setDone(true)
-    setTimeout(onSuccess, 2000)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/applications/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({
+          annonce_id: annonce.id,
+          message: message.trim(),
+          applicant_name: applicantName,
+          applicant_role: currentUser.role,
+        }),
+      })
+      const json = await res.json()
+      console.log('🟢 [POSTULER] API response:', res.status, json)
+      setSending(false)
+      if (!res.ok) { setError('Erreur lors de la candidature. Réessaie.'); return }
+      setDone(true)
+      setTimeout(onSuccess, 2000)
+    } catch (e) {
+      console.error('🔴 [POSTULER] Network error:', e)
+      setSending(false)
+      setError('Erreur réseau. Réessaie.')
+    }
   }
 
   return (

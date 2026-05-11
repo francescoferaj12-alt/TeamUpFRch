@@ -91,6 +91,7 @@ export default function CandidaturesPage() {
   useEffect(() => {
     if (authLoading) return
     if (!session) { router.push('/login'); return }
+    if (!session.user.email_confirmed_at) { router.push('/verify-email-pending'); return }
     if (authProfile) { setProfile(authProfile); setPageLoading(false) }
   }, [authLoading, session, authProfile, router])
 
@@ -142,8 +143,28 @@ export default function CandidaturesPage() {
   }, [profile?.id])
 
   async function updateStatus(id: string, status: 'pending' | 'accepted' | 'rejected') {
-    await supabase.from('applications').update({ status }).eq('id', id)
+    console.log('🟢 [CAND/STATUS] updateStatus called:', id, status)
     setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status } : a))
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`/api/applications/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ status }),
+      })
+      const json = await res.json()
+      console.log('🟢 [CAND/STATUS] API response:', res.status, json)
+      if (!res.ok) {
+        // Roll back optimistic update on error
+        setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status: 'pending' } : a))
+      }
+    } catch (e) {
+      console.error('🔴 [CAND/STATUS] Network error:', e)
+      setReceivedApps(prev => prev.map(a => a.id === id ? { ...a, status: 'pending' } : a))
+    }
   }
 
   async function cancelApplication(id: string) {

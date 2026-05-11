@@ -113,7 +113,7 @@ function LoginForm() {
       email, password,
       options: {
         data: { first_name: firstName, last_name: lastName, role },
-        emailRedirectTo: 'https://teamupfr.ch/profil'
+        emailRedirectTo: 'https://teamupfr.ch/verify-email'
       }
     })
 
@@ -136,6 +136,7 @@ function LoginForm() {
         bio: role !== 'coach' ? bio : null,
         birthdate,
         available: true,
+        hidden: true,
         ...(role === 'coach' ? {
           coach_experience: coachExperience,
           coach_diploma: coachDiploma,
@@ -156,8 +157,8 @@ function LoginForm() {
       }
     }
 
-    setSuccess(t.login.success_register[lang])
-    setShowResend(true)
+    if (typeof window !== 'undefined') sessionStorage.setItem('pendingVerifyEmail', email)
+    router.push('/verify-email-pending')
     setLoading(false)
   }
 

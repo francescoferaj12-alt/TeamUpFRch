@@ -3,7 +3,8 @@ import '../styles/globals.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { LangProvider } from '../lib/lang-context';
-import { AuthProvider } from '../lib/auth-context';
+import { AuthProvider } from '../lib/auth-context'
+import EmailVerificationBanner from '../components/EmailVerificationBanner';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://teamupfr.ch'),
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LangProvider>
           <AuthProvider>
             <Navbar />
+            <EmailVerificationBanner />
             <main>{children}</main>
             <Footer />
           </AuthProvider>
