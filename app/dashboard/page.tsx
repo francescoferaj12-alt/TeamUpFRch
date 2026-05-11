@@ -242,7 +242,6 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
   }, [profile.id])
 
   async function updateStatus(id: string, status: 'accepted' | 'rejected') {
-    console.log('🟢 [DASH/STATUS] updateStatus called:', id, status)
     setApps((prev) => prev.map((a) => a.id === id ? { ...a, status } : a))
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -254,13 +253,11 @@ function CandidaturesSection({ profile }: { profile: Profile }) {
         },
         body: JSON.stringify({ status }),
       })
-      const json = await res.json()
-      console.log('🟢 [DASH/STATUS] API response:', res.status, json)
       if (!res.ok) {
         setApps((prev) => prev.map((a) => a.id === id ? { ...a, status: 'pending' } : a))
       }
     } catch (e) {
-      console.error('🔴 [DASH/STATUS] Network error:', e)
+      console.error('Application status network error:', e)
       setApps((prev) => prev.map((a) => a.id === id ? { ...a, status: 'pending' } : a))
     }
   }
