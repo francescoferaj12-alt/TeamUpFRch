@@ -61,6 +61,7 @@ function LoginForm() {
   const [birthYear, setBirthYear] = useState('')
   const [clubName, setClubName] = useState('')
   const [selectedAffClubId, setSelectedAffClubId] = useState<number | null>(null)
+  const selectedAffClubIdRef = useRef<number | null>(null)
   const [affClubError, setAffClubError] = useState('')
   const [bio, setBio] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -104,7 +105,7 @@ function LoginForm() {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true); setError('')
+    setLoading(true); setError(''); setAffClubError('')
 
     if (password !== confirmPassword) {
       setError(t.login.error_pwd_match[lang])
@@ -112,7 +113,9 @@ function LoginForm() {
       return
     }
 
-    if (role === 'club' && selectedAffClubId === null) {
+    // Use ref for most up-to-date value, fall back to state
+    const affClubId = selectedAffClubIdRef.current ?? selectedAffClubId
+    if (role === 'club' && affClubId === null) {
       setAffClubError(t.login.club_selector_error_required[lang])
       setLoading(false)
       return
@@ -142,7 +145,7 @@ function LoginForm() {
         zone,
         foot: role === 'player' ? foot : null,
         club_name: role === 'club' ? clubName : null,
-        aff_club_id: role === 'club' ? selectedAffClubId : null,
+        aff_club_id: role === 'club' ? affClubId : null,
         bio: role !== 'coach' ? bio : null,
         birthdate,
         available: true,
@@ -155,15 +158,23 @@ function LoginForm() {
         } : {})
       }
 
-      const { error: profileError } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' })
-      if (profileError) {
-        if (profileError.message?.includes('birthdate')) {
-          const { birthdate: _bd, ...profileWithoutBirthdate } = profileData
-          const { error: retry } = await supabase.from('profiles').upsert(profileWithoutBirthdate, { onConflict: 'id' })
-          if (retry) { setError('Erreur profil: ' + retry.message); setLoading(false); return }
+      // Use server-side API route to create the profile, bypassing RLS
+      const res = await fetch('/api/auth/create-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: data.user.id, profileData }),
+      })
+
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}))
+        const msg: string = json.error ?? ''
+        if (msg.includes('row-level security') || msg.includes('violates')) {
+          setError(t.login.club_selector_error_invalid[lang])
         } else {
-          setError('Erreur profil: ' + profileError.message); setLoading(false); return
+          setError('Erreur profil: ' + (msg || 'réessaie.'))
         }
+        setLoading(false)
+        return
       }
     }
 
@@ -390,6 +401,7 @@ function LoginForm() {
                     value={selectedAffClubId}
                     onChange={(clubId, name) => {
                       setSelectedAffClubId(clubId)
+                      selectedAffClubIdRef.current = clubId
                       setClubName(name)
                       if (clubId !== null) setAffClubError('')
                     }}
