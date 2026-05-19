@@ -248,3 +248,37 @@ export function newClubNotificationHtml(opts: {
     </div>`
   return wrapper(content, lang)
 }
+
+// ── Club deleted / account removed (to club) ────────────────────────────────
+export function clubDeletedHtml(opts: {
+  clubName: string
+  reason: string
+  lang: Lang
+}): string {
+  const { clubName, reason, lang } = opts
+  const de = lang === 'de'
+  const content = `
+    <div style="text-align:center;margin-bottom:16px;font-size:2.5rem;">🗑️</div>
+    <h1 style="font-family:'Bebas Neue','Arial Narrow',Arial,sans-serif;font-size:28px;color:#ff6b6b;margin:0 0 12px;letter-spacing:0.03em;">
+      ${de ? 'Ihr Konto wurde gelöscht' : 'Votre compte a été supprimé'}
+    </h1>
+    <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.65;margin:0 0 8px;">
+      ${de
+        ? `Das Konto des Vereins <strong style="color:#fff;">${clubName}</strong> wurde von TeamUpFR entfernt.`
+        : `Le compte du club <strong style="color:#fff;">${clubName}</strong> a été supprimé de TeamUpFR.`}
+    </p>
+    <div style="background:rgba(255,255,255,0.05);border-left:3px solid #ff6b6b;border-radius:0 8px 8px 0;padding:14px 18px;margin:18px 0;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.55;">
+      ${de ? 'Grund:' : 'Raison :'} ${reason}
+    </div>
+    <p style="color:rgba(255,255,255,0.55);font-size:14px;line-height:1.65;margin:0 0 24px;">
+      ${de
+        ? 'Wenn Sie Fragen haben, kontaktieren Sie uns bitte per E-Mail.'
+        : 'Pour toute question, contactez-nous par email.'}
+    </p>
+    <div style="text-align:center;">
+      <a href="mailto:teamupfr.ch@gmail.com" style="display:inline-block;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);padding:13px 24px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;border:1px solid rgba(255,255,255,0.12);">
+        teamupfr.ch@gmail.com
+      </a>
+    </div>`
+  return wrapper(content, lang)
+}
