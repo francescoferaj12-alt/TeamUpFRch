@@ -34,8 +34,9 @@ export default function RecherchePage() {
     async function load() {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id,email,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,birthdate,genre,verified')
+        .select('id,email,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,birthdate,genre,verified,club_verification_status')
         .neq('hidden', true)
+        .or('role.neq.club,club_verification_status.eq.approved')
         .order('created_at', { ascending: false })
         .limit(500)
       if (!error && data) setProfiles(data as Profile[])

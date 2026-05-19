@@ -153,3 +153,98 @@ export function applicationStatusHtml(opts: {
     ${isAccepted ? `<div style="text-align:center;">${redBtn(msgUrl, de ? 'Kontakt aufnehmen →' : 'Contacter le club →')}</div>` : `<div style="text-align:center;"><a href="${BASE_URL}/annonces" style="display:inline-block;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);padding:13px 24px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;border:1px solid rgba(255,255,255,0.12);">${de ? 'Andere Anzeigen suchen →' : "Voir d'autres annonces →"}</a></div>`}`
   return wrapper(content, lang)
 }
+
+// ── Club approved (to club) ──────────────────────────────────────────────────
+export function clubApprovedHtml(opts: {
+  clubName: string
+  lang: Lang
+}): string {
+  const { clubName, lang } = opts
+  const de = lang === 'de'
+  const content = `
+    <div style="text-align:center;margin-bottom:16px;font-size:2.5rem;">✅</div>
+    <h1 style="font-family:'Bebas Neue','Arial Narrow',Arial,sans-serif;font-size:30px;color:#4cdb7a;margin:0 0 12px;letter-spacing:0.03em;">
+      ${de ? 'Ihr Verein wurde verifiziert!' : 'Votre club a été vérifié !'}
+    </h1>
+    <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.65;margin:0 0 8px;">
+      ${de
+        ? `<strong style="color:#fff;">${clubName}</strong> ist jetzt offiziell auf TeamUpFR verifiziert.`
+        : `Le club <strong style="color:#fff;">${clubName}</strong> est maintenant officiellement vérifié sur TeamUpFR.`}
+    </p>
+    <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.65;margin:0 0 24px;">
+      ${de
+        ? 'Das Verifikations-Badge ist auf Ihrem Profil und in der Suche sichtbar. Sie können jetzt Anzeigen veröffentlichen.'
+        : "Le badge vérifié est visible sur votre profil et dans la recherche. Vous pouvez désormais publier des annonces."}
+    </p>
+    <div style="text-align:center;">
+      ${redBtn(`${BASE_URL}/profil`, de ? 'Mein Profil ansehen →' : 'Voir mon profil →')}
+    </div>`
+  return wrapper(content, lang)
+}
+
+// ── Club rejected (to club) ──────────────────────────────────────────────────
+export function clubRejectedHtml(opts: {
+  clubName: string
+  reason: string
+  lang: Lang
+}): string {
+  const { clubName, reason, lang } = opts
+  const de = lang === 'de'
+  const content = `
+    <div style="text-align:center;margin-bottom:16px;font-size:2.5rem;">❌</div>
+    <h1 style="font-family:'Bebas Neue','Arial Narrow',Arial,sans-serif;font-size:30px;color:#ff6b6b;margin:0 0 12px;letter-spacing:0.03em;">
+      ${de ? 'Verifikation abgelehnt' : 'Vérification refusée'}
+    </h1>
+    <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.65;margin:0 0 8px;">
+      ${de
+        ? `Leider wurde der Antrag von <strong style="color:#fff;">${clubName}</strong> abgelehnt.`
+        : `La demande de vérification du club <strong style="color:#fff;">${clubName}</strong> a été refusée.`}
+    </p>
+    <div style="background:rgba(255,255,255,0.05);border-left:3px solid #ff6b6b;border-radius:0 8px 8px 0;padding:14px 18px;margin:18px 0;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.55;">
+      ${de ? 'Grund:' : 'Raison :'} ${reason}
+    </div>
+    <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.65;margin:0 0 24px;">
+      ${de
+        ? 'Wenn Sie Fragen haben, kontaktieren Sie uns bitte per E-Mail.'
+        : 'Si vous pensez qu\'il s\'agit d\'une erreur, contactez-nous par email.'}
+    </p>
+    <div style="text-align:center;">
+      <a href="mailto:teamupfr.ch@gmail.com" style="display:inline-block;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);padding:13px 24px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;border:1px solid rgba(255,255,255,0.12);">
+        ${de ? 'Kontakt aufnehmen' : 'Nous contacter'}
+      </a>
+    </div>`
+  return wrapper(content, lang)
+}
+
+// ── New club notification (to admin) ─────────────────────────────────────────
+export function newClubNotificationHtml(opts: {
+  clubName: string
+  clubEmail: string
+  affClubName?: string | null
+  emailIsProfessional: boolean
+  adminUrl: string
+}): string {
+  const { clubName, clubEmail, affClubName, emailIsProfessional, adminUrl } = opts
+  const lang: Lang = 'fr'
+  const emailBadge = emailIsProfessional
+    ? `<span style="display:inline-block;background:rgba(76,219,122,0.15);color:#4cdb7a;border:1px solid rgba(76,219,122,0.3);border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700;">Email pro</span>`
+    : `<span style="display:inline-block;background:rgba(255,165,0,0.15);color:#ffa500;border:1px solid rgba(255,165,0,0.3);border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700;">Email perso</span>`
+  const content = `
+    <h1 style="font-family:'Bebas Neue','Arial Narrow',Arial,sans-serif;font-size:28px;color:#fff;margin:0 0 16px;letter-spacing:0.03em;">
+      🏟️ Nouveau club à valider
+    </h1>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:20px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="color:rgba(255,255,255,0.5);font-size:13px;padding:6px 0;width:40%;">Club</td>
+            <td style="color:#fff;font-size:15px;font-weight:700;">${clubName}</td></tr>
+        <tr><td style="color:rgba(255,255,255,0.5);font-size:13px;padding:6px 0;">Email</td>
+            <td style="color:#fff;font-size:14px;">${clubEmail} ${emailBadge}</td></tr>
+        ${affClubName ? `<tr><td style="color:rgba(255,255,255,0.5);font-size:13px;padding:6px 0;">Club AFF</td>
+            <td style="color:#fff;font-size:14px;">${affClubName}</td></tr>` : ''}
+      </table>
+    </div>
+    <div style="text-align:center;">
+      ${redBtn(adminUrl, 'Valider sur le dashboard →')}
+    </div>`
+  return wrapper(content, lang)
+}
