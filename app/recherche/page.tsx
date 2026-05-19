@@ -29,6 +29,7 @@ export default function RecherchePage() {
   const [filterZone, setFilterZone] = useState('')
   const [filterDispo, setFilterDispo] = useState(false)
   const [filterGenre, setFilterGenre] = useState('')
+  const [filterVerifiedOnly, setFilterVerifiedOnly] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -62,13 +63,14 @@ export default function RecherchePage() {
       if (filterLigue && p.ligue !== filterLigue) return false
       if (filterPos && p.position !== filterPos) return false
       if (filterZone && p.zone !== filterZone) return false
+      if (filterVerifiedOnly && p.role === 'club' && p.club_verification_status !== 'approved') return false
       if (q) {
         const name = `${p.first_name || ''} ${p.last_name || ''} ${p.club_name || ''}`.toLowerCase()
         if (!name.includes(q) && !(p.position || '').toLowerCase().includes(q) && !(p.ligue || '').toLowerCase().includes(q) && !(p.zone || '').toLowerCase().includes(q)) return false
       }
       return true
     })
-  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, debouncedQuery, currentUser])
+  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, debouncedQuery, currentUser, filterVerifiedOnly])
 
   const counts = {
     all: filtered.length,
@@ -173,6 +175,17 @@ export default function RecherchePage() {
             {f.options.map(o => <option key={o} style={optSt}>{o}</option>)}
           </select>
         ))}
+
+        {filterType === 'club' && (
+          <button onClick={() => setFilterVerifiedOnly(!filterVerifiedOnly)} style={{
+            border: `1.5px solid ${filterVerifiedOnly ? '#4cdb7a' : 'rgba(255,255,255,.12)'}`,
+            background: filterVerifiedOnly ? 'rgba(76,219,122,.15)' : 'rgba(255,255,255,.04)',
+            color: filterVerifiedOnly ? '#4cdb7a' : 'rgba(255,255,255,.6)',
+            borderRadius: 100, padding: '6px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit'
+          }}>
+            ✅ {lang === 'fr' ? 'Seulement clubs vérifiés' : 'Nur verifizierte Vereine'}
+          </button>
+        )}
 
         <span style={{ marginLeft:'auto', fontSize:13, color:'rgba(255,255,255,.5)', fontWeight:500 }}>
           {filtered.length} {filtered.length > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
