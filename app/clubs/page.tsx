@@ -26,6 +26,7 @@ export default function ClubsPage() {
         .select('*')
         .eq('role', 'club')
         .neq('hidden', true)
+        .eq('club_verification_status', 'approved')
         .order('created_at', { ascending: false })
       if (data) setClubs(data)
       setLoading(false)
@@ -122,8 +123,13 @@ export default function ClubsPage() {
                     </div>
                     <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.4rem', color:'#fff', letterSpacing:1, display:'flex', alignItems:'center', justifyContent:'center', gap:4 }}>
                       {club.club_name || 'Club'}
-                      {club.verified && <VerifiedBadge />}
+                      {(club as any).club_verification_status === 'approved' && <VerifiedBadge />}
                     </div>
+                    {(club as any).club_verification_status === 'approved' && (
+                      <div style={{ marginTop: 6, display:'inline-flex', alignItems:'center', gap:4, background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.35)', color:'#4cdb7a', fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:100 }}>
+                        ✅ {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
+                      </div>
+                    )}
                     {club.available && (
                       <div style={{ position:'absolute', top:10, right:10, background:'rgba(13,122,54,.3)', border:'1px solid rgba(76,219,122,.3)', color:'#4cdb7a', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:100 }}>
                         🟢 {t.clubs.recruits[lang]}

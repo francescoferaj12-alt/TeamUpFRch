@@ -138,6 +138,11 @@ export default function PublicProfilPage() {
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600 }}>
                   {roleEmoji} {coachBadge || profile.position || roleLabel}
                 </span>
+                {profile.role === 'club' && (profile as any).club_verification_status === 'approved' && (
+                  <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#4cdb7a', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100 }}>
+                    ✅ {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
+                  </span>
+                )}
                 {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
                 {profile.zone && <span style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>📍 {profile.zone}</span>}
 
