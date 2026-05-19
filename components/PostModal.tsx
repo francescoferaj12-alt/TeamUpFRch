@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react'
 import { supabase, Profile, Annonce, avatarSrc } from '../lib/supabase'
 import { liguesHomme, liguesFemme } from '../lib/data'
+import { useLang } from '../lib/lang-context'
+import { t } from '../lib/translations'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
 const ZONES  = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export default function PostModal({ profile, annonce, onClose, onSuccess }: Props) {
+  const { lang } = useLang()
   const [title, setTitle] = useState(annonce?.title || '')
   const [body, setBody] = useState(annonce?.body || '')
   const [ligue, setLigue] = useState(annonce?.ligue || profile.ligue || '')
@@ -95,6 +98,35 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
         style={{ background:'#061540', border:'1px solid rgba(255,255,255,.1)', borderRadius:20, padding:'1.75rem', maxWidth:520, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.6)', color:'#fff' }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Club verification gate */}
+        {profile.role === 'club' && profile.club_verification_status !== 'approved' && (
+          <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+              {profile.club_verification_status === 'rejected' ? '❌' : '⏳'}
+            </div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.4rem', letterSpacing: 1, marginBottom: '.5rem', color: profile.club_verification_status === 'rejected' ? '#ff6b6b' : '#ffa500' }}>
+              {t.clubVerif.post_blocked_title[lang]}
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, lineHeight: 1.6, marginBottom: 8 }}>
+              {t.clubVerif.post_blocked_body[lang]}
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginBottom: '1.5rem' }}>
+              {profile.club_verification_status === 'rejected'
+                ? t.clubVerif.post_blocked_rejected[lang]
+                : t.clubVerif.post_blocked_pending[lang]}
+            </p>
+            <button
+              onClick={onClose}
+              style={{ background: 'rgba(255,255,255,.07)', color: 'rgba(255,255,255,.7)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 9, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Fermer
+            </button>
+          </div>
+        )}
+
+        {/* Normal form — only for non-club or approved clubs */}
+        {(profile.role !== 'club' || profile.club_verification_status === 'approved') && <>
+
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:'1.25rem' }}>
           <div style={{ width:44, height:44, borderRadius:'50%', overflow:'hidden', background:'linear-gradient(135deg,#e63946,#0a1f5c)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
@@ -190,6 +222,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
             Annuler
           </button>
         </div>
+        </>}
       </div>
     </div>
   )

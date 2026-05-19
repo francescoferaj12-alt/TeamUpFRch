@@ -849,6 +849,21 @@ export const t = {
     foot_both: { fr: 'Ambidextre', de: 'Beidfüssig' },
   },
 
+  // CLUB VERIFICATION
+  clubVerif: {
+    pending_title: { fr: 'Vérification en cours', de: 'Verifizierung ausstehend' },
+    pending_body: { fr: "Votre club est en attente de vérification par notre équipe. Vous pourrez publier des annonces dès l'approbation.", de: 'Ihr Verein wird von unserem Team überprüft. Sie können Anzeigen veröffentlichen, sobald die Genehmigung erteilt wurde.' },
+    rejected_title: { fr: 'Vérification refusée', de: 'Verifizierung abgelehnt' },
+    rejected_body: { fr: 'Votre demande de vérification a été refusée. Contactez-nous à teamupfr.ch@gmail.com.', de: 'Ihre Verifikationsanfrage wurde abgelehnt. Kontaktieren Sie uns unter teamupfr.ch@gmail.com.' },
+    rejected_reason: { fr: 'Raison :', de: 'Grund:' },
+    post_blocked_title: { fr: 'Club non vérifié', de: 'Verein nicht verifiziert' },
+    post_blocked_body: { fr: 'Votre club doit être vérifié par notre équipe avant de pouvoir publier des annonces.', de: 'Ihr Verein muss von unserem Team verifiziert werden, bevor Sie Anzeigen veröffentlichen können.' },
+    post_blocked_pending: { fr: 'Votre demande est en cours de traitement.', de: 'Ihre Anfrage wird bearbeitet.' },
+    post_blocked_rejected: { fr: 'Votre demande a été refusée. Contactez-nous pour régulariser votre situation.', de: 'Ihre Anfrage wurde abgelehnt. Kontaktieren Sie uns.' },
+    email_warning_title: { fr: 'Adresse email personnelle détectée', de: 'Persönliche E-Mail-Adresse erkannt' },
+    email_warning_body: { fr: "Pour accélérer la vérification, utilisez une adresse email officielle du club (ex: contact@fcbulle.ch).", de: 'Für eine schnellere Verifizierung verwenden Sie bitte eine offizielle Vereins-E-Mail (z.B. kontakt@fcbulle.ch).' },
+  },
+
   // FOOTER
   footer: {
     rights: { fr: 'Tous droits réservés', de: 'Alle Rechte vorbehalten' },

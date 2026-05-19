@@ -8,6 +8,7 @@ import { t, months } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
 import { liguesHomme, liguesFemme } from '../../lib/data'
 import AffClubSelector from '../../components/AffClubSelector'
+import { isPersonalEmail } from '../../lib/personal-email-domains'
 
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
@@ -63,6 +64,8 @@ function LoginForm() {
   const [selectedAffClubId, setSelectedAffClubId] = useState<number | null>(null)
   const selectedAffClubIdRef = useRef<number | null>(null)
   const [affClubError, setAffClubError] = useState('')
+  const [selectedAffClubName, setSelectedAffClubName] = useState('')
+  const [emailIsProfessional, setEmailIsProfessional] = useState(false)
   const [bio, setBio] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [coachExperience, setCoachExperience] = useState('')
@@ -136,6 +139,7 @@ function LoginForm() {
         ? `${birthYear}-${birthMonth.toString().padStart(2,'0')}-${birthDay.toString().padStart(2,'0')}`
         : null
 
+      const isPro = role === 'club' ? !isPersonalEmail(email) : false
       const profileData = {
         id: data.user.id, email, role,
         first_name: firstName, last_name: lastName,
@@ -150,6 +154,10 @@ function LoginForm() {
         birthdate,
         available: true,
         hidden: true,
+        ...(role === 'club' ? {
+          club_verification_status: 'pending',
+          club_email_is_professional: isPro,
+        } : {}),
         ...(role === 'coach' ? {
           coach_experience: coachExperience,
           coach_diploma: coachDiploma,
@@ -175,6 +183,20 @@ function LoginForm() {
         }
         setLoading(false)
         return
+      }
+
+      // Notify admin of new club registration (fire-and-forget)
+      if (role === 'club') {
+        fetch('/api/send-club-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clubName,
+            clubEmail: email,
+            affClubName: selectedAffClubName || null,
+            emailIsProfessional: isPro,
+          }),
+        }).catch(() => {})
       }
     }
 
@@ -403,6 +425,7 @@ function LoginForm() {
                       setSelectedAffClubId(clubId)
                       selectedAffClubIdRef.current = clubId
                       setClubName(name)
+                      setSelectedAffClubName(name)
                       if (clubId !== null) setAffClubError('')
                     }}
                     required
@@ -524,7 +547,28 @@ function LoginForm() {
 
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{t.login.email[lang]}</div>
-                <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ton@email.ch" required />
+                <input
+                  style={inputStyle}
+                  type="email"
+                  value={email}
+                  onChange={e => {
+                    setEmail(e.target.value)
+                    if (mode === 'register' && role === 'club') {
+                      setEmailIsProfessional(!isPersonalEmail(e.target.value))
+                    }
+                  }}
+                  placeholder="ton@email.ch"
+                  required
+                />
+                {mode === 'register' && role === 'club' && email && isPersonalEmail(email) && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,165,0,0.08)', border: '1px solid rgba(255,165,0,0.3)', borderRadius: 8, padding: '8px 12px', marginTop: 6 }}>
+                    <span style={{ fontSize: 15, flexShrink: 0 }}>⚠️</span>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#ffa500', marginBottom: 2 }}>{t.clubVerif.email_warning_title[lang]}</div>
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>{t.clubVerif.email_warning_body[lang]}</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div style={{ marginBottom: '1rem' }}>

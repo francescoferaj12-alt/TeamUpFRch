@@ -11,6 +11,7 @@ const ALLOWED_FIELDS = new Set([
   'ligue', 'zone', 'foot', 'club_name', 'aff_club_id', 'bio', 'birthdate',
   'available', 'hidden', 'coach_experience', 'coach_diploma',
   'coach_specialty', 'coach_availability',
+  'club_verification_status', 'club_email_is_professional',
 ])
 
 export async function POST(req: NextRequest) {

@@ -109,6 +109,11 @@ export type Profile = {
   club_contact_role?: string
   // AFF
   aff_club_id?: number | null
+  // Club verification
+  club_verification_status?: 'pending' | 'approved' | 'rejected' | null
+  club_verified_at?: string | null
+  club_rejection_reason?: string | null
+  club_email_is_professional?: boolean
   created_at: string
 }
 
