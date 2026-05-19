@@ -529,6 +529,11 @@ export default function ProfilPage() {
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
               {profile.verified && <VerifiedBadge />}
+              {profile.role === 'club' && profile.club_verification_status === 'approved' && (
+                <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#4cdb7a', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100 }}>
+                  ✅ {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
+                </span>
+              )}
             </div>
 
             {strengthKeys.length > 0 && (
