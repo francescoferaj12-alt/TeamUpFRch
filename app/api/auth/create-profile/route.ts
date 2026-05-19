@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { captureError } from '../../../../lib/logger'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -57,15 +58,14 @@ export async function POST(req: NextRequest) {
     .upsert(safe, { onConflict: 'id' })
 
   if (error) {
-    console.error('create-profile error:', error)
+    captureError(error, { api: 'create-profile', userId })
     if (error.message?.includes('birthdate')) {
-      // Retry without birthdate (column type mismatch guard)
       const { birthdate: _bd, ...withoutBirthdate } = safe
       const { error: retry } = await supabase
         .from('profiles')
         .upsert(withoutBirthdate, { onConflict: 'id' })
       if (retry) {
-        console.error('create-profile retry error:', retry)
+        captureError(retry, { api: 'create-profile-retry', userId })
         return NextResponse.json({ error: retry.message }, { status: 500 })
       }
     } else {

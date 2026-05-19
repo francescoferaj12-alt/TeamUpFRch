@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { isThrottled } from '../../../lib/email-throttle'
 import { applicationStatusHtml, zoneLang } from '../../../lib/email-templates'
+import { captureError } from '../../../lib/logger'
 
 const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({ from: FROM, to: toEmail, subject, html })
   if (error) {
-    console.error('send-application-status Resend error:', error)
+    captureError(error, { api: 'send-application-status', toEmail, status })
     return NextResponse.json({ error }, { status: 500 })
   }
   return NextResponse.json({ ok: true })

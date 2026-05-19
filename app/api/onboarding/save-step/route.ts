@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { captureError } from '../../../../lib/logger'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
 
       const { error: careerErr } = await supabase.from('career_experiences').insert(rows)
       if (careerErr) {
-        console.error('Onboarding career insert error:', careerErr)
+        captureError(careerErr, { api: 'onboarding/save-step', step: 'career_insert', userId: user.id })
         return NextResponse.json({ error: 'Career insert failed' }, { status: 500 })
       }
     }
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest) {
 
   const { error: updateErr } = await supabase.from('profiles').update(profileUpdate).eq('id', user.id)
   if (updateErr) {
-    console.error('Onboarding profile update error:', updateErr)
+    captureError(updateErr, { api: 'onboarding/save-step', step: stepIndex, role, userId: user.id })
     return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   }
 

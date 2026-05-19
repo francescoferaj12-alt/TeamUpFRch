@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { captureError } from '../../../../lib/logger'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     .limit(10)
 
   if (error) {
-    console.error('AFF clubs search error:', error)
+    captureError(error, { api: 'aff-clubs/search', query: q })
     return NextResponse.json({ clubs: [] }, { status: 500 })
   }
 
