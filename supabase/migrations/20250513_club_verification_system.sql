@@ -16,7 +16,7 @@ ALTER TABLE profiles
 -- Grandfather existing verified clubs into the new system
 UPDATE profiles
   SET club_verification_status = 'approved',
-      club_verified_at = COALESCE(updated_at, created_at)
+      club_verified_at = created_at
   WHERE verified = true AND role = 'club';
 
 -- New club registrations will start with club_verification_status = 'pending'
