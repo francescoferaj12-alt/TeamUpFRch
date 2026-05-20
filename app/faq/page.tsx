@@ -16,11 +16,11 @@ const faqs: { category: { fr: string; de: string }; icon: string; items: FAQ[] }
     items: [
       {
         q: { fr: 'Comment fonctionne TeamUpFR ?', de: 'Wie funktioniert TeamUpFR?' },
-        a: { fr: "TeamUpFR est une plateforme gratuite qui connecte joueurs, coachs et clubs de football amateur du canton de Fribourg. Tu crées un profil, tu indiques ta disponibilité et ta position, puis tu peux postuler aux annonces des clubs ou être contacté directement.", de: "TeamUpFR ist eine kostenlose Plattform, die Amateurfussballer, Trainer und Vereine im Kanton Freiburg verbindet. Du erstellst ein Profil, gibst deine Verfügbarkeit und Position an und kannst dich dann auf Vereinsanzeigen bewerben oder direkt kontaktiert werden." }
+        a: { fr: "TeamUpFR est une plateforme qui connecte joueurs, coachs et clubs de football amateur du canton de Fribourg. Tu crées un profil, tu indiques ta disponibilité et ta position, puis tu peux postuler aux annonces des clubs ou être contacté directement.", de: "TeamUpFR ist eine Plattform, die Amateurfussballer, Trainer und Vereine im Kanton Freiburg verbindet. Du erstellst ein Profil, gibst deine Verfügbarkeit und Position an und kannst dich dann auf Vereinsanzeigen bewerben oder direkt kontaktiert werden." }
       },
       {
-        q: { fr: 'Est-ce que TeamUpFR est gratuit ?', de: 'Ist TeamUpFR kostenlos?' },
-        a: { fr: "Oui, TeamUpFR est 100% gratuit pour les joueurs, les coachs et les clubs. Il n'y a pas de frais cachés, pas d'abonnement, pas de carte bancaire requise.", de: "Ja, TeamUpFR ist 100% kostenlos für Spieler, Trainer und Vereine. Es gibt keine versteckten Kosten, kein Abonnement, keine Kreditkarte erforderlich." }
+        q: { fr: 'Qui peut rejoindre TeamUpFR ?', de: 'Wer kann TeamUpFR beitreten?' },
+        a: { fr: "TeamUpFR est ouvert à tous les joueurs, coachs et clubs du canton de Fribourg. Il suffit de créer un profil pour commencer à explorer la communauté.", de: "TeamUpFR steht allen Spielern, Trainern und Vereinen im Kanton Freiburg offen. Du musst nur ein Profil erstellen, um die Community zu erkunden." }
       },
       {
         q: { fr: 'Mes données sont-elles sécurisées ?', de: 'Sind meine Daten sicher?' },

@@ -10,7 +10,7 @@ export default function CGUPage() {
       badge: "Conditions d'utilisation",
       title: "Règles de la plateforme",
       updated: 'En vigueur depuis : Mai 2026',
-      intro: "En utilisant TeamUpFR, vous acceptez les présentes conditions. Veuillez les lire attentivement. TeamUpFR est une plateforme gratuite dédiée au football amateur du canton de Fribourg, Suisse.",
+      intro: "En utilisant TeamUpFR, vous acceptez les présentes conditions. Veuillez les lire attentivement. TeamUpFR est une plateforme dédiée au football amateur du canton de Fribourg, Suisse.",
       sections: [
         { title: '1. Acceptation des conditions', content: "En créant un compte sur TeamUpFR, vous acceptez les présentes Conditions Générales d'Utilisation. Si vous n'acceptez pas ces conditions, vous ne pouvez pas utiliser la plateforme." },
         { title: '2. Eligibilité', content: "TeamUpFR est ouvert à toute personne de 14 ans ou plus. Les mineurs de moins de 18 ans doivent avoir l'accord de leurs parents ou tuteurs légaux pour s'inscrire." },
@@ -29,7 +29,7 @@ export default function CGUPage() {
       badge: 'Nutzungsbedingungen',
       title: 'Plattformregeln',
       updated: 'Gültig ab: Mai 2026',
-      intro: "Durch die Nutzung von TeamUpFR stimmen Sie diesen Bedingungen zu. Bitte lesen Sie sie sorgfältig durch. TeamUpFR ist eine kostenlose Plattform für den Amateurfussball im Kanton Freiburg, Schweiz.",
+      intro: "Durch die Nutzung von TeamUpFR stimmen Sie diesen Bedingungen zu. Bitte lesen Sie sie sorgfältig durch. TeamUpFR ist eine Plattform für den Amateurfussball im Kanton Freiburg, Schweiz.",
       sections: [
         { title: '1. Annahme der Bedingungen', content: "Durch die Erstellung eines Kontos auf TeamUpFR akzeptieren Sie diese Allgemeinen Nutzungsbedingungen. Wenn Sie diese Bedingungen nicht akzeptieren, können Sie die Plattform nicht nutzen." },
         { title: '2. Berechtigung', content: "TeamUpFR steht allen Personen ab 14 Jahren offen. Minderjährige unter 18 Jahren benötigen die Zustimmung ihrer Eltern oder gesetzlichen Vertreter zur Registrierung." },

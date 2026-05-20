@@ -16,7 +16,7 @@ const Svg = ({ children, size = 14, ...props }: React.SVGProps<SVGSVGElement> & 
 
 const IcoGlobe    = () => <Svg><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"/></Svg>
 const IcoOrigin   = () => <Svg><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></Svg>
-const IcoTeam     = () => <Svg><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></Svg>
+
 const IcoTarget   = () => <Svg><polygon points="3 11 22 2 13 21 11 13 3 11"/></Svg>
 const IcoPulse    = () => <Svg><path d="M3 12h4l3-9 4 18 3-9h4"/></Svg>
 const IcoEye      = (p: {size?:number}) => <Svg size={p.size||26}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></Svg>
@@ -35,42 +35,6 @@ const IcoArrow    = () => <Svg size={16}><path d="M5 12h14M12 5l7 7-7 7"/></Svg>
 export default function AProposPage() {
   const { lang } = useLang()
 
-  const members = [
-    {
-      name: 'Tiago',
-      initial: 'T',
-      age: 28,
-      role:   t.apropos.tiago_role[lang],
-      flag:   'PT',
-      origin: t.apropos.tiago_origin[lang],
-      avatarBg: 'linear-gradient(135deg, #ff9a3a 0%, #c4651f 100%)',
-      desc: t.apropos.tiago_desc[lang],
-      tag:  t.apropos.tiago_tag[lang],
-    },
-    {
-      name: 'Francesco',
-      initial: 'F',
-      age: 21,
-      role:   t.apropos.fran_role[lang],
-      flag:   'IT · AL',
-      origin: t.apropos.fran_origin[lang],
-      avatarBg: 'linear-gradient(135deg, #FF3A3A 0%, #c41f1f 100%)',
-      desc: t.apropos.fran_desc[lang],
-      tag:  t.apropos.fran_tag[lang],
-    },
-    {
-      name: 'Hugo',
-      initial: 'H',
-      age: 21,
-      role:   t.apropos.hugo_role[lang],
-      flag:   'PT',
-      origin: t.apropos.hugo_origin[lang],
-      avatarBg: 'linear-gradient(135deg, #2ED27F 0%, #1a8a52 100%)',
-      desc: t.apropos.hugo_desc[lang],
-      tag:  t.apropos.hugo_tag[lang],
-    },
-  ]
-
   const missions = [
     { icon: <IcoEye />,     title: t.apropos.val_visibility[lang], desc: t.apropos.val_visibility_desc[lang] },
     { icon: <IcoNetwork />, title: t.apropos.val_connection[lang],  desc: t.apropos.val_connection_desc[lang] },
@@ -79,28 +43,24 @@ export default function AProposPage() {
   ]
 
   const timeline = [
-    { date: '2024',           icon: <IcoBulb />,  title: t.apropos.tl1_title[lang], desc: t.apropos.tl1_desc[lang] },
-    { date: '2024–2025',      icon: <IcoTool />,  title: t.apropos.tl2_title[lang], desc: t.apropos.tl2_desc[lang] },
-    { date: '2025',           icon: <IcoRocket />,title: t.apropos.tl3_title[lang], desc: t.apropos.tl3_desc[lang] },
-    { date: t.apropos.tl4_date[lang], icon: <IcoStar />, title: t.apropos.tl4_title[lang], desc: t.apropos.tl4_desc[lang] },
+    { date: lang === 'fr' ? 'Fin 2025'    : 'Ende 2025',    icon: <IcoBulb />,   title: t.apropos.tl1_title[lang], desc: t.apropos.tl1_desc[lang] },
+    { date: lang === 'fr' ? 'Début 2026'  : 'Anfang 2026',  icon: <IcoTool />,   title: t.apropos.tl2_title[lang], desc: t.apropos.tl2_desc[lang] },
+    { date: lang === 'fr' ? 'Juin 2026'   : 'Juni 2026',    icon: <IcoRocket />, title: t.apropos.tl3_title[lang], desc: t.apropos.tl3_desc[lang] },
+    { date: t.apropos.tl4_date[lang],                        icon: <IcoStar />,   title: t.apropos.tl4_title[lang], desc: t.apropos.tl4_desc[lang] },
   ]
-
-  const ageSuffix = t.apropos.age_suffix[lang]
 
   return (
     <div style={{ background: '#0D1F4A', minHeight: '100vh', color: '#fff', fontFamily: "'Inter', sans-serif" }}>
       <style>{`
         .ap-card { transition: transform .5s cubic-bezier(.22,1,.36,1), border-color .5s, background .5s; }
         .ap-card:hover { transform: translateY(-6px); border-color: rgba(255,58,58,.4) !important; }
-        .ap-card-member:hover { background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.02) 100%) !important; }
-        .ap-value-card { transition: transform .4s cubic-bezier(.22,1,.36,1), border-color .4s; }
+.ap-value-card { transition: transform .4s cubic-bezier(.22,1,.36,1), border-color .4s; }
         .ap-value-card:hover { transform: translateY(-4px); border-color: rgba(255,58,58,.3) !important; }
         .ap-btn-primary { transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s cubic-bezier(.22,1,.36,1); }
         .ap-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(255,58,58,.4); }
         .ap-btn-secondary { transition: border-color .3s, background .3s; }
         .ap-btn-secondary:hover { border-color: #fff !important; background: rgba(255,255,255,.05) !important; }
         @media (max-width: 860px) {
-          .ap-team-grid { grid-template-columns: 1fr !important; }
           .ap-mission-grid { grid-template-columns: 1fr 1fr !important; }
           .ap-section { padding: 60px 0 !important; }
           .ap-hero { padding: 120px 0 60px !important; }
@@ -169,47 +129,7 @@ export default function AProposPage() {
         </div>
       </section>
 
-      {/* ── TEAM (3 cards, maintenu car absent du mockup) ── */}
-      <section className="ap-section" style={{ padding: '100px 0', background: 'rgba(255,255,255,.02)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <span style={{ fontFamily: "'Russo One', sans-serif", fontSize: 12, letterSpacing: '4px', color: '#FF3A3A', textTransform: 'uppercase', marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              <IcoTeam />{t.apropos.team_badge[lang]}
-            </span>
-            <h2 style={{ fontFamily: "'Russo One', sans-serif", fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1.05, letterSpacing: '-.5px', textTransform: 'uppercase', marginBottom: 16 }}>
-              {t.apropos.team_title[lang]}
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 16, fontWeight: 300, maxWidth: 500, margin: '0 auto' }}>
-              {t.apropos.team_desc[lang]}
-            </p>
-          </div>
-
-          <div className="ap-team-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
-            {members.map(m => (
-              <div key={m.name} className="ap-card ap-card-member" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 24, padding: '36px 28px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-                  <div style={{ width: 72, height: 72, borderRadius: '50%', background: m.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Russo One', sans-serif", fontSize: 24, color: '#fff' }}>
-                    {m.initial}
-                  </div>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 10px', borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', background: 'rgba(255,58,58,.12)', color: '#FF3A3A', border: '1px solid rgba(255,58,58,.3)' }}>
-                    {m.tag}
-                  </span>
-                </div>
-                <div style={{ fontFamily: "'Russo One', sans-serif", fontSize: 32, lineHeight: 1, letterSpacing: '.5px', marginBottom: 8 }}>{m.name}</div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,.6)', marginBottom: 4 }}>
-                  <span style={{ padding: '3px 8px', borderRadius: 4, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', fontSize: 10, fontWeight: 600, letterSpacing: '1px', color: 'rgba(255,255,255,.92)' }}>{m.flag}</span>
-                  <span>{m.age}{ageSuffix}</span>
-                </div>
-                <div style={{ fontSize: 13, color: '#fff', fontWeight: 500, margin: '16px 0 4px' }}>{m.role}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginBottom: 20 }}>{m.origin}</div>
-                <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,.92)', fontWeight: 300, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,.12)' }}>{m.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── MISSION / VALEURS (4 cards, val_free maintenu) ── */}
+      {/* ── MISSION / VALEURS ── */}
       <section className="ap-section" style={{ padding: '100px 0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
           <span style={{ fontFamily: "'Russo One', sans-serif", fontSize: 12, letterSpacing: '4px', color: '#FF3A3A', textTransform: 'uppercase', marginBottom: 24, display: 'inline-flex', alignItems: 'center', gap: 10 }}>

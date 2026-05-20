@@ -49,7 +49,7 @@ export default async function Image() {
 
         {/* Stats */}
         <div style={{ display: 'flex', gap: 48 }}>
-          {[['340+', 'Joueurs'], ['52', 'Clubs'], ['100%', 'Gratuit']].map(([num, label]) => (
+          {[['340+', 'Joueurs'], ['52', 'Clubs'], ['FR', 'Fribourg']].map(([num, label]) => (
             <div key={label} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 42, fontWeight: 900, color: '#fff', lineHeight: 1 }}>{num}</div>
               <div style={{ fontSize: 16, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: 2, marginTop: 4 }}>{label}</div>
