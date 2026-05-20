@@ -1,8 +1,32 @@
 /* TeamUpFR — Design System */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@200;300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Russo+One&display=swap');
 
 :root {
-  /* ── Dark design system (new) ── */
+  /* ── Design System v2 (maquettes teamupfr_apple_v20) ── */
+  /* Couleurs */
+  --ds-navy:          #0D1F4A;
+  --ds-navy-deep:     #081434;
+  --ds-navy-light:    #1a2f6b;
+  --ds-red:           #FF3A3A;
+  --ds-green:         #2ED27F;
+  --ds-orange:        #FF9A3A;
+  --ds-blue:          #3A7AFF;
+  /* Typographie */
+  --ds-font-body:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ds-font-display:  'Russo One', 'Bebas Neue', sans-serif;
+  /* Espacements / layout */
+  --ds-container:     1400px;
+  --ds-container-lg:  1200px;
+  --ds-radius-card:   20px;
+  --ds-radius-sm:     16px;
+  --ds-radius-xs:     12px;
+  /* Borders */
+  --ds-border:        rgba(255,255,255,0.12);
+  --ds-border-strong: rgba(255,255,255,0.20);
+  /* Easing */
+  --ds-ease:          cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ── Dark design system (legacy — ne pas modifier) ── */
   --blue-deep:   #0a1f5c;
   --blue-darker: #061540;
   --blue-night:  #030a24;
@@ -1060,4 +1084,118 @@ textarea.input { resize: vertical; min-height: 80px; }
   .pe-savebar { flex-direction: column; align-items: stretch; }
   .pe-savebar-actions { justify-content: flex-end; }
   .pe-title { font-size: 32px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM v2 — Composants de base (utilisés par les pages refactorées)
+   Ne pas utiliser sur les pages existantes — risque de conflit de style.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Container */
+.ds-container {
+  width: 100%;
+  max-width: var(--ds-container);
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+.ds-container-lg {
+  max-width: var(--ds-container-lg);
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+@media (max-width: 768px) {
+  .ds-container,
+  .ds-container-lg { padding-inline: 20px; }
+}
+
+/* Buttons v2 */
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--ds-font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s var(--ds-ease), box-shadow 0.2s var(--ds-ease), background 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ds-btn-sm { padding: 8px 18px; font-size: 13px; }
+.ds-btn-lg { padding: 15px 32px; font-size: 16px; }
+.ds-btn-full { width: 100%; }
+.ds-btn-primary {
+  background: var(--ds-red);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(255,58,58,0.35);
+}
+.ds-btn-primary:hover {
+  background: #e62a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255,58,58,0.50);
+}
+.ds-btn-secondary {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  border: 1.5px solid var(--ds-border);
+}
+.ds-btn-secondary:hover {
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  border-color: var(--ds-border-strong);
+}
+.ds-btn-ghost {
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  border: 1.5px solid var(--ds-border);
+}
+.ds-btn-ghost:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+/* Card v2 */
+.ds-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-card);
+  padding: 28px;
+  transition: border-color 0.2s var(--ds-ease), transform 0.2s var(--ds-ease);
+}
+.ds-card:hover {
+  border-color: rgba(255,58,58,0.35);
+  transform: translateY(-3px);
+}
+
+/* Section label v2 */
+.ds-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ds-red);
+  margin-bottom: 14px;
+}
+.ds-section-label::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--ds-red);
+  flex-shrink: 0;
+}
+
+/* Heading v2 */
+.ds-heading {
+  font-family: var(--ds-font-display);
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  color: #fff;
 }
