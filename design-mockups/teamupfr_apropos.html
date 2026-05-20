@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="L'histoire de TeamUpFR — la plateforme du football amateur fribourgeois née d'un projet d'école.">
+<meta name="theme-color" content="#0D1F4A">
+<title>À propos — TeamUpFR</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+
+<style>
+/* ========== TOKENS ========== */
+:root {
+  --navy: #0D1F4A;
+  --navy-deep: #081434;
+  --navy-light: #1a2f6b;
+  --red: #FF3A3A;
+  --red-glow: rgba(255, 58, 58, 0.4);
+  --green: #2ED27F;
+  --orange: #FF9A3A;
+  --blue: #3A7AFF;
+  --white: #ffffff;
+  --offwhite: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.6);
+  --faint: rgba(255,255,255,0.3);
+  --line: rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.22);
+
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Russo One', sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at top, var(--navy-light) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(255, 58, 58, 0.06) 0%, transparent 60%),
+    var(--navy);
+  color: var(--white); line-height: 1.5;
+  min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button, input, select { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+::selection { background: var(--red); color: var(--white); }
+
+/* ========== NAV ========== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 22px 0;
+  transition: padding 0.4s var(--ease-out);
+  background: rgba(13, 31, 74, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+}
+.nav.scrolled { padding: 14px 0; }
+.nav-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: baseline; gap: 1px;
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.logo .lg-teamup { color: var(--white); }
+.logo .lg-f { color: #0a0a0a; background: var(--white); padding: 2px 4px; margin-left: 4px; border-radius: 2px; }
+.logo .lg-r { color: var(--white); background: #0a0a0a; padding: 2px 4px; border-radius: 2px; }
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--offwhite);
+  position: relative; transition: color 0.3s;
+}
+.nav-links a.active { color: var(--white); }
+.nav-links a::after {
+  content: ''; position: absolute; left: 0; bottom: -4px;
+  width: 0; height: 2px; background: var(--red);
+  transition: width 0.3s var(--ease-out);
+}
+.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+.nav-cta {
+  background: var(--red); color: var(--white);
+  padding: 10px 22px; border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px var(--red-glow); }
+.nav-toggle { display: none; }
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: block; }
+}
+
+/* ========== CONTAINER ========== */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.container-narrow { max-width: 820px; margin: 0 auto; padding: 0 32px; }
+
+/* ========== SECTION COMMON ========== */
+.section { padding: 100px 0; }
+.section-eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 4px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 24px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.section-eyebrow svg { width: 14px; height: 14px; stroke: var(--red); fill: none; stroke-width: 2; }
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.05; letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.section-title .em { color: var(--red); }
+.section-intro {
+  font-size: clamp(16px, 1.4vw, 19px);
+  font-weight: 300; color: var(--offwhite);
+  line-height: 1.6;
+  max-width: 720px;
+}
+.section-intro.centered { margin-left: auto; margin-right: auto; text-align: center; }
+
+/* ========== HERO ========== */
+.hero {
+  padding: 180px 0 80px;
+  text-align: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 80%; max-width: 900px; height: 420px;
+  background: radial-gradient(ellipse at center, rgba(255, 58, 58, 0.14) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.hero .container { position: relative; z-index: 1; }
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 104px);
+  line-height: 0.95; letter-spacing: -1.5px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.hero-title .em { color: var(--red); }
+.hero-intro {
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 300;
+  color: var(--offwhite);
+  line-height: 1.6;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ========== ORIGIN STORY (long text + quote) ========== */
+.origin {
+  padding: 80px 0;
+}
+.origin-text { display: flex; flex-direction: column; gap: 22px; }
+.origin-text p {
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.7;
+  color: var(--offwhite);
+  font-weight: 300;
+}
+.origin-text p strong { font-weight: 600; color: var(--white); }
+
+.pull-quote {
+  margin: 60px 0;
+  padding: 48px 40px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,58,58,0.06) 0%, rgba(13,31,74,0.3) 100%);
+  position: relative;
+}
+.quote-icon {
+  position: absolute;
+  top: -22px; left: 40px;
+  width: 44px; height: 44px;
+  background: var(--red);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 28px var(--red-glow);
+}
+.quote-icon svg { width: 22px; height: 22px; stroke: var(--white); fill: var(--white); }
+
+.quote-text {
+  font-family: var(--font-body);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 300; font-style: italic;
+  line-height: 1.4;
+  color: var(--white);
+  margin-bottom: 28px;
+}
+.quote-author {
+  display: flex; align-items: center; gap: 14px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.quote-avatar {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #ff9a3a 0%, #c4651f 100%);
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--white);
+  border-radius: 50%;
+}
+.quote-info { display: flex; flex-direction: column; }
+.quote-name { font-weight: 600; font-size: 15px; }
+.quote-role { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* ========== TEAM ========== */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+@media (max-width: 960px) { .team-grid { grid-template-columns: 1fr; } }
+
+.member-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 36px 28px;
+  transition: transform 0.5s var(--ease-out), border-color 0.5s, background 0.5s;
+}
+.member-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 58, 58, 0.4);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+}
+.member-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.member-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 24px; letter-spacing: 0.5px;
+  color: var(--white);
+}
+.av-tiago { background: linear-gradient(135deg, #ff9a3a 0%, #c4651f 100%); }
+.av-francesco { background: linear-gradient(135deg, #FF3A3A 0%, #c41f1f 100%); }
+.av-hugo { background: linear-gradient(135deg, #2ED27F 0%, #1a8a52 100%); }
+
+.member-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: rgba(255, 58, 58, 0.12);
+  color: var(--red);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+}
+.member-tag svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.member-name {
+  font-family: var(--font-display);
+  font-size: 32px; line-height: 1;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.member-flags {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 4px;
+}
+.flag-pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--offwhite);
+}
+.member-role {
+  font-size: 13px;
+  color: var(--white);
+  font-weight: 500;
+  margin: 16px 0 4px;
+}
+.member-origin {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.member-bio {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--offwhite);
+  font-weight: 300;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+/* ========== MISSION ========== */
+.mission { background: rgba(255,255,255,0.02); }
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 60px;
+}
+@media (max-width: 960px) { .mission-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .mission-grid { grid-template-columns: 1fr; } }
+
+.value-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px 24px;
+  transition: transform 0.4s var(--ease-out), border-color 0.4s;
+}
+.value-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 58, 58, 0.3);
+}
+.value-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: rgba(255, 58, 58, 0.12);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.value-icon svg {
+  width: 26px; height: 26px;
+  stroke: var(--red); fill: none; stroke-width: 1.8;
+}
+.value-title {
+  font-family: var(--font-display);
+  font-size: 22px; line-height: 1.1;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.value-desc {
+  font-size: 14px; line-height: 1.55;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+/* ========== TIMELINE ========== */
+.timeline {
+  margin-top: 60px;
+  position: relative;
+  padding-left: 32px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 11px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--red) 0%, var(--line) 100%);
+}
+.timeline-item {
+  position: relative;
+  padding: 0 0 48px 32px;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute;
+  left: -32px; top: 4px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--navy);
+  border: 2px solid var(--red);
+  display: flex; align-items: center; justify-content: center;
+}
+.timeline-dot svg {
+  width: 12px; height: 12px;
+  stroke: var(--red); fill: none; stroke-width: 2.5;
+}
+.timeline-year {
+  font-family: var(--font-display);
+  font-size: 13px; letter-spacing: 2px;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.timeline-title {
+  font-family: var(--font-display);
+  font-size: 24px; line-height: 1.15;
+  letter-spacing: 0.3px;
+  margin-bottom: 12px;
+}
+.timeline-desc {
+  font-size: 15px; line-height: 1.6;
+  color: var(--offwhite);
+  font-weight: 300;
+  max-width: 680px;
+}
+
+/* ========== CTA FINAL ========== */
+.cta-final {
+  padding: 120px 0 100px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-final::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 60%, rgba(255, 58, 58, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse at 20% 80%, rgba(13, 31, 74, 0.5) 0%, transparent 50%);
+  pointer-events: none;
+}
+.cta-final .container { position: relative; z-index: 1; }
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 1; letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.cta-text {
+  font-size: clamp(16px, 1.4vw, 19px);
+  font-weight: 300; color: var(--offwhite);
+  max-width: 620px; margin: 0 auto 40px;
+  line-height: 1.6;
+}
+.cta-actions {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--red); color: var(--white);
+  padding: 18px 36px; border-radius: 999px;
+  font-size: 15px; font-weight: 600;
+  letter-spacing: 0.5px;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px var(--red-glow); }
+.btn-primary svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.btn-secondary {
+  background: transparent; color: var(--white);
+  padding: 18px 36px; border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 15px; font-weight: 600;
+  transition: border-color 0.3s, background 0.3s;
+}
+.btn-secondary:hover { border-color: var(--white); background: rgba(255,255,255,0.05); }
+
+/* ========== FOOTER ========== */
+footer { padding: 60px 0 40px; border-top: 1px solid var(--line); }
+.footer-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+}
+.footer-brand .logo { margin-bottom: 20px; }
+.footer-brand p { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 320px; }
+.footer-col h5 {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 3px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a { font-size: 14px; color: var(--offwhite); transition: color 0.3s; }
+.footer-col a:hover { color: var(--red); }
+.footer-base {
+  max-width: 1400px; margin: 60px auto 0;
+  padding: 28px 32px 0;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--muted);
+}
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .footer-base { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="https://teamupfr.ch/" class="logo" aria-label="TeamUpFR">
+      <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://teamupfr.ch/recherche">Recherche</a>
+      <a href="https://teamupfr.ch/clubs">Clubs</a>
+      <a href="https://teamupfr.ch/annonces">Annonces</a>
+      <a href="https://teamupfr.ch/a-propos" class="active">À propos</a>
+      <a href="https://teamupfr.ch/login" class="nav-cta">Connexion</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="container">
+    <span class="section-eyebrow">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"/></svg>
+      Notre histoire
+    </span>
+    <h1 class="hero-title">Nés du terrain,<br>pour le <span class="em">terrain.</span></h1>
+    <p class="hero-intro">TeamUpFR n'est pas né dans un bureau. Il est né d'une frustration réelle, vécue par trois jeunes passionnés de football aux origines diverses — unis par Fribourg et par le ballon rond.</p>
+  </div>
+</section>
+
+<!-- ========== ORIGIN STORY ========== -->
+<section class="origin">
+  <div class="container-narrow">
+    <span class="section-eyebrow">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
+      L'origine
+    </span>
+    <h2 class="section-title">Un projet d'école devenu une <span class="em">vraie mission.</span></h2>
+
+    <div class="origin-text">
+      <p>Tout commence sur les bancs de l'école. Nous devions rendre un projet sur un service innovant — le sujet était libre. C'est là que <strong>Tiago</strong> a eu la lumière.</p>
+      <p>En tant qu'entraîneur, il vivait chaque saison le même problème : trouver des joueurs, c'est une affaire de réseau. Si tu ne connais personne, tu ne trouves personne.</p>
+      <p><strong>Francesco</strong> avait vécu de l'autre côté — chercher une équipe dans un pays qu'il découvrait.</p>
+      <p><strong>Hugo</strong>, lui, vit le football amateur fribourgeois de l'intérieur depuis toujours. Sa connaissance du terrain et son énergie ont façonné chaque détail de la plateforme.</p>
+      <p>Trois expériences différentes, un même constat. Un même manque. Une seule solution.</p>
+    </div>
+
+    <!-- Pull quote -->
+    <blockquote class="pull-quote">
+      <div class="quote-icon">
+        <svg viewBox="0 0 24 24"><path d="M7 7h4v8H3V11a4 4 0 0 1 4-4zM17 7h4v8h-8V11a4 4 0 0 1 4-4z"/></svg>
+      </div>
+      <p class="quote-text">Dans le football amateur, tu trouves une équipe par les connaissances. Si tu ne connais personne, tu joues nulle part. Ce n'est pas normal.</p>
+      <div class="quote-author">
+        <div class="quote-avatar">T</div>
+        <div class="quote-info">
+          <span class="quote-name">Tiago</span>
+          <span class="quote-role">Coach · Co-fondateur · 28 ans</span>
+        </div>
+      </div>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ========== MISSION ========== -->
+<section class="section mission">
+  <div class="container">
+    <span class="section-eyebrow">
+      <svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Notre mission
+    </span>
+    <h2 class="section-title">Que chaque joueur trouve<br>son <span class="em">équipe.</span></h2>
+    <p class="section-intro">Notre mission est simple : dans le football amateur fribourgeois, le talent ne doit plus être limité par le réseau. Chaque joueur mérite d'être vu. Chaque club mérite de trouver le bon profil.</p>
+
+    <div class="mission-grid">
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3 class="value-title">Visibilité</h3>
+        <p class="value-desc">Chaque joueur visible, peu importe son réseau ou ses origines.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M8 8l3 8M16 8l-3 8"/></svg>
+        </div>
+        <h3 class="value-title">Connexion</h3>
+        <p class="value-desc">Joueurs, coachs et clubs réunis sur une seule plateforme.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 class="value-title">Local</h3>
+        <p class="value-desc">Fait pour Fribourg, par des jeunes de Fribourg.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== TIMELINE ========== -->
+<section class="section">
+  <div class="container-narrow">
+    <span class="section-eyebrow">
+      <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+      Notre parcours
+    </span>
+    <h2 class="section-title">De l'idée<br>au <span class="em">lancement.</span></h2>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg></div>
+        <div class="timeline-year">Fin 2025</div>
+        <h3 class="timeline-title">L'idée naît</h3>
+        <p class="timeline-desc">Tiago propose le projet en classe. Hugo et Francesco rejoignent immédiatement. Ce qui devait être un travail scolaire devient une vraie vision.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="9" r="3"/><path d="M21 21v-1a3 3 0 0 0-3-3"/></svg></div>
+        <div class="timeline-year">Début 2026</div>
+        <h3 class="timeline-title">Le projet prend forme</h3>
+        <p class="timeline-desc">L'équipe se structure, les premières maquettes émergent, la vision se précise. L'idée scolaire devient un vrai projet d'entreprise.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div class="timeline-year">Juin 2026</div>
+        <h3 class="timeline-title">Construction de la plateforme</h3>
+        <p class="timeline-desc">Des mois de travail pour créer quelque chose de vraiment utile pour les joueurs et clubs fribourgeois. Conception, développement, tests — tout est fait à Fribourg.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"><svg viewBox="0 0 24 24"><path d="M5 16l4-4-4-4M12 20h7"/></svg></div>
+        <div class="timeline-year">À venir</div>
+        <h3 class="timeline-title">TeamUpFR en ligne</h3>
+        <p class="timeline-desc">Le lancement officiel approche. Joueurs, coachs et clubs du canton pourront enfin se retrouver sur une seule plateforme. Et ce n'est que le début.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA FINAL ========== -->
+<section class="cta-final">
+  <div class="container-narrow">
+    <h2 class="cta-title">Rejoins<br><span style="color:var(--red)">l'aventure.</span></h2>
+    <p class="cta-text">Nous sommes trois jeunes qui ont cru en une idée née en classe. Aujourd'hui c'est une vraie plateforme. Demain c'est ta communauté.</p>
+    <div class="cta-actions">
+      <a href="https://teamupfr.ch/login" class="btn-primary">
+        Créer mon profil
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://teamupfr.ch/recherche" class="btn-secondary">Explorer</a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="https://teamupfr.ch/" class="logo">
+        <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+      </a>
+      <p>Ton équipe, ton avenir.<br>Canton de Fribourg · Suisse.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Plateforme</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/recherche">Recherche</a></li>
+        <li><a href="https://teamupfr.ch/clubs">Clubs</a></li>
+        <li><a href="https://teamupfr.ch/annonces">Annonces</a></li>
+        <li><a href="https://teamupfr.ch/dashboard">Dashboard</a></li>
+        <li><a href="https://teamupfr.ch/candidatures">Candidatures</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>TeamUpFR</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/a-propos">À propos</a></li>
+        <li><a href="https://teamupfr.ch/faq">FAQ</a></li>
+        <li><a href="https://teamupfr.ch/privacy">Confidentialité</a></li>
+        <li><a href="https://teamupfr.ch/cgu">CGU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="mailto:teamupfr.ch@gmail.com">teamupfr.ch@gmail.com</a></li>
+        <li><span style="color: var(--muted); font-size: 14px;">Fribourg, Suisse</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-base">
+    <span>© 2025 TeamUpFR — Tous droits réservés</span>
+    <span>Français · Deutsch</span>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+</script>
+</body>
+</html>

@@ -6,12 +6,11 @@ import { ButtonHTMLAttributes, ReactNode } from 'react'
 type Variant = 'primary' | 'secondary' | 'ghost'
 type Size = 'sm' | 'md' | 'lg'
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   variant?: Variant
   size?: Size
   full?: boolean
   children: ReactNode
-  className?: string
 }
 
 interface ButtonLinkProps {
@@ -24,9 +23,7 @@ interface ButtonLinkProps {
 }
 
 function buildClass(variant: Variant, size: Size, full: boolean, extra?: string) {
-  const parts = ['ds-btn', `ds-btn-${variant}`]
-  if (size === 'sm') parts.push('ds-btn-sm')
-  if (size === 'lg') parts.push('ds-btn-lg')
+  const parts = ['ds-btn', `ds-btn-${variant}`, `ds-btn-${size}`]
   if (full) parts.push('ds-btn-full')
   if (extra) parts.push(extra)
   return parts.join(' ')

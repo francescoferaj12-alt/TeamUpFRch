@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Recherche avancée TeamUpFR — Trouve joueurs, coachs et clubs dans le canton de Fribourg.">
+<meta name="theme-color" content="#0D1F4A">
+<title>Recherche — TeamUpFR</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   DESIGN TOKENS — identiques à v19 (cohérence cross-pages)
+   ========================================================= */
+:root {
+  --navy: #0D1F4A;
+  --navy-deep: #081434;
+  --navy-light: #1a2f6b;
+  --navy-elev: #142659;          /* surface élevée pour cards/inputs */
+  --red: #FF3A3A;
+  --red-glow: rgba(255, 58, 58, 0.4);
+  --green: #2ED27F;              /* "disponible" indicator */
+  --white: #ffffff;
+  --offwhite: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.6);
+  --faint: rgba(255,255,255,0.3);
+  --line: rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.22);
+
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Russo One', sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at top, var(--navy-light) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(255, 58, 58, 0.06) 0%, transparent 60%),
+    var(--navy);
+  color: var(--white);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button, input, select { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+
+::selection { background: var(--red); color: var(--white); }
+
+/* =========================================================
+   1. NAV — identique à v19
+   ========================================================= */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 22px 0;
+  transition: background 0.4s var(--ease-out), backdrop-filter 0.4s var(--ease-out), padding 0.4s var(--ease-out);
+  background: rgba(13, 31, 74, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+}
+.nav.scrolled { padding: 14px 0; }
+.nav-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: baseline; gap: 1px;
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.logo .lg-teamup { color: var(--white); }
+.logo .lg-f { color: #0a0a0a; background: var(--white); padding: 2px 4px; margin-left: 4px; border-radius: 2px; }
+.logo .lg-r { color: var(--white); background: #0a0a0a; padding: 2px 4px; border-radius: 2px; }
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--offwhite);
+  position: relative; transition: color 0.3s;
+}
+.nav-links a.active { color: var(--white); }
+.nav-links a::after {
+  content: ''; position: absolute; left: 0; bottom: -4px;
+  width: 0; height: 2px; background: var(--red);
+  transition: width 0.3s var(--ease-out);
+}
+.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+.nav-cta {
+  background: var(--red); color: var(--white);
+  padding: 10px 22px; border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px var(--red-glow); }
+.nav-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: block; color: var(--white); font-size: 24px; }
+}
+
+/* =========================================================
+   2. PAGE HEADER
+   ========================================================= */
+.page-header {
+  padding: 160px 0 60px;
+  text-align: center;
+  position: relative;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 80%; max-width: 900px; height: 380px;
+  background: radial-gradient(ellipse at center, rgba(255, 58, 58, 0.12) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.page-header .container { position: relative; z-index: 1; }
+.container {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+}
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 4px;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 96px);
+  line-height: 0.95; letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.page-title .em { color: var(--red); }
+.page-sub {
+  font-size: clamp(16px, 1.4vw, 19px);
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   3. SEARCH BAR — large, centered
+   ========================================================= */
+.search-section {
+  padding: 0 0 40px;
+  position: relative;
+  z-index: 5;
+}
+.search-bar {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 8px 8px 8px 28px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  transition: border-color 0.3s, background 0.3s;
+}
+.search-bar:focus-within {
+  border-color: var(--red);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.15);
+}
+.search-bar svg.search-icon {
+  width: 22px; height: 22px;
+  stroke: var(--muted); fill: none; stroke-width: 2;
+  flex-shrink: 0;
+}
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  border: 0; outline: 0;
+  padding: 18px 16px;
+  font-size: 17px;
+  color: var(--white);
+  font-weight: 400;
+}
+.search-bar input::placeholder { color: var(--muted); }
+.search-bar button.search-submit {
+  background: var(--red);
+  color: var(--white);
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.search-bar button.search-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px var(--red-glow);
+}
+
+/* =========================================================
+   4. TABS + TOGGLE
+   ========================================================= */
+.tabs-row {
+  max-width: 1400px; margin: 0 auto;
+  padding: 0 32px 24px;
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  font-size: 14px; font-weight: 500;
+  color: var(--offwhite);
+  transition: border-color 0.3s, background 0.3s, color 0.3s;
+}
+.tab .count {
+  font-family: var(--font-display);
+  font-size: 11px;
+  background: rgba(255,255,255,0.08);
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: background 0.3s, color 0.3s;
+}
+.tab:hover { border-color: var(--line-strong); }
+.tab.active {
+  background: var(--white);
+  color: var(--navy);
+  border-color: var(--white);
+}
+.tab.active .count {
+  background: var(--red);
+  color: var(--white);
+}
+.tab .emoji, .tab .tab-icon {
+  width: 16px; height: 16px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.toggle-availability {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 14px; font-weight: 500;
+  color: var(--offwhite);
+  cursor: pointer;
+  user-select: none;
+}
+.toggle-switch {
+  position: relative;
+  width: 44px; height: 24px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  transition: background 0.3s var(--ease-out);
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  background: var(--white);
+  border-radius: 50%;
+  transition: transform 0.3s var(--ease-out);
+}
+.toggle-availability.active .toggle-switch { background: var(--green); }
+.toggle-availability.active .toggle-switch::after { transform: translateX(20px); }
+.toggle-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--green); border-radius: 50%;
+  margin-right: 2px;
+  box-shadow: 0 0 0 4px rgba(46, 210, 127, 0.2);
+}
+
+/* =========================================================
+   5. FILTERS GRID — 4 dropdowns
+   ========================================================= */
+.filters {
+  max-width: 1400px; margin: 0 auto;
+  padding: 0 32px 32px;
+}
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.filter {
+  position: relative;
+}
+.filter-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  margin-left: 4px;
+}
+.filter-select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 42px 14px 18px;
+  font-size: 15px; font-weight: 500;
+  color: var(--offwhite);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.6)' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+.filter-select:hover { border-color: var(--line-strong); }
+.filter-select:focus {
+  outline: 0;
+  border-color: var(--red);
+  background-color: rgba(255,255,255,0.06);
+}
+.filter-select option { background: var(--navy-deep); color: var(--white); padding: 8px; }
+.filter-select option[disabled] {
+  color: var(--red);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.filter-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 24px;
+}
+.filter-reset {
+  font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 0;
+  transition: color 0.3s;
+}
+.filter-reset:hover { color: var(--white); }
+.filter-reset svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.results-count {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.results-count .num {
+  font-family: var(--font-display);
+  color: var(--white);
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+@media (max-width: 960px) { .filters-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .filters-grid { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   6. RESULTS GRID — profile cards
+   ========================================================= */
+.results {
+  padding: 16px 0 100px;
+}
+.results-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.profile-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px 22px 22px;
+  transition: transform 0.5s var(--ease-out), border-color 0.5s, background 0.5s;
+  cursor: pointer;
+}
+.profile-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 58, 58, 0.4);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+}
+
+.pc-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.pc-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px; letter-spacing: 0.5px;
+  color: var(--white);
+  flex-shrink: 0;
+  position: relative;
+}
+.pc-avatar.av-joueur { background: linear-gradient(135deg, #1a3a8a 0%, #0d1f4a 100%); }
+.pc-avatar.av-coach { background: linear-gradient(135deg, #6a4a2a 0%, #3a2a1a 100%); }
+.pc-avatar.av-club { background: linear-gradient(135deg, #FF3A3A 0%, #c41f1f 100%); }
+
+.pc-avatar .status {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  width: 14px; height: 14px;
+  background: var(--green);
+  border-radius: 50%;
+  border: 3px solid var(--navy);
+}
+
+.pc-role-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 58, 58, 0.12);
+  color: var(--red);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+}
+.pc-role-badge.coach { background: rgba(255, 154, 90, 0.12); color: #ff9a5a; border-color: rgba(255, 154, 90, 0.3); }
+.pc-role-badge.club { background: rgba(58, 122, 255, 0.12); color: #3a7aff; border-color: rgba(58, 122, 255, 0.3); }
+
+.pc-name {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+.pc-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.pc-meta {
+  display: flex; flex-direction: column; gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.pc-meta-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  color: var(--offwhite);
+}
+.pc-meta-row svg { width: 14px; height: 14px; stroke: var(--red); fill: none; stroke-width: 2; flex-shrink: 0; }
+.pc-meta-row .label { color: var(--muted); margin-right: auto; }
+.pc-meta-row .value { font-weight: 500; }
+
+.pc-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 20px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--red);
+  transition: gap 0.3s var(--ease-out);
+}
+.pc-cta svg { width: 14px; height: 14px; transition: transform 0.3s; }
+.profile-card:hover .pc-cta svg { transform: translateX(4px); }
+
+@media (max-width: 1100px) { .results-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 820px)  { .results-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px)  { .results-grid { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   7. EMPTY STATE (when 0 results)
+   ========================================================= */
+.empty-state {
+  display: none;
+  text-align: center;
+  padding: 80px 32px;
+}
+.empty-state.visible { display: block; }
+.empty-state .empty-icon {
+  width: 80px; height: 80px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+}
+.empty-state h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  color: var(--muted); max-width: 400px; margin: 0 auto;
+}
+
+/* =========================================================
+   8. FOOTER — identique à v19
+   ========================================================= */
+footer {
+  padding: 60px 0 40px;
+  border-top: 1px solid var(--line);
+  position: relative;
+}
+.footer-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+.footer-brand .logo { margin-bottom: 20px; }
+.footer-brand p { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 320px; }
+.footer-col h5 {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 3px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a {
+  font-size: 14px; color: var(--offwhite); transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--red); }
+.footer-base {
+  max-width: 1400px; margin: 60px auto 0;
+  padding: 28px 32px 0;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--muted);
+}
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .footer-base { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     NAV
+     ========================================================= -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="https://teamupfr.ch/" class="logo" aria-label="TeamUpFR">
+      <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://teamupfr.ch/recherche" class="active">Recherche</a>
+      <a href="https://teamupfr.ch/clubs">Clubs</a>
+      <a href="https://teamupfr.ch/annonces">Annonces</a>
+      <a href="https://teamupfr.ch/a-propos">À propos</a>
+      <a href="https://teamupfr.ch/login" class="nav-cta">Connexion</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+<header class="page-header">
+  <div class="container">
+    <span class="eyebrow">Recherche avancée</span>
+    <h1 class="page-title">Trouve ton<br><span class="em">terrain de jeu.</span></h1>
+    <p class="page-sub">Joueurs, coachs et clubs dans tout le canton de Fribourg.</p>
+  </div>
+</header>
+
+<!-- =========================================================
+     SEARCH BAR
+     ========================================================= -->
+<section class="search-section">
+  <div class="container">
+    <form class="search-bar" onsubmit="event.preventDefault();">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="search" placeholder="Nom, club, position, ligue…" autocomplete="off" id="searchInput">
+      <button type="submit" class="search-submit">Rechercher</button>
+    </form>
+  </div>
+</section>
+
+<!-- =========================================================
+     TABS + TOGGLE
+     ========================================================= -->
+<div class="tabs-row">
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="all">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Tous <span class="count">124</span>
+    </button>
+    <button class="tab" data-tab="joueurs">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+      Joueurs <span class="count">87</span>
+    </button>
+    <button class="tab" data-tab="coachs">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg>
+      Coachs <span class="count">23</span>
+    </button>
+    <button class="tab" data-tab="clubs">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
+      Clubs <span class="count">14</span>
+    </button>
+  </div>
+  <label class="toggle-availability" id="availabilityToggle">
+    <span class="toggle-dot"></span>
+    <span>Disponible uniquement</span>
+    <span class="toggle-switch"></span>
+  </label>
+</div>
+
+<!-- =========================================================
+     FILTERS
+     ========================================================= -->
+<section class="filters">
+  <div class="filters-grid">
+
+    <div class="filter">
+      <label class="filter-label" for="f-genre">Genre</label>
+      <select class="filter-select" id="f-genre">
+        <option value="">Tous genres</option>
+        <option value="m">Homme</option>
+        <option value="f">Femme</option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label class="filter-label" for="f-ligue">Ligue</label>
+      <select class="filter-select" id="f-ligue">
+        <option value="">Toutes les ligues</option>
+        <optgroup label="Actifs Hommes">
+          <option>2ème Ligue</option>
+          <option>3ème Ligue</option>
+          <option>4ème Ligue</option>
+          <option>5ème Ligue</option>
+        </optgroup>
+        <optgroup label="Juniors Garçons">
+          <option>Juniors A — Promotion</option>
+          <option>Juniors A — 1er degré</option>
+          <option>Juniors A — 2ème degré</option>
+          <option>Juniors B — Promotion</option>
+          <option>Juniors B — 1er degré</option>
+          <option>Juniors B — 2ème degré</option>
+          <option>Juniors C — Promotion</option>
+          <option>Juniors C — 1er degré</option>
+          <option>Juniors C — 2ème degré</option>
+          <option>Juniors D-9 — Promotion</option>
+          <option>Juniors D-9 — 1er degré</option>
+          <option>Juniors D-9 — 2ème degré</option>
+          <option>Juniors D-9 — 3ème degré</option>
+        </optgroup>
+        <optgroup label="Actives Femmes">
+          <option>2ème Ligue Féminine</option>
+          <option>3ème Ligue Féminine</option>
+          <option>4ème Ligue Féminine</option>
+        </optgroup>
+        <optgroup label="Juniores Filles">
+          <option>FF-19</option>
+          <option>FF-17</option>
+          <option>FF-14</option>
+          <option>FF-11</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label class="filter-label" for="f-position">Position</label>
+      <select class="filter-select" id="f-position">
+        <option value="">Toutes positions</option>
+        <option>Attaquant</option>
+        <option>Milieu offensif</option>
+        <option>Milieu défensif</option>
+        <option>Défenseur central</option>
+        <option>Défenseur latéral</option>
+        <option>Gardien</option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label class="filter-label" for="f-zone">Zone</label>
+      <select class="filter-select" id="f-zone">
+        <option value="">Toute la zone</option>
+        <option>Fribourg-Ville</option>
+        <option>Gruyère</option>
+        <option>Broye</option>
+        <option>Glâne</option>
+        <option>Sensebezirk</option>
+        <option>Veveyse</option>
+        <option>Lac</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="filter-actions">
+    <button class="filter-reset" id="resetBtn">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      Réinitialiser les filtres
+    </button>
+    <span class="results-count"><span class="num" id="resultsCount">8</span>résultats</span>
+  </div>
+</section>
+
+<!-- =========================================================
+     RESULTS GRID (mockup data)
+     ========================================================= -->
+<section class="results">
+  <div class="results-grid" id="resultsGrid">
+
+    <!-- JOUEUR -->
+    <article class="profile-card" data-type="joueurs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-joueur">LB<span class="status"></span></div>
+        <span class="pc-role-badge">Joueur</span>
+      </div>
+      <h3 class="pc-name">Lucas Brulhart</h3>
+      <p class="pc-sub">FC Bulle · 22 ans</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Ligue</span><span class="value">2ème Ligue</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Gruyère</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+          <span class="label">Position</span><span class="value">Attaquant</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- COACH -->
+    <article class="profile-card" data-type="coachs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-coach">AS<span class="status"></span></div>
+        <span class="pc-role-badge coach">Coach</span>
+      </div>
+      <h3 class="pc-name">Andreas Schöpfer</h3>
+      <p class="pc-sub">FC Tafers · UEFA B</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Niveau</span><span class="value">Juniors A — 1er</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Sensebezirk</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg>
+          <span class="label">Philosophie</span><span class="value">4-3-3 offensif</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- CLUB -->
+    <article class="profile-card" data-type="clubs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-club">FC<span class="status"></span></div>
+        <span class="pc-role-badge club">Club</span>
+      </div>
+      <h3 class="pc-name">FC Düdingen</h3>
+      <p class="pc-sub">Fondé en 1922 · 380 membres</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Équipes</span><span class="value">12 actives</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Sensebezirk</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="label">Annonces</span><span class="value">3 ouvertes</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- JOUEUSE -->
+    <article class="profile-card" data-type="joueurs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-joueur">LP<span class="status"></span></div>
+        <span class="pc-role-badge">Joueuse</span>
+      </div>
+      <h3 class="pc-name">Léa Python</h3>
+      <p class="pc-sub">FC Estavayer · 17 ans</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Ligue</span><span class="value">FF-17</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Broye</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+          <span class="label">Position</span><span class="value">Milieu offensif</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- JOUEUR -->
+    <article class="profile-card" data-type="joueurs" data-available="false">
+      <div class="pc-top">
+        <div class="pc-avatar av-joueur" style="opacity: 0.7">YA</div>
+        <span class="pc-role-badge">Joueur</span>
+      </div>
+      <h3 class="pc-name">Yann Aebischer</h3>
+      <p class="pc-sub">FC Domdidier · 28 ans</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Ligue</span><span class="value">3ème Ligue</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Broye</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+          <span class="label">Position</span><span class="value">Gardien</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- COACH -->
+    <article class="profile-card" data-type="coachs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-coach">TR<span class="status"></span></div>
+        <span class="pc-role-badge coach">Coach</span>
+      </div>
+      <h3 class="pc-name">Théo Repond</h3>
+      <p class="pc-sub">FC Romont · UEFA C</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Niveau</span><span class="value">3ème Ligue</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Glâne</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg>
+          <span class="label">Philosophie</span><span class="value">Possession</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- CLUB -->
+    <article class="profile-card" data-type="clubs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-club">FC<span class="status"></span></div>
+        <span class="pc-role-badge club">Club</span>
+      </div>
+      <h3 class="pc-name">FC Bulle</h3>
+      <p class="pc-sub">Fondé en 1909 · 450 membres</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Équipes</span><span class="value">15 actives</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Gruyère</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="label">Annonces</span><span class="value">5 ouvertes</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- JOUEUR -->
+    <article class="profile-card" data-type="joueurs" data-available="true">
+      <div class="pc-top">
+        <div class="pc-avatar av-joueur">RB<span class="status"></span></div>
+        <span class="pc-role-badge">Joueur</span>
+      </div>
+      <h3 class="pc-name">Robin Bertschi</h3>
+      <p class="pc-sub">FC Plaffeien · 19 ans</p>
+      <div class="pc-meta">
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="label">Ligue</span><span class="value">Juniors A</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="label">Zone</span><span class="value">Sensebezirk</span>
+        </div>
+        <div class="pc-meta-row">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+          <span class="label">Position</span><span class="value">Défenseur central</span>
+        </div>
+      </div>
+      <a href="#" class="pc-cta">Voir profil
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    </div>
+    <h3>Aucun résultat</h3>
+    <p>Essaie d'élargir ta recherche ou de réinitialiser les filtres.</p>
+  </div>
+</section>
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="https://teamupfr.ch/" class="logo">
+        <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+      </a>
+      <p>Ton équipe, ton avenir.<br>Canton de Fribourg · Suisse.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Plateforme</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/recherche">Recherche</a></li>
+        <li><a href="https://teamupfr.ch/clubs">Clubs</a></li>
+        <li><a href="https://teamupfr.ch/annonces">Annonces</a></li>
+        <li><a href="https://teamupfr.ch/dashboard">Dashboard</a></li>
+        <li><a href="https://teamupfr.ch/candidatures">Candidatures</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>TeamUpFR</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/a-propos">À propos</a></li>
+        <li><a href="https://teamupfr.ch/faq">FAQ</a></li>
+        <li><a href="https://teamupfr.ch/privacy">Confidentialité</a></li>
+        <li><a href="https://teamupfr.ch/cgu">CGU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="mailto:teamupfr.ch@gmail.com">teamupfr.ch@gmail.com</a></li>
+        <li><span style="color: var(--muted); font-size: 14px;">Fribourg, Suisse</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-base">
+    <span>© 2025 TeamUpFR — Tous droits réservés</span>
+    <span>Français · Deutsch</span>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   INTERACTIVITY
+   ========================================================= */
+
+// Nav scroll state (the page already has a styled nav, just adds .scrolled class for finer effect)
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// Tabs
+const tabs = document.querySelectorAll('.tab');
+const cards = document.querySelectorAll('.profile-card');
+const emptyState = document.getElementById('emptyState');
+const resultsCount = document.getElementById('resultsCount');
+let activeTab = 'all';
+let availableOnly = false;
+
+const applyFilters = () => {
+  let count = 0;
+  cards.forEach(card => {
+    const matchType = activeTab === 'all' || card.dataset.type === activeTab;
+    const matchAvail = !availableOnly || card.dataset.available === 'true';
+    const show = matchType && matchAvail;
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  resultsCount.textContent = count;
+  emptyState.classList.toggle('visible', count === 0);
+};
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeTab = tab.dataset.tab;
+    applyFilters();
+  });
+});
+
+// Availability toggle
+const availabilityToggle = document.getElementById('availabilityToggle');
+availabilityToggle.addEventListener('click', () => {
+  availableOnly = !availableOnly;
+  availabilityToggle.classList.toggle('active', availableOnly);
+  applyFilters();
+});
+
+// Reset filters
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.querySelectorAll('.filter-select').forEach(s => s.value = '');
+  document.getElementById('searchInput').value = '';
+  tabs.forEach(t => t.classList.remove('active'));
+  tabs[0].classList.add('active');
+  activeTab = 'all';
+  availableOnly = false;
+  availabilityToggle.classList.remove('active');
+  applyFilters();
+});
+
+// Subtle ripple on card click (for demo feel)
+cards.forEach(card => {
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.pc-cta')) return; // let the link work
+    // Simple flash effect
+    card.style.borderColor = 'var(--red)';
+    setTimeout(() => card.style.borderColor = '', 250);
+  });
+});
+</script>
+</body>
+</html>

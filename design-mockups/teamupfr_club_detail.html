@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="FC Bulle — club de football fondé en 1909, basé au Stade de Bouleyres en Gruyère. Découvre ses équipes, ses coachs et ses recrutements en cours.">
+<meta name="theme-color" content="#0D1F4A">
+<title>FC Bulle — TeamUpFR</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #0D1F4A;
+  --navy-deep: #081434;
+  --navy-light: #1a2f6b;
+  --red: #FF3A3A;
+  --red-glow: rgba(255, 58, 58, 0.4);
+  --green: #2ED27F;
+  --orange: #FF9A3A;
+  --blue: #3A7AFF;
+  --white: #ffffff;
+  --offwhite: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.6);
+  --faint: rgba(255,255,255,0.3);
+  --line: rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.22);
+
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Russo One', sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at top, var(--navy-light) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(255, 58, 58, 0.06) 0%, transparent 60%),
+    var(--navy);
+  color: var(--white); line-height: 1.5;
+  min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button, input, select { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+::selection { background: var(--red); color: var(--white); }
+
+/* ========== NAV ========== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 22px 0;
+  transition: padding 0.4s var(--ease-out);
+  background: rgba(13, 31, 74, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+}
+.nav.scrolled { padding: 14px 0; }
+.nav-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: baseline; gap: 1px;
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.logo .lg-teamup { color: var(--white); }
+.logo .lg-f { color: #0a0a0a; background: var(--white); padding: 2px 4px; margin-left: 4px; border-radius: 2px; }
+.logo .lg-r { color: var(--white); background: #0a0a0a; padding: 2px 4px; border-radius: 2px; }
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--offwhite);
+  position: relative; transition: color 0.3s;
+}
+.nav-links a.active { color: var(--white); }
+.nav-links a::after {
+  content: ''; position: absolute; left: 0; bottom: -4px;
+  width: 0; height: 2px; background: var(--red);
+  transition: width 0.3s var(--ease-out);
+}
+.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+.nav-cta {
+  background: var(--red); color: var(--white);
+  padding: 10px 22px; border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px var(--red-glow); }
+.nav-toggle { display: none; }
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: block; }
+}
+
+/* ========== CONTAINER ========== */
+.container { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+
+/* ========== BREADCRUMB ========== */
+.breadcrumb {
+  padding: 130px 0 0;
+  font-size: 13px; color: var(--muted);
+}
+.breadcrumb .container { display: flex; align-items: center; gap: 8px; }
+.breadcrumb a { transition: color 0.3s; }
+.breadcrumb a:hover { color: var(--white); }
+.breadcrumb svg { width: 12px; height: 12px; stroke: var(--faint); fill: none; stroke-width: 2; }
+.breadcrumb .current { color: var(--white); font-weight: 500; }
+
+/* ========== CLUB HERO ========== */
+.club-hero {
+  padding: 40px 0 60px;
+  position: relative;
+}
+.club-hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%; transform: translateX(-50%);
+  width: 80%; max-width: 1000px; height: 500px;
+  background: radial-gradient(ellipse at center, rgba(58, 122, 255, 0.1) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.club-hero .container { position: relative; z-index: 1; }
+.hero-main {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 40px;
+  align-items: center;
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 860px) {
+  .hero-main { grid-template-columns: 1fr; text-align: center; gap: 24px; }
+}
+
+.club-crest {
+  width: 140px; height: 156px;
+  clip-path: polygon(50% 0%, 100% 14%, 100% 60%, 50% 100%, 0% 60%, 0% 14%);
+  background: linear-gradient(135deg, #1a3a8a 0%, #0d1f4a 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 44px;
+  color: var(--white);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  position: relative;
+}
+.club-crest::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  clip-path: polygon(50% 0%, 100% 14%, 100% 60%, 50% 100%, 0% 60%, 0% 14%);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+@media (max-width: 860px) {
+  .club-crest { margin: 0 auto; }
+}
+
+.club-info {
+  flex: 1;
+}
+.club-tags {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 14px;
+}
+@media (max-width: 860px) { .club-tags { justify-content: center; } }
+.club-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  color: var(--offwhite);
+}
+.club-tag.primary { background: rgba(255, 58, 58, 0.12); border-color: rgba(255, 58, 58, 0.3); color: var(--red); }
+.club-tag svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.club-name {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 0.95; letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.club-sub {
+  font-size: 16px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.hero-actions { display: flex; flex-direction: column; gap: 10px; }
+@media (max-width: 860px) { .hero-actions { flex-direction: row; justify-content: center; } }
+
+.btn-primary {
+  background: var(--red); color: var(--white);
+  padding: 14px 24px; border-radius: 12px;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.3px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px var(--red-glow); }
+.btn-primary svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.btn-secondary {
+  background: transparent; color: var(--white);
+  padding: 14px 24px; border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  font-size: 14px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: border-color 0.3s, background 0.3s;
+}
+.btn-secondary:hover { border-color: var(--white); background: rgba(255,255,255,0.04); }
+.btn-secondary svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* ========== STATS STRIP ========== */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 40px 0 0;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 720px) { .stats-strip { grid-template-columns: repeat(2, 1fr); gap: 24px 0; } }
+
+.stat-cell {
+  text-align: center;
+  position: relative;
+}
+.stat-cell:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 50%; transform: translateY(-50%);
+  width: 1px; height: 60%;
+  background: var(--line);
+}
+@media (max-width: 720px) { .stat-cell:not(:last-child)::after { display: none; } }
+.stat-num {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 40px);
+  color: var(--white);
+  line-height: 1;
+}
+.stat-num .em { color: var(--red); }
+.stat-label {
+  font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ========== TAB NAV ========== */
+.tabs-nav {
+  position: sticky; top: 78px; z-index: 50;
+  background: rgba(13, 31, 74, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+}
+.tabs-nav-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: flex; gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-nav-inner::-webkit-scrollbar { display: none; }
+.tab-link {
+  padding: 16px 20px;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.3s, border-color 0.3s;
+}
+.tab-link:hover { color: var(--offwhite); }
+.tab-link.active { color: var(--white); border-bottom-color: var(--red); }
+
+/* ========== SECTION COMMON ========== */
+.section { padding: 80px 0; }
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1; letter-spacing: -0.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title .em { color: var(--red); }
+.section-eyebrow {
+  font-family: var(--font-display);
+  font-size: 11px; letter-spacing: 3px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-intro {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+
+/* ========== ABOUT (text + facts grid) ========== */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+@media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+.about-text { font-size: 16px; line-height: 1.7; color: var(--offwhite); font-weight: 300; }
+.about-text p { margin-bottom: 18px; }
+.about-text strong { font-weight: 600; color: var(--white); }
+
+.facts-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+}
+.facts-card h4 {
+  font-family: var(--font-display);
+  font-size: 13px; letter-spacing: 2px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.fact-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.fact-row:last-child { border-bottom: 0; }
+.fact-label { color: var(--muted); }
+.fact-value { color: var(--white); font-weight: 500; text-align: right; }
+.fact-value a { color: var(--red); transition: opacity 0.3s; }
+.fact-value a:hover { opacity: 0.8; }
+
+/* ========== TEAMS GRID ========== */
+.teams-section { background: rgba(255,255,255,0.02); }
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1000px) { .teams-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .teams-grid { grid-template-columns: 1fr; } }
+
+.team-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  transition: transform 0.4s var(--ease-out), border-color 0.4s, background 0.4s;
+  cursor: pointer;
+}
+.team-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 58, 58, 0.4);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+}
+
+.team-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 18px;
+}
+.team-badge {
+  font-family: var(--font-display);
+  font-size: 11px; letter-spacing: 2px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  color: var(--offwhite);
+}
+.team-status {
+  font-size: 11px; letter-spacing: 1px;
+  color: var(--green);
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.team-status::before {
+  content: ''; width: 6px; height: 6px;
+  background: var(--green); border-radius: 50%;
+}
+
+.team-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+}
+.team-coach {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.team-coach strong { color: var(--offwhite); font-weight: 500; }
+
+.team-meta {
+  display: flex; gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.team-meta-item { flex: 1; }
+.team-meta-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--white);
+  line-height: 1;
+}
+.team-meta-label {
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ========== ANNONCES (club's active) ========== */
+.annonces-list {
+  display: flex; flex-direction: column;
+  gap: 16px;
+}
+.ann-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s var(--ease-out);
+  cursor: pointer;
+}
+.ann-row:hover {
+  border-color: rgba(255, 58, 58, 0.4);
+  transform: translateX(4px);
+}
+@media (max-width: 720px) { .ann-row { grid-template-columns: 1fr; gap: 12px; } }
+
+.ann-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 58, 58, 0.12);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ann-icon svg { width: 22px; height: 22px; stroke: var(--red); fill: none; stroke-width: 2; }
+
+.ann-content { min-width: 0; }
+.ann-row-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.ann-row-meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+.ann-row-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.ann-row-meta svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.ann-row-action {
+  font-size: 12px; font-weight: 600;
+  color: var(--red);
+  letter-spacing: 0.5px;
+  display: inline-flex; align-items: center; gap: 6px;
+  text-transform: uppercase;
+  transition: gap 0.3s;
+}
+.ann-row-action svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+.ann-row:hover .ann-row-action { gap: 10px; }
+
+.see-all-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 24px;
+  font-size: 13px; font-weight: 600;
+  color: var(--white);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 4px;
+  transition: border-color 0.3s, color 0.3s;
+}
+.see-all-link:hover { border-color: var(--red); color: var(--red); }
+.see-all-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* ========== COACHS ========== */
+.coachs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 860px) { .coachs-grid { grid-template-columns: 1fr; } }
+
+.coach-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  text-align: center;
+  transition: transform 0.4s var(--ease-out), border-color 0.4s;
+}
+.coach-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 58, 58, 0.3);
+}
+
+.coach-avatar {
+  width: 80px; height: 80px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--white);
+}
+.coach-avatar.g1 { background: linear-gradient(135deg, #ff9a3a 0%, #c4651f 100%); }
+.coach-avatar.g2 { background: linear-gradient(135deg, #3a7aff 0%, #1f4ac4 100%); }
+.coach-avatar.g3 { background: linear-gradient(135deg, #2ED27F 0%, #1a8a52 100%); }
+
+.coach-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+.coach-team {
+  font-size: 13px;
+  color: var(--red);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.coach-details {
+  display: flex; justify-content: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.coach-detail {
+  font-size: 11px;
+  color: var(--offwhite);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line);
+}
+
+/* ========== CONTACT + LOCATION ========== */
+.contact-section { background: rgba(255,255,255,0.02); }
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+@media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; } }
+
+.contact-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px;
+}
+.contact-card h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin-bottom: 24px;
+  letter-spacing: 0.3px;
+}
+
+.contact-line {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.contact-line:last-child { border-bottom: 0; }
+.contact-line-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 58, 58, 0.12);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.contact-line-icon svg { width: 16px; height: 16px; stroke: var(--red); fill: none; stroke-width: 2; }
+.contact-line-content { flex: 1; min-width: 0; }
+.contact-line-label {
+  font-size: 11px; letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.contact-line-value {
+  font-size: 14px;
+  color: var(--white);
+  font-weight: 500;
+  word-break: break-word;
+}
+.contact-line-value a {
+  color: var(--white);
+  transition: color 0.3s;
+}
+.contact-line-value a:hover { color: var(--red); }
+
+/* Map placeholder */
+.map-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  min-height: 360px;
+}
+.map-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(58, 122, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 70% 70%, rgba(46, 210, 127, 0.1) 0%, transparent 40%),
+    linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 100%);
+}
+.map-bg::before, .map-bg::after {
+  content: '';
+  position: absolute;
+}
+.map-bg::before {
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.map-bg::after {
+  top: 30%; left: 20%; width: 60%; height: 30%;
+  background: rgba(58, 122, 255, 0.08);
+  border: 1px solid rgba(58, 122, 255, 0.2);
+  border-radius: 50%;
+  transform: rotate(-15deg);
+  filter: blur(8px);
+}
+.map-pin {
+  position: absolute;
+  top: 45%; left: 50%; transform: translate(-50%, -50%);
+  width: 48px; height: 48px;
+  background: var(--red);
+  border-radius: 50% 50% 50% 0;
+  rotate: -45deg;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 28px var(--red-glow);
+  z-index: 2;
+  animation: bounce 2s ease-in-out infinite;
+}
+.map-pin svg { width: 22px; height: 22px; stroke: var(--white); fill: none; stroke-width: 2.5; rotate: 45deg; }
+@keyframes bounce {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -60%); }
+}
+.map-pin-shadow {
+  position: absolute;
+  top: 58%; left: 50%; transform: translateX(-50%);
+  width: 30px; height: 8px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 50%;
+  filter: blur(4px);
+  z-index: 1;
+  animation: shadowPulse 2s ease-in-out infinite;
+}
+@keyframes shadowPulse {
+  0%, 100% { width: 30px; opacity: 0.4; }
+  50% { width: 22px; opacity: 0.25; }
+}
+.map-overlay {
+  position: absolute;
+  bottom: 20px; left: 20px; right: 20px;
+  padding: 16px 20px;
+  background: rgba(13, 31, 74, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  z-index: 3;
+}
+.map-overlay h5 {
+  font-family: var(--font-display);
+  font-size: 14px; letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.map-overlay p { font-size: 12px; color: var(--muted); }
+
+/* ========== CTA FINAL ========== */
+.cta-final {
+  padding: 120px 0;
+  text-align: center;
+  position: relative;
+}
+.cta-final::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255, 58, 58, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.cta-final .container { position: relative; z-index: 1; }
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 60px);
+  line-height: 1; letter-spacing: -0.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.cta-text {
+  font-size: 17px; font-weight: 300; color: var(--offwhite);
+  max-width: 580px; margin: 0 auto 32px;
+}
+.cta-actions {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+}
+
+/* ========== FOOTER ========== */
+footer { padding: 60px 0 40px; border-top: 1px solid var(--line); }
+.footer-inner {
+  max-width: 1400px; margin: 0 auto; padding: 0 32px;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+}
+.footer-brand .logo { margin-bottom: 20px; }
+.footer-brand p { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 320px; }
+.footer-col h5 {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 3px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a { font-size: 14px; color: var(--offwhite); transition: color 0.3s; }
+.footer-col a:hover { color: var(--red); }
+.footer-base {
+  max-width: 1400px; margin: 60px auto 0;
+  padding: 28px 32px 0;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--muted);
+}
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .footer-base { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="https://teamupfr.ch/" class="logo" aria-label="TeamUpFR">
+      <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://teamupfr.ch/recherche">Recherche</a>
+      <a href="https://teamupfr.ch/clubs" class="active">Clubs</a>
+      <a href="https://teamupfr.ch/annonces">Annonces</a>
+      <a href="https://teamupfr.ch/a-propos">À propos</a>
+      <a href="https://teamupfr.ch/login" class="nav-cta">Connexion</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ========== BREADCRUMB ========== -->
+<div class="breadcrumb">
+  <div class="container">
+    <a href="https://teamupfr.ch/clubs">Clubs</a>
+    <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    <span class="current">FC Bulle</span>
+  </div>
+</div>
+
+<!-- ========== CLUB HERO ========== -->
+<section class="club-hero">
+  <div class="container">
+    <div class="hero-main">
+      <div class="club-crest">FCB</div>
+      <div class="club-info">
+        <div class="club-tags">
+          <span class="club-tag primary">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+            2ème Ligue
+          </span>
+          <span class="club-tag">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Gruyère
+          </span>
+          <span class="club-tag">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Fondé en 1909
+          </span>
+        </div>
+        <h1 class="club-name">FC Bulle</h1>
+        <p class="club-sub">Stade de Bouleyres · Bulle · Bleu &amp; Blanc</p>
+      </div>
+      <div class="hero-actions">
+        <a href="https://teamupfr.ch/login" class="btn-primary">
+          <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Suivre le club
+        </a>
+        <a href="#contact" class="btn-secondary">
+          <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Contacter
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-cell">
+        <div class="stat-num"><span class="em">7</span></div>
+        <div class="stat-label">Équipes</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">142</div>
+        <div class="stat-label">Joueurs</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num"><span class="em">3</span></div>
+        <div class="stat-label">Annonces actives</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">117</div>
+        <div class="stat-label">Années d'histoire</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TAB NAV (anchor links) ========== -->
+<nav class="tabs-nav">
+  <div class="tabs-nav-inner">
+    <a href="#about" class="tab-link active">À propos</a>
+    <a href="#teams" class="tab-link">Équipes</a>
+    <a href="#annonces" class="tab-link">Annonces</a>
+    <a href="#coachs" class="tab-link">Coachs</a>
+    <a href="#contact" class="tab-link">Contact</a>
+  </div>
+</nav>
+
+<!-- ========== ABOUT ========== -->
+<section class="section" id="about">
+  <div class="container">
+    <span class="section-eyebrow">À propos</span>
+    <h2 class="section-title">L'histoire du <span class="em">club.</span></h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>Fondé en <strong>1909</strong>, le FC Bulle est l'un des clubs les plus anciens du canton de Fribourg. Avec plus d'un siècle d'histoire, il représente fièrement la <strong>Gruyère</strong> dans les championnats régionaux.</p>
+        <p>Son <strong>Stade de Bouleyres</strong>, situé au cœur de Bulle, est un lieu emblématique du football amateur fribourgeois. Le club évolue actuellement en <strong>2ème Ligue</strong> avec son équipe première.</p>
+        <p>Au-delà de la compétition, le FC Bulle s'engage dans la formation des jeunes avec une école de football active et des équipes juniors de tous niveaux. Plus de <strong>140 joueurs</strong> portent les couleurs bleu et blanc chaque saison.</p>
+      </div>
+
+      <aside class="facts-card">
+        <h4>Infos clés</h4>
+        <div class="fact-row">
+          <span class="fact-label">Fondation</span>
+          <span class="fact-value">1909</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Couleurs</span>
+          <span class="fact-value">Bleu &amp; Blanc</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Stade</span>
+          <span class="fact-value">Bouleyres</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Ville</span>
+          <span class="fact-value">Bulle</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">District</span>
+          <span class="fact-value">Gruyère</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Ligue principale</span>
+          <span class="fact-value">2ème Ligue</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Site officiel</span>
+          <span class="fact-value"><a href="https://fcbulle.ch" target="_blank" rel="noopener">fcbulle.ch</a></span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TEAMS ========== -->
+<section class="section teams-section" id="teams">
+  <div class="container">
+    <span class="section-eyebrow">Effectifs</span>
+    <h2 class="section-title">Les 7 <span class="em">équipes.</span></h2>
+    <p class="section-intro">De la première équipe aux juniors, le FC Bulle propose un parcours complet pour tous les niveaux et toutes les générations.</p>
+
+    <div class="teams-grid">
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Sénior H</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">1ère équipe</h3>
+        <p class="team-coach">Coach <strong>Pascal Vauthey</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">2ème L.</div>
+            <div class="team-meta-label">Ligue</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">24</div>
+            <div class="team-meta-label">Joueurs</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Sénior H</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">2ème équipe</h3>
+        <p class="team-coach">Coach <strong>Sébastien Andrey</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">4ème L.</div>
+            <div class="team-meta-label">Ligue</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">22</div>
+            <div class="team-meta-label">Joueurs</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Junior</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">Juniors A</h3>
+        <p class="team-coach">Coach <strong>Mauro Petralia</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">Promo</div>
+            <div class="team-meta-label">Niveau</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">19</div>
+            <div class="team-meta-label">Joueurs</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Junior</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">Juniors B</h3>
+        <p class="team-coach">Coach <strong>Yvan Mauron</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">B Prom.</div>
+            <div class="team-meta-label">Niveau</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">21</div>
+            <div class="team-meta-label">Joueurs</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Junior</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">Juniors C</h3>
+        <p class="team-coach">Coach <strong>Daniel Crausaz</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">C Prom.</div>
+            <div class="team-meta-label">Niveau</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">23</div>
+            <div class="team-meta-label">Joueurs</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Féminine</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">FF-17</h3>
+        <p class="team-coach">Coach <strong>Marie Dey</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">2ème L.</div>
+            <div class="team-meta-label">Ligue Fém.</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">17</div>
+            <div class="team-meta-label">Joueuses</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="team-header">
+          <span class="team-badge">Vétérans</span>
+          <span class="team-status">Active</span>
+        </div>
+        <h3 class="team-name">Vétérans</h3>
+        <p class="team-coach">Coach <strong>Jean-Pierre Bovet</strong></p>
+        <div class="team-meta">
+          <div class="team-meta-item">
+            <div class="team-meta-num">Loisir</div>
+            <div class="team-meta-label">Niveau</div>
+          </div>
+          <div class="team-meta-item">
+            <div class="team-meta-num">16</div>
+            <div class="team-meta-label">Joueurs</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== ANNONCES ACTIVES ========== -->
+<section class="section" id="annonces">
+  <div class="container">
+    <span class="section-eyebrow">Recrutement en cours</span>
+    <h2 class="section-title">3 postes <span class="em">ouverts.</span></h2>
+    <p class="section-intro">Le FC Bulle recrute actuellement. Postule directement depuis ton profil pour ces opportunités.</p>
+
+    <div class="annonces-list">
+
+      <a href="#" class="ann-row">
+        <div class="ann-icon">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+        </div>
+        <div class="ann-content">
+          <div class="ann-row-title">Recherche attaquant pour fin de saison</div>
+          <div class="ann-row-meta">
+            <span><svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>Attaquant</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>2ème Ligue</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>il y a 2h</span>
+          </div>
+        </div>
+        <span class="ann-row-action">
+          Postuler
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="#" class="ann-row">
+        <div class="ann-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg>
+        </div>
+        <div class="ann-content">
+          <div class="ann-row-title">Coach FF-15 saison 2026/27</div>
+          <div class="ann-row-meta">
+            <span><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg>UEFA C+</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>FF-15</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>il y a 1j</span>
+          </div>
+        </div>
+        <span class="ann-row-action">
+          Postuler
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="#" class="ann-row">
+        <div class="ann-icon">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
+        </div>
+        <div class="ann-content">
+          <div class="ann-row-title">Gardien Juniors A — remplacement</div>
+          <div class="ann-row-meta">
+            <span><svg viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>Gardien</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Junior A Promotion</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>il y a 3j</span>
+          </div>
+        </div>
+        <span class="ann-row-action">
+          Postuler
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+    </div>
+
+    <a href="https://teamupfr.ch/annonces" class="see-all-link">
+      Voir toutes les annonces du club
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ========== COACHS ========== -->
+<section class="section teams-section" id="coachs">
+  <div class="container">
+    <span class="section-eyebrow">Encadrement</span>
+    <h2 class="section-title">L'équipe <span class="em">technique.</span></h2>
+    <p class="section-intro">Les coachs qui forment, motivent et accompagnent les joueurs du FC Bulle, saison après saison.</p>
+
+    <div class="coachs-grid">
+
+      <article class="coach-card">
+        <div class="coach-avatar g1">PV</div>
+        <h3 class="coach-name">Pascal Vauthey</h3>
+        <p class="coach-team">1ère équipe · 2ème Ligue</p>
+        <div class="coach-details">
+          <span class="coach-detail">UEFA B</span>
+          <span class="coach-detail">8 saisons</span>
+        </div>
+      </article>
+
+      <article class="coach-card">
+        <div class="coach-avatar g2">MP</div>
+        <h3 class="coach-name">Mauro Petralia</h3>
+        <p class="coach-team">Juniors A · Promotion</p>
+        <div class="coach-details">
+          <span class="coach-detail">UEFA C</span>
+          <span class="coach-detail">12 saisons</span>
+        </div>
+      </article>
+
+      <article class="coach-card">
+        <div class="coach-avatar g3">MD</div>
+        <h3 class="coach-name">Marie Dey</h3>
+        <p class="coach-team">FF-17 · 2ème Ligue Féminine</p>
+        <div class="coach-details">
+          <span class="coach-detail">UEFA C</span>
+          <span class="coach-detail">5 saisons</span>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section class="section contact-section" id="contact">
+  <div class="container">
+    <span class="section-eyebrow">Contact</span>
+    <h2 class="section-title">Où trouver <span class="em">le club.</span></h2>
+
+    <div class="contact-grid">
+
+      <div class="contact-card">
+        <h3>Informations</h3>
+        <div class="contact-line">
+          <div class="contact-line-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="contact-line-content">
+            <div class="contact-line-label">Adresse</div>
+            <div class="contact-line-value">Stade de Bouleyres<br>1630 Bulle</div>
+          </div>
+        </div>
+        <div class="contact-line">
+          <div class="contact-line-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          </div>
+          <div class="contact-line-content">
+            <div class="contact-line-label">Email</div>
+            <div class="contact-line-value"><a href="mailto:info@fcbulle.ch">info@fcbulle.ch</a></div>
+          </div>
+        </div>
+        <div class="contact-line">
+          <div class="contact-line-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="contact-line-content">
+            <div class="contact-line-label">Téléphone</div>
+            <div class="contact-line-value"><a href="tel:+41269121234">+41 26 912 12 34</a></div>
+          </div>
+        </div>
+        <div class="contact-line">
+          <div class="contact-line-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"/></svg>
+          </div>
+          <div class="contact-line-content">
+            <div class="contact-line-label">Site web</div>
+            <div class="contact-line-value"><a href="https://fcbulle.ch" target="_blank" rel="noopener">fcbulle.ch</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-card">
+        <div class="map-bg"></div>
+        <div class="map-pin-shadow"></div>
+        <div class="map-pin">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="map-overlay">
+          <h5>Stade de Bouleyres</h5>
+          <p>Avenue de la Gare 30, 1630 Bulle</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA FINAL ========== -->
+<section class="cta-final">
+  <div class="container">
+    <h2 class="cta-title">Rejoins le <span style="color:var(--red)">FC Bulle.</span></h2>
+    <p class="cta-text">Postule à une des annonces ouvertes ou contacte directement le club. 117 ans d'histoire t'attendent au Stade de Bouleyres.</p>
+    <div class="cta-actions">
+      <a href="https://teamupfr.ch/login" class="btn-primary">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Postuler maintenant
+      </a>
+      <a href="#contact" class="btn-secondary">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Contacter
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="https://teamupfr.ch/" class="logo">
+        <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+      </a>
+      <p>Ton équipe, ton avenir.<br>Canton de Fribourg · Suisse.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Plateforme</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/recherche">Recherche</a></li>
+        <li><a href="https://teamupfr.ch/clubs">Clubs</a></li>
+        <li><a href="https://teamupfr.ch/annonces">Annonces</a></li>
+        <li><a href="https://teamupfr.ch/dashboard">Dashboard</a></li>
+        <li><a href="https://teamupfr.ch/candidatures">Candidatures</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>TeamUpFR</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/a-propos">À propos</a></li>
+        <li><a href="https://teamupfr.ch/faq">FAQ</a></li>
+        <li><a href="https://teamupfr.ch/privacy">Confidentialité</a></li>
+        <li><a href="https://teamupfr.ch/cgu">CGU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="mailto:teamupfr.ch@gmail.com">teamupfr.ch@gmail.com</a></li>
+        <li><span style="color: var(--muted); font-size: 14px;">Fribourg, Suisse</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-base">
+    <span>© 2025 TeamUpFR — Tous droits réservés</span>
+    <span>Français · Deutsch</span>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// Tab nav scroll active state
+const tabLinks = document.querySelectorAll('.tab-link');
+const sections = ['about', 'teams', 'annonces', 'coachs', 'contact'].map(id => document.getElementById(id));
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + 200;
+  let activeIdx = 0;
+  sections.forEach((s, i) => {
+    if (s && s.offsetTop <= scrollY) activeIdx = i;
+  });
+  tabLinks.forEach((t, i) => t.classList.toggle('active', i === activeIdx));
+}, { passive: true });
+</script>
+</body>
+</html>

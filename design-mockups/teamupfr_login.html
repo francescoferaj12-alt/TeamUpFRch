@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Connexion et inscription TeamUpFR — la plateforme du football amateur fribourgeois.">
+<meta name="theme-color" content="#0D1F4A">
+<title>Connexion — TeamUpFR</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #0D1F4A;
+  --navy-deep: #081434;
+  --navy-light: #1a2f6b;
+  --navy-elev: #142659;
+  --red: #FF3A3A;
+  --red-glow: rgba(255, 58, 58, 0.4);
+  --green: #2ED27F;
+  --white: #ffffff;
+  --offwhite: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.6);
+  --faint: rgba(255,255,255,0.3);
+  --line: rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.22);
+
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Russo One', sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--navy);
+  color: var(--white); line-height: 1.5;
+  min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+button, input, select { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+::selection { background: var(--red); color: var(--white); }
+
+/* ========== LAYOUT (split-screen) ========== */
+.auth-layout {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  min-height: 100vh;
+}
+@media (max-width: 980px) {
+  .auth-layout { grid-template-columns: 1fr; }
+}
+
+/* ========== LEFT PANEL — branding ========== */
+.brand-panel {
+  position: relative;
+  padding: 40px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at top left, var(--navy-light) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(255, 58, 58, 0.18) 0%, transparent 55%),
+    var(--navy-deep);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+@media (max-width: 980px) {
+  .brand-panel { padding: 32px 32px 60px; min-height: auto; }
+}
+
+/* Decorative pattern */
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255,58,58,0.06) 0%, transparent 30%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 30%);
+  pointer-events: none;
+}
+.brand-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  background-position: -1px -1px;
+  pointer-events: none;
+  opacity: 0.4;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+}
+
+.brand-top {
+  position: relative; z-index: 2;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.logo {
+  display: inline-flex; align-items: baseline; gap: 1px;
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.logo .lg-teamup { color: var(--white); }
+.logo .lg-f { color: #0a0a0a; background: var(--white); padding: 2px 4px; margin-left: 4px; border-radius: 2px; }
+.logo .lg-r { color: var(--white); background: #0a0a0a; padding: 2px 4px; border-radius: 2px; }
+
+.back-home {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+.back-home:hover { color: var(--white); border-color: var(--line-strong); background: rgba(255,255,255,0.04); }
+.back-home svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.brand-content {
+  position: relative; z-index: 2;
+  max-width: 540px;
+}
+.brand-eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 4px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.brand-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 0.95; letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.brand-title .em { color: var(--red); }
+.brand-text {
+  font-size: clamp(15px, 1.2vw, 18px);
+  font-weight: 300;
+  color: var(--offwhite);
+  line-height: 1.6;
+  max-width: 460px;
+}
+
+.brand-bottom {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.feature-row {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 14px;
+  color: var(--offwhite);
+}
+.feature-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 58, 58, 0.12);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.feature-icon svg { width: 16px; height: 16px; stroke: var(--red); fill: none; stroke-width: 2; }
+
+@media (max-width: 980px) {
+  .brand-bottom { display: none; }
+}
+
+/* ========== RIGHT PANEL — form ========== */
+.form-panel {
+  background: var(--navy);
+  padding: 40px;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  position: relative;
+}
+.form-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 60%; height: 60%;
+  background: radial-gradient(ellipse at top right, rgba(255, 58, 58, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.form-container {
+  width: 100%; max-width: 460px;
+  margin: 0 auto;
+  position: relative; z-index: 1;
+}
+
+/* Tab switcher */
+.tabs-switcher {
+  display: flex;
+  padding: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  margin-bottom: 36px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 24px;
+  font-size: 14px; font-weight: 600;
+  color: var(--muted);
+  border-radius: 999px;
+  transition: color 0.3s, background 0.3s;
+}
+.tab-btn.active {
+  background: var(--white);
+  color: var(--navy);
+}
+
+/* Form heading */
+.form-heading {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.1; letter-spacing: -0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.form-sub {
+  font-size: 14px; color: var(--muted);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+/* SSO button (Google, Apple) */
+.sso-row {
+  display: flex; gap: 10px;
+  margin-bottom: 24px;
+}
+.sso-btn {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  font-size: 13px; font-weight: 500;
+  color: var(--offwhite);
+  transition: border-color 0.3s, background 0.3s;
+}
+.sso-btn:hover {
+  border-color: var(--white);
+  background: rgba(255,255,255,0.08);
+}
+.sso-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Divider */
+.divider {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 24px 0;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: var(--line);
+}
+
+/* Profile type selector (only for register) */
+.profile-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.profile-type {
+  position: relative;
+  padding: 16px 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s var(--ease-out);
+}
+.profile-type:hover {
+  border-color: var(--line-strong);
+  background: rgba(255,255,255,0.05);
+}
+.profile-type.selected {
+  border-color: var(--red);
+  background: rgba(255, 58, 58, 0.08);
+}
+.profile-type .pt-icon {
+  width: 36px; height: 36px;
+  margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transition: background 0.3s, border-color 0.3s;
+}
+.profile-type.selected .pt-icon {
+  background: var(--red);
+  border-color: var(--red);
+}
+.profile-type .pt-icon svg { width: 18px; height: 18px; stroke: var(--offwhite); fill: none; stroke-width: 2; transition: stroke 0.3s; }
+.profile-type.selected .pt-icon svg { stroke: var(--white); }
+.profile-type .pt-label {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--offwhite);
+}
+.profile-type.selected .pt-label { color: var(--white); }
+
+/* Form fields */
+.field {
+  margin-bottom: 16px;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+.field-label {
+  display: block;
+  font-size: 12px; font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.field-input {
+  position: relative;
+}
+.field-input input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--white);
+  transition: border-color 0.3s, background 0.3s;
+}
+.field-input input::placeholder { color: var(--faint); }
+.field-input input:hover { border-color: var(--line-strong); }
+.field-input input:focus {
+  outline: 0;
+  border-color: var(--red);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.1);
+}
+.field-input.with-icon input { padding-left: 44px; }
+.field-input .input-icon {
+  position: absolute;
+  left: 14px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px;
+  pointer-events: none;
+}
+.field-input .input-icon svg { width: 100%; height: 100%; stroke: var(--muted); fill: none; stroke-width: 2; }
+.field-input.with-icon input:focus + .input-icon svg { stroke: var(--red); }
+
+.password-toggle {
+  position: absolute;
+  right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted);
+  padding: 4px;
+}
+.password-toggle:hover { color: var(--white); }
+.password-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* Password strength bar */
+.password-strength {
+  display: flex; gap: 4px;
+  margin-top: 8px;
+}
+.strength-bar {
+  flex: 1; height: 3px;
+  background: var(--line);
+  border-radius: 999px;
+  transition: background 0.3s;
+}
+.strength-bar.weak { background: var(--red); }
+.strength-bar.medium { background: #ff9a3a; }
+.strength-bar.strong { background: var(--green); }
+
+/* Checkbox + remember/forgot row */
+.form-options {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 8px 0 20px;
+}
+.checkbox {
+  display: inline-flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--offwhite);
+  user-select: none;
+}
+.checkbox input { position: absolute; opacity: 0; pointer-events: none; }
+.checkbox-box {
+  width: 18px; height: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.03);
+  transition: border-color 0.3s, background 0.3s;
+  flex-shrink: 0;
+}
+.checkbox-box svg { width: 12px; height: 12px; stroke: var(--white); fill: none; stroke-width: 3; opacity: 0; transition: opacity 0.2s; }
+.checkbox input:checked + .checkbox-box {
+  background: var(--red);
+  border-color: var(--red);
+}
+.checkbox input:checked + .checkbox-box svg { opacity: 1; }
+
+.forgot-link {
+  font-size: 13px;
+  color: var(--red);
+  font-weight: 500;
+  transition: opacity 0.3s;
+}
+.forgot-link:hover { opacity: 0.8; }
+
+/* Terms checkbox for register */
+.terms-checkbox {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px;
+  color: var(--offwhite);
+  margin: 16px 0 24px;
+  line-height: 1.5;
+}
+.terms-checkbox a {
+  color: var(--red);
+  font-weight: 500;
+}
+.terms-checkbox a:hover { text-decoration: underline; }
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  background: var(--red);
+  color: var(--white);
+  border-radius: 12px;
+  font-size: 15px; font-weight: 600;
+  letter-spacing: 0.3px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 14px 32px var(--red-glow); }
+.btn-submit svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* Footer switch */
+.form-switch {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.form-switch a {
+  color: var(--white);
+  font-weight: 600;
+  margin-left: 4px;
+}
+.form-switch a:hover { color: var(--red); }
+
+/* Show/hide forms */
+.form-block { display: none; }
+.form-block.active { display: block; }
+
+/* Bottom links (legal) */
+.legal-row {
+  margin-top: 40px;
+  display: flex; justify-content: center; gap: 24px;
+  font-size: 12px; color: var(--muted);
+}
+.legal-row a { transition: color 0.3s; }
+.legal-row a:hover { color: var(--white); }
+</style>
+</head>
+<body>
+
+<div class="auth-layout">
+
+  <!-- ========== LEFT — BRANDING ========== -->
+  <aside class="brand-panel">
+    <div class="brand-top">
+      <a href="https://teamupfr.ch/" class="logo" aria-label="TeamUpFR">
+        <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+      </a>
+      <a href="https://teamupfr.ch/" class="back-home">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Retour
+      </a>
+    </div>
+
+    <div class="brand-content">
+      <span class="brand-eyebrow">Canton de Fribourg</span>
+      <h1 class="brand-title">Ton équipe,<br><span class="em">ton avenir.</span></h1>
+      <p class="brand-text">Rejoins la communauté du football amateur fribourgeois. Joueurs, coachs et clubs réunis sur une seule plateforme.</p>
+    </div>
+
+    <div class="brand-bottom">
+      <div class="feature-row">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <span>Profil visible par tous les clubs du canton</span>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M8 8l3 8M16 8l-3 8"/></svg>
+        </div>
+        <span>Connecté à 24 clubs · 187 équipes</span>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <span>Fait à Fribourg, pour Fribourg</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== RIGHT — FORM ========== -->
+  <main class="form-panel">
+    <div class="form-container">
+
+      <!-- Switch tabs -->
+      <div class="tabs-switcher">
+        <button class="tab-btn active" data-tab="login">Connexion</button>
+        <button class="tab-btn" data-tab="register">Inscription</button>
+      </div>
+
+      <!-- ========== LOGIN FORM ========== -->
+      <div class="form-block active" id="login-form">
+        <h2 class="form-heading">Bon retour.</h2>
+        <p class="form-sub">Connecte-toi pour accéder à ton profil et tes candidatures.</p>
+
+        <!-- SSO -->
+        <div class="sso-row">
+          <button type="button" class="sso-btn">
+            <svg viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#FF3A3A" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.998 10.998 0 0 0 12 23z"/><path fill="#fff" d="M5.84 14.09a6.6 6.6 0 0 1 0-4.18V7.07H2.18a10.997 10.997 0 0 0 0 9.86l3.66-2.84z"/><path fill="#FF3A3A" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1a10.998 10.998 0 0 0-9.82 6.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
+            Google
+          </button>
+          <button type="button" class="sso-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+            Apple
+          </button>
+        </div>
+
+        <div class="divider">ou</div>
+
+        <form onsubmit="event.preventDefault(); alert('Connexion (démo)');">
+          <div class="field">
+            <label class="field-label">Email</label>
+            <div class="field-input with-icon">
+              <input type="email" placeholder="ton@email.ch" required>
+              <span class="input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Mot de passe</label>
+            <div class="field-input with-icon">
+              <input type="password" id="login-pw" placeholder="••••••••" required>
+              <span class="input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <button type="button" class="password-toggle" onclick="togglePw('login-pw')" aria-label="Afficher le mot de passe">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox">
+              <input type="checkbox" checked>
+              <span class="checkbox-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Se souvenir de moi
+            </label>
+            <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            Se connecter
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+
+        <p class="form-switch">
+          Pas encore de compte ?
+          <a href="#" onclick="event.preventDefault(); switchTab('register');">Créer un compte</a>
+        </p>
+      </div>
+
+      <!-- ========== REGISTER FORM ========== -->
+      <div class="form-block" id="register-form">
+        <h2 class="form-heading">Crée ton compte.</h2>
+        <p class="form-sub">Choisis ton profil et rejoins la communauté en 2 minutes.</p>
+
+        <!-- SSO -->
+        <div class="sso-row">
+          <button type="button" class="sso-btn">
+            <svg viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#FF3A3A" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.998 10.998 0 0 0 12 23z"/><path fill="#fff" d="M5.84 14.09a6.6 6.6 0 0 1 0-4.18V7.07H2.18a10.997 10.997 0 0 0 0 9.86l3.66-2.84z"/><path fill="#FF3A3A" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1a10.998 10.998 0 0 0-9.82 6.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
+            Google
+          </button>
+          <button type="button" class="sso-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+            Apple
+          </button>
+        </div>
+
+        <div class="divider">ou</div>
+
+        <form onsubmit="event.preventDefault(); alert('Inscription (démo)');">
+          <!-- Profile type -->
+          <label class="field-label">Je suis</label>
+          <div class="profile-types" role="radiogroup">
+            <div class="profile-type selected" data-type="joueur" tabindex="0">
+              <div class="pt-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></div>
+              <div class="pt-label">Joueur</div>
+            </div>
+            <div class="profile-type" data-type="coach" tabindex="0">
+              <div class="pt-icon"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg></div>
+              <div class="pt-label">Coach</div>
+            </div>
+            <div class="profile-type" data-type="club" tabindex="0">
+              <div class="pt-icon"><svg viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg></div>
+              <div class="pt-label">Club</div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Prénom</label>
+              <div class="field-input">
+                <input type="text" placeholder="Lucas" required>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Nom</label>
+              <div class="field-input">
+                <input type="text" placeholder="Brulhart" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Email</label>
+            <div class="field-input with-icon">
+              <input type="email" placeholder="ton@email.ch" required>
+              <span class="input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Mot de passe</label>
+            <div class="field-input with-icon">
+              <input type="password" id="reg-pw" placeholder="Au moins 8 caractères" required>
+              <span class="input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <button type="button" class="password-toggle" onclick="togglePw('reg-pw')" aria-label="Afficher le mot de passe">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="password-strength" id="pwStrength">
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+            </div>
+          </div>
+
+          <label class="terms-checkbox">
+            <input type="checkbox" required style="display:none;">
+            <span class="checkbox-box" id="termsBox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>J'accepte les <a href="https://teamupfr.ch/cgu">conditions d'utilisation</a> et la <a href="https://teamupfr.ch/privacy">politique de confidentialité</a>.</span>
+          </label>
+
+          <button type="submit" class="btn-submit">
+            Créer mon compte
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+
+        <p class="form-switch">
+          Déjà un compte ?
+          <a href="#" onclick="event.preventDefault(); switchTab('login');">Se connecter</a>
+        </p>
+      </div>
+
+      <!-- Legal links -->
+      <div class="legal-row">
+        <a href="https://teamupfr.ch/cgu">CGU</a>
+        <a href="https://teamupfr.ch/privacy">Confidentialité</a>
+        <a href="mailto:teamupfr.ch@gmail.com">Contact</a>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script>
+// ========== TAB SWITCHING ==========
+const tabs = document.querySelectorAll('.tab-btn');
+const blocks = document.querySelectorAll('.form-block');
+
+function switchTab(target) {
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === target));
+  blocks.forEach(b => b.classList.toggle('active', b.id === target + '-form'));
+}
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// ========== PROFILE TYPE SELECTOR ==========
+const profileTypes = document.querySelectorAll('.profile-type');
+profileTypes.forEach(pt => {
+  pt.addEventListener('click', () => {
+    profileTypes.forEach(p => p.classList.remove('selected'));
+    pt.classList.add('selected');
+  });
+  pt.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      pt.click();
+    }
+  });
+});
+
+// ========== PASSWORD TOGGLE ==========
+function togglePw(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// ========== PASSWORD STRENGTH ==========
+const regPw = document.getElementById('reg-pw');
+const strengthBars = document.querySelectorAll('#pwStrength .strength-bar');
+if (regPw) {
+  regPw.addEventListener('input', () => {
+    const val = regPw.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    strengthBars.forEach((bar, i) => {
+      bar.classList.remove('weak', 'medium', 'strong');
+      if (i < score) {
+        if (score === 1) bar.classList.add('weak');
+        else if (score === 2) bar.classList.add('weak');
+        else if (score === 3) bar.classList.add('medium');
+        else bar.classList.add('strong');
+      }
+    });
+  });
+}
+
+// ========== TERMS CHECKBOX (custom click) ==========
+const termsBox = document.getElementById('termsBox');
+const termsInput = termsBox?.previousElementSibling;
+if (termsBox && termsInput) {
+  termsBox.addEventListener('click', (e) => {
+    e.preventDefault();
+    termsInput.checked = !termsInput.checked;
+    termsBox.style.background = termsInput.checked ? 'var(--red)' : 'rgba(255,255,255,0.03)';
+    termsBox.style.borderColor = termsInput.checked ? 'var(--red)' : 'var(--line-strong)';
+    termsBox.querySelector('svg').style.opacity = termsInput.checked ? '1' : '0';
+  });
+}
+</script>
+</body>
+</html>

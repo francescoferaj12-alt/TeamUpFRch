@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Foire aux questions TeamUpFR — réponses sur le fonctionnement, les profils, les annonces et la gestion de compte.">
+<meta name="theme-color" content="#0D1F4A">
+<title>FAQ — TeamUpFR</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #0D1F4A;
+  --navy-deep: #081434;
+  --navy-light: #1a2f6b;
+  --red: #FF3A3A;
+  --red-glow: rgba(255, 58, 58, 0.4);
+  --green: #2ED27F;
+  --orange: #FF9A3A;
+  --blue: #3A7AFF;
+  --white: #ffffff;
+  --offwhite: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.6);
+  --faint: rgba(255,255,255,0.3);
+  --line: rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.22);
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Russo One', sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at top, var(--navy-light) 0%, transparent 60%),
+    var(--navy);
+  color: var(--white); line-height: 1.5; min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { background: none; border: 0; cursor: pointer; font: inherit; color: inherit; }
+::selection { background: var(--red); color: var(--white); }
+
+/* ========== NAV ========== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 22px 0;
+  background: rgba(13, 31, 74, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+  transition: padding 0.4s var(--ease-out);
+}
+.nav.scrolled { padding: 14px 0; }
+.nav-inner { max-width: 1400px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+.logo { display: flex; align-items: baseline; gap: 1px; font-family: var(--font-display); font-size: 22px; letter-spacing: 0.5px; text-transform: uppercase; }
+.logo .lg-teamup { color: var(--white); }
+.logo .lg-f { color: #0a0a0a; background: var(--white); padding: 2px 4px; margin-left: 4px; border-radius: 2px; }
+.logo .lg-r { color: var(--white); background: #0a0a0a; padding: 2px 4px; border-radius: 2px; }
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--offwhite); position: relative; transition: color 0.3s; }
+.nav-links a.active { color: var(--white); }
+.nav-links a::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 2px; background: var(--red); transition: width 0.3s var(--ease-out); }
+.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+.nav-cta { background: var(--red); color: var(--white); padding: 10px 22px; border-radius: 999px; font-size: 14px; font-weight: 600; transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out); }
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px var(--red-glow); }
+@media (max-width: 860px) { .nav-links a:not(.nav-cta):not(.logo) { display: none; } }
+
+/* ========== CONTAINER ========== */
+.container { max-width: 1000px; margin: 0 auto; padding: 0 32px; }
+.container-narrow { max-width: 820px; margin: 0 auto; padding: 0 32px; }
+
+/* ========== PAGE HEADER ========== */
+.page-header {
+  padding: 160px 0 40px;
+  text-align: center;
+  position: relative;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 80%; max-width: 900px; height: 380px;
+  background: radial-gradient(ellipse at center, rgba(255, 58, 58, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.page-header .container { position: relative; z-index: 1; }
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: 4px;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 24px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.eyebrow svg { width: 14px; height: 14px; stroke: var(--red); fill: none; stroke-width: 2; }
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 80px);
+  line-height: 0.95; letter-spacing: -1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.page-title .em { color: var(--red); }
+.page-sub {
+  font-size: clamp(15px, 1.4vw, 18px);
+  font-weight: 300; color: var(--muted);
+  max-width: 540px; margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ========== SEARCH BAR ========== */
+.search-wrap {
+  max-width: 580px;
+  margin: 40px auto 0;
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  padding: 16px 24px 16px 56px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 15px;
+  color: var(--white);
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.search-input::placeholder { color: var(--faint); }
+.search-input:hover { border-color: var(--line-strong); }
+.search-input:focus {
+  outline: 0;
+  border-color: var(--red);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.1);
+}
+.search-icon {
+  position: absolute;
+  left: 22px; top: 50%; transform: translateY(-50%);
+  pointer-events: none;
+}
+.search-icon svg { width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 2; }
+.search-input:focus + .search-icon svg { stroke: var(--red); }
+
+/* ========== CATEGORY SECTION ========== */
+.faq-content { padding: 60px 0 100px; }
+.category {
+  margin-bottom: 56px;
+}
+.category-head {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.category-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 58, 58, 0.12);
+  border: 1px solid rgba(255, 58, 58, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.category-icon svg { width: 22px; height: 22px; stroke: var(--red); fill: none; stroke-width: 2; }
+.category-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.category-count {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+}
+
+/* ========== ACCORDION ========== */
+.qa-list { display: flex; flex-direction: column; gap: 8px; }
+
+.qa-item {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s, background 0.3s;
+}
+.qa-item:hover { border-color: var(--line-strong); }
+.qa-item.open {
+  border-color: rgba(255, 58, 58, 0.3);
+  background: linear-gradient(180deg, rgba(255,58,58,0.04) 0%, rgba(255,255,255,0.01) 100%);
+}
+
+.qa-question {
+  width: 100%;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 20px 24px;
+  text-align: left;
+  font-size: 15px; font-weight: 500;
+  color: var(--white);
+  transition: color 0.3s;
+}
+.qa-question:hover { color: var(--red); }
+.qa-item.open .qa-question { color: var(--white); }
+
+.qa-toggle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s, transform 0.4s var(--ease-out);
+}
+.qa-item.open .qa-toggle {
+  background: var(--red);
+  transform: rotate(135deg);
+}
+.qa-toggle svg { width: 14px; height: 14px; stroke: var(--white); fill: none; stroke-width: 2.5; }
+
+.qa-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease-out);
+}
+.qa-item.open .qa-answer { max-height: 500px; }
+.qa-answer-inner {
+  padding: 0 24px 24px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--offwhite);
+  font-weight: 300;
+}
+.qa-answer-inner a { color: var(--red); transition: opacity 0.3s; }
+.qa-answer-inner a:hover { opacity: 0.8; }
+.qa-answer-inner strong { font-weight: 600; color: var(--white); }
+
+/* ========== NO RESULTS ========== */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 60px 32px;
+}
+.no-results.visible { display: block; }
+.no-results-icon {
+  width: 80px; height: 80px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.no-results-icon svg { width: 32px; height: 32px; stroke: var(--muted); fill: none; stroke-width: 1.5; }
+.no-results h3 { font-family: var(--font-display); font-size: 22px; margin-bottom: 8px; }
+.no-results p { color: var(--muted); font-size: 14px; }
+
+/* ========== CONTACT CTA ========== */
+.contact-cta {
+  background: linear-gradient(135deg, rgba(255,58,58,0.06) 0%, rgba(13,31,74,0.3) 100%);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 56px 40px;
+  text-align: center;
+  margin-top: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.contact-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 58, 58, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+.contact-cta > * { position: relative; z-index: 1; }
+.contact-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 16px 40px var(--red-glow);
+}
+.contact-icon svg { width: 28px; height: 28px; stroke: var(--white); fill: none; stroke-width: 2; }
+.contact-cta h3 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+.contact-cta p {
+  color: var(--offwhite); font-weight: 300;
+  max-width: 460px; margin: 0 auto 28px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+.btn-contact {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--red);
+  color: var(--white);
+  padding: 16px 32px;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.3px;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.btn-contact:hover { transform: translateY(-2px); box-shadow: 0 16px 36px var(--red-glow); }
+.btn-contact svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.response-time {
+  margin-top: 20px;
+  font-size: 12px; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.response-time::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--green); border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(46, 210, 127, 0.2);
+}
+
+/* ========== FOOTER ========== */
+footer { padding: 60px 0 40px; border-top: 1px solid var(--line); }
+.footer-inner { max-width: 1400px; margin: 0 auto; padding: 0 32px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+.footer-brand .logo { margin-bottom: 20px; }
+.footer-brand p { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 320px; }
+.footer-col h5 { font-family: var(--font-display); font-size: 12px; letter-spacing: 3px; color: var(--red); text-transform: uppercase; margin-bottom: 20px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a { font-size: 14px; color: var(--offwhite); transition: color 0.3s; }
+.footer-col a:hover { color: var(--red); }
+.footer-base { max-width: 1400px; margin: 60px auto 0; padding: 28px 32px 0; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .footer-base { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="https://teamupfr.ch/" class="logo">
+      <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://teamupfr.ch/recherche">Recherche</a>
+      <a href="https://teamupfr.ch/clubs">Clubs</a>
+      <a href="https://teamupfr.ch/annonces">Annonces</a>
+      <a href="https://teamupfr.ch/a-propos">À propos</a>
+      <a href="https://teamupfr.ch/login" class="nav-cta">Connexion</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ========== PAGE HEADER ========== -->
+<section class="page-header">
+  <div class="container">
+    <span class="eyebrow">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Centre d'aide
+    </span>
+    <h1 class="page-title">Questions<br><span class="em">fréquentes.</span></h1>
+    <p class="page-sub">Tu as une question ? La réponse est sûrement ici. Sinon, contacte-nous directement.</p>
+
+    <div class="search-wrap">
+      <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une question...">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FAQ CONTENT ========== -->
+<section class="faq-content">
+  <div class="container-narrow" id="faqContainer">
+
+    <!-- ========== GÉNÉRAL ========== -->
+    <div class="category" data-category="general">
+      <div class="category-head">
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"/></svg>
+        </div>
+        <h2 class="category-title">Général</h2>
+        <span class="category-count">4 questions</span>
+      </div>
+
+      <div class="qa-list">
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment fonctionne TeamUpFR ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              TeamUpFR connecte joueurs, coachs et clubs du canton de Fribourg. Tu crées un profil avec tes infos (position, ligue, disponibilité), tu explores les annonces ou tu publies les tiennes, et tu postules en un clic. Les clubs peuvent aussi te contacter directement après avoir vu ton profil.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Mes données sont-elles sécurisées ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Oui. Nous stockons tes données sur des serveurs sécurisés en Europe et ne les partageons jamais avec des tiers sans ton accord. Tu peux modifier, exporter ou supprimer tes données à tout moment depuis ton profil. Plus de détails dans notre <a href="https://teamupfr.ch/privacy">politique de confidentialité</a>.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>TeamUpFR fonctionne-t-il sur mobile ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Oui, TeamUpFR est entièrement responsive. Tu peux y accéder depuis n'importe quel smartphone ou tablette via ton navigateur. Une application mobile dédiée est en cours de réflexion pour la suite.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment contacter le support ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Le moyen le plus rapide est par email à <a href="mailto:teamupfr.ch@gmail.com">teamupfr.ch@gmail.com</a>. Notre équipe répond généralement dans les 24 heures. Tu peux aussi nous contacter via le bouton en bas de cette page.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== JOUEURS ========== -->
+    <div class="category" data-category="joueurs">
+      <div class="category-head">
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+        </div>
+        <h2 class="category-title">Joueurs</h2>
+        <span class="category-count">3 questions</span>
+      </div>
+
+      <div class="qa-list">
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment modifier mon profil ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Connecte-toi, puis clique sur ton avatar en haut à droite. Tu accèdes à ton <a href="https://teamupfr.ch/dashboard">dashboard</a> où tu peux éditer toutes tes infos : position, ligue, disponibilité, parcours, photos. <strong>Plus ton profil est complet, plus les clubs te trouvent facilement.</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment postuler à une annonce ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Trouve une annonce qui te plaît dans le <a href="https://teamupfr.ch/annonces">fil</a> ou via la <a href="https://teamupfr.ch/recherche">recherche</a>, puis clique sur "Postuler". Tu peux ajouter un court message personnalisé pour expliquer pourquoi tu corresponds. Tu suis ensuite l'état de ta candidature dans la section <a href="https://teamupfr.ch/candidatures">Candidatures</a>.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Un club peut-il me contacter directement ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Oui. Si ton profil est visible, n'importe quel club inscrit peut consulter tes infos et t'envoyer un message via la plateforme. Tu peux gérer ta visibilité dans les paramètres de ton compte.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== COACHS ========== -->
+    <div class="category" data-category="coachs">
+      <div class="category-head">
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></svg>
+        </div>
+        <h2 class="category-title">Coachs</h2>
+        <span class="category-count">4 questions</span>
+      </div>
+
+      <div class="qa-list">
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment ajouter mes certifications UEFA ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Dans la section <strong>Parcours</strong> de ton profil, tu peux ajouter tes certifications (UEFA C, B, A, Pro) ainsi que d'autres formations Swiss Olympic ou diplômes pédagogiques. Indique aussi les saisons d'expérience pour gagner en crédibilité.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment décrire ma philosophie de jeu ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Utilise le champ <strong>Philosophie</strong> de ton profil pour décrire en quelques phrases ton approche : style de jeu privilégié, valeurs (formation, performance, plaisir), méthodes d'entraînement. C'est souvent ce qui fait la différence pour les clubs.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Un club peut-il me contacter directement ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Oui, comme pour les joueurs. Les clubs inscrits sur TeamUpFR peuvent te contacter pour des opportunités, même si tu n'as pas postulé à une annonce spécifique.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Puis-je avoir un profil joueur ET coach ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Oui, tu peux activer les deux rôles depuis ton profil. Tu apparaîtras dans les recherches des deux catégories. Pratique si tu joues encore tout en entraînant une équipe junior par exemple.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== CLUBS ========== -->
+    <div class="category" data-category="clubs">
+      <div class="category-head">
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></svg>
+        </div>
+        <h2 class="category-title">Clubs</h2>
+        <span class="category-count">3 questions</span>
+      </div>
+
+      <div class="qa-list">
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment publier une annonce de recrutement ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Depuis ton dashboard club, clique sur <strong>Publier une annonce</strong>. Tu peux préciser le type de profil recherché (poste, niveau, ligue), ajouter une description et indiquer si c'est urgent. Ton annonce apparaîtra dans le <a href="https://teamupfr.ch/annonces">fil</a> dès sa publication.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment gérer les candidatures reçues ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Toutes les candidatures arrivent dans ton tableau de bord. Tu peux les filtrer par annonce, voir le profil complet du candidat, lui envoyer un message ou accepter/refuser directement. Les candidats sont notifiés automatiquement.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Peut-on avoir plusieurs responsables pour un club ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Oui. Tu peux inviter d'autres responsables (entraîneurs, comité, président) à gérer la page du club. Chaque responsable a accès au dashboard et peut publier des annonces ou répondre aux candidatures.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== COMPTE ========== -->
+    <div class="category" data-category="compte">
+      <div class="category-head">
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h2 class="category-title">Compte</h2>
+        <span class="category-count">3 questions</span>
+      </div>
+
+      <div class="qa-list">
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment supprimer mon profil ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Dans les paramètres de ton compte, scrolle jusqu'à la section <strong>Zone dangereuse</strong> et clique sur <strong>Supprimer mon compte</strong>. La suppression est définitive et toutes tes données sont effacées dans les 30 jours suivants.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment changer mon mot de passe ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              Va dans <strong>Paramètres › Sécurité › Modifier le mot de passe</strong>. Tu peux aussi utiliser le lien "Mot de passe oublié" sur la page de connexion si tu n'arrives plus à te connecter.
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-item">
+          <button class="qa-question">
+            <span>Comment changer la langue de mon compte ?</span>
+            <span class="qa-toggle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="qa-answer">
+            <div class="qa-answer-inner">
+              TeamUpFR est disponible en <strong>français</strong> et <strong>allemand</strong>. Tu peux changer la langue depuis le sélecteur FR/DE en haut de chaque page, ou la définir par défaut dans tes paramètres de compte.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No results -->
+    <div class="no-results" id="noResults">
+      <div class="no-results-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </div>
+      <h3>Aucun résultat</h3>
+      <p>Essaie avec d'autres mots-clés ou contacte-nous directement.</p>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="contact-cta">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </div>
+      <h3>Tu n'as pas trouvé ta réponse ?</h3>
+      <p>Notre équipe est disponible pour t'aider. Pose-nous ta question directement par email — on revient vers toi rapidement.</p>
+      <a href="mailto:teamupfr.ch@gmail.com" class="btn-contact">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+        Contacter le support
+      </a>
+      <div class="response-time">Réponse sous 24h</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="https://teamupfr.ch/" class="logo">
+        <span class="lg-teamup">TeamUp</span><span class="lg-f">F</span><span class="lg-r">R</span>
+      </a>
+      <p>Ton équipe, ton avenir.<br>Canton de Fribourg · Suisse.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Plateforme</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/recherche">Recherche</a></li>
+        <li><a href="https://teamupfr.ch/clubs">Clubs</a></li>
+        <li><a href="https://teamupfr.ch/annonces">Annonces</a></li>
+        <li><a href="https://teamupfr.ch/dashboard">Dashboard</a></li>
+        <li><a href="https://teamupfr.ch/candidatures">Candidatures</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>TeamUpFR</h5>
+      <ul>
+        <li><a href="https://teamupfr.ch/a-propos">À propos</a></li>
+        <li><a href="https://teamupfr.ch/faq">FAQ</a></li>
+        <li><a href="https://teamupfr.ch/privacy">Confidentialité</a></li>
+        <li><a href="https://teamupfr.ch/cgu">CGU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="mailto:teamupfr.ch@gmail.com">teamupfr.ch@gmail.com</a></li>
+        <li><span style="color: var(--muted); font-size: 14px;">Fribourg, Suisse</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-base">
+    <span>© 2025 TeamUpFR — Tous droits réservés</span>
+    <span>Français · Deutsch</span>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// Accordion toggle
+document.querySelectorAll('.qa-question').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.qa-item');
+    item.classList.toggle('open');
+  });
+});
+
+// Search filter
+const searchInput = document.getElementById('searchInput');
+const categories = document.querySelectorAll('.category');
+const noResults = document.getElementById('noResults');
+
+searchInput.addEventListener('input', (e) => {
+  const term = e.target.value.toLowerCase().trim();
+  let totalVisible = 0;
+
+  categories.forEach(cat => {
+    let catVisible = 0;
+    const qaItems = cat.querySelectorAll('.qa-item');
+    qaItems.forEach(qa => {
+      const question = qa.querySelector('.qa-question span').textContent.toLowerCase();
+      const answer = qa.querySelector('.qa-answer-inner').textContent.toLowerCase();
+      const matches = !term || question.includes(term) || answer.includes(term);
+      qa.style.display = matches ? '' : 'none';
+      if (matches) catVisible++;
+    });
+    cat.style.display = catVisible > 0 ? '' : 'none';
+    totalVisible += catVisible;
+  });
+
+  noResults.classList.toggle('visible', totalVisible === 0 && term !== '');
+});
+</script>
+</body>
+</html>

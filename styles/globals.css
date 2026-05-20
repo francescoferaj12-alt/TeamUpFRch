@@ -2,28 +2,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@200;300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Russo+One&display=swap');
 
 :root {
-  /* ── Design System v2 (maquettes teamupfr_apple_v20) ── */
-  /* Couleurs */
+  /* ── Design System v2 — token esatti da teamupfr_apple_v20.html ── */
+  /* Colori principali */
   --ds-navy:          #0D1F4A;
   --ds-navy-deep:     #081434;
   --ds-navy-light:    #1a2f6b;
   --ds-red:           #FF3A3A;
+  --ds-red-glow:      rgba(255, 58, 58, 0.4);
+  /* Colori testo */
+  --ds-white:         #ffffff;
+  --ds-offwhite:      rgba(255,255,255,0.92);
+  --ds-muted:         rgba(255,255,255,0.6);
+  --ds-faint:         rgba(255,255,255,0.3);
+  --ds-line:          rgba(255,255,255,0.12);
+  /* Colori supplementari (non nel mockup principale, usati in pagine interne) */
   --ds-green:         #2ED27F;
   --ds-orange:        #FF9A3A;
   --ds-blue:          #3A7AFF;
-  /* Typographie */
+  /* Tipografia */
   --ds-font-body:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --ds-font-display:  'Russo One', 'Bebas Neue', sans-serif;
-  /* Espacements / layout */
+  --ds-font-display:  'Russo One', sans-serif;
+  /* Layout */
   --ds-container:     1400px;
   --ds-container-lg:  1200px;
-  --ds-radius-card:   20px;
-  --ds-radius-sm:     16px;
-  --ds-radius-xs:     12px;
-  /* Borders */
-  --ds-border:        rgba(255,255,255,0.12);
-  --ds-border-strong: rgba(255,255,255,0.20);
   /* Easing */
+  --ds-ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+  --ds-ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+  /* Aliases brevi (corrispondono ai nomi esatti del mockup HTML) */
+  --ds-border:        rgba(255,255,255,0.12);
   --ds-ease:          cubic-bezier(0.22, 1, 0.36, 1);
 
   /* ── Dark design system (legacy — ne pas modifier) ── */
@@ -1108,54 +1114,57 @@ textarea.input { resize: vertical; min-height: 80px; }
   .ds-container-lg { padding-inline: 20px; }
 }
 
-/* Buttons v2 */
+/* Buttons v2 — forma e stile esatti dal mockup (pillola 999px) */
 .ds-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 10px;
+  gap: 10px;
+  border-radius: 999px;
   font-family: var(--ds-font-body);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: transform 0.2s var(--ds-ease), box-shadow 0.2s var(--ds-ease), background 0.2s;
   text-decoration: none;
   white-space: nowrap;
+  transition: transform 0.3s var(--ds-ease-out), box-shadow 0.3s var(--ds-ease-out), background 0.3s, border-color 0.3s;
 }
-.ds-btn-sm { padding: 8px 18px; font-size: 13px; }
-.ds-btn-lg { padding: 15px 32px; font-size: 16px; }
-.ds-btn-full { width: 100%; }
+.ds-btn-sm { padding: 10px 22px; font-size: 13px; }
+.ds-btn-md { padding: 18px 36px; }
+.ds-btn-lg { padding: 20px 44px; font-size: 17px; }
+.ds-btn-full { width: 100%; justify-content: center; }
+/* Primary = rouge plein */
 .ds-btn-primary {
   background: var(--ds-red);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(255,58,58,0.35);
+  color: var(--ds-white);
+  border: none;
+  padding: 18px 36px;
 }
 .ds-btn-primary:hover {
-  background: #e62a2a;
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(255,58,58,0.50);
+  box-shadow: 0 16px 40px var(--ds-red-glow);
 }
+/* Secondary = contorno trasparente */
 .ds-btn-secondary {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.85);
-  border: 1.5px solid var(--ds-border);
+  background: transparent;
+  color: var(--ds-white);
+  border: 1px solid var(--ds-line);
+  padding: 18px 36px;
 }
 .ds-btn-secondary:hover {
-  background: rgba(255,255,255,0.14);
-  color: #fff;
-  border-color: var(--ds-border-strong);
+  border-color: var(--ds-white);
+  background: rgba(255,255,255,0.05);
 }
+/* Ghost = senza bordo */
 .ds-btn-ghost {
   background: transparent;
-  color: rgba(255,255,255,0.7);
-  border: 1.5px solid var(--ds-border);
+  color: var(--ds-muted);
+  border: none;
+  padding: 14px 28px;
 }
 .ds-btn-ghost:hover {
-  background: rgba(255,255,255,0.06);
-  color: #fff;
+  color: var(--ds-white);
 }
 
 /* Card v2 */
@@ -1192,10 +1201,42 @@ textarea.input { resize: vertical; min-height: 80px; }
   flex-shrink: 0;
 }
 
-/* Heading v2 */
-.ds-heading {
+/* Tipografia v2 — classi esatte dal mockup */
+/* Eyebrow: label piccola sopra i titoli */
+.ds-eyebrow {
   font-family: var(--ds-font-display);
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-  color: #fff;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--ds-red);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: inline-block;
 }
+/* Hero heading (homepage, sezioni principali) */
+.ds-h-display {
+  font-family: var(--ds-font-display);
+  font-size: clamp(48px, 8vw, 120px);
+  line-height: 0.95;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  color: var(--ds-white);
+}
+/* Section heading */
+.ds-h-section {
+  font-family: var(--ds-font-display);
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: 1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ds-white);
+}
+/* Lead text / sottotitolo */
+.ds-lead {
+  font-family: var(--ds-font-body);
+  font-size: clamp(17px, 1.5vw, 22px);
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ds-offwhite);
+}
+/* Accent */
+.ds-accent-red { color: var(--ds-red); }
