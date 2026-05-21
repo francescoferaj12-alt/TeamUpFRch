@@ -8,6 +8,7 @@ import { ligues, zones, positions } from '../../lib/data'
 import { useAuth } from '../../lib/auth-context'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import { relativeTime } from '../../lib/utils/time'
+import PostModal from '../../components/PostModal'
 
 // ——— SVG helpers ————————————————————————————
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -90,6 +91,7 @@ export default function AnnoncesPage() {
   const [filterType, setFilterType]   = useState('')
   const [query, setQuery]             = useState('')
   const [postulerModal, setPostulerModal] = useState<Annonce | null>(null)
+  const [showPublishModal, setShowPublishModal] = useState(false)
   const router = useRouter()
   const { profile: currentUser } = useAuth()
 
@@ -200,12 +202,15 @@ export default function AnnoncesPage() {
               <option value="">Toute la zone</option>
               {zones.map((z) => <option key={z} value={z}>{z}</option>)}
             </select>
-            <Link
-              href={currentUser ? '/profil' : '/login'}
-              className="an-publish-btn"
-            >
-              <IcoPlus s={16} />Publier un post
-            </Link>
+            {currentUser ? (
+              <button className="an-publish-btn" onClick={() => setShowPublishModal(true)}>
+                <IcoPlus s={16} />Publier un post
+              </button>
+            ) : (
+              <Link href="/login" className="an-publish-btn">
+                <IcoPlus s={16} />Publier un post
+              </Link>
+            )}
           </div>
 
           {/* Results bar */}
@@ -271,6 +276,15 @@ export default function AnnoncesPage() {
           currentUser={currentUser!}
           onClose={() => setPostulerModal(null)}
           onSuccess={() => setPostulerModal(null)}
+        />
+      )}
+
+      {/* PUBLISH MODAL */}
+      {showPublishModal && currentUser && (
+        <PostModal
+          profile={currentUser}
+          onClose={() => setShowPublishModal(false)}
+          onSuccess={(a) => { setAnnonces(prev => [a, ...prev]); setShowPublishModal(false) }}
         />
       )}
 
@@ -406,7 +420,8 @@ export default function AnnoncesPage() {
           background:#FF3A3A; color:#fff;
           padding:13px 22px; border-radius:12px;
           font-size:14px; font-weight:600; letter-spacing:.3px;
-          text-decoration:none; white-space:nowrap;
+          text-decoration:none; white-space:nowrap; border:none; cursor:pointer;
+          font-family:inherit;
           transition:transform .3s,box-shadow .3s;
         }
         .an-publish-btn:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(255,58,58,.4); }
