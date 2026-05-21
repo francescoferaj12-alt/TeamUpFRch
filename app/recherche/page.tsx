@@ -451,7 +451,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
       {/* CTA buttons */}
       <div className="sr-btns" style={{ display:'flex', gap:8, marginTop:'auto' }}>
-        <Link href="/profil" className="sr-btn-pri">
+        <Link href={`/profil/${p.id}`} className="sr-btn-pri">
           {t.search.profile[lang]}
           <span className="sr-arr">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
