@@ -8,7 +8,6 @@ import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import { useAuth } from '../../lib/auth-context'
-import EmptyState from '../../components/EmptyState'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
 const ALL_LIGUES_FLAT = ALL_LIGUE_GROUPS.flatMap(g => g.items)
@@ -16,6 +15,21 @@ const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Vevey
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 
 type FilterType = 'all' | 'player' | 'coach' | 'club'
+
+// ── SVG primitives ────────────────────────────────────────────────────────────
+const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color}
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+    {children}
+  </svg>
+)
+const IcoGrid    = ({ s = 15 }: { s?: number }) => <Svg size={s}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></Svg>
+const IcoPlayer  = ({ s = 15 }: { s?: number }) => <Svg size={s}><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></Svg>
+const IcoCoach   = ({ s = 15 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></Svg>
+const IcoStadium = ({ s = 15 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></Svg>
+const IcoSearch  = ({ s = 20, color = 'currentColor' }: { s?: number; color?: string }) => <Svg size={s} color={color}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></Svg>
+const IcoReset   = ({ s = 13 }: { s?: number }) => <Svg size={s}><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></Svg>
+const IcoCheck   = ({ s = 11 }: { s?: number }) => <Svg size={s}><polyline points="20 6 9 17 4 12"/></Svg>
 
 export default function RecherchePage() {
   const { lang } = useLang()
@@ -46,7 +60,6 @@ export default function RecherchePage() {
     load()
   }, [])
 
-  // Debounce the search query to avoid filtering on every keystroke
   const [debouncedQuery, setDebouncedQuery] = useState('')
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(query), 200)
@@ -80,145 +93,233 @@ export default function RecherchePage() {
   }
 
   const tabs = [
-    ['all', t.search.all[lang], counts.all],
+    ['all',    t.search.all[lang],     counts.all],
     ['player', t.search.players[lang], counts.player],
-    ['coach', t.search.coaches[lang], counts.coach],
-    ['club', t.search.clubs[lang], counts.club],
+    ['coach',  t.search.coaches[lang], counts.coach],
+    ['club',   t.search.clubs[lang],   counts.club],
   ] as const
 
-  const optSt = { background:'#061540' }
+  function resetFilters() {
+    setQuery('')
+    setFilterType('all')
+    setFilterLigue('')
+    setFilterPos('')
+    setFilterZone('')
+    setFilterDispo(false)
+    setFilterGenre('')
+    setFilterVerifiedOnly(false)
+  }
+  const hasActiveFilters = !!(query || filterType !== 'all' || filterDispo || filterLigue || filterPos || filterZone || filterGenre || filterVerifiedOnly)
+
+  const tabIcon = (type: string) => {
+    if (type === 'player') return <IcoPlayer />
+    if (type === 'coach')  return <IcoCoach />
+    if (type === 'club')   return <IcoStadium />
+    return <IcoGrid />
+  }
+
+  const optSt = { background: '#081434' }
 
   return (
-    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+    <div style={{ background: '#0D1F4A', minHeight: '100vh', color: '#fff' }}>
       <style>{`
-        .rech-card:hover { border-color:rgba(230,57,70,.4) !important; background:rgba(255,255,255,.07) !important; }
-        @keyframes spin{to{transform:rotate(360deg);}}
+        /* Search bar */
+        .sr-bar { display:flex; align-items:center; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.18); border-radius:999px; padding:8px 8px 8px 24px; transition:border-color .3s,background .3s,box-shadow .3s; max-width:800px; margin:0 auto; }
+        .sr-bar:focus-within { border-color:#FF3A3A !important; background:rgba(255,255,255,.09) !important; box-shadow:0 0 0 4px rgba(255,58,58,.15) !important; }
+        .sr-inp { flex:1; background:transparent; border:0; outline:0; padding:13px 16px; font-size:16px; color:#fff; font-family:inherit; }
+        .sr-inp::placeholder { color:rgba(255,255,255,.4); }
+        .sr-sbtn { background:#FF3A3A; color:#fff; border:none; border-radius:999px; padding:12px 24px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; letter-spacing:.3px; transition:transform .25s,box-shadow .25s; white-space:nowrap; }
+        .sr-sbtn:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(255,58,58,.4); }
+        /* Type tabs */
+        .sr-tab { display:inline-flex; align-items:center; gap:7px; padding:10px 20px; border-radius:999px; border:1px solid rgba(255,255,255,.15); background:transparent; font-size:14px; font-weight:500; color:rgba(255,255,255,.7); cursor:pointer; transition:border-color .3s,background .3s,color .3s; font-family:inherit; white-space:nowrap; }
+        .sr-tab:hover { border-color:rgba(255,255,255,.3); }
+        .sr-tab.act { background:#fff !important; color:#0D1F4A !important; border-color:#fff !important; }
+        .sr-tab.act .sr-cnt { background:#FF3A3A !important; color:#fff !important; }
+        .sr-cnt { font-size:11px; background:rgba(255,255,255,.1); padding:2px 8px; border-radius:999px; color:rgba(255,255,255,.5); transition:background .3s,color .3s; }
+        /* Availability toggle switch */
+        .sr-tog { display:inline-flex; align-items:center; gap:10px; font-size:14px; font-weight:500; color:rgba(255,255,255,.7); cursor:pointer; user-select:none; }
+        .sr-tog-track { position:relative; width:44px; height:24px; background:rgba(255,255,255,.15); border-radius:999px; transition:background .3s; flex-shrink:0; }
+        .sr-tog-track::after { content:''; position:absolute; top:2px; left:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:transform .3s; }
+        .sr-tog.on .sr-tog-track { background:#2ED27F; }
+        .sr-tog.on .sr-tog-track::after { transform:translateX(20px); }
+        /* Filter selects */
+        .sr-sel { width:100%; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:13px 40px 13px 16px; font-size:14px; font-weight:500; color:rgba(255,255,255,.9); cursor:pointer; appearance:none; -webkit-appearance:none; outline:none; font-family:inherit; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.5)' stroke-width='2' fill='none' stroke-linecap='round'/></svg>"); background-repeat:no-repeat; background-position:right 16px center; transition:border-color .3s,background-color .3s; }
+        .sr-sel:hover { border-color:rgba(255,255,255,.25); }
+        .sr-sel:focus { border-color:#FF3A3A !important; background-color:rgba(255,255,255,.07) !important; outline:none; }
+        .sr-lbl { display:block; font-family:'Russo One',sans-serif; font-size:10px; letter-spacing:2px; color:#FF3A3A; text-transform:uppercase; margin-bottom:8px; margin-left:2px; }
+        /* Filter grid — responsive */
+        .sr-fgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+        @media (max-width:960px)  { .sr-fgrid { grid-template-columns:repeat(2,1fr) !important; } }
+        @media (max-width:520px)  { .sr-fgrid { grid-template-columns:1fr !important; } }
+        /* Reset button */
+        .sr-reset { font-size:13px; font-weight:500; color:rgba(255,255,255,.45); display:inline-flex; align-items:center; gap:6px; padding:5px 0; background:none; border:none; cursor:pointer; font-family:inherit; transition:color .2s; letter-spacing:.3px; }
+        .sr-reset:hover { color:#fff; }
+        /* Profile cards */
+        .sr-card { position:relative; background:linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.02) 100%); border:1px solid rgba(255,255,255,.1); border-radius:20px; padding:24px 20px 20px; transition:transform .4s cubic-bezier(.22,1,.36,1),border-color .4s,background .4s; display:flex; flex-direction:column; }
+        .sr-card:hover { transform:translateY(-6px) !important; border-color:rgba(255,58,58,.45) !important; background:linear-gradient(180deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.03) 100%) !important; }
+        .sr-card:hover .sr-arr { transform:translateX(4px); }
+        .sr-arr { transition:transform .3s; display:inline-flex; align-items:center; }
+        /* Card CTA buttons */
+        .sr-btn-pri { flex:1; background:#FF3A3A; color:#fff; border:none; border-radius:10px; padding:9px 12px; font-size:12px; font-weight:600; text-align:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; transition:transform .25s,box-shadow .25s; font-family:inherit; letter-spacing:.3px; }
+        .sr-btn-pri:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(255,58,58,.35); }
+        .sr-btn-sec { flex:1; background:transparent; color:rgba(255,255,255,.75); border:1px solid rgba(255,255,255,.2); border-radius:10px; padding:9px 12px; font-size:12px; font-weight:600; text-align:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; transition:border-color .25s,color .25s,background .25s; font-family:inherit; letter-spacing:.3px; }
+        .sr-btn-sec:hover { border-color:rgba(255,255,255,.4); color:#fff; background:rgba(255,255,255,.06); }
+        @media (max-width:480px) { .sr-btns { flex-direction:column !important; } .sr-btn-pri,.sr-btn-sec { flex:none !important; } }
+        /* Meta rows */
+        .sr-meta { display:flex; align-items:center; gap:8px; font-size:12px; }
+        .sr-meta-lbl { color:rgba(255,255,255,.45); font-size:11px; }
+        .sr-meta-val { font-weight:500; margin-left:auto; color:rgba(255,255,255,.9); }
+        /* Spinner */
+        @keyframes spin { to { transform:rotate(360deg); } }
       `}</style>
 
-      {/* HERO */}
-      <div style={{ background:'linear-gradient(180deg,#030a24 0%,#061540 100%)', padding:'2.5rem 1.5rem 1.5rem' }}>
-        <div style={{ maxWidth:900, margin:'0 auto' }}>
-          <h1 style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:'#fff', letterSpacing:2, marginBottom:'.25rem' }}>
-            {t.search.title[lang]} <span style={{ color:'#e63946' }}>{t.search.advanced[lang]}</span>
+      {/* ── PAGE HEADER ─────────────────────────────────────────────────────── */}
+      <div style={{ background:'radial-gradient(ellipse at 50% 0%,rgba(26,47,107,.9) 0%,transparent 65%),radial-gradient(ellipse at 50% 100%,rgba(255,58,58,.06) 0%,transparent 60%),#0D1F4A', padding:'2.25rem 1.5rem 2.25rem', textAlign:'center' }}>
+        <div style={{ maxWidth:860, margin:'0 auto' }}>
+          <span style={{ fontFamily:"'Russo One',sans-serif", fontSize:11, letterSpacing:4, color:'#FF3A3A', textTransform:'uppercase', display:'block', marginBottom:14 }}>
+            {lang === 'fr' ? 'Recherche avancée' : 'Erweiterte Suche'}
+          </span>
+          <h1 style={{ fontFamily:"'Russo One',sans-serif", fontSize:'clamp(2rem,6vw,3.25rem)', lineHeight:.95, letterSpacing:'-.5px', textTransform:'uppercase', marginBottom:14, color:'#fff' }}>
+            {t.search.title[lang]} <span style={{ color:'#FF3A3A' }}>{t.search.advanced[lang]}</span>
           </h1>
-          <p style={{ color:'rgba(255,255,255,.5)', fontSize:14, marginBottom:'1.25rem' }}>
+          <p style={{ color:'rgba(255,255,255,.5)', fontSize:15, fontWeight:300, lineHeight:1.6, marginBottom:'2rem', maxWidth:520, margin:'0 auto 2rem' }}>
             {t.search.subtitle[lang]}
           </p>
-          <div style={{ display:'flex', gap:8 }}>
+          <div className="sr-bar">
+            <IcoSearch s={20} color="rgba(255,255,255,.4)" />
             <input
+              className="sr-inp"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={t.search.placeholder[lang]}
-              style={{ flex:1, background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:10, padding:'12px 16px', fontSize:15, outline:'none', fontFamily:'inherit' }}
             />
-            <button style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:10, padding:'12px 22px', fontSize:14, fontWeight:700, fontFamily:'inherit', cursor:'pointer' }}>
-              {t.search.btn[lang]}
-            </button>
+            <button className="sr-sbtn">{t.search.btn[lang]}</button>
           </div>
         </div>
       </div>
 
-      {/* TYPE TABS */}
-      <div style={{ background:'#061540', padding:'.85rem 1.5rem', borderBottom:'1px solid rgba(255,255,255,.06)', display:'flex', gap:6, overflowX:'auto' }}>
-        {tabs.map(([type, label, count]) => (
-          <button key={type} onClick={() => setFilterType(type as FilterType)} style={{
-            padding:'7px 18px', borderRadius:8,
-            border:`1.5px solid ${filterType === type ? '#e63946' : 'rgba(255,255,255,.12)'}`,
-            background: filterType === type ? 'rgba(230,57,70,.15)' : 'rgba(255,255,255,.04)',
-            color: filterType === type ? '#e63946' : 'rgba(255,255,255,.6)',
-            fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit'
-          }}>
-            {label} <span style={{ background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:100, padding:'1px 7px', fontSize:11, marginLeft:4 }}>{count}</span>
-          </button>
-        ))}
+      {/* ── TABS + AVAILABILITY TOGGLE ───────────────────────────────────────── */}
+      <div style={{ background:'rgba(8,20,52,.65)', borderBottom:'1px solid rgba(255,255,255,.07)', padding:'.9rem 1.5rem' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            {tabs.map(([type, label, count]) => (
+              <button key={type} className={`sr-tab${filterType === type ? ' act' : ''}`} onClick={() => setFilterType(type as FilterType)}>
+                {tabIcon(type)}
+                {label}
+                <span className="sr-cnt">{count}</span>
+              </button>
+            ))}
+          </div>
+          <div className={`sr-tog${filterDispo ? ' on' : ''}`} onClick={() => setFilterDispo(!filterDispo)}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F', display:'inline-block', boxShadow:'0 0 0 4px rgba(46,210,127,.2)', flexShrink:0 }} />
+            {t.search.available[lang]}
+            <span className="sr-tog-track" />
+          </div>
+        </div>
       </div>
 
-      {/* FILTERS */}
-      <div style={{ background:'#061540', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'.85rem 1.5rem', display:'flex', gap:'.75rem', flexWrap:'wrap', alignItems:'center' }}>
-        <button onClick={() => setFilterDispo(!filterDispo)} style={{
-          border:`1.5px solid ${filterDispo ? '#e63946' : 'rgba(255,255,255,.12)'}`,
-          background: filterDispo ? 'rgba(230,57,70,.15)' : 'rgba(255,255,255,.04)',
-          color: filterDispo ? '#e63946' : 'rgba(255,255,255,.6)',
-          borderRadius:100, padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit'
-        }}>{t.search.available[lang]}</button>
+      {/* ── FILTERS GRID ─────────────────────────────────────────────────────── */}
+      <div style={{ background:'rgba(8,20,52,.4)', borderBottom:'1px solid rgba(255,255,255,.07)', padding:'1.25rem 1.5rem' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <div className="sr-fgrid">
+            <div>
+              <label className="sr-lbl">{t.search.genre_filter[lang]}</label>
+              <select className="sr-sel" value={filterGenre} onChange={e => setFilterGenre(e.target.value)}>
+                <option value="" style={optSt}>{t.search.all_genres[lang]}</option>
+                <option value="homme" style={optSt}>{lang === 'fr' ? 'Homme' : 'Mann'}</option>
+                <option value="femme" style={optSt}>{lang === 'fr' ? 'Femme' : 'Frau'}</option>
+              </select>
+            </div>
+            <div>
+              <label className="sr-lbl">{lang === 'fr' ? 'Ligue' : 'Liga'}</label>
+              <select className="sr-sel" value={filterLigue} onChange={e => setFilterLigue(e.target.value)}>
+                <option value="" style={optSt}>{t.search.all_ligues[lang]}</option>
+                {ALL_LIGUE_GROUPS.map(g => (
+                  <optgroup key={g.group} label={g.group} style={{ background:'#081434' }}>
+                    {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="sr-lbl">{lang === 'fr' ? 'Position' : 'Position'}</label>
+              <select className="sr-sel" value={filterPos} onChange={e => setFilterPos(e.target.value)}>
+                <option value="" style={optSt}>{t.search.all_positions[lang]}</option>
+                {POSITIONS.map(o => <option key={o} style={optSt}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="sr-lbl">{lang === 'fr' ? 'Zone' : 'Zone'}</label>
+              <select className="sr-sel" value={filterZone} onChange={e => setFilterZone(e.target.value)}>
+                <option value="" style={optSt}>{t.search.all_zones[lang]}</option>
+                {ZONES.map(o => <option key={o} style={optSt}>{o}</option>)}
+              </select>
+            </div>
+          </div>
 
-        <select value={filterGenre} onChange={e => setFilterGenre(e.target.value)} style={{
-          background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:100,
-          padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
-        }}>
-          <option value="" style={optSt}>{t.search.all_genres[lang]}</option>
-          <option value="homme" style={optSt}>♂ {lang === 'fr' ? 'Homme' : 'Mann'}</option>
-          <option value="femme" style={optSt}>♀ {lang === 'fr' ? 'Femme' : 'Frau'}</option>
-        </select>
-
-        <select value={filterLigue} onChange={e => setFilterLigue(e.target.value)} style={{
-          background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:100,
-          padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
-        }}>
-          <option value="" style={optSt}>{t.search.all_ligues[lang]}</option>
-          {ALL_LIGUE_GROUPS.map(g => (
-            <optgroup key={g.group} label={g.group} style={{ background:'#061540' }}>
-              {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
-            </optgroup>
-          ))}
-        </select>
-
-        {[
-          { value: filterPos, set: setFilterPos, placeholder: t.search.all_positions[lang], options: POSITIONS },
-          { value: filterZone, set: setFilterZone, placeholder: t.search.all_zones[lang], options: ZONES },
-        ].map((f, i) => (
-          <select key={i} value={f.value} onChange={e => f.set(e.target.value)} style={{
-            background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:100,
-            padding:'6px 14px', fontSize:13, fontWeight:500, cursor:'pointer', outline:'none', fontFamily:'inherit'
-          }}>
-            <option value="" style={optSt}>{f.placeholder}</option>
-            {f.options.map(o => <option key={o} style={optSt}>{o}</option>)}
-          </select>
-        ))}
-
-        {filterType === 'club' && (
-          <button onClick={() => setFilterVerifiedOnly(!filterVerifiedOnly)} style={{
-            border: `1.5px solid ${filterVerifiedOnly ? '#4cdb7a' : 'rgba(255,255,255,.12)'}`,
-            background: filterVerifiedOnly ? 'rgba(76,219,122,.15)' : 'rgba(255,255,255,.04)',
-            color: filterVerifiedOnly ? '#4cdb7a' : 'rgba(255,255,255,.6)',
-            borderRadius: 100, padding: '6px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit'
-          }}>
-            ✅ {lang === 'fr' ? 'Seulement clubs vérifiés' : 'Nur verifizierte Vereine'}
-          </button>
-        )}
-
-        <span style={{ marginLeft:'auto', fontSize:13, color:'rgba(255,255,255,.5)', fontWeight:500 }}>
-          {filtered.length} {filtered.length > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
-        </span>
+          {/* Filter actions */}
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:14, flexWrap:'wrap', gap:10 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+              <button className="sr-reset" onClick={resetFilters}>
+                <IcoReset /> {lang === 'fr' ? 'Réinitialiser les filtres' : 'Filter zurücksetzen'}
+              </button>
+              {filterType === 'club' && (
+                <button onClick={() => setFilterVerifiedOnly(!filterVerifiedOnly)} style={{
+                  border:`1px solid ${filterVerifiedOnly ? '#2ED27F' : 'rgba(255,255,255,.15)'}`,
+                  background: filterVerifiedOnly ? 'rgba(46,210,127,.12)' : 'transparent',
+                  color: filterVerifiedOnly ? '#2ED27F' : 'rgba(255,255,255,.55)',
+                  borderRadius:999, padding:'5px 14px', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'inherit',
+                  display:'inline-flex', alignItems:'center', gap:6, transition:'all .2s'
+                }}>
+                  <IcoCheck />
+                  {lang === 'fr' ? 'Clubs vérifiés' : 'Verifizierte Vereine'}
+                </button>
+              )}
+            </div>
+            <span style={{ fontSize:12, color:'rgba(255,255,255,.45)', letterSpacing:.5, textTransform:'uppercase' }}>
+              <span style={{ fontFamily:"'Russo One',sans-serif", color:'#fff', fontSize:15, marginRight:5 }}>{filtered.length}</span>
+              {filtered.length > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* RESULTS */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:'1rem', padding:'1.5rem' }}>
+      {/* ── RESULTS ─────────────────────────────────────────────────────────── */}
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'2rem 1.5rem' }}>
         {loading ? (
-          <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
-            <div style={{ width:36, height:36, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
-            {t.search.loading[lang]}
+          <div style={{ textAlign:'center', padding:'4rem', color:'rgba(255,255,255,.4)' }}>
+            <div style={{ width:36, height:36, border:'3px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
+            <div style={{ fontSize:14 }}>{t.search.loading[lang]}</div>
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ gridColumn:'1/-1' }}>
+          <div style={{ textAlign:'center', padding:'5rem 2rem' }}>
+            <div style={{ width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px' }}>
+              <IcoSearch s={36} color="rgba(255,255,255,.3)" />
+            </div>
             {profiles.length === 0 ? (
-              <EmptyState
-                icon="🔍"
-                title={t.search.empty_title[lang]}
-                message={t.search.empty_msg[lang]}
-                ctaText={t.search.create_profile[lang]}
-                ctaHref="/login"
-              />
+              <>
+                <h3 style={{ fontFamily:"'Russo One',sans-serif", fontSize:22, marginBottom:12 }}>{t.search.empty_title[lang]}</h3>
+                <p style={{ color:'rgba(255,255,255,.5)', maxWidth:440, margin:'0 auto 28px', lineHeight:1.65, fontSize:15 }}>{t.search.empty_msg[lang]}</p>
+                <Link href="/login" style={{ display:'inline-flex', alignItems:'center', gap:8, background:'#FF3A3A', color:'#fff', borderRadius:999, padding:'13px 28px', fontSize:14, fontWeight:600, textDecoration:'none' }}>
+                  {t.search.create_profile[lang]}
+                </Link>
+              </>
             ) : (
-              <div style={{ textAlign:'center', padding:'3rem', color:'rgba(255,255,255,.4)' }}>
-                <div style={{ fontSize:'2rem', marginBottom:'.75rem' }}>😕</div>
-                <div style={{ fontSize:15, color:'#fff', marginBottom:'.5rem' }}>{t.search.no_results[lang]}</div>
-                <div style={{ fontSize:13 }}>{t.search.no_filter[lang]}</div>
-              </div>
+              <>
+                <h3 style={{ fontFamily:"'Russo One',sans-serif", fontSize:22, marginBottom:10 }}>{t.search.no_results[lang]}</h3>
+                <p style={{ color:'rgba(255,255,255,.5)', fontSize:14, marginBottom:20, lineHeight:1.65 }}>{t.search.no_filter[lang]}</p>
+                {hasActiveFilters && (
+                  <button className="sr-reset" style={{ margin:'0 auto' }} onClick={resetFilters}>
+                    <IcoReset /> {lang === 'fr' ? 'Réinitialiser les filtres' : 'Filter zurücksetzen'}
+                  </button>
+                )}
+              </>
             )}
           </div>
         ) : (
-          filtered.map(p => <ProfileCard key={p.id} profile={p} />)
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(275px,1fr))', gap:'1.25rem' }}>
+            {filtered.map(p => <ProfileCard key={p.id} profile={p} />)}
+          </div>
         )}
       </div>
     </div>
@@ -243,72 +344,122 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
     : `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email
 
   const initials = p.role === 'club'
-    ? (p.club_name?.[0] || '🏟️')
-    : `${p.first_name?.[0] || ''}${p.last_name?.[0] || ''}`.toUpperCase() || '??'
+    ? (p.club_name?.[0]?.toUpperCase() || 'C')
+    : `${p.first_name?.[0] || ''}${p.last_name?.[0] || ''}`.toUpperCase() || '?'
 
-  const roleEmoji = p.role === 'player' ? '👤' : p.role === 'coach' ? '🧑‍🏫' : '🏟️'
   const roleLabel = p.role === 'player' ? t.search.joueur[lang] : p.role === 'coach' ? t.search.coach_label[lang] : t.search.club_label[lang]
 
   const stripeColor = p.role === 'player'
     ? 'linear-gradient(90deg,#1a6fd4,#5b9eff)'
     : p.role === 'coach'
-    ? 'linear-gradient(90deg,#e02020,#ff8c42)'
-    : 'linear-gradient(90deg,#0d7a36,#1db954)'
+    ? 'linear-gradient(90deg,#FF3A3A,#FF9A3A)'
+    : 'linear-gradient(90deg,#0d7a36,#2ED27F)'
 
-  const bgColor = p.role === 'player' ? '#deeafa' : p.role === 'coach' ? '#fde8e8' : 'var(--green-bg)'
+  const avatarBg = p.role === 'player'
+    ? 'linear-gradient(135deg,#1a3a8a 0%,#0d1f4a 100%)'
+    : p.role === 'coach'
+    ? 'linear-gradient(135deg,#6a4a2a 0%,#3a2a1a 100%)'
+    : 'linear-gradient(135deg,#FF3A3A 0%,#c41f1f 100%)'
 
+  const roleBadgeStyle = p.role === 'player'
+    ? { background:'rgba(255,58,58,.12)', color:'#FF3A3A', border:'1px solid rgba(255,58,58,.3)' }
+    : p.role === 'coach'
+    ? { background:'rgba(255,154,90,.12)', color:'#FF9A3A', border:'1px solid rgba(255,154,90,.3)' }
+    : { background:'rgba(91,158,255,.12)', color:'#5b9eff', border:'1px solid rgba(91,158,255,.3)' }
+
+  const age = calcAge(p.birthdate)
   const ageSuffix = t.general.age_suffix[lang]
-
-  const avatarBg = p.role === 'player' ? 'rgba(26,111,212,.25)' : p.role === 'coach' ? 'rgba(224,32,32,.2)' : 'rgba(13,122,54,.2)'
+  const subLine = [p.role !== 'club' ? (p.position || roleLabel) : null, age ? `${age}${ageSuffix}` : null].filter(Boolean).join(' · ')
 
   return (
-    <div className="rech-card" style={{ background:'rgba(255,255,255,.04)', borderRadius:14, border:'1px solid rgba(255,255,255,.08)', padding:'1.25rem', position:'relative', overflow:'hidden', transition:'border-color .2s,background .2s' }}>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:stripeColor }} />
+    <div className="sr-card">
+      {/* Top role-color stripe */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:stripeColor, borderRadius:'20px 20px 0 0' }} />
 
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'.85rem' }}>
-        <div style={{ width:46, height:46, borderRadius:12, background:avatarBg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:p.avatar_url ? 0 : 18, fontWeight:700, flexShrink:0, overflow:'hidden' }}>
+      {/* Avatar + role badge */}
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:16 }}>
+        <div style={{ width:56, height:56, borderRadius:'50%', background:avatarBg, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Russo One',sans-serif", fontSize:17, color:'#fff', flexShrink:0, overflow:'hidden', position:'relative' }}>
           {p.avatar_url
             ? <img src={avatarSrc(p.avatar_url)!} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-            : (initials.length > 2 ? roleEmoji : initials)
+            : initials
           }
-        </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:700, fontSize:15, lineHeight:1.2, color:'#fff', display:'flex', alignItems:'center', gap:2, minWidth:0 }}>
-            <span style={{ whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{name}</span>
-            {p.role === 'club' && p.club_verification_status === 'approved'
-              ? <VerifiedBadge size={15} />
-              : p.verified && <VerifiedBadge size={15} />}
-          </div>
-          {p.role === 'club' && p.club_verification_status === 'approved' && (
-            <div style={{ display:'inline-flex', alignItems:'center', gap:3, background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.35)', color:'#4cdb7a', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:100, marginBottom: 2 }}>
-              ✅ {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
-            </div>
+          {p.available && (
+            <span style={{ position:'absolute', bottom:2, right:2, width:14, height:14, background:'#2ED27F', borderRadius:'50%', border:'3px solid #0D1F4A' }} />
           )}
-          <div style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>{p.position || roleLabel}{calcAge(p.birthdate) ? ` · ${calcAge(p.birthdate)}${ageSuffix}` : ''}</div>
         </div>
-        <span style={{ background: p.available ? 'rgba(13,122,54,.2)' : 'rgba(255,255,255,.07)', color: p.available ? '#4cdb7a' : 'rgba(255,255,255,.4)', borderRadius:100, padding:'3px 9px', fontSize:11, fontWeight:600, whiteSpace:'nowrap' }}>
-          {p.available ? t.search.dispo[lang] : t.search.indispo[lang]}
+        <span style={{ ...roleBadgeStyle, fontSize:10, fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', padding:'5px 10px', borderRadius:999, whiteSpace:'nowrap' }}>
+          {roleLabel}
         </span>
       </div>
 
-      <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginBottom:'.85rem' }}>
-        {p.ligue && <span style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.7)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:500 }}>{p.ligue}</span>}
-        {p.zone && <span style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.7)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:500 }}>{p.zone}</span>}
-        {p.foot && <span style={{ background:'rgba(255,255,255,.05)', color:'rgba(255,255,255,.5)', borderRadius:100, padding:'2px 9px', fontSize:11, fontWeight:500 }}>{p.foot}</span>}
+      {/* Name + verified badges */}
+      <div style={{ marginBottom:14 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:3, flexWrap:'wrap' }}>
+          <span style={{ fontFamily:"'Russo One',sans-serif", fontSize:17, letterSpacing:.3, color:'#fff', lineHeight:1.2 }}>{name}</span>
+          {p.role === 'club' && p.club_verification_status === 'approved'
+            ? <VerifiedBadge size={15} />
+            : p.verified && <VerifiedBadge size={15} />}
+        </div>
+        {p.role === 'club' && p.club_verification_status === 'approved' && (
+          <div style={{ display:'inline-flex', alignItems:'center', gap:4, background:'rgba(46,210,127,.12)', border:'1px solid rgba(46,210,127,.3)', color:'#2ED27F', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:999, marginBottom:4 }}>
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
+          </div>
+        )}
+        {subLine && <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', marginTop:2 }}>{subLine}</p>}
       </div>
 
+      {/* Meta rows: ligue / zone / foot */}
+      <div style={{ borderTop:'1px solid rgba(255,255,255,.08)', paddingTop:12, marginBottom:12, display:'flex', flexDirection:'column', gap:7, flex:1 }}>
+        {p.ligue && (
+          <div className="sr-meta">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span className="sr-meta-lbl">{lang === 'fr' ? 'Ligue' : 'Liga'}</span>
+            <span className="sr-meta-val">{p.ligue}</span>
+          </div>
+        )}
+        {p.zone && (
+          <div className="sr-meta">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span className="sr-meta-lbl">Zone</span>
+            <span className="sr-meta-val">{p.zone}</span>
+          </div>
+        )}
+        {p.foot && (
+          <div className="sr-meta">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span className="sr-meta-lbl">{lang === 'fr' ? 'Pied' : 'Fuss'}</span>
+            <span className="sr-meta-val">{p.foot}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Bio */}
       {p.bio && (
-        <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', lineHeight:1.5, marginBottom:'.85rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+        <p style={{ fontSize:12, color:'rgba(255,255,255,.5)', lineHeight:1.55, marginBottom:12, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
           {p.bio}
         </p>
       )}
 
-      <div style={{ display:'flex', gap:6 }}>
-        <Link href={`/messages?partner=${p.id}`} style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          {t.search.contact[lang]}
-        </Link>
-        <Link href="/profil" style={{ flex:1, background:'rgba(255,255,255,.07)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.1)', borderRadius:7, padding:'7px', fontSize:12, fontWeight:700, textAlign:'center', cursor:'pointer', textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      {/* Unavailable indicator (available shown as dot on avatar) */}
+      {!p.available && (
+        <div style={{ display:'inline-flex', alignItems:'center', gap:5, background:'rgba(255,255,255,.05)', color:'rgba(255,255,255,.4)', borderRadius:999, padding:'3px 10px', fontSize:11, fontWeight:500, marginBottom:12, alignSelf:'flex-start' }}>
+          <span style={{ width:6, height:6, borderRadius:'50%', background:'rgba(255,255,255,.2)', flexShrink:0 }} />
+          {t.search.indispo[lang]}
+        </div>
+      )}
+
+      {/* CTA buttons */}
+      <div className="sr-btns" style={{ display:'flex', gap:8, marginTop:'auto' }}>
+        <Link href="/profil" className="sr-btn-pri">
           {t.search.profile[lang]}
+          <span className="sr-arr">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </Link>
+        <Link href={`/messages?partner=${p.id}`} className="sr-btn-sec">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          {t.search.contact[lang]}
         </Link>
       </div>
     </div>
