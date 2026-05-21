@@ -541,16 +541,25 @@ export default function AnnoncesPage() {
         .an-card-actions {
           display:flex; align-items:center; justify-content:space-between;
           padding-top:16px; border-top:1px solid rgba(255,255,255,.1);
+          gap:8px;
         }
-        .an-card-btns { display:flex; gap:8px; align-items:center; }
-        .an-btn-apply {
+        .an-card-btns { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .an-btn-pri {
           display:inline-flex; align-items:center; gap:6px;
-          font-size:12px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
-          color:#FF3A3A; background:none; border:none; cursor:pointer;
-          font-family:inherit; text-decoration:none; padding:0;
-          transition:gap .3s cubic-bezier(.22,1,.36,1);
+          background:#FF3A3A; color:#fff;
+          padding:8px 16px; border-radius:8px;
+          font-size:13px; font-weight:700; letter-spacing:.3px;
+          text-decoration:none; border:none; cursor:pointer; font-family:inherit;
+          transition:transform .3s,box-shadow .3s;
+          white-space:nowrap;
         }
-        .an-card:hover .an-btn-apply { gap:10px; }
+        .an-btn-pri:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(255,58,58,.4); }
+        .an-btn-author {
+          display:inline-flex; align-items:center; gap:5px;
+          font-size:12px; font-weight:600; color:rgba(255,255,255,.45);
+          text-decoration:none; transition:color .3s;
+        }
+        .an-btn-author:hover { color:rgba(255,255,255,.8); }
         .an-btn-msg {
           display:inline-flex; align-items:center; gap:5px;
           font-size:12px; font-weight:600;
@@ -657,13 +666,14 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
   onPostuler: () => void
 }) {
   const type = TYPE_CFG[annonce.author_type] ?? TYPE_CFG.player
-  const isClub = annonce.author_type === 'club'
+  const isClub   = annonce.author_type === 'club'
+  const isAuthor = currentUser?.id === annonce.author_id
   const avatarUrl = annonce.profiles?.avatar_url
   const authorId  = annonce.profiles?.id || annonce.author_id
   const initials  = annonce.author_name.slice(0, 2).toUpperCase()
   const grad      = GRADS[annonce.author_name.charCodeAt(0) % GRADS.length]
   const isRecent  = Date.now() - new Date(annonce.created_at).getTime() < 24 * 3_600_000
-  const canApply  = currentUser && currentUser.role !== 'club'
+  const canApply  = !isAuthor && currentUser != null && currentUser.role !== 'club'
 
   const authorSub = isClub
     ? [annonce.ligue, annonce.zone].filter(Boolean).join(' · ')
@@ -718,21 +728,28 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
       {/* Actions */}
       <div className="an-card-actions">
         <div className="an-card-btns">
+          {/* 1. Postuler — primary red button */}
           {canApply ? (
-            <button className="an-btn-apply" onClick={onPostuler}>
+            <button className="an-btn-pri" onClick={onPostuler}>
               Postuler <IcoArrow s={14} />
             </button>
           ) : !currentUser ? (
-            <Link href="/login" className="an-btn-apply">
+            <Link href="/login" className="an-btn-pri">
               Postuler <IcoArrow s={14} />
             </Link>
+          ) : isAuthor ? (
+            <Link href="/candidatures" className="an-btn-author">
+              Candidatures <IcoArrow s={12} />
+            </Link>
           ) : null}
-          {(!currentUser || currentUser.id !== annonce.author_id) && (
+          {/* 2. Message — ghost button (hidden for author) */}
+          {(!currentUser || !isAuthor) && (
             <Link href={`/messages?partner=${annonce.author_id}`} className="an-btn-msg">
               <IcoMsg s={14} />Message
             </Link>
           )}
         </div>
+        {/* 3. Voir profil — always visible */}
         <Link href={`/profil/${authorId}`} className="an-view-profile">
           Voir profil →
         </Link>
