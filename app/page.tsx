@@ -268,14 +268,14 @@ export default function HomePage() {
       <section className="hp-hero">
         <video
           className="hp-hero-video"
+          src={VIDEO_URL}
           autoPlay
           muted
           loop
           playsInline
+          preload="metadata"
           poster="/images/home/fribourg-aerial.jpg"
-        >
-          <source src={VIDEO_URL} type="video/mp4" />
-        </video>
+        />
         <div className="hp-hero-veil" />
         <div className="hp-hero-content">
           <div className="hp-badge-pill">
