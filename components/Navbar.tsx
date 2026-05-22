@@ -151,11 +151,6 @@ export default function Navbar() {
     <>
       <nav className={`nav${scrolled ? ' nav-scrolled' : ''}`}>
         <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>
-          <img
-            src="/images/logo-official.jpeg"
-            alt="TeamUpFR"
-            style={{ height: 38, width: 38, objectFit: 'cover', borderRadius: 9, border: '2px solid rgba(255,255,255,.18)', flexShrink: 0 }}
-          />
           <span className="brand-text">
             <span className="brand-teamup">TeamUp</span>
             <span className="brand-f">F</span>

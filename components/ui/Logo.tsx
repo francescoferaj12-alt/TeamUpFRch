@@ -1,18 +1,15 @@
 import Link from 'next/link'
-import { ReactNode } from 'react'
 
 interface LogoProps {
-  /** Size variant */
   size?: 'sm' | 'md' | 'lg'
-  /** If provided, wraps in a Link */
   href?: string
   className?: string
 }
 
 const sizes = {
-  sm: { img: 30, font: 18 },
-  md: { img: 36, font: 22 },
-  lg: { img: 44, font: 28 },
+  sm: { font: 18, box: 24, boxFont: 14 },
+  md: { font: 22, box: 28, boxFont: 17 },
+  lg: { font: 28, box: 34, boxFont: 21 },
 }
 
 function LogoMark({ size = 'md', className }: LogoProps) {
@@ -23,48 +20,55 @@ function LogoMark({ size = 'md', className }: LogoProps) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 10,
+        gap: 2,
         textDecoration: 'none',
       }}
     >
-      <img
-        src="/images/logo-official.jpeg"
-        alt=""
-        aria-hidden="true"
+      <span
         style={{
-          height: s.img,
-          width: s.img,
-          objectFit: 'cover',
-          borderRadius: 8,
-          border: '2px solid rgba(255,255,255,.18)',
-          flexShrink: 0,
+          fontFamily: "'Russo One', sans-serif",
+          fontSize: s.font,
+          color: '#ffffff',
+          letterSpacing: '0.01em',
+          lineHeight: 1,
+          marginRight: 2,
         }}
-      />
+      >
+        TeamUp
+      </span>
       <span
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          fontFamily: "'Bebas Neue', sans-serif",
-          fontSize: s.font,
-          letterSpacing: '0.02em',
-          lineHeight: 1,
+          justifyContent: 'center',
+          width: s.box,
+          height: s.box,
+          background: '#ffffff',
+          color: '#0D1F4A',
+          fontFamily: "'Russo One', sans-serif",
+          fontSize: s.boxFont,
+          borderRadius: 4,
+          flexShrink: 0,
         }}
       >
-        <span style={{ color: '#e63946' }}>TeamUp</span>
-        <span
-          style={{
-            color: '#000',
-            background: '#fff',
-            padding: '1px 5px 2px',
-            margin: '0 2px',
-            borderRadius: 3,
-            display: 'inline-block',
-            lineHeight: 1.1,
-          }}
-        >
-          F
-        </span>
-        <span style={{ color: '#fff' }}>R</span>
+        F
+      </span>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: s.box,
+          height: s.box,
+          background: '#FF3A3A',
+          color: '#ffffff',
+          fontFamily: "'Russo One', sans-serif",
+          fontSize: s.boxFont,
+          borderRadius: 4,
+          flexShrink: 0,
+        }}
+      >
+        R
       </span>
     </span>
   )

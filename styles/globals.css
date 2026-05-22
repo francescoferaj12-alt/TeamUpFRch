@@ -143,22 +143,42 @@ select option:checked {
 .brand-text {
   display: inline-flex;
   align-items: center;
-  font-family: 'Bebas Neue', sans-serif;
+  gap: 2px;
+  font-family: 'Russo One', sans-serif;
   font-size: 22px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1;
 }
-.brand-teamup { color: #e63946; }
-.brand-f {
-  color: #000000;
-  background: #ffffff;
-  padding: 1px 5px 2px;
-  margin: 0 2px;
-  border-radius: 3px;
-  display: inline-block;
-  line-height: 1.1;
+.brand-teamup {
+  color: #ffffff;
+  margin-right: 2px;
 }
-.brand-r { color: #ffffff; }
+.brand-f {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #ffffff;
+  color: #0D1F4A;
+  font-family: 'Russo One', sans-serif;
+  font-size: 17px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.brand-r {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #FF3A3A;
+  color: #ffffff;
+  font-family: 'Russo One', sans-serif;
+  font-size: 17px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
 
 .nav-brand { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
 
