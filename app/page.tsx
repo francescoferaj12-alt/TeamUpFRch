@@ -8,7 +8,6 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../lib/lang-context'
 import { t, tagsByRole, Lang } from '../lib/translations'
 
-const SHOW_LIVE_COUNTS = process.env.NEXT_PUBLIC_SHOW_LIVE_COUNTS === 'true'
 const VIDEO_URL = 'https://videos.pexels.com/video-files/28870860/12500591_2560_1440_30fps.mp4'
 
 // ── useCounters (unchanged logic) ────────────────────────────────────────────
@@ -21,12 +20,11 @@ function useCounters() {
 
   useEffect(() => {
     async function loadCounts() {
-      const [rp, rc, rco] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'player').neq('hidden', true),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'club').neq('hidden', true),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'coach').neq('hidden', true),
+      const [rp, rc] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'player').eq('hidden', false),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'club').eq('club_verification_status', 'approved'),
       ])
-      real.current = { players: rp.count ?? 0, clubs: rc.count ?? 0, coaches: rco.count ?? 0 }
+      real.current = { players: rp.count ?? 0, clubs: rc.count ?? 0, coaches: 0 }
       if (visible.current) animateToReal()
     }
 
@@ -248,19 +246,16 @@ export default function HomePage() {
     },
   ]
 
-  const statItems = SHOW_LIVE_COUNTS
-    ? [
-        { value: '24',                   label: lang === 'fr' ? 'Ligues' : 'Ligen' },
-        { value: String(counts.clubs),   label: t.home.stats_clubs[lang] },
-        { value: String(counts.players), label: t.home.stats_players[lang] },
-        { value: '2',                    label: lang === 'fr' ? 'Langues' : 'Sprachen' },
-      ]
-    : [
-        { value: '24',     label: lang === 'fr' ? 'Ligues' : 'Ligen' },
-        { value: '150+',   label: t.home.stats_clubs[lang] },
-        { value: '12000+', label: t.home.stats_players[lang] },
-        { value: '2',      label: lang === 'fr' ? 'Langues' : 'Sprachen' },
-      ]
+  const statItems = [
+    { value: '24',                   label: lang === 'fr' ? 'Ligues' : 'Ligen' },
+    { value: String(counts.clubs),   label: lang === 'fr' ? 'Clubs inscrits' : 'Eingetragene Vereine' },
+    { value: String(counts.players), label: lang === 'fr' ? 'Joueurs visibles' : 'Sichtbare Spieler' },
+    { value: '2',                    label: lang === 'fr' ? 'Langues' : 'Sprachen' },
+  ]
+
+  const statMotivation = lang === 'fr'
+    ? 'Sois parmi les premiers à rejoindre la communauté du football fribourgeois.'
+    : 'Sei einer der Ersten, der der Fribourg-Fußball-Community beitritt.'
 
   return (
     <>
@@ -344,6 +339,7 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        <p className="hp-stats-motivation">{statMotivation}</p>
       </div>
 
       {/* ── How it works ────────────────────────────────────────────────── */}
@@ -760,6 +756,16 @@ const CSS = `
     color: rgba(255,255,255,0.5);
     text-transform: uppercase;
     letter-spacing: 0.1em;
+  }
+  .hp-stats-motivation {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    max-width: 600px;
+    margin: 24px auto 0;
+    line-height: 1.6;
+    padding: 0 24px;
   }
 
   /* ── How it works ── */
