@@ -99,49 +99,27 @@ const allLigueItems = [
 
 // ── Story section ─────────────────────────────────────────────────────────────
 function StorySection({ lang }: { lang: Lang }) {
-  const [phase, setPhase] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
-
-  const phases = [
-    { label: '01', title: t.how.step1_title[lang], desc: t.how.step1_desc[lang] },
-    { label: '02', title: t.how.step2_title[lang], desc: t.how.step2_desc[lang] },
-    { label: '03', title: t.how.step4_title[lang], desc: t.how.step4_desc[lang] },
-  ]
-
-  useEffect(() => {
-    function onScroll() {
-      if (!ref.current) return
-      const { top, height } = ref.current.getBoundingClientRect()
-      const scrollable = height - window.innerHeight
-      if (scrollable <= 0) return
-      const progress = Math.max(0, Math.min(1, -top / scrollable))
-      setPhase(Math.min(2, Math.floor(progress * 3)))
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   return (
-    <section ref={ref} style={{ height: '300vh' }}>
-      <div className="hp-story-sticky">
-        <Image
-          src="/images/home/story-bg.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          style={{ objectFit: 'cover', opacity: 0.35 }}
-        />
-        <div className="hp-story-vignette" />
-        <div className="hp-story-content">
-          <div className="hp-story-num">{phases[phase].label}</div>
-          <h2 className="hp-story-title">{phases[phase].title}</h2>
-          <p className="hp-story-desc">{phases[phase].desc}</p>
-        </div>
-        <div className="hp-story-dots">
-          {phases.map((_, i) => (
-            <div key={i} className={`hp-story-dot${phase === i ? ' active' : ''}`} />
-          ))}
-        </div>
+    <section className="hp-story-banner">
+      <Image
+        src="/images/home/story-bg.jpg"
+        alt=""
+        fill
+        sizes="100vw"
+        style={{ objectFit: 'cover', objectPosition: 'center', opacity: 0.38 }}
+      />
+      <div className="hp-story-vignette" />
+      <div className="hp-story-content">
+        <h2 className="hp-story-title">
+          {lang === 'fr'
+            ? <>Le football fribourgeois,<br /><span style={{ color: '#FF3A3A' }}>en un clic.</span></>
+            : <>Freiburger Fussball,<br /><span style={{ color: '#FF3A3A' }}>mit einem Klick.</span></>}
+        </h2>
+        <p className="hp-story-desc">
+          {lang === 'fr'
+            ? 'Joueurs, coachs et clubs — tous connectés sur une seule plateforme pour le football amateur fribourgeois.'
+            : 'Spieler, Trainer und Vereine — alle auf einer Plattform für den Freiburger Amateurfussball vernetzt.'}
+        </p>
       </div>
     </section>
   )
@@ -329,6 +307,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── How it works ────────────────────────────────────────────────── */}
+      <HowSection lang={lang} />
+
       {/* ── Stats ───────────────────────────────────────────────────────── */}
       <div ref={statsRef} className="hp-stats-section">
         <div className="hp-stats-inner">
@@ -341,9 +322,6 @@ export default function HomePage() {
         </div>
         <p className="hp-stats-motivation">{statMotivation}</p>
       </div>
-
-      {/* ── How it works ────────────────────────────────────────────────── */}
-      <HowSection lang={lang} />
 
       {/* ── Leagues ─────────────────────────────────────────────────────── */}
       <section className="hp-ligues-section">
@@ -557,11 +535,11 @@ const CSS = `
   }
   .hp-btn-white:hover { opacity: 0.9; }
 
-  /* ── Story ── */
-  .hp-story-sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
+  /* ── Story banner ── */
+  .hp-story-banner {
+    position: relative;
+    height: 70vh;
+    min-height: 420px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -571,8 +549,8 @@ const CSS = `
   .hp-story-vignette {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at center, transparent 20%, rgba(3,12,32,0.7) 70%),
-                linear-gradient(180deg, rgba(13,31,74,0.75) 0%, rgba(0,0,0,0.65) 100%);
+    background: radial-gradient(ellipse at center, transparent 25%, rgba(3,12,32,0.72) 75%),
+                linear-gradient(180deg, rgba(13,31,74,0.72) 0%, rgba(0,0,0,0.65) 100%);
     z-index: 1;
   }
   .hp-story-content {
@@ -582,21 +560,12 @@ const CSS = `
     padding: 0 24px;
     max-width: 700px;
   }
-  .hp-story-num {
-    font-family: 'Russo One', sans-serif;
-    font-size: 100px;
-    color: rgba(255,58,58,0.12);
-    line-height: 1;
-    margin-bottom: -30px;
-    user-select: none;
-  }
   .hp-story-title {
     font-family: 'Russo One', sans-serif;
-    font-size: clamp(36px, 6vw, 80px);
+    font-size: clamp(36px, 6vw, 72px);
     color: #fff;
     margin-bottom: 20px;
     line-height: 1.05;
-    transition: opacity 0.35s ease, transform 0.35s ease;
   }
   .hp-story-desc {
     font-size: 18px;
@@ -604,30 +573,7 @@ const CSS = `
     line-height: 1.65;
     max-width: 560px;
     margin: 0 auto;
-    transition: opacity 0.35s ease;
   }
-  .hp-story-dots {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  .hp-story-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.25);
-    transition: all 0.35s ease;
-  }
-  .hp-story-dot.active {
-    background: #FF3A3A;
-    width: 26px;
-  }
-
   /* ── Profile cards ── */
   .hp-cards-section {
     background: #0D1F4A;
