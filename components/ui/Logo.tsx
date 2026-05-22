@@ -60,7 +60,7 @@ function LogoMark({ size = 'md', className }: LogoProps) {
           justifyContent: 'center',
           width: s.box,
           height: s.box,
-          background: '#FF3A3A',
+          background: '#111111',
           color: '#ffffff',
           fontFamily: "'Russo One', sans-serif",
           fontSize: s.boxFont,
