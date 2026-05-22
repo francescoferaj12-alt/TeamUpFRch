@@ -179,20 +179,7 @@ function HowSection({ lang }: { lang: Lang }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { lang } = useLang()
-  const [activeTab, setActiveTab] = useState<LigueTab>('all')
   const [counts, statsRef] = useCounters()
-
-  const filteredLigues = activeTab === 'all'
-    ? allLigueItems
-    : allLigueItems.filter(l => l.cat === activeTab)
-
-  const ligueTabs: { key: LigueTab; label: string }[] = [
-    { key: 'all',        label: t.home.ligues_all[lang] },
-    { key: 'actifs_h',   label: t.home.ligues_actifs_h[lang] },
-    { key: 'juniors_g',  label: t.home.ligues_juniors_g[lang] },
-    { key: 'actives_f',  label: t.home.ligues_actives_f[lang] },
-    { key: 'juniores_f', label: t.home.ligues_juniores_f[lang] },
-  ]
 
   const profileCards = [
     {
@@ -342,27 +329,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div className="hp-ligue-tabs">
-            {ligueTabs.map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`hp-ligue-tab${activeTab === key ? ' active' : ''}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="hp-ligue-grid">
-            {filteredLigues.map(l => (
-              <div key={l.item} className="hp-ligue-item">
-                <div className={`hp-ligue-dot${l.cat === 'actives_f' || l.cat === 'juniores_f' ? ' female' : ' male'}`} />
-                <span>{l.item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* ── CTA final ───────────────────────────────────────────────────── */}
@@ -807,56 +773,6 @@ const CSS = `
     white-space: nowrap;
     padding: 0 8px;
   }
-  .hp-ligue-tabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-  }
-  .hp-ligue-tab {
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.7);
-  }
-  .hp-ligue-tab.active {
-    background: #FF3A3A;
-    border-color: #FF3A3A;
-    color: #fff;
-  }
-  .hp-ligue-tab:hover:not(.active) { background: rgba(255,255,255,0.08); }
-  .hp-ligue-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
-  }
-  .hp-ligue-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.82);
-  }
-  .hp-ligue-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .hp-ligue-dot.male  { background: #2ED27F; }
-  .hp-ligue-dot.female { background: #FF3A3A; }
-
   /* ── CTA final ── */
   .hp-cta-section {
     background: #0D1F4A;
