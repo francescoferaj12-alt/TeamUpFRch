@@ -5,12 +5,27 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import VerifiedBadge from '../../components/VerifiedBadge'
-import { strengthIcon } from '../../lib/strength-icons'
 import { supabase, Profile, CareerExperience, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t, months, footDisplay, translateFoot, Lang } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
+
+const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color}
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+    {children}
+  </svg>
+)
+const IcoPlayer    = ({ s = 18 }: { s?: number }) => <Svg size={s}><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></Svg>
+const IcoCoach     = ({ s = 18 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></Svg>
+const IcoStadium   = ({ s = 18 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></Svg>
+const IcoTrophy    = ({ s = 18 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M7 3h10v5a5 5 0 0 1-10 0V3z"/><path d="M7 6H4a2 2 0 0 0 0 4h3"/><path d="M17 6h3a2 2 0 0 0 0-4h-3"/><path d="M12 13v5"/><path d="M9 21h6"/></Svg>
+const IcoCamera    = ({ s = 13 }: { s?: number }) => <Svg size={s}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></Svg>
+const IcoPen       = ({ s = 13 }: { s?: number }) => <Svg size={s}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></Svg>
+const IcoTrash     = ({ s = 13 }: { s?: number }) => <Svg size={s}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></Svg>
+const IcoMegaphone = ({ s = 14 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></Svg>
+const IcoFilm      = ({ s = 16 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="2" y1="17" x2="7" y2="17"/></Svg>
 
 const AvatarCropModal = dynamic(() => import('../../components/AvatarCropModal'), { ssr: false })
 const PostModal = dynamic(() => import('../../components/PostModal'), { ssr: false })
@@ -388,7 +403,7 @@ export default function ProfilPage() {
   }
 
   if (loading || authLoading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#061333' }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#081434' }}>
       <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
       <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.profil.loading[lang]}</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
@@ -398,13 +413,13 @@ export default function ProfilPage() {
   if (!profile) return null
 
   const initials = profile.role === 'club'
-    ? (profile.club_name?.slice(0, 2).toUpperCase() || '🏟️')
+    ? (profile.club_name?.slice(0, 2).toUpperCase() || '')
     : `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase()
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
   const displayName = profile.role === 'club'
     ? (profile.club_name || profile.email)
     : (fullName || profile.email)
-  const roleEmoji = profile.role === 'player' ? '⚽' : profile.role === 'coach' ? '🎽' : '🏟️'
+  const roleIcon = (s = 18) => profile.role === 'club' ? <IcoStadium s={s} /> : profile.role === 'coach' ? <IcoCoach s={s} /> : <IcoPlayer s={s} />
   const roleLabel = profile.role === 'player'
     ? (profile.genre === 'femme' ? t.profil.joueur_f[lang] : t.profil.role_player[lang])
     : profile.role === 'coach'
@@ -440,7 +455,7 @@ export default function ProfilPage() {
   const optSt = { background:'#0D1F4A' }
 
   return (
-    <div style={{ background:'#061333', minHeight:'100vh', color:'#fff' }}>
+    <div style={{ background:'#081434', minHeight:'100vh', color:'#fff' }}>
       {cropSrc && (
         <AvatarCropModal
           src={cropSrc}
@@ -470,18 +485,20 @@ export default function ProfilPage() {
       <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
-        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem' }}>
-          ✅ {saveMsg}
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
+          {saveMsg}
         </div>
       )}
       {postSuccess && (
-        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem' }}>
-          ✅ Post publié ! Visible dans <a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>le fil d'annonces</a>.
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
+          Post publié ! Visible dans <a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>le fil d'annonces</a>.
         </div>
       )}
 
       {/* ── HERO ── */}
-      <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #061333 100%)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
+      <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #081434 100%)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
         <div style={{ display:'flex', alignItems:'flex-end', gap:'1.5rem', flexWrap:'wrap', position:'relative' }}>
 
           {/* AVATAR */}
@@ -492,16 +509,19 @@ export default function ProfilPage() {
             >
               {profile.avatar_url
                 ? <img src={avatarSrc(profile.avatar_url)!} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                : (initials || roleEmoji)
+                : (initials || roleIcon(36))
               }
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#FF3A3A', border:'2px solid #061333', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, cursor:'pointer', color:'#fff' }}
+              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#FF3A3A', border:'2px solid #081434', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}
               title={t.profil.photo_upload[lang]}
             >
-              {uploadingPhoto ? '⏳' : '📷'}
+              {uploadingPhoto
+                ? <span style={{ display:'block', width:10, height:10, border:'2px solid rgba(255,255,255,.3)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+                : <IcoCamera s={13} />
+              }
             </button>
             <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleFileSelect} />
           </div>
@@ -511,8 +531,8 @@ export default function ProfilPage() {
               {displayName}
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
-              <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
-                {roleEmoji} {profile.role === 'coach' ? (profile.coach_specialty || roleLabel) : (profile.position || roleLabel)}
+              <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)', display:'inline-flex', alignItems:'center', gap:5 }}>
+                {roleIcon(12)} {profile.role === 'coach' ? (profile.coach_specialty || roleLabel) : (profile.position || roleLabel)}
               </span>
               {profile.role === 'player' && profile.foot && (
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
@@ -524,14 +544,16 @@ export default function ProfilPage() {
               )}
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
-              {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>🏆 {profile.ligue}</span>}
-              <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
+              {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:5 }}><IcoTrophy s={11} />{profile.ligue}</span>}
+              <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
+                <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
               {profile.verified && <VerifiedBadge />}
               {profile.role === 'club' && profile.club_verification_status === 'approved' && (
-                <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#2ED27F', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100 }}>
-                  ✅ {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
+                <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#2ED27F', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
+                  <span style={{ width:7, height:7, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
+                  {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
                 </span>
               )}
             </div>
@@ -540,7 +562,6 @@ export default function ProfilPage() {
               <div className="strengths-row">
                 {(showAllStrengths ? strengthKeys : strengthKeys.slice(0, 5)).map(key => (
                   <span key={key} className="strength-tag">
-                    <span className="strength-icon">{strengthIcon(key)}</span>
                     {strengthLabel(key, lang)}
                   </span>
                 ))}
@@ -560,9 +581,9 @@ export default function ProfilPage() {
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             <button
               onClick={() => setShowPostModal(true)}
-              style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+              style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:6 }}
             >
-              📢 Publier un post
+              <IcoMegaphone s={13} /> Publier un post
             </button>
             <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,0.1)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
@@ -589,7 +610,7 @@ export default function ProfilPage() {
         return (
           <div style={{ background:'rgba(255,255,255,.04)', borderRadius:16, border:'1px solid rgba(255,255,255,.08)', marginBottom:'1.25rem', overflow:'hidden' }}>
             {/* CURRENT SEASON header */}
-            <div style={{ background:'linear-gradient(135deg,#0D1F4A,#061333)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div style={{ background:'linear-gradient(135deg,#0D1F4A,#081434)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
               <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', letterSpacing:1, fontWeight:600 }}>{seasonNow}</span>
             </div>
@@ -604,7 +625,7 @@ export default function ProfilPage() {
                     <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
                     <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
                     {delta !== null && (
-                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#2ED27F' : delta < 0 ? '#ff6b6b' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,107,107,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
+                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#2ED27F' : delta < 0 ? '#FF3A3A' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,58,58,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
                         {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
                       </div>
                     )}
@@ -643,7 +664,7 @@ export default function ProfilPage() {
       {/* ── COACH INFO CARD ── */}
       {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
-          <div style={{ background:'linear-gradient(135deg,#0D1F4A,#061333)', padding:'.85rem 1.25rem' }}>
+          <div style={{ background:'linear-gradient(135deg,#0D1F4A,#081434)', padding:'.85rem 1.25rem' }}>
             <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Entraîneur</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
@@ -666,7 +687,7 @@ export default function ProfilPage() {
       {/* ── CLUB INFO CARD ── */}
       {profile.role === 'club' && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
-          <div style={{ background:'linear-gradient(135deg,#0D1F4A,#061333)', padding:'.85rem 1.25rem' }}>
+          <div style={{ background:'linear-gradient(135deg,#0D1F4A,#081434)', padding:'.85rem 1.25rem' }}>
             <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Club</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
@@ -689,8 +710,8 @@ export default function ProfilPage() {
       {/* ── CLUB CATEGORIES ── */}
       {profile.role === 'club' && profile.club_categories && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', padding:'1.25rem' }}>
-          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:2, color:'#fff', marginBottom:'1rem' }}>
-            ⚽ {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
+          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:2, color:'#fff', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
+            <IcoStadium s={15} /> {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
             {profile.club_categories.split(',').map(s => s.trim()).filter(Boolean).map(key => {
@@ -750,8 +771,8 @@ export default function ProfilPage() {
       {/* ── MES ANNONCES ── */}
       <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
-          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1 }}>
-            📢 Mes annonces ({myPosts.length})
+          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1, display:'flex', alignItems:'center', gap:6 }}>
+            <IcoMegaphone s={15} /> Mes annonces ({myPosts.length})
           </div>
           <button
             onClick={() => setShowPostModal(true)}
@@ -780,7 +801,7 @@ export default function ProfilPage() {
                 </div>
                 <div style={{ display:'flex', gap:6, flexShrink:0 }}>
                   {post.status === 'active' && (
-                    <button onClick={() => setEditingPost(post)} style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>✏️</button>
+                    <button onClick={() => setEditingPost(post)} style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center' }}><IcoPen s={12}/></button>
                   )}
                   <button
                     onClick={async () => {
@@ -789,8 +810,8 @@ export default function ProfilPage() {
                       if (error) { alert('Erreur: ' + error.message); return }
                       setMyPosts(prev => prev.filter(p => p.id !== post.id))
                     }}
-                    style={{ background:'rgba(230,57,70,.12)', color:'#FF3A3A', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
-                  >🗑️</button>
+                    style={{ background:'rgba(255,58,58,.12)', color:'#FF3A3A', border:'1px solid rgba(255,58,58,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center' }}
+                  ><IcoTrash s={12}/></button>
                 </div>
               </div>
             ))}
@@ -846,7 +867,7 @@ export default function ProfilPage() {
             </div>
             {videoUrls.length === 0 ? (
               <div style={{ background:'rgba(255,255,255,.03)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed rgba(255,255,255,.12)' }}>
-                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)' }}>🎬 {t.profil.video_soon[lang]}</div>
+                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)', display:'flex', alignItems:'center', gap:6 }}><IcoFilm s={16}/>{t.profil.video_soon[lang]}</div>
                 <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
                   {t.profil.edit_videos[lang]} →
                 </button>
@@ -871,7 +892,7 @@ export default function ProfilPage() {
                   return (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                       style={{ display:'flex', alignItems:'center', gap:8, padding:'.75rem', background:'rgba(255,255,255,.05)', borderRadius:10, textDecoration:'none', color:'#3a8cff', fontSize:14, fontWeight:600 }}>
-                      🎬 {t.profil.video_label[lang]} {i+1}
+                      <IcoFilm s={16}/>{t.profil.video_label[lang]} {i+1}
                     </a>
                   )
                 })}
