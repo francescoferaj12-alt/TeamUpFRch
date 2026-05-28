@@ -426,7 +426,7 @@ export default function MessagesPage() {
   // ── Loading state ─────────────────────────────────────────────────────────────
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
-      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'999px', animation:'spin .8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -436,7 +436,7 @@ export default function MessagesPage() {
     <aside className="msg-sidebar">
       {/* Header with title + "+" button */}
       <div style={{ padding:'1rem 1.25rem', borderBottom:'1px solid rgba(255,255,255,.07)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, flexShrink:0 }}>
-        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.4rem', letterSpacing:1, color:'#fff' }}>
+        <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.4rem', letterSpacing:1, color:'#fff' }}>
           {t.messages.title[lang]}
         </div>
         <button
@@ -469,7 +469,7 @@ export default function MessagesPage() {
                 <div style={{ marginBottom:14 }}>{t.messages.no_conv_yet[lang]}</div>
                 <button
                   onClick={() => setMobileView('newChat')}
-                  style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}
+                  style={{ background:'#FF3A3A', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}
                 >
                   + {t.messages.new_msg_btn[lang]}
                 </button>
@@ -484,11 +484,11 @@ export default function MessagesPage() {
             <div
               key={c.partnerId}
               onClick={() => openConversation(c.partnerId)}
-              style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#e63946' : 'transparent'}`, background: isActive ? 'rgba(230,57,70,.12)' : 'transparent', borderBottom:'1px solid rgba(255,255,255,.06)', transition:'background .15s' }}
+              style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#FF3A3A' : 'transparent'}`, background: isActive ? 'rgba(255,58,58,.12)' : 'transparent', borderBottom:'1px solid rgba(255,255,255,.06)', transition:'background .15s' }}
             >
               <Link href={`/profil/${c.partnerId}`} onClick={e => e.stopPropagation()} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }}>
                 <UserAvatar userId={c.partnerId} size={42} radius={12}
-                  fallback={<div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(230,57,70,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:'#fff' }}>{roleEmoji(c.partnerRole)}</div>}
+                  fallback={<div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(255,58,58,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:'#fff' }}>{roleEmoji(c.partnerRole)}</div>}
                 />
               </Link>
               <div style={{ flex:1, minWidth:0 }}>
@@ -498,7 +498,7 @@ export default function MessagesPage() {
               <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0 }}>
                 <span style={{ fontSize:11, color:'rgba(255,255,255,.35)' }}>{c.lastTime}</span>
                 {c.unread > 0 && (
-                  <span style={{ width:18, height:18, background:'#e63946', borderRadius:'50%', fontSize:10, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <span style={{ width:18, height:18, background:'#FF3A3A', borderRadius:'50%', fontSize:10, fontWeight:700, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center' }}>
                     {c.unread}
                   </span>
                 )}
@@ -516,7 +516,7 @@ export default function MessagesPage() {
       {!activeConv ? (
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1, flexDirection:'column', gap:'1rem', color:'rgba(255,255,255,.4)', padding:'2rem', textAlign:'center' }}>
           <div style={{ fontSize:'3.5rem', opacity:.35 }}>💬</div>
-          <div style={{ fontSize:22, fontFamily:"'Bebas Neue', sans-serif", letterSpacing:1, color:'rgba(255,255,255,.7)' }}>
+          <div style={{ fontSize:22, fontFamily:"'Russo One', sans-serif", letterSpacing:1, color:'rgba(255,255,255,.7)' }}>
             {t.messages.select_chat_title[lang]}
           </div>
           <div style={{ fontSize:13, maxWidth:260 }}>{t.messages.select_chat_desc[lang]}</div>
@@ -564,7 +564,7 @@ export default function MessagesPage() {
                   {fromMe ? (
                     profile?.avatar_url
                       ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:28, height:28, borderRadius:8, objectFit:'cover', flexShrink:0 }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                      : <div style={{ width:28, height:28, borderRadius:8, background:'#e63946', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>{myName?.slice(0, 2) || t.messages.me[lang]}</div>
+                      : <div style={{ width:28, height:28, borderRadius:8, background:'#FF3A3A', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>{myName?.slice(0, 2) || t.messages.me[lang]}</div>
                   ) : (
                     <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ width:28, height:28, borderRadius:8, overflow:'hidden', flexShrink:0, display:'block', textDecoration:'none' }} title={activeConv.partnerName}>
                       <UserAvatar userId={activeConv.partnerId} size={28} radius={8}
@@ -573,7 +573,7 @@ export default function MessagesPage() {
                     </Link>
                   )}
                   <div style={{ maxWidth:'70%' }}>
-                    <div style={{ background: fromMe ? '#e63946' : 'rgba(255,255,255,.08)', color:'#fff', padding:'.65rem .95rem', borderRadius:14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize:14, lineHeight:1.5 }}>
+                    <div style={{ background: fromMe ? '#FF3A3A' : 'rgba(255,255,255,.08)', color:'#fff', padding:'.65rem .95rem', borderRadius:14, borderBottomLeftRadius: fromMe ? 14 : 4, borderBottomRightRadius: fromMe ? 4 : 14, fontSize:14, lineHeight:1.5 }}>
                       {hasText && <div>{m.text}</div>}
                       {hasFile && (
                         <div style={{ marginTop: hasText ? 8 : 0 }}>
@@ -638,7 +638,7 @@ export default function MessagesPage() {
               style={{ flex:1, background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:10, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }}
             />
             <button onClick={handleSend} disabled={sending || (!input.trim() && !pendingFile)}
-              style={{ width:40, height:40, background:(input.trim() || pendingFile) ? '#e63946' : 'rgba(255,255,255,.1)', border:'none', borderRadius:10, color:'#fff', fontSize:18, cursor:(input.trim() || pendingFile) ? 'pointer' : 'default', flexShrink:0, transition:'background .15s' }}>
+              style={{ width:40, height:40, background:(input.trim() || pendingFile) ? '#FF3A3A' : 'rgba(255,255,255,.1)', border:'none', borderRadius:'999px', color:'#fff', fontSize:18, cursor:(input.trim() || pendingFile) ? 'pointer' : 'default', flexShrink:0, transition:'background .15s' }}>
               ➤
             </button>
           </div>
@@ -659,7 +659,7 @@ export default function MessagesPage() {
         >
           {isMobile ? '←' : '✕'}
         </button>
-        <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1, color:'#fff' }}>
+        <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', letterSpacing:1, color:'#fff' }}>
           {t.messages.new_msg_title[lang]}
         </div>
       </div>
@@ -754,7 +754,7 @@ export default function MessagesPage() {
           }
         }
         .msg-sidebar {
-          background: #061540;
+          background: #0D1F4A;
           border-right: 1px solid rgba(255,255,255,.07);
           display: flex;
           flex-direction: column;
@@ -767,7 +767,7 @@ export default function MessagesPage() {
           overflow: hidden;
         }
         .msg-header {
-          background: #061540;
+          background: #0D1F4A;
           border-bottom: 1px solid rgba(255,255,255,.07);
           padding: .85rem 1.25rem;
           display: flex;
@@ -784,7 +784,7 @@ export default function MessagesPage() {
           gap: .75rem;
         }
         .msg-input-wrap {
-          background: #061540;
+          background: #0D1F4A;
           border-top: 1px solid rgba(255,255,255,.07);
           padding: .85rem 1.25rem;
           display: flex;
@@ -807,17 +807,17 @@ export default function MessagesPage() {
           transform: translate(-50%, -50%);
           width: 480px;
           max-height: 580px;
-          background: #061540;
+          background: #0D1F4A;
           border: 1px solid rgba(255,255,255,.12);
-          border-radius: 18px;
+          border-radius: 20px;
           display: flex;
           flex-direction: column;
           box-shadow: 0 30px 80px rgba(0,0,0,.7);
           z-index: 100;
         }
         .msg-user-result:hover {
-          background: rgba(230,57,70,.1) !important;
-          border-color: rgba(230,57,70,.3) !important;
+          background: rgba(255,58,58,.1) !important;
+          border-color: rgba(255,58,58,.3) !important;
         }
         .msg-avatar-link {
           cursor: pointer;
@@ -830,9 +830,9 @@ export default function MessagesPage() {
         }
         .msg-plus-btn {
           width: 36px; height: 36px;
-          background: #e63946;
+          background: #FF3A3A;
           border: none;
-          border-radius: 50%;
+          border-radius: 999px;
           color: #fff;
           font-size: 22px;
           font-weight: 700;
@@ -840,7 +840,7 @@ export default function MessagesPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 14px rgba(230,57,70,.5);
+          box-shadow: 0 4px 14px rgba(255,58,58,.5);
           flex-shrink: 0;
           line-height: 1;
           transition: transform .15s, background .15s, box-shadow .15s;
@@ -848,7 +848,7 @@ export default function MessagesPage() {
         .msg-plus-btn:hover {
           transform: scale(1.1);
           background: #ff2d4a;
-          box-shadow: 0 6px 20px rgba(230,57,70,.7);
+          box-shadow: 0 6px 20px rgba(255,58,58,.7);
         }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
