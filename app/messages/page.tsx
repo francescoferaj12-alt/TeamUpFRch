@@ -9,6 +9,23 @@ import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
 
+// ── SVG primitives (identici a /recherche e /annonces) ────────────────────────
+const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color}
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+    {children}
+  </svg>
+)
+const IcoPlayer     = ({ s = 18 }: { s?: number }) => <Svg size={s}><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></Svg>
+const IcoCoach      = ({ s = 18 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6c0 1.5 4 4 9 4s9-2.5 9-4V7"/></Svg>
+const IcoStadium    = ({ s = 18 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21V12h6v9"/></Svg>
+const IcoChatBubble = ({ s = 48 }: { s?: number }) => <Svg size={s} strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Svg>
+const IcoPaperclip  = ({ s = 18 }: { s?: number }) => <Svg size={s}><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></Svg>
+const IcoSend       = ({ s = 18 }: { s?: number }) => <Svg size={s}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></Svg>
+const IcoArrowLeft  = ({ s = 18 }: { s?: number }) => <Svg size={s}><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></Svg>
+const IcoX          = ({ s = 14 }: { s?: number }) => <Svg size={s}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Svg>
+const IcoFilm       = ({ s = 16 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></Svg>
+
 type Conversation = {
   partnerId: string
   partnerName: string
@@ -415,8 +432,8 @@ export default function MessagesPage() {
     role === 'club' ? t.messages.role_club[lang]
     : role === 'coach' ? t.messages.role_coach[lang]
     : t.messages.role_player[lang]
-  const roleEmoji = (role: string) =>
-    role === 'club' ? '🏟️' : role === 'coach' ? '🧑‍🏫' : '👤'
+  const roleIcon = (role: string, s = 20) =>
+    role === 'club' ? <IcoStadium s={s} /> : role === 'coach' ? <IcoCoach s={s} /> : <IcoPlayer s={s} />
   const myName = profile
     ? (profile.role === 'club'
         ? (profile.club_name || '').slice(0, 2)
@@ -425,7 +442,7 @@ export default function MessagesPage() {
 
   // ── Loading state ─────────────────────────────────────────────────────────────
   if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#0D1F4A' }}>
       <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'999px', animation:'spin .8s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
@@ -465,7 +482,7 @@ export default function MessagesPage() {
           <div style={{ padding:'2.5rem 1rem', textAlign:'center', color:'rgba(255,255,255,.4)', fontSize:13 }}>
             {conversations.length === 0 ? (
               <>
-                <div style={{ fontSize:36, marginBottom:10, opacity:.5 }}>💬</div>
+                <div style={{ marginBottom:10, opacity:.4, color:'rgba(255,255,255,.7)' }}><IcoChatBubble s={48} /></div>
                 <div style={{ marginBottom:14 }}>{t.messages.no_conv_yet[lang]}</div>
                 <button
                   onClick={() => setMobileView('newChat')}
@@ -488,12 +505,16 @@ export default function MessagesPage() {
             >
               <Link href={`/profil/${c.partnerId}`} onClick={e => e.stopPropagation()} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }}>
                 <UserAvatar userId={c.partnerId} size={42} radius={12}
-                  fallback={<div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(255,58,58,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:'#fff' }}>{roleEmoji(c.partnerRole)}</div>}
+                  fallback={<div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(255,58,58,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(c.partnerRole, 20)}</div>}
                 />
               </Link>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontWeight:600, fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#fff' }}>{c.partnerName}</div>
-                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.lastMessage}</div>
+                <div style={{ fontSize:12, color:'rgba(255,255,255,.4)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                  {c.lastMessage.startsWith('📎 ')
+                    ? <span style={{ display:'inline-flex', alignItems:'center', gap:3, maxWidth:'100%' }}><IcoPaperclip s={11} /><span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.lastMessage.slice(3) || t.messages.file_preview[lang]}</span></span>
+                    : c.lastMessage}
+                </div>
               </div>
               <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4, flexShrink:0 }}>
                 <span style={{ fontSize:11, color:'rgba(255,255,255,.35)' }}>{c.lastTime}</span>
@@ -515,7 +536,7 @@ export default function MessagesPage() {
     <section className="msg-main">
       {!activeConv ? (
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1, flexDirection:'column', gap:'1rem', color:'rgba(255,255,255,.4)', padding:'2rem', textAlign:'center' }}>
-          <div style={{ fontSize:'3.5rem', opacity:.35 }}>💬</div>
+          <div style={{ opacity:.35, color:'rgba(255,255,255,.9)' }}><IcoChatBubble s={64} /></div>
           <div style={{ fontSize:22, fontFamily:"'Russo One', sans-serif", letterSpacing:1, color:'rgba(255,255,255,.7)' }}>
             {t.messages.select_chat_title[lang]}
           </div>
@@ -529,14 +550,14 @@ export default function MessagesPage() {
               <button
                 onClick={() => setMobileView('list')}
                 aria-label={t.messages.back[lang]}
-                style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'#fff', width:36, height:36, cursor:'pointer', fontSize:17, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+                style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'#fff', width:36, height:36, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
               >
-                ←
+                <IcoArrowLeft s={18} />
               </button>
             )}
             <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }} title={activeConv.partnerName}>
               <UserAvatar userId={activeConv.partnerId} size={42} radius={12}
-                fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>{roleEmoji(activeConv.partnerRole)}</div>}
+                fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(activeConv.partnerRole, 22)}</div>}
               />
             </Link>
             <div style={{ flex:1, minWidth:0 }}>
@@ -568,7 +589,7 @@ export default function MessagesPage() {
                   ) : (
                     <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ width:28, height:28, borderRadius:8, overflow:'hidden', flexShrink:0, display:'block', textDecoration:'none' }} title={activeConv.partnerName}>
                       <UserAvatar userId={activeConv.partnerId} size={28} radius={8}
-                        fallback={<div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>{roleEmoji(activeConv.partnerRole)}</div>}
+                        fallback={<div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(activeConv.partnerRole, 14)}</div>}
                       />
                     </Link>
                   )}
@@ -589,7 +610,7 @@ export default function MessagesPage() {
                           {m.file_type === 'file' && (
                             <a href={m.file_url} target="_blank" rel="noopener noreferrer" download={m.file_name || 'fichier'}
                               style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 12px', background:'rgba(255,255,255,.15)', borderRadius:8, color:'#fff', textDecoration:'none', fontSize:13, fontWeight:600 }}>
-                              📎 {m.file_name || 'Télécharger'}
+                              <IcoPaperclip s={14} /> {m.file_name || (lang === 'fr' ? 'Télécharger' : 'Herunterladen')}
                             </a>
                           )}
                         </div>
@@ -609,14 +630,14 @@ export default function MessagesPage() {
                 <img src={pendingFile.url} alt="" style={{ height:52, width:52, objectFit:'cover', borderRadius:8 }} />
               )}
               {pendingFile.type !== 'image' && (
-                <div style={{ background:'rgba(255,255,255,.1)', borderRadius:8, padding:'8px 12px', fontSize:13, color:'rgba(255,255,255,.7)' }}>
-                  {pendingFile.type === 'video' ? '🎬' : '📎'} {pendingFile.name}
+                <div style={{ background:'rgba(255,255,255,.1)', borderRadius:8, padding:'8px 12px', fontSize:13, color:'rgba(255,255,255,.7)', display:'flex', alignItems:'center', gap:6 }}>
+                  {pendingFile.type === 'video' ? <IcoFilm s={16} /> : <IcoPaperclip s={16} />} {pendingFile.name}
                 </div>
               )}
               <div style={{ flex:1, fontSize:12, color:'rgba(255,255,255,.5)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                 {pendingFile.type === 'image' ? pendingFile.name : ''}
               </div>
-              <button onClick={() => setPendingFile(null)} style={{ background:'rgba(255,255,255,.12)', border:'none', borderRadius:6, color:'rgba(255,255,255,.7)', cursor:'pointer', padding:'4px 8px', fontSize:13 }}>✕</button>
+              <button onClick={() => setPendingFile(null)} style={{ background:'rgba(255,255,255,.12)', border:'none', borderRadius:6, color:'rgba(255,255,255,.7)', cursor:'pointer', padding:'4px 8px', display:'flex', alignItems:'center', justifyContent:'center' }}><IcoX s={13} /></button>
             </div>
           )}
 
@@ -626,8 +647,10 @@ export default function MessagesPage() {
               accept="image/*,video/*,.pdf,.doc,.docx,.zip" />
             <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadingFile}
               title={lang === 'fr' ? 'Joindre un fichier' : 'Datei anhängen'}
-              style={{ width:38, height:38, background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'rgba(255,255,255,.7)', fontSize:16, cursor:'pointer', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              {uploadingFile ? '⏳' : '📎'}
+              style={{ width:38, height:38, background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'rgba(255,255,255,.7)', cursor:'pointer', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              {uploadingFile
+                ? <div style={{ width:16, height:16, border:'2px solid rgba(255,255,255,.2)', borderTopColor:'rgba(255,255,255,.7)', borderRadius:'50%', animation:'spin .7s linear infinite' }} />
+                : <IcoPaperclip s={17} />}
             </button>
             <input
               ref={inputRef}
@@ -638,8 +661,8 @@ export default function MessagesPage() {
               style={{ flex:1, background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:10, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }}
             />
             <button onClick={handleSend} disabled={sending || (!input.trim() && !pendingFile)}
-              style={{ width:40, height:40, background:(input.trim() || pendingFile) ? '#FF3A3A' : 'rgba(255,255,255,.1)', border:'none', borderRadius:'999px', color:'#fff', fontSize:18, cursor:(input.trim() || pendingFile) ? 'pointer' : 'default', flexShrink:0, transition:'background .15s' }}>
-              ➤
+              style={{ width:40, height:40, background:(input.trim() || pendingFile) ? '#FF3A3A' : 'rgba(255,255,255,.1)', border:'none', borderRadius:'999px', color:'#fff', cursor:(input.trim() || pendingFile) ? 'pointer' : 'default', flexShrink:0, transition:'background .15s', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <IcoSend s={17} />
             </button>
           </div>
         </>
@@ -655,9 +678,9 @@ export default function MessagesPage() {
         <button
           onClick={() => { setMobileView('list'); setSearchNewUser(''); setNewUserResults([]) }}
           aria-label={t.messages.back[lang]}
-          style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'#fff', width:36, height:36, cursor:'pointer', fontSize: isMobile ? 17 : 14, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+          style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'#fff', width:36, height:36, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
         >
-          {isMobile ? '←' : '✕'}
+          {isMobile ? <IcoArrowLeft s={18} /> : <IcoX s={14} />}
         </button>
         <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', letterSpacing:1, color:'#fff' }}>
           {t.messages.new_msg_title[lang]}
@@ -700,7 +723,7 @@ export default function MessagesPage() {
             >
               <div style={{ width:42, height:42, borderRadius:12, overflow:'hidden', flexShrink:0 }}>
                 <UserAvatar userId={user.id} size={42} radius={12}
-                  fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>{roleEmoji(user.role)}</div>}
+                  fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(user.role, 20)}</div>}
                 />
               </div>
               <div style={{ flex:1, minWidth:0 }}>
@@ -744,7 +767,7 @@ export default function MessagesPage() {
           min-height: 600px;
           overflow: hidden;
           position: relative;
-          background: #030a24;
+          background: #0D1F4A;
         }
         @media (max-width: 900px) {
           .msg-wrap {
@@ -763,7 +786,7 @@ export default function MessagesPage() {
         .msg-main {
           display: flex;
           flex-direction: column;
-          background: #030a24;
+          background: #081434;
           overflow: hidden;
         }
         .msg-header {
@@ -795,7 +818,7 @@ export default function MessagesPage() {
         .msg-new-chat-mobile {
           position: absolute;
           inset: 0;
-          background: #030a24;
+          background: #0D1F4A;
           display: flex;
           flex-direction: column;
           z-index: 20;

@@ -507,6 +507,7 @@ export const t = {
     new_msg_btn: { fr: 'Nouveau message', de: 'Neue Nachricht' },
     new_msg_title: { fr: 'Nouveau message', de: 'Neue Nachricht' },
     back: { fr: 'Retour', de: 'Zurück' },
+    file_preview: { fr: 'Fichier', de: 'Datei' },
   },
 
   // DASHBOARD
