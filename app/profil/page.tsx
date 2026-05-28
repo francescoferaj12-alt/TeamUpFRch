@@ -388,8 +388,8 @@ export default function ProfilPage() {
   }
 
   if (loading || authLoading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#030a24' }}>
-      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#e63946', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#061333' }}>
+      <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
       <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.profil.loading[lang]}</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
@@ -434,13 +434,13 @@ export default function ProfilPage() {
 
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
 
-  const darkCard: React.CSSProperties = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, padding:'1.25rem' }
+  const darkCard: React.CSSProperties = { background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'1.25rem' }
   const inpSt: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:9, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }
   const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'rgba(255,255,255,.55)', marginBottom:6 }
-  const optSt = { background:'#061540' }
+  const optSt = { background:'#0D1F4A' }
 
   return (
-    <div style={{ background:'#030a24', minHeight:'100vh', color:'#fff' }}>
+    <div style={{ background:'#061333', minHeight:'100vh', color:'#fff' }}>
       {cropSrc && (
         <AvatarCropModal
           src={cropSrc}
@@ -470,18 +470,18 @@ export default function ProfilPage() {
       <div style={{ maxWidth:900, margin:'0 auto', padding:'1.5rem' }}>
 
       {saveMsg && (
-        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem' }}>
           ✅ {saveMsg}
         </div>
       )}
       {postSuccess && (
-        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#4cdb7a', marginBottom:'1rem' }}>
-          ✅ Post publié ! Visible dans <a href="/annonces" style={{ color:'#4cdb7a', fontWeight:700 }}>le fil d'annonces</a>.
+        <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem' }}>
+          ✅ Post publié ! Visible dans <a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>le fil d'annonces</a>.
         </div>
       )}
 
       {/* ── HERO ── */}
-      <div style={{ background:'linear-gradient(135deg,#061540,#0a1f5c)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
+      <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #061333 100%)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
         <div style={{ display:'flex', alignItems:'flex-end', gap:'1.5rem', flexWrap:'wrap', position:'relative' }}>
 
           {/* AVATAR */}
@@ -498,7 +498,7 @@ export default function ProfilPage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#e63946', border:'2px solid #030a24', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, cursor:'pointer', color:'#fff' }}
+              style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#FF3A3A', border:'2px solid #061333', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, cursor:'pointer', color:'#fff' }}
               title={t.profil.photo_upload[lang]}
             >
               {uploadingPhoto ? '⏳' : '📷'}
@@ -507,7 +507,7 @@ export default function ProfilPage() {
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6 }}>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(28px, 4vw, 48px)', color:'#fff', letterSpacing:'normal', lineHeight:1, marginBottom:6 }}>
               {displayName}
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
@@ -530,7 +530,7 @@ export default function ProfilPage() {
               </span>
               {profile.verified && <VerifiedBadge />}
               {profile.role === 'club' && profile.club_verification_status === 'approved' && (
-                <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#4cdb7a', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100 }}>
+                <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#2ED27F', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100 }}>
                   ✅ {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
                 </span>
               )}
@@ -560,14 +560,14 @@ export default function ProfilPage() {
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             <button
               onClick={() => setShowPostModal(true)}
-              style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+              style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
             >
               📢 Publier un post
             </button>
-            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,.2)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,0.1)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
-            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.6)', border:'1px solid rgba(255,255,255,.12)', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.6)', border:'1px solid rgba(255,255,255,.12)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
           </div>
@@ -582,15 +582,15 @@ export default function ProfilPage() {
         const seasonPrev = `${sy - 1} – ${String(sy).slice(2)}`
         const hasPrev = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
         const stats = [
-          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#e02020' },
-          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#1a6fd4' },
-          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#0a7c3e' },
+          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#FF3A3A' },
+          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#3A7AFF' },
+          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#2ED27F' },
         ]
         return (
           <div style={{ background:'rgba(255,255,255,.04)', borderRadius:16, border:'1px solid rgba(255,255,255,.08)', marginBottom:'1.25rem', overflow:'hidden' }}>
             {/* CURRENT SEASON header */}
-            <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
+            <div style={{ background:'linear-gradient(135deg,#0D1F4A,#061333)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
               <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', letterSpacing:1, fontWeight:600 }}>{seasonNow}</span>
             </div>
 
@@ -601,10 +601,10 @@ export default function ProfilPage() {
                 return (
                   <div key={s.k} style={{ padding:'1.4rem .5rem 1.1rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                     <div style={{ position:'absolute', top:0, left:'25%', right:'25%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                    <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
+                    <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
                     <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
                     {delta !== null && (
-                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#4cdb7a' : delta < 0 ? '#ff6b6b' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,107,107,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
+                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#2ED27F' : delta < 0 ? '#ff6b6b' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,107,107,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
                         {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
                       </div>
                     )}
@@ -617,19 +617,19 @@ export default function ProfilPage() {
               <>
                 {/* PREVIOUS SEASON header — same style as current but lighter */}
                 <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
-                  <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.prev_season[lang]}</span>
+                  <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.prev_season[lang]}</span>
                   <span style={{ fontSize:11, color:'rgba(255,255,255,.55)', letterSpacing:1, fontWeight:600 }}>{seasonPrev}</span>
                 </div>
 
                 {/* Previous numbers — smaller */}
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
                   {[
-                    { v: profile.goals_prev,   k: t.profil.goals[lang],   color:'#e02020' },
-                    { v: profile.assists_prev, k: t.profil.assists[lang], color:'#1a6fd4' },
-                    { v: profile.matches_prev, k: t.profil.matches[lang], color:'#0a7c3e' },
+                    { v: profile.goals_prev,   k: t.profil.goals[lang],   color:'#FF3A3A' },
+                    { v: profile.assists_prev, k: t.profil.assists[lang], color:'#3A7AFF' },
+                    { v: profile.matches_prev, k: t.profil.matches[lang], color:'#2ED27F' },
                   ].map((s, i) => (
                     <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', background:'rgba(255,255,255,.02)' }}>
-                      <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.9rem', color: s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
+                      <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.9rem', color: s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
                       <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
                     </div>
                   ))}
@@ -643,19 +643,19 @@ export default function ProfilPage() {
       {/* ── COACH INFO CARD ── */}
       {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
-          <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem' }}>
-            <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Entraîneur</span>
+          <div style={{ background:'linear-gradient(135deg,#0D1F4A,#061333)', padding:'.85rem 1.25rem' }}>
+            <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Entraîneur</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
             {[
-              { label:'Expérience', value:profile.coach_experience, color:'#e02020' },
-              { label:'Diplôme',    value:profile.coach_diploma,    color:'#1a6fd4' },
-              { label:'Spécialité', value:profile.coach_specialty,  color:'#0a7c3e' },
+              { label:'Expérience', value:profile.coach_experience, color:'#FF3A3A' },
+              { label:'Diplôme',    value:profile.coach_diploma,    color:'#3A7AFF' },
+              { label:'Spécialité', value:profile.coach_specialty,  color:'#2ED27F' },
               { label:'Statut',     value:profile.coach_availability, color:'#b56cf0' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
@@ -666,19 +666,19 @@ export default function ProfilPage() {
       {/* ── CLUB INFO CARD ── */}
       {profile.role === 'club' && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
-          <div style={{ background:'linear-gradient(135deg,#0d1f3c,#1a3a6b)', padding:'.85rem 1.25rem' }}>
-            <span style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Club</span>
+          <div style={{ background:'linear-gradient(135deg,#0D1F4A,#061333)', padding:'.85rem 1.25rem' }}>
+            <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Club</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
             {[
-              { label:'Ligue',       value: profile.ligue,  color:'#e02020' },
-              { label:'Zone',        value: profile.zone,   color:'#1a6fd4' },
-              { label:'Recrutement', value: profile.available ? 'Ouvert' : 'Complet', color: profile.available ? '#0a7c3e' : '#888' },
+              { label:'Ligue',       value: profile.ligue,  color:'#FF3A3A' },
+              { label:'Zone',        value: profile.zone,   color:'#3A7AFF' },
+              { label:'Recrutement', value: profile.available ? 'Ouvert' : 'Complet', color: profile.available ? '#2ED27F' : '#888' },
               { label:'Vérifié',     value: profile.verified ? 'Oui ✓' : null, color:'#1d9bf0' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
@@ -689,7 +689,7 @@ export default function ProfilPage() {
       {/* ── CLUB CATEGORIES ── */}
       {profile.role === 'club' && profile.club_categories && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', padding:'1.25rem' }}>
-          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1rem', letterSpacing:2, color:'#fff', marginBottom:'1rem' }}>
+          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:2, color:'#fff', marginBottom:'1rem' }}>
             ⚽ {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
@@ -750,12 +750,12 @@ export default function ProfilPage() {
       {/* ── MES ANNONCES ── */}
       <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
-          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1 }}>
+          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1 }}>
             📢 Mes annonces ({myPosts.length})
           </div>
           <button
             onClick={() => setShowPostModal(true)}
-            style={{ background:'rgba(230,57,70,.15)', color:'#e63946', border:'1.5px solid rgba(230,57,70,.4)', borderRadius:8, padding:'5px 12px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+            style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'5px 12px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
           >
             + Nouveau
           </button>
@@ -763,14 +763,14 @@ export default function ProfilPage() {
         {myPosts.length === 0 ? (
           <div style={{ textAlign:'center', padding:'1rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
             Aucun post publié.{' '}
-            <button onClick={() => setShowPostModal(true)} style={{ color:'#e63946', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700 }}>
+            <button onClick={() => setShowPostModal(true)} style={{ color:'#FF3A3A', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700, borderRadius:999 }}>
               Publier →
             </button>
           </div>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:'.6rem' }}>
             {myPosts.map(post => (
-              <div key={post.id} style={{ background:'rgba(255,255,255,.03)', borderRadius:10, padding:'.75rem 1rem', borderLeft:`3px solid ${post.status === 'active' ? '#e63946' : 'rgba(255,255,255,.15)'}`, display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
+              <div key={post.id} style={{ background:'rgba(255,255,255,.03)', borderRadius:10, padding:'.75rem 1rem', borderLeft:`3px solid ${post.status === 'active' ? '#FF3A3A' : 'rgba(255,255,255,.15)'}`, display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontWeight:700, fontSize:14, marginBottom:2, color: post.status === 'active' ? '#fff' : 'rgba(255,255,255,.4)' }}>{post.title}</div>
                   <div style={{ fontSize:12, color:'rgba(255,255,255,.35)' }}>
@@ -789,7 +789,7 @@ export default function ProfilPage() {
                       if (error) { alert('Erreur: ' + error.message); return }
                       setMyPosts(prev => prev.filter(p => p.id !== post.id))
                     }}
-                    style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                    style={{ background:'rgba(230,57,70,.12)', color:'#FF3A3A', border:'1px solid rgba(230,57,70,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
                   >🗑️</button>
                 </div>
               </div>
@@ -827,7 +827,7 @@ export default function ProfilPage() {
         <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
           <div style={darkCard}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
               {t.profil.about[lang]}
             </div>
             {profile.bio
@@ -841,7 +841,7 @@ export default function ProfilPage() {
 
           {profile.role !== 'club' && (
             <div style={darkCard}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.2rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
               {t.profil.highlights[lang]}
             </div>
             {videoUrls.length === 0 ? (
@@ -888,12 +888,12 @@ export default function ProfilPage() {
           {/* Informations */}
           <div style={darkCard}>
             {profile.available && (
-              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(13,122,54,.2)', color:'#4cdb7a', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
-                <span style={{ width:8, height:8, borderRadius:'50%', background:'#4cdb7a' }} />
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(13,122,54,.2)', color:'#2ED27F', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
+                <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F' }} />
                 {t.profil.available_badge[lang]}
               </div>
             )}
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.info[lang]}</div>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.info[lang]}</div>
             {infoRows.filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
               <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
                 <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
@@ -904,11 +904,11 @@ export default function ProfilPage() {
 
           {/* Actions rapides */}
           <div style={darkCard}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.actions[lang]}</div>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.actions[lang]}</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              <Link href="/recherche" style={{ background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.search_clubs[lang]}</Link>
-              <Link href="/messages" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_msgs[lang]}</Link>
-              <Link href="/candidatures" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_cands[lang]}</Link>
+              <Link href="/recherche" style={{ background:'#FF3A3A', color:'#fff', border:'none', borderRadius:999, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.search_clubs[lang]}</Link>
+              <Link href="/messages" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:999, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_msgs[lang]}</Link>
+              <Link href="/candidatures" style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.75)', border:'1px solid rgba(255,255,255,.15)', borderRadius:999, padding:'9px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit', textDecoration:'none', textAlign:'center', display:'block' }}>{t.profil.my_cands[lang]}</Link>
             </div>
           </div>
 
@@ -916,7 +916,7 @@ export default function ProfilPage() {
           <div style={{ ...darkCard, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.25)' }}>
             <div style={{ fontSize:13, color:'#3a8cff', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
             <div style={{ fontSize:13, color:'rgba(255,255,255,.55)', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
-            <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', width:'100%', background:'#e63946', color:'#fff', border:'none', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', width:'100%', background:'#FF3A3A', color:'#fff', border:'none', borderRadius:999, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.complete[lang]}
             </button>
           </div>
