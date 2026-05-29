@@ -23,17 +23,17 @@ export default function Footer() {
   ]
 
   const colHead: React.CSSProperties = {
-    fontFamily: "'Bebas Neue', sans-serif",
+    fontFamily: "'Russo One', sans-serif",
     fontSize: 18,
     marginBottom: 18,
-    color: '#e63946',
+    color: '#FF3A3A',
     letterSpacing: '0.05em',
   }
   const colLink: React.CSSProperties = {
     display: 'block',
     color: 'rgba(255,255,255,0.55)',
     textDecoration: 'none',
-    fontFamily: "'Bebas Neue', sans-serif",
+    fontFamily: "'Russo One', sans-serif",
     fontSize: 15,
     letterSpacing: '0.05em',
     textTransform: 'uppercase',

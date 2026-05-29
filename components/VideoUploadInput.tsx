@@ -74,7 +74,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
           title="Choisir depuis la galerie"
           style={{
             flexShrink: 0, width: 40, height: 40,
-            background: uploading ? 'rgba(230,57,70,.15)' : 'rgba(255,255,255,.08)',
+            background: uploading ? 'rgba(255,58,58,.15)' : 'rgba(255,255,255,.08)',
             border: '1.5px solid rgba(255,255,255,.15)',
             borderRadius: 9, cursor: uploading ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -97,7 +97,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
         <div style={{ marginTop: 6, height: 3, background: 'rgba(255,255,255,.08)', borderRadius: 3, overflow: 'hidden' }}>
           <div style={{
             height: '100%', borderRadius: 3,
-            background: 'linear-gradient(90deg, #e63946, #ff6b7a)',
+            background: 'linear-gradient(90deg, #FF3A3A, #FF3A3A)',
             width: `${progress}%`, transition: 'width .3s ease',
           }} />
         </div>

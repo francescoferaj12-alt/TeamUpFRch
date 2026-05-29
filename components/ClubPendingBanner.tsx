@@ -17,9 +17,9 @@ export default function ClubPendingBanner() {
 
   const isRejected = profile.club_verification_status === 'rejected'
 
-  const bg = isRejected ? 'rgba(230,57,70,0.12)' : 'rgba(255,165,0,0.10)'
-  const border = isRejected ? 'rgba(230,57,70,0.35)' : 'rgba(255,165,0,0.35)'
-  const color = isRejected ? '#ff6b6b' : '#ffa500'
+  const bg = isRejected ? 'rgba(255,58,58,0.12)' : 'rgba(255,165,0,0.10)'
+  const border = isRejected ? 'rgba(255,58,58,0.35)' : 'rgba(255,165,0,0.35)'
+  const color = isRejected ? '#FF3A3A' : '#ffa500'
   const icon = isRejected ? '❌' : '⏳'
 
   const title = isRejected

@@ -55,13 +55,13 @@ export default function AvatarCropModal({ src, onConfirm, onCancel, uploading }:
         <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.6)', fontSize: 15, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 0' }}>
           Annuler
         </button>
-        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: '#fff', letterSpacing: 1 }}>
+        <span style={{ fontFamily: "'Russo One', sans-serif", fontSize: 18, color: '#fff', letterSpacing: 1 }}>
           Modifier la photo
         </span>
         <button
           onClick={handleConfirm}
           disabled={uploading}
-          style={{ background: '#e63946', border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', padding: '7px 18px', borderRadius: 8, opacity: uploading ? 0.7 : 1 }}
+          style={{ background: '#FF3A3A', border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', padding: '7px 18px', borderRadius: 8, opacity: uploading ? 0.7 : 1 }}
         >
           {uploading ? '…' : 'Appliquer'}
         </button>
@@ -82,7 +82,7 @@ export default function AvatarCropModal({ src, onConfirm, onCancel, uploading }:
           style={{
             containerStyle: { borderRadius: 16 },
             mediaStyle: {},
-            cropAreaStyle: { border: '3px solid #e63946', boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)' },
+            cropAreaStyle: { border: '3px solid #FF3A3A', boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)' },
           }}
         />
       </div>
@@ -95,7 +95,7 @@ export default function AvatarCropModal({ src, onConfirm, onCancel, uploading }:
           min={1} max={3} step={0.01}
           value={zoom}
           onChange={e => setZoom(Number(e.target.value))}
-          style={{ flex: 1, accentColor: '#e63946', cursor: 'pointer' }}
+          style={{ flex: 1, accentColor: '#FF3A3A', cursor: 'pointer' }}
         />
         <span style={{ fontSize: 18, color: 'rgba(255,255,255,.5)' }}>🔍</span>
       </div>

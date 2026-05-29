@@ -196,7 +196,7 @@ function CareerEditor({
             <input type="checkbox" checked={entry.is_current} onChange={e => update(i, 'is_current', e.target.checked)} />
             {o.career_current[lang]}
           </label>
-          <button onClick={() => removeEntry(i)} style={{ background: 'none', border: '1px solid rgba(230,57,70,.4)', color: '#e63946', borderRadius: 8, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <button onClick={() => removeEntry(i)} style={{ background: 'none', border: '1px solid rgba(255,58,58,.4)', color: '#FF3A3A', borderRadius: 8, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
             {o.career_remove[lang]}
           </button>
         </div>
@@ -265,7 +265,7 @@ function PhotoStep({
       >
         {uploading ? o.photo_uploading[lang] : avatarUrl ? o.photo_done[lang] : o.photo_upload[lang]}
       </button>
-      {error && <p style={{ color: '#e63946', fontSize: 13, marginTop: 8 }}>{error}</p>}
+      {error && <p style={{ color: '#FF3A3A', fontSize: 13, marginTop: 8 }}>{error}</p>}
     </div>
   )
 }
@@ -457,14 +457,14 @@ export default function OnboardingPage() {
       {/* Card */}
       <div style={{ width: '100%', maxWidth: 520, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 20, padding: '2rem 1.75rem', animation: 'fadeIn .35s ease both' }}>
         <div style={{ marginBottom: '1.75rem' }}>
-          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.75rem', letterSpacing: 1, color: '#fff', margin: '0 0 .5rem' }}>{title}</h1>
+          <h1 style={{ fontFamily: "'Russo One', sans-serif", fontSize: '1.75rem', letterSpacing: 1, color: '#fff', margin: '0 0 .5rem' }}>{title}</h1>
           <p style={{ color: 'rgba(255,255,255,.45)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>{desc}</p>
         </div>
 
         {/* Step content */}
         {renderStepContent()}
 
-        {error && <p style={{ color: '#e63946', fontSize: 13, marginTop: '0.5rem', textAlign: 'center' }}>{error}</p>}
+        {error && <p style={{ color: '#FF3A3A', fontSize: 13, marginTop: '0.5rem', textAlign: 'center' }}>{error}</p>}
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.75rem', alignItems: 'center', justifyContent: 'space-between' }}>

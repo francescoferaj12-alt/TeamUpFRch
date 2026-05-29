@@ -675,7 +675,7 @@ const CSS = `
 
   /* ── Stats ── */
   .hp-stats-section {
-    background: linear-gradient(135deg, #061333 0%, #0D1F4A 100%);
+    background: linear-gradient(135deg, #081434 0%, #0D1F4A 100%);
     padding: 80px 0;
     border-top: 1px solid rgba(255,255,255,0.05);
     border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -716,7 +716,7 @@ const CSS = `
 
   /* ── How it works ── */
   .hp-how-section {
-    background: linear-gradient(180deg, #0D1F4A 0%, #061333 100%);
+    background: linear-gradient(180deg, #0D1F4A 0%, #081434 100%);
     padding: 100px 0;
   }
   .hp-how-inner {
@@ -772,7 +772,7 @@ const CSS = `
 
   /* ── Leagues ── */
   .hp-ligues-section {
-    background: #061333;
+    background: #081434;
     padding: 100px 0;
   }
   .hp-marquee-link {

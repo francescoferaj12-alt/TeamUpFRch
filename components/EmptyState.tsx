@@ -21,7 +21,7 @@ export default function EmptyState({ icon, title, message, ctaText, ctaHref }: P
     }}>
       <div style={{ fontSize: 64, marginBottom: 24, opacity: 0.7 }}>{icon}</div>
       <h2 style={{
-        fontFamily: "'Bebas Neue', sans-serif",
+        fontFamily: "'Russo One', sans-serif",
         fontSize: 32,
         color: '#fff',
         marginBottom: 12,
@@ -40,14 +40,14 @@ export default function EmptyState({ icon, title, message, ctaText, ctaHref }: P
         <Link href={ctaHref} style={{
           display: 'inline-flex',
           alignItems: 'center',
-          background: '#e63946',
+          background: '#FF3A3A',
           color: '#fff',
           padding: '12px 28px',
           borderRadius: 10,
           fontWeight: 700,
           fontSize: 14,
           textDecoration: 'none',
-          boxShadow: '0 6px 20px rgba(230,57,70,0.35)',
+          boxShadow: '0 6px 20px rgba(255,58,58,0.35)',
         }}>
           {ctaText}
         </Link>

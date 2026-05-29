@@ -29,8 +29,8 @@ export default function EmailVerificationBanner() {
 
   return (
     <div style={{
-      background: 'rgba(230,57,70,.12)',
-      borderBottom: '1px solid rgba(230,57,70,.25)',
+      background: 'rgba(255,58,58,.12)',
+      borderBottom: '1px solid rgba(255,58,58,.25)',
       padding: '10px 1.5rem',
       display: 'flex',
       alignItems: 'center',
@@ -48,7 +48,7 @@ export default function EmailVerificationBanner() {
           onClick={handleResend}
           disabled={sending || sent}
           style={{
-            background: sent ? 'rgba(76,219,122,.15)' : '#e63946',
+            background: sent ? 'rgba(76,219,122,.15)' : '#FF3A3A',
             color: sent ? '#4cdb7a' : '#fff',
             border: sent ? '1px solid rgba(76,219,122,.4)' : 'none',
             borderRadius: 8,

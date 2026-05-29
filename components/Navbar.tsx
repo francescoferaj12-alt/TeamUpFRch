@@ -144,7 +144,7 @@ export default function Navbar() {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 8, fontWeight: 700, color: '#fff',
     width: 14, height: 14, borderRadius: '50%',
-    background: '#e63946', flexShrink: 0,
+    background: '#FF3A3A', flexShrink: 0,
   }
 
   return (
@@ -250,7 +250,7 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : (
-                <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e63946', color: '#fff', padding: '13px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 14px rgba(230,57,70,0.35)' }}>
+                <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FF3A3A', color: '#fff', padding: '13px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 14px rgba(255,58,58,0.35)' }}>
                   {t.nav.connexion[lang]}
                 </Link>
               )}

@@ -194,7 +194,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
         .pm-error-box {
           background:rgba(255,58,58,.08); border:1px solid rgba(255,58,58,.25);
           border-radius:10px; padding:10px 14px;
-          font-size:13px; color:#ff6b6b; margin-bottom:18px;
+          font-size:13px; color:#FF3A3A; margin-bottom:18px;
         }
 
         .pm-btns { display:flex; gap:10px; }

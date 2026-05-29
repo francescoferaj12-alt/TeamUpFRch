@@ -130,13 +130,13 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{ background:'#061540', border:'1px solid rgba(255,255,255,.12)', borderRadius:20, padding:'1.75rem', width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.25rem' }}>
-          <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'1.3rem', letterSpacing:1, color:'#fff' }}>
+          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', letterSpacing:1, color:'#fff' }}>
             {experience ? tc.edit_title[lang] : tc.add_title[lang]}
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.5)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
         </div>
 
-        {error && <div style={{ background:'rgba(230,57,70,.15)', border:'1px solid rgba(230,57,70,.3)', borderRadius:8, padding:'8px 12px', fontSize:13, color:'#ff8590', marginBottom:'1rem' }}>{error}</div>}
+        {error && <div style={{ background:'rgba(255,58,58,.12)', border:'1px solid rgba(255,58,58,.3)', borderRadius:8, padding:'8px 12px', fontSize:13, color:'#FF3A3A', marginBottom:'1rem' }}>{error}</div>}
 
         <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
           <div>
@@ -192,7 +192,7 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
           {/* Current toggle */}
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <input type="checkbox" id="is-current" checked={isCurrent} onChange={e => setIsCurrent(e.target.checked)}
-              style={{ width:16, height:16, accentColor:'#e63946', cursor:'pointer' }} />
+              style={{ width:16, height:16, accentColor:'#FF3A3A', cursor:'pointer' }} />
             <label htmlFor="is-current" style={{ fontSize:13, color:'rgba(255,255,255,.75)', cursor:'pointer', userSelect:'none' }}>
               {tc.is_current[lang]}
             </label>
@@ -257,13 +257,13 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
 
         <div style={{ display:'flex', gap:8, marginTop:'1.25rem' }}>
           <button onClick={handleSave} disabled={saving}
-            style={{ flex:1, background:'#e63946', color:'#fff', border:'none', borderRadius:9, padding:'11px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity:saving?.7:1 }}>
+            style={{ flex:1, background:'#FF3A3A', color:'#fff', border:'none', borderRadius:9, padding:'11px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity:saving?.7:1 }}>
             {saving ? tc.saving[lang] : tc.save[lang]}
           </button>
           {experience && onDeleted && (
             <button onClick={handleDelete}
-              style={{ background:'rgba(230,57,70,.12)', color:'#e63946', border:'1px solid rgba(230,57,70,.3)', borderRadius:9, padding:'11px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
-              🗑️
+              style={{ background:'rgba(255,58,58,.12)', color:'#FF3A3A', border:'1px solid rgba(255,58,58,.3)', borderRadius:9, padding:'11px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center' }}>
+              <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </button>
           )}
           <button onClick={onClose}

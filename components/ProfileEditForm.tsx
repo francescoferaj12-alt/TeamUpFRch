@@ -107,11 +107,11 @@ function renderMarkdown(text: string): string {
 
 // ── Char-counter zones ────────────────────────────────────────────────
 function charZone(n: number, lang: Lang) {
-  if (n < 100)  return { color: '#ff6b6b', msg: t.profil.char_too_short[lang],  pct: Math.min(n/1500,1) }
+  if (n < 100)  return { color: '#FF3A3A', msg: t.profil.char_too_short[lang],  pct: Math.min(n/1500,1) }
   if (n < 300)  return { color: '#ffb84a', msg: t.profil.char_keep_going[lang], pct: Math.min(n/1500,1) }
   if (n <= 800) return { color: '#4cdb7a', msg: t.profil.char_perfect[lang],    pct: Math.min(n/1500,1) }
   if (n <= 1000)return { color: '#ffb84a', msg: t.profil.char_almost_max[lang], pct: Math.min(n/1500,1) }
-  return            { color: '#ff6b6b', msg: t.profil.char_too_long[lang],  pct: Math.min(n/1500,1) }
+  return            { color: '#FF3A3A', msg: t.profil.char_too_long[lang],  pct: Math.min(n/1500,1) }
 }
 
 // ── Completion calculation ────────────────────────────────────────────
@@ -231,7 +231,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [clubTeamsCount, setClubTeamsCount] = useState((profile as any).club_teams_count != null ? String((profile as any).club_teams_count) : '')
   const [clubStadiumName, setClubStadiumName] = useState((profile as any).club_stadium_name || '')
   const [clubStadiumAddress, setClubStadiumAddress] = useState((profile as any).club_stadium_address || '')
-  const [clubColorPrimary, setClubColorPrimary] = useState((profile as any).club_color_primary || '#e63946')
+  const [clubColorPrimary, setClubColorPrimary] = useState((profile as any).club_color_primary || '#FF3A3A')
   const [clubColorSecondary, setClubColorSecondary] = useState((profile as any).club_color_secondary || '#ffffff')
   const [clubCategories, setClubCategories] = useState<string[]>(parseList((profile as any).club_categories))
 
@@ -489,7 +489,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             <div style={{ display:'flex', gap:8 }}>
               {(['homme','femme'] as const).map(g => (
                 <button key={g} type="button" onClick={() => { setGenre(g); setLigue('') }}
-                  className="pe-multi-chip" style={{ flex:1, ...(genre === g ? { borderColor:'#e63946', background:'rgba(230,57,70,0.2)', color:'white' } : {}) }}>
+                  className="pe-multi-chip" style={{ flex:1, ...(genre === g ? { borderColor:'#FF3A3A', background:'rgba(255,58,58,0.2)', color:'white' } : {}) }}>
                   {g === 'homme' ? t.profil.genre_homme[lang] : t.profil.genre_femme[lang]}
                 </button>
               ))}
@@ -713,7 +713,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     if (role !== 'player') return null
     return (
       <Section title={t.profil.sec_stats[lang]} desc={t.profil.sec_stats_desc[lang]} defaultOpen={false} lang={lang}>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'#3a8cff' }}>{t.profil.current_season[lang]}</div>
+        <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'#3a8cff' }}>{t.profil.current_season[lang]}</div>
         <div className="form-grid-3" style={{ marginBottom:18 }}>
           {[
             { v: goals, set: setGoals, label: t.profil.goals[lang] },
@@ -726,7 +726,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             </div>
           ))}
         </div>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'rgba(255,255,255,0.45)' }}>{t.profil.prev_season[lang]}</div>
+        <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'rgba(255,255,255,0.45)' }}>{t.profil.prev_season[lang]}</div>
         <div className="form-grid-3">
           {[
             { v: goalsPrev, set: setGoalsPrev, label: t.profil.goals[lang] },
@@ -757,13 +757,13 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
           <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:16 }}>
             {coachCertificates.map((cert, i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:10, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.2)', borderRadius:9, padding:'9px 14px' }}>
-                <span style={{ fontSize:16 }}>🎓</span>
+                <svg viewBox="0 0 24 24" width={16} height={16} fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                 <span style={{ flex:1, fontWeight:600, fontSize:14, color:'#fff' }}>{cert.name}</span>
                 {cert.year && <span style={{ fontSize:12, color:'rgba(255,255,255,.45)', fontWeight:600 }}>{cert.year}</span>}
                 <button
                   type="button"
                   onClick={() => setCoachCertificates(prev => prev.filter((_, j) => j !== i))}
-                  style={{ background:'rgba(230,57,70,.15)', border:'1px solid rgba(230,57,70,.3)', color:'#e63946', borderRadius:6, padding:'4px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+                  style={{ background:'rgba(255,58,58,.12)', border:'1px solid rgba(255,58,58,.3)', color:'#FF3A3A', borderRadius:6, padding:'4px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
                 >✕</button>
               </div>
             ))}
@@ -1048,8 +1048,9 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       </div>
 
       {saveError && (
-        <div style={{ background:'rgba(230,57,70,0.12)', border:'1px solid rgba(230,57,70,0.3)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#ff6b6b', marginBottom:14 }}>
-          ❌ {saveError}
+        <div style={{ background:'rgba(255,58,58,0.1)', border:'1px solid rgba(255,58,58,0.3)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#FF3A3A', marginBottom:14, display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ width:7, height:7, borderRadius:'50%', background:'#FF3A3A', flexShrink:0 }} />
+          {saveError}
         </div>
       )}
 

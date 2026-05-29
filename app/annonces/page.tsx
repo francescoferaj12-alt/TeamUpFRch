@@ -624,7 +624,7 @@ export default function AnnoncesPage() {
         }
         .an-modal-textarea:focus { border-color:rgba(255,58,58,.5); }
         .an-modal-textarea::placeholder { color:rgba(255,255,255,.3); }
-        .an-modal-error { color:#ff6b6b; font-size:13px; margin-bottom:.75rem; }
+        .an-modal-error { color:#FF3A3A; font-size:13px; margin-bottom:.75rem; }
         .an-modal-btns { display:flex; gap:8px; }
         .an-modal-submit {
           flex:1; background:#FF3A3A; color:#fff; border:none; border-radius:10px;
