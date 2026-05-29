@@ -6,6 +6,15 @@ import { supabase } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 
+const Svg = ({ children, size = 18, ...p }: any) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+    {children}
+  </svg>
+)
+const IcoMail  = ({ s = 32 }: { s?: number }) => <Svg size={s} strokeWidth="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></Svg>
+const IcoCheck = ({ s = 14 }: { s?: number }) => <Svg size={s} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></Svg>
+
 export default function VerifyEmailPendingPage() {
   const { lang } = useLang()
   const [email, setEmail] = useState('')
@@ -49,18 +58,18 @@ export default function VerifyEmailPendingPage() {
   }
 
   return (
-    <div style={{ background: '#030a24', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', fontFamily: 'inherit' }}>
+    <div style={{ background: '#081434', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', fontFamily: 'inherit' }}>
       <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}`}</style>
 
       <div style={{ width: '100%', maxWidth: 460, animation: 'fadeIn .5s ease both' }}>
         {/* Card */}
         <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 24, padding: '2.5rem 2rem', textAlign: 'center' }}>
           {/* Icon */}
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(230,57,70,.12)', border: '2px solid rgba(230,57,70,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '2rem' }}>
-            ✉️
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,58,58,.1)', border: '2px solid rgba(255,58,58,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#FF3A3A' }}>
+            <IcoMail s={32} />
           </div>
 
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2rem', letterSpacing: 1, color: '#fff', marginBottom: '.75rem' }}>
+          <div style={{ fontFamily: "'Russo One', sans-serif", fontSize: '2rem', letterSpacing: 1, color: '#fff', marginBottom: '.75rem' }}>
             {t.login.verify_pending_title[lang]}
           </div>
 
@@ -69,7 +78,7 @@ export default function VerifyEmailPendingPage() {
           </p>
 
           {email && (
-            <div style={{ background: 'rgba(230,57,70,.08)', border: '1px solid rgba(230,57,70,.2)', borderRadius: 10, padding: '10px 16px', marginBottom: '1.5rem', fontSize: 14, color: '#e63946', fontWeight: 600, wordBreak: 'break-all' }}>
+            <div style={{ background: 'rgba(255,58,58,.08)', border: '1px solid rgba(255,58,58,.2)', borderRadius: 10, padding: '10px 16px', marginBottom: '1.5rem', fontSize: 14, color: '#FF3A3A', fontWeight: 600, wordBreak: 'break-all' }}>
               {email}
             </div>
           )}
@@ -80,13 +89,13 @@ export default function VerifyEmailPendingPage() {
 
           {/* Sent banner */}
           {sent && (
-            <div style={{ background: 'rgba(76,219,122,.1)', border: '1px solid rgba(76,219,122,.3)', borderRadius: 10, padding: '10px 16px', marginBottom: '1rem', fontSize: 13, color: '#4cdb7a', fontWeight: 600 }}>
-              ✓ {t.login.resend_confirm_sent[lang]}
+            <div style={{ background: 'rgba(46,210,127,.1)', border: '1px solid rgba(46,210,127,.3)', borderRadius: 10, padding: '10px 16px', marginBottom: '1rem', fontSize: 13, color: '#2ED27F', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <IcoCheck s={13} />{t.login.resend_confirm_sent[lang]}
             </div>
           )}
 
           {error && (
-            <div style={{ background: 'rgba(230,57,70,.1)', border: '1px solid rgba(230,57,70,.3)', borderRadius: 10, padding: '10px 16px', marginBottom: '1rem', fontSize: 13, color: '#ff6b6b' }}>
+            <div style={{ background: 'rgba(255,58,58,.1)', border: '1px solid rgba(255,58,58,.3)', borderRadius: 10, padding: '10px 16px', marginBottom: '1rem', fontSize: 13, color: '#FF3A3A' }}>
               {error}
             </div>
           )}
@@ -97,7 +106,7 @@ export default function VerifyEmailPendingPage() {
             disabled={cooldown > 0 || !email}
             style={{
               width: '100%', padding: '13px', borderRadius: 12, border: 'none',
-              background: cooldown > 0 ? 'rgba(255,255,255,.06)' : '#e63946',
+              background: cooldown > 0 ? 'rgba(255,255,255,.06)' : '#FF3A3A',
               color: cooldown > 0 ? 'rgba(255,255,255,.4)' : '#fff',
               fontWeight: 700, fontSize: 15, cursor: cooldown > 0 ? 'not-allowed' : 'pointer',
               fontFamily: 'inherit', marginBottom: '1rem', transition: 'background .2s',
