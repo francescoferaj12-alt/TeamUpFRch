@@ -878,7 +878,7 @@ export const t = {
     apropos_link: { fr: 'À propos', de: 'Über uns' },
     privacy_link: { fr: 'Confidentialité', de: 'Datenschutz' },
     cgu_link: { fr: 'CGU', de: 'Nutzungsbedingungen' },
-    copyright: { fr: '© 2025 TeamUpFR —', de: '© 2025 TeamUpFR —' },
+    copyright: { fr: `© ${new Date().getFullYear()} TeamUpFR —`, de: `© ${new Date().getFullYear()} TeamUpFR —` },
   },
 }
 
