@@ -271,12 +271,6 @@ export default function ClubsPage() {
                       </span>
                       {(club as any).club_verification_status === 'approved' && <VerifiedBadge size={15} />}
                     </div>
-                    {(club as any).club_verification_status === 'approved' && (
-                      <div style={{ display:'inline-flex', alignItems:'center', gap:4, background:'rgba(46,210,127,.12)', border:'1px solid rgba(46,210,127,.3)', color:'#2ED27F', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:999 }}>
-                        <IcoCheck s={10} />
-                        {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
-                      </div>
-                    )}
                   </div>
 
                   {/* Meta rows */}

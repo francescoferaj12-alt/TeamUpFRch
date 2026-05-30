@@ -400,11 +400,6 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
             ? <VerifiedBadge size={15} />
             : p.verified && <VerifiedBadge size={15} />}
         </div>
-        {p.role === 'club' && p.club_verification_status === 'approved' && (
-          <div style={{ display:'inline-flex', alignItems:'center', gap:4, background:'rgba(46,210,127,.12)', border:'1px solid rgba(46,210,127,.3)', color:'#2ED27F', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:999, marginBottom:4 }}>
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
-          </div>
         )}
         {subLine && <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', marginTop:2 }}>{subLine}</p>}
       </div>

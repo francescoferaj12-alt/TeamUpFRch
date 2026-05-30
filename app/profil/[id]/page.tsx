@@ -175,13 +175,6 @@ export default function PublicProfilPage() {
                   {roleIcon(13)} {coachBadge || profile.position || roleLabel}
                 </span>
 
-                {/* Club verified */}
-                {profile.role === 'club' && profile.club_verification_status === 'approved' && (
-                  <span style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(46,210,127,.12)', border:'1px solid rgba(46,210,127,.35)', color:'#2ED27F', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100 }}>
-                    <span style={{ width:7, height:7, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
-                    {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
-                  </span>
-                )}
 
                 {/* Ligue */}
                 {profile.ligue && (

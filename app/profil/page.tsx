@@ -550,12 +550,6 @@ export default function ProfilPage() {
                 <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
-              {profile.role === 'club' && profile.club_verification_status === 'approved' && (
-                <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#2ED27F', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
-                  <span style={{ width:7, height:7, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
-                  {lang === 'fr' ? 'Club Vérifié' : 'Verifizierter Verein'}
-                </span>
-              )}
             </div>
 
             {strengthKeys.length > 0 && (
