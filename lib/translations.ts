@@ -21,8 +21,8 @@ export const t = {
   // HOMEPAGE
   home: {
     badge: { fr: 'Canton de Fribourg · Suisse', de: 'Kanton Freiburg · Schweiz' },
-    title1: { fr: "IT'S TIME TO", de: 'ES IST ZEIT ZU' },
-    title2: { fr: 'PLAY', de: 'SPIELEN' },
+    title1: { fr: "IT'S TIME TO", de: "IT'S TIME TO" },
+    title2: { fr: 'PLAY', de: 'PLAY' },
     motto: { fr: 'Ton équipe, ton avenir', de: 'Dein Team, deine Zukunft' },
     desc: { fr: 'La première plateforme qui connecte joueurs, coachs et clubs de football amateurs du canton de Fribourg.', de: 'Die erste Plattform, die Spieler, Trainer und Vereine des Amateurfussballs im Kanton Freiburg verbindet.' },
     cta_primary: { fr: 'Créer mon profil', de: 'Profil erstellen' },
