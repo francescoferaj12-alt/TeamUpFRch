@@ -72,6 +72,22 @@ const CATEGORIES = [
   'cat_seniors_h','cat_seniors_f','cat_youth','cat_juniors_a','cat_juniors_b','cat_juniors_c','cat_juniors_d','cat_juniores_f','cat_veterans',
 ] as const
 
+const Svg = ({ children, size = 18, ...p }: any) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+    {children}
+  </svg>
+)
+const IcoX      = ({ s = 12 }: { s?: number }) => <Svg size={s}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Svg>
+const IcoWarn   = ({ s = 13 }: { s?: number }) => <Svg size={s}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></Svg>
+const IcoGlobe  = ({ s = 12 }: { s?: number }) => <Svg size={s}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></Svg>
+const IcoCamera = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></Svg>
+const IcoPhone  = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></Svg>
+const IcoMail   = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></Svg>
+const IcoChat   = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Svg>
+const IcoBook   = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></Svg>
+const IcoVideo  = ({ s = 12 }: { s?: number }) => <Svg size={s}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></Svg>
+
 function getStrengthsByRole(role: string) {
   if (role === 'coach') return STRENGTHS_COACH
   if (role === 'club') return STRENGTHS_CLUB
@@ -107,11 +123,11 @@ function renderMarkdown(text: string): string {
 
 // ── Char-counter zones ────────────────────────────────────────────────
 function charZone(n: number, lang: Lang) {
-  if (n < 100)  return { color: '#ff6b6b', msg: t.profil.char_too_short[lang],  pct: Math.min(n/1500,1) }
-  if (n < 300)  return { color: '#ffb84a', msg: t.profil.char_keep_going[lang], pct: Math.min(n/1500,1) }
-  if (n <= 800) return { color: '#4cdb7a', msg: t.profil.char_perfect[lang],    pct: Math.min(n/1500,1) }
-  if (n <= 1000)return { color: '#ffb84a', msg: t.profil.char_almost_max[lang], pct: Math.min(n/1500,1) }
-  return            { color: '#ff6b6b', msg: t.profil.char_too_long[lang],  pct: Math.min(n/1500,1) }
+  if (n < 100)  return { color: '#FF3A3A', msg: t.profil.char_too_short[lang],  pct: Math.min(n/1500,1) }
+  if (n < 300)  return { color: '#FF9A3A', msg: t.profil.char_keep_going[lang], pct: Math.min(n/1500,1) }
+  if (n <= 800) return { color: '#2ED27F', msg: t.profil.char_perfect[lang],    pct: Math.min(n/1500,1) }
+  if (n <= 1000)return { color: '#FF9A3A', msg: t.profil.char_almost_max[lang], pct: Math.min(n/1500,1) }
+  return            { color: '#FF3A3A', msg: t.profil.char_too_long[lang],  pct: Math.min(n/1500,1) }
 }
 
 // ── Completion calculation ────────────────────────────────────────────
@@ -450,7 +466,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               <label>{t.profil.club_society_name[lang]}</label>
               <input type="text" value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Mon Club" />
               {clubName && clubName !== profile.club_name && (
-                <div className="field-help" style={{ color:'#ffb84a' }}>⚠ {lang === 'fr' ? 'Le statut « vérifié » sera réinitialisé.' : 'Der „verifiziert"-Status wird zurückgesetzt.'}</div>
+                <div className="field-help" style={{ color:'#FF9A3A', display:'flex', alignItems:'center', gap:5 }}><IcoWarn s={13} /> {lang === 'fr' ? 'Le statut « vérifié » sera réinitialisé.' : 'Der „verifiziert"-Status wird zurückgesetzt.'}</div>
               )}
             </div>
             <div className="form-group">
@@ -713,7 +729,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     if (role !== 'player') return null
     return (
       <Section title={t.profil.sec_stats[lang]} desc={t.profil.sec_stats_desc[lang]} defaultOpen={false} lang={lang}>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'#3a8cff' }}>{t.profil.current_season[lang]}</div>
+        <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'#3A7AFF' }}>{t.profil.current_season[lang]}</div>
         <div className="form-grid-3" style={{ marginBottom:18 }}>
           {[
             { v: goals, set: setGoals, label: t.profil.goals[lang] },
@@ -747,7 +763,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     if (role !== 'coach') return null
     return (
       <Section
-        title={lang === 'fr' ? '🎓 Certificats & Diplômes' : '🎓 Zertifikate & Diplome'}
+        title={lang === 'fr' ? 'Certificats & Diplômes' : 'Zertifikate & Diplome'}
         desc={lang === 'fr' ? 'Ajoute tes licences UEFA, diplômes SFV et autres certifications.' : 'Füge deine UEFA-Lizenzen, SFV-Diplome und andere Zertifikate hinzu.'}
         defaultOpen={false}
         lang={lang}
@@ -763,8 +779,8 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
                 <button
                   type="button"
                   onClick={() => setCoachCertificates(prev => prev.filter((_, j) => j !== i))}
-                  style={{ background:'rgba(230,57,70,.15)', border:'1px solid rgba(230,57,70,.3)', color:'#e63946', borderRadius:6, padding:'4px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
-                >✕</button>
+                  style={{ background:'rgba(255,58,58,.12)', border:'1px solid rgba(255,58,58,.3)', color:'#FF3A3A', borderRadius:999, padding:'4px 10px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:3 }}
+                ><IcoX s={11} /></button>
               </div>
             ))}
           </div>
@@ -804,7 +820,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               setCoachCertificates(prev => [...prev, { name: newCertName.trim(), year: newCertYear.trim() }])
               setNewCertName(''); setNewCertYear('')
             }}
-            style={{ height:42, background: newCertName.trim() ? 'rgba(58,140,255,.2)' : 'rgba(255,255,255,.05)', border:`1px solid ${newCertName.trim() ? 'rgba(58,140,255,.4)' : 'rgba(255,255,255,.1)'}`, color: newCertName.trim() ? '#7eb6ff' : 'rgba(255,255,255,.3)', borderRadius:9, padding:'0 16px', fontWeight:700, fontSize:14, cursor: newCertName.trim() ? 'pointer' : 'not-allowed', fontFamily:'inherit', whiteSpace:'nowrap', marginTop:20 }}
+            style={{ height:42, background: newCertName.trim() ? 'rgba(58,122,255,.2)' : 'rgba(255,255,255,.05)', border:`1px solid ${newCertName.trim() ? 'rgba(58,122,255,.4)' : 'rgba(255,255,255,.1)'}`, color: newCertName.trim() ? '#7eb6ff' : 'rgba(255,255,255,.3)', borderRadius:999, padding:'0 16px', fontWeight:700, fontSize:14, cursor: newCertName.trim() ? 'pointer' : 'not-allowed', fontFamily:'inherit', whiteSpace:'nowrap', marginTop:20 }}
           >
             + {lang === 'fr' ? 'Ajouter' : 'Hinzufügen'}
           </button>
@@ -951,29 +967,29 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             </div>
           )}
           <div className="form-group">
-            <label>🌐 {lang === 'fr' ? 'Site web' : 'Webseite'}</label>
+            <label style={{ display:'flex', alignItems:'center', gap:5 }}><IcoGlobe s={12} /> {lang === 'fr' ? 'Site web' : 'Webseite'}</label>
             <input type="url" value={clubWebsite} onChange={e => setClubWebsite(e.target.value)} placeholder="https://monclub.ch" />
           </div>
           <div className="form-group">
-            <label>📷 Instagram</label>
+            <label style={{ display:'flex', alignItems:'center', gap:5 }}><IcoCamera s={12} /> Instagram</label>
             <input value={clubInstagram} onChange={e => setClubInstagram(e.target.value)} placeholder="https://instagram.com/…" />
           </div>
           <div className="form-group">
-            <label>📘 Facebook</label>
+            <label style={{ display:'flex', alignItems:'center', gap:5 }}><IcoBook s={12} /> Facebook</label>
             <input value={clubFacebook} onChange={e => setClubFacebook(e.target.value)} placeholder="https://facebook.com/…" />
           </div>
           <div className="form-group">
-            <label>💬 WhatsApp</label>
+            <label style={{ display:'flex', alignItems:'center', gap:5 }}><IcoChat s={12} /> WhatsApp</label>
             <input type="tel" value={clubWhatsapp} onChange={e => setClubWhatsapp(e.target.value)} placeholder="+41 79 000 00 00" />
           </div>
           {isClub && (
             <>
               <div className="form-group">
-                <label>📞 {lang === 'fr' ? 'Téléphone public' : 'Öffentliches Telefon'}</label>
+                <label style={{ display:'flex', alignItems:'center', gap:5 }}><IcoPhone s={12} /> {lang === 'fr' ? 'Téléphone public' : 'Öffentliches Telefon'}</label>
                 <input type="tel" value={clubPhonePublic} onChange={e => setClubPhonePublic(e.target.value)} placeholder="+41 26 000 00 00" />
               </div>
               <div className="form-group">
-                <label>✉️ {lang === 'fr' ? 'Email public' : 'Öffentliche E-Mail'}</label>
+                <label style={{ display:'flex', alignItems:'center', gap:5 }}><IcoMail s={12} /> {lang === 'fr' ? 'Email public' : 'Öffentliche E-Mail'}</label>
                 <input type="email" value={clubEmailPublic} onChange={e => setClubEmailPublic(e.target.value)} placeholder="contact@monclub.ch" />
               </div>
             </>
@@ -1003,8 +1019,8 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     if (role === 'club') return null
     return (
       <Section title={t.profil.sec_videos[lang]} desc={t.profil.sec_videos_desc[lang]} defaultOpen={false} lang={lang}>
-        <p style={{ fontSize:12, color:'rgba(255,255,255,0.45)', marginBottom:14 }}>
-          📱 {lang === 'fr' ? 'Choisis depuis ta galerie — ou colle un lien YouTube' : 'Aus deiner Galerie wählen — oder einen YouTube-Link einfügen'}
+        <p style={{ fontSize:12, color:'rgba(255,255,255,0.45)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}>
+          <IcoVideo s={12} /> {lang === 'fr' ? 'Choisis depuis ta galerie — ou colle un lien YouTube' : 'Aus deiner Galerie wählen — oder einen YouTube-Link einfügen'}
         </p>
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {[
@@ -1019,7 +1035,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               placeholder={`${f.label} — YouTube ou vidéo`}
               profileId={profile.id}
               index={f.idx}
-              inpSt={{ width:'100%', background:'rgba(0,0,0,0.3)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, padding:'11px 13px', color:'#fff', fontSize:14, fontFamily:'inherit', boxSizing:'border-box' }}
+              inpSt={{ width:'100%', background:'rgba(0,0,0,0.3)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, padding:'11px 13px', color:'#fff', fontSize:14, fontFamily:'inherit', boxSizing:'border-box' }}
             />
           ))}
         </div>

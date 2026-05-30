@@ -54,6 +54,14 @@ const CONTACT_ROLE_OPTIONS = [
 
 const YEARS = Array.from({ length: 60 }, (_, i) => String(new Date().getFullYear() - i))
 
+const Svg = ({ children, size = 18, ...p }: any) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+    {children}
+  </svg>
+)
+const IcoCamera = ({ s = 40 }: { s?: number }) => <Svg size={s} stroke="rgba(255,255,255,.4)"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></Svg>
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const ALL_LIGUES = ligues.flatMap(g => g.items)
@@ -196,7 +204,7 @@ function CareerEditor({
             <input type="checkbox" checked={entry.is_current} onChange={e => update(i, 'is_current', e.target.checked)} />
             {o.career_current[lang]}
           </label>
-          <button onClick={() => removeEntry(i)} style={{ background: 'none', border: '1px solid rgba(230,57,70,.4)', color: '#e63946', borderRadius: 8, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <button onClick={() => removeEntry(i)} style={{ background: 'none', border: '1px solid rgba(255,58,58,.4)', color: '#FF3A3A', borderRadius: 999, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
             {o.career_remove[lang]}
           </button>
         </div>
@@ -250,18 +258,18 @@ function PhotoStep({
     <div style={{ textAlign: 'center' }}>
       <div
         onClick={() => !uploading && inputRef.current?.click()}
-        style={{ width: 120, height: 120, borderRadius: '50%', background: avatarUrl ? 'none' : 'rgba(255,255,255,.08)', border: '2px dashed rgba(255,255,255,.2)', margin: '0 auto 1rem', overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}
+        style={{ width: 120, height: 120, borderRadius: '50%', background: avatarUrl ? 'none' : 'rgba(255,255,255,.08)', border: '2px dashed rgba(255,255,255,.2)', margin: '0 auto 1rem', overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
         {avatarUrl
           ? <img src={avatarSrc(avatarUrl)!} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : '📷'
+          : <IcoCamera s={40} />
         }
       </div>
       <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
       <button
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        style={{ padding: '10px 24px', borderRadius: 10, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.06)', color: '#fff', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}
+        style={{ padding: '10px 24px', borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.06)', color: '#fff', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}
       >
         {uploading ? o.photo_uploading[lang] : avatarUrl ? o.photo_done[lang] : o.photo_upload[lang]}
       </button>
@@ -415,8 +423,8 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <div style={{ background: '#030a24', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid rgba(255,255,255,.1)', borderTopColor: '#3a8cff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+      <div style={{ background: '#081434', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 36, height: 36, border: '3px solid rgba(255,255,255,.1)', borderTopColor: '#FF3A3A', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     )
@@ -427,7 +435,7 @@ export default function OnboardingPage() {
   const isLast = step === LAST_STEP[role]
 
   return (
-    <div style={{ background: '#030a24', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1.25rem', fontFamily: 'inherit' }}>
+    <div style={{ background: '#081434', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1.25rem', fontFamily: 'inherit' }}>
       <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}`}</style>
 
       {/* Progress */}
@@ -447,7 +455,7 @@ export default function OnboardingPage() {
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div key={i} style={{
               flex: 1, height: 3, borderRadius: 100,
-              background: i <= step ? '#3a8cff' : 'rgba(255,255,255,.12)',
+              background: i <= step ? '#FF3A3A' : 'rgba(255,255,255,.12)',
               transition: 'background .3s',
             }} />
           ))}
@@ -473,7 +481,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => setStep(step - 1)}
                 disabled={saving}
-                style={{ background: 'none', border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.6)', borderRadius: 10, padding: '10px 18px', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ background: 'none', border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.6)', borderRadius: 999, padding: '10px 18px', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 {o.back[lang]}
               </button>
@@ -490,7 +498,7 @@ export default function OnboardingPage() {
             <button
               onClick={handleNext}
               disabled={saving}
-              style={{ background: '#3a8cff', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}
+              style={{ background: '#FF3A3A', color: '#fff', border: 'none', borderRadius: 999, padding: '11px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: saving ? .6 : 1, boxShadow: '0 4px 14px rgba(255,58,58,.35)' }}
             >
               {saving ? o.saving[lang] : isLast ? o.finish[lang] : o.next[lang]}
             </button>

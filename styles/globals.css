@@ -5,8 +5,8 @@
   /* ── Dark design system (new) ── */
   --blue-deep:   #0a1f5c;
   --blue-darker: #061540;
-  --blue-night:  #030a24;
-  --red-accent:  #e63946;
+  --blue-night:  #081434;
+  --red-accent:  #FF3A3A;
   --red-bright:  #ff2d4a;
 
   /* ── Legacy variables (inner pages) ── */
@@ -60,7 +60,7 @@ select option[disabled] {
 }
 
 select option:checked {
-  background-color: #e63946 !important;
+  background-color: #FF3A3A !important;
   color: #ffffff !important;
 }
 
@@ -680,7 +680,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   margin: 0 auto;
 }
 .pe-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Russo One', sans-serif;
   font-size: 42px;
   margin-bottom: 8px;
   color: white;
@@ -719,7 +719,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .pe-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #e63946, #ff7a85);
+  background: #FF3A3A;
   border-radius: 100px;
   transition: width 0.4s ease;
 }
@@ -743,7 +743,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .form-section-label {
   display: inline-block;
-  color: #e63946;
+  color: #FF3A3A;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -758,10 +758,10 @@ textarea.input { resize: vertical; min-height: 80px; }
   left: 0; top: 50%;
   transform: translateY(-50%);
   width: 14px; height: 2px;
-  background: #e63946;
+  background: #FF3A3A;
 }
 .form-section-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Russo One', sans-serif;
   font-size: 26px;
   color: white;
   letter-spacing: 0.01em;
@@ -836,8 +836,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #e63946;
-  box-shadow: 0 0 0 3px rgba(230,57,70,0.18);
+  border-color: #FF3A3A;
+  box-shadow: 0 0 0 3px rgba(255,58,58,0.18);
   background: rgba(0,0,0,0.4);
 }
 .form-group input::placeholder,
@@ -850,7 +850,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   line-height: 1.55;
 }
 .form-group select option {
-  background: #061540;
+  background: #0D1F4A;
   color: #fff;
 }
 .form-group input[type="color"] {
@@ -882,8 +882,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   color: white;
 }
 .pe-multi-chip.active {
-  background: rgba(230,57,70,0.2);
-  border-color: #e63946;
+  background: rgba(255,58,58,0.2);
+  border-color: #FF3A3A;
   color: white;
 }
 
@@ -902,8 +902,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   gap: 6px;
 }
 .pe-guided-chip {
-  background: rgba(58,140,255,0.1);
-  border: 1px solid rgba(58,140,255,0.3);
+  background: rgba(58,122,255,0.1);
+  border: 1px solid rgba(58,122,255,0.3);
   color: #7eb6ff;
   border-radius: 100px;
   padding: 6px 13px;
@@ -914,7 +914,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   transition: all 0.15s;
 }
 .pe-guided-chip:hover {
-  background: rgba(58,140,255,0.2);
+  background: rgba(58,122,255,0.2);
   color: white;
   transform: translateY(-1px);
 }
@@ -968,7 +968,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   transition: all 0.15s;
 }
 .pe-tab.active {
-  background: rgba(230,57,70,0.2);
+  background: rgba(255,58,58,0.2);
   color: white;
 }
 
@@ -994,7 +994,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   position: sticky;
   bottom: 16px;
   z-index: 10;
-  background: rgba(3,10,36,0.92);
+  background: rgba(8,20,52,0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.1);
@@ -1018,19 +1018,19 @@ textarea.input { resize: vertical; min-height: 80px; }
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4cdb7a;
+  background: #2ED27F;
 }
-.pe-savebar-status.saving .dot { background: #ffb84a; animation: pulse 1.2s infinite; }
-.pe-savebar-status.error .dot { background: #ff6b6b; }
+.pe-savebar-status.saving .dot { background: #FF9A3A; animation: pulse 1.2s infinite; }
+.pe-savebar-status.error .dot { background: #FF3A3A; }
 .pe-savebar-actions {
   display: flex;
   gap: 8px;
 }
 .pe-btn-save {
-  background: #e63946;
+  background: #FF3A3A;
   color: white;
   border: none;
-  border-radius: 9px;
+  border-radius: 999px;
   padding: 9px 18px;
   font-size: 13px;
   font-weight: 700;
@@ -1042,7 +1042,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.75);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 9px;
+  border-radius: 999px;
   padding: 9px 18px;
   font-size: 13px;
   font-weight: 600;
