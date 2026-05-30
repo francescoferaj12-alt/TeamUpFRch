@@ -7,6 +7,7 @@ import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import { t } from '../../lib/translations'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import ClubCrest from '../../components/ClubCrest'
 
 // ── SVG primitives ────────────────────────────────────────────────────────────
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -113,11 +114,6 @@ export default function ClubsPage() {
         .cb-card:hover::before { opacity:1; }
         .cb-card:hover .cb-arr { transform:translateX(4px); }
         .cb-arr { transition:transform .3s; display:inline-flex; align-items:center; }
-        /* Blason crest */
-        .cb-crest { width:68px; height:68px; clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%); display:flex; align-items:center; justify-content:center; position:relative; font-family:'Russo One',sans-serif; font-size:15px; letter-spacing:.5px; color:#fff; flex-shrink:0; margin-bottom:18px; }
-        .cb-crest-inner { position:absolute; inset:3px; clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%); background:#0D1F4A; }
-        .cb-crest-txt { position:relative; z-index:1; }
-        .cb-crest img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
         /* Card buttons */
         .cb-btn-pri { flex:1; background:#FF3A3A; color:#fff; border:none; border-radius:10px; padding:9px 12px; font-size:12px; font-weight:600; text-align:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; transition:transform .25s,box-shadow .25s; font-family:inherit; letter-spacing:.3px; }
         .cb-btn-pri:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(255,58,58,.35); }
@@ -251,17 +247,7 @@ export default function ClubsPage() {
                     </div>
                   )}
 
-                  {/* Blason crest */}
-                  <div className="cb-crest" style={{ background: crestBg }}>
-                    {club.avatar_url ? (
-                      <img src={avatarSrc(club.avatar_url)!} alt={club.club_name || ''} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                    ) : (
-                      <>
-                        <span className="cb-crest-inner" />
-                        <span className="cb-crest-txt">{initials}</span>
-                      </>
-                    )}
-                  </div>
+                  <ClubCrest src={avatarSrc(club.avatar_url)} alt={club.club_name || ''} size={68} fallback={initials} />
 
                   {/* Name + verified */}
                   <div style={{ marginBottom:14 }}>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, avatarSrc } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import ClubCrest from '../../../components/ClubCrest'
 
 const ADMIN_EMAIL = 'teamupfr.ch@gmail.com'
 
@@ -249,11 +250,7 @@ function ClubCard({ club, busy, onApprove, onDelete }: {
     <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '1rem 1.25rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         {/* Avatar */}
-        <div style={{ width: 48, height: 48, borderRadius: 10, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', overflow: 'hidden', flexShrink: 0 }}>
-          {club.avatar_url
-            ? <img src={avatarSrc(club.avatar_url)!} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 9 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-            : '🏟️'}
-        </div>
+        <ClubCrest src={avatarSrc(club.avatar_url)} size={48} fallback="🏟️" />
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>

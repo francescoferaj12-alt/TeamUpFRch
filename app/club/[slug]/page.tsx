@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile, Annonce, avatarSrc } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
+import ClubCrest from '../../../components/ClubCrest'
 
 // ——— SVG helpers ————————————————————————————
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -142,14 +143,7 @@ export default function ClubPage() {
         <div className="cd-container">
           <div className="cd-hero-main">
 
-            {/* Blason crest */}
-            <div className="cd-crest" style={{ background: 'linear-gradient(135deg,#1a3a8a 0%,#0D1F4A 100%)' }}>
-              <div className="cd-crest-inner" />
-              {club.avatar_url
-                ? <img src={avatarSrc(club.avatar_url)!} alt={club.club_name || ''} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                : <span className="cd-crest-txt">{initials}</span>
-              }
-            </div>
+            <ClubCrest src={avatarSrc(club.avatar_url)} alt={club.club_name || ''} size={140} fallback={initials} />
 
             {/* Club info */}
             <div className="cd-info">
@@ -406,22 +400,6 @@ export default function ClubPage() {
           border-bottom:1px solid rgba(255,255,255,.12);
         }
 
-        /* Blason crest */
-        .cd-crest {
-          width:140px; height:156px;
-          clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%);
-          display:flex; align-items:center; justify-content:center;
-          font-family:'Russo One',sans-serif;
-          font-size:44px; color:#fff; letter-spacing:1px;
-          flex-shrink:0; position:relative; overflow:hidden;
-        }
-        .cd-crest-inner {
-          position:absolute; inset:4px;
-          clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%);
-          border:1px solid rgba(255,255,255,.18); pointer-events:none;
-        }
-        .cd-crest img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-        .cd-crest-txt { position:relative; z-index:1; }
 
         /* Tags */
         .cd-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
@@ -654,7 +632,6 @@ export default function ClubPage() {
         /* Responsive */
         @media (max-width:860px) {
           .cd-hero-main { grid-template-columns:1fr; text-align:center; gap:24px; }
-          .cd-crest { margin:0 auto; }
           .cd-tags  { justify-content:center; }
           .cd-hero-actions { align-items:center; flex-direction:row; justify-content:center; }
           .cd-about-grid { grid-template-columns:1fr; gap:32px; }

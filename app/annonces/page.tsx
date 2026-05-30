@@ -7,6 +7,7 @@ import { supabase, Annonce, Profile, avatarSrc } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
 import { useAuth } from '../../lib/auth-context'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import ClubCrest from '../../components/ClubCrest'
 import { relativeTime } from '../../lib/utils/time'
 import PostModal from '../../components/PostModal'
 
@@ -515,10 +516,6 @@ export default function AnnoncesPage() {
           font-family:'Russo One',sans-serif; font-size:13px; color:#fff;
           overflow:hidden; position:relative;
         }
-        .an-avatar.shield {
-          clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%);
-          border-radius:0;
-        }
         .an-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
         .an-avatar span { position:relative; z-index:1; }
         .an-author-info { flex:1; min-width:0; }
@@ -712,12 +709,15 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
 
       {/* Author */}
       <Link href={`/profil/${authorId}`} className="an-author">
-        <div className={`an-avatar${isClub ? ' shield' : ''}`} style={{ background: avatarUrl ? 'transparent' : grad }}>
-          {avatarUrl
-            ? <img src={avatarSrc(avatarUrl)!} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-            : <span>{initials}</span>
-          }
-        </div>
+        {isClub
+          ? <ClubCrest src={avatarSrc(avatarUrl)} size={40} fallback={initials} />
+          : <div className="an-avatar" style={{ background: avatarUrl ? 'transparent' : grad }}>
+              {avatarUrl
+                ? <img src={avatarSrc(avatarUrl)!} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                : <span>{initials}</span>
+              }
+            </div>
+        }
         <div className="an-author-info">
           <div className="an-author-name">
             {annonce.author_name}

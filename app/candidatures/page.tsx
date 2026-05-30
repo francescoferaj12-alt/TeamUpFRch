@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile, Application, Annonce } from '../../lib/supabase'
 import UserAvatar from '../../components/UserAvatar'
+import ClubCrest from '../../components/ClubCrest'
 import { useLang } from '../../lib/lang-context'
 import { t, Lang } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
@@ -119,8 +120,6 @@ const CAND_CSS = `
 .ca-card:hover { border-color:rgba(255,255,255,.2); transform:translateY(-2px); }
 @media(max-width:760px){ .ca-card { grid-template-columns:1fr; gap:16px; } }
 
-/* shield */
-.ca-shield { width:56px; height:64px; flex-shrink:0; clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%); display:flex; align-items:center; justify-content:center; font-family:'Russo One',sans-serif; font-size:13px; color:#fff; letter-spacing:.5px; }
 
 /* content */
 .ca-content { min-width:0; }
@@ -597,10 +596,7 @@ export default function CandidaturesPage() {
                     const isExpanded = expandedIds.has(a.id)
                     return (
                       <article key={a.id} className="ca-card">
-                        {/* Shield blason */}
-                        <div className="ca-shield" style={{ background: shieldGrad(clubName) }}>
-                          {shieldInit(clubName)}
-                        </div>
+                        <ClubCrest size={56} fallback={shieldInit(clubName)} />
 
                         {/* Content */}
                         <div className="ca-content">

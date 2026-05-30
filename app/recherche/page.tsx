@@ -7,6 +7,7 @@ import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import ClubCrest from '../../components/ClubCrest'
 import { useAuth } from '../../lib/auth-context'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
@@ -378,15 +379,18 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
       {/* Avatar + role badge */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:16 }}>
-        <div style={{ width:56, height:56, borderRadius:'50%', background:avatarBg, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Russo One',sans-serif", fontSize:17, color:'#fff', flexShrink:0, overflow:'hidden', position:'relative' }}>
-          {p.avatar_url
-            ? <img src={avatarSrc(p.avatar_url)!} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-            : initials
-          }
-          {p.available && (
-            <span style={{ position:'absolute', bottom:2, right:2, width:14, height:14, background:'#2ED27F', borderRadius:'50%', border:'3px solid #0D1F4A' }} />
-          )}
-        </div>
+        {p.role === 'club'
+          ? <ClubCrest src={avatarSrc(p.avatar_url)} alt={name} size={56} fallback={initials} />
+          : <div style={{ width:56, height:56, borderRadius:'50%', background:avatarBg, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Russo One',sans-serif", fontSize:17, color:'#fff', flexShrink:0, overflow:'hidden', position:'relative' }}>
+              {p.avatar_url
+                ? <img src={avatarSrc(p.avatar_url)!} alt={name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : initials
+              }
+              {p.available && (
+                <span style={{ position:'absolute', bottom:2, right:2, width:14, height:14, background:'#2ED27F', borderRadius:'50%', border:'3px solid #0D1F4A' }} />
+              )}
+            </div>
+        }
         <span style={{ ...roleBadgeStyle, fontSize:10, fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', padding:'5px 10px', borderRadius:999, whiteSpace:'nowrap' }}>
           {roleLabel}
         </span>

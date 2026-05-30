@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ClubCrest from './ClubCrest'
 import { CareerExperience } from '../lib/supabase'
 import { t } from '../lib/translations'
 import type { Lang } from '../lib/translations'
@@ -102,12 +103,7 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
               <div className="career-dot" />
 
               <div className="career-card-head">
-                <div className="career-shield">
-                  {exp.club_logo_url
-                    ? <img src={exp.club_logo_url} alt={exp.club_name} />
-                    : initials(exp.club_name)
-                  }
-                </div>
+                <ClubCrest src={exp.club_logo_url} alt={exp.club_name} size={46} fallback={initials(exp.club_name)} />
 
                 <div className="career-club-info">
                   <div className="career-club-name">

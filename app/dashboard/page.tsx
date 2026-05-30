@@ -8,6 +8,7 @@ import { ligues, zones, positions } from '../../lib/data'
 import { useLang } from '../../lib/lang-context'
 import { t, Lang } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
+import ClubCrest from '../../components/ClubCrest'
 import { relativeTime } from '../../lib/utils/time'
 import PostModal from '../../components/PostModal'
 
@@ -308,9 +309,7 @@ function RecommendedSection({ profile }: { profile: Profile }) {
             const grad = GRADS[a.author_name.charCodeAt(0) % GRADS.length]
             return (
               <Link key={a.id} href="/annonces" className="db-reco-row">
-                <div className="db-reco-shield shield" style={{ background: grad }}>
-                  <span>{initials}</span>
-                </div>
+                <ClubCrest size={40} fallback={initials} />
                 <div className="db-reco-content">
                   <div className="db-reco-club">{a.author_name}</div>
                   <div className="db-reco-title">{a.title}</div>
@@ -660,14 +659,18 @@ function ProfileSidebar({ profile, onShowSettings, lang }: {
 
   return (
     <div className="db-profile-card">
-      <div className={`db-profile-avatar${isClub ? ' shield' : ''}`}
-        style={{ background: profile.avatar_url ? 'transparent' : avatarGrad }}>
-        {profile.avatar_url
-          ? <img src={avatarSrc(profile.avatar_url)!} alt=""
-              onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-          : <span className="db-profile-initials">{initials}</span>}
-        {!isClub && <div className="db-online-dot" />}
-      </div>
+      {isClub
+        ? <div style={{ margin:'0 auto 16px', display:'flex', justifyContent:'center' }}>
+            <ClubCrest src={avatarSrc(profile.avatar_url)} size={96} fallback={initials} />
+          </div>
+        : <div className="db-profile-avatar" style={{ background: profile.avatar_url ? 'transparent' : avatarGrad }}>
+            {profile.avatar_url
+              ? <img src={avatarSrc(profile.avatar_url)!} alt=""
+                  onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+              : <span className="db-profile-initials">{initials}</span>}
+            <div className="db-online-dot" />
+          </div>
+      }
       <h3 className="db-profile-name">{displayName}</h3>
       <p className="db-profile-role">{roleLabel}{profile.position ? ` · ${profile.position}` : ''}</p>
 
@@ -1064,16 +1067,6 @@ const DB_CSS = `
   transition:border-color .3s,transform .3s cubic-bezier(.22,1,.36,1);
 }
 .db-reco-row:hover { border-color:rgba(255,58,58,.4); transform:translateX(4px); }
-.db-reco-shield {
-  width:44px; height:44px; border-radius:10px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Russo One',sans-serif; font-size:12px; color:#fff;
-}
-.db-reco-shield.shield {
-  clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%);
-  border-radius:0; width:40px; height:46px;
-}
-.db-reco-shield span { position:relative; z-index:1; }
 .db-reco-club { font-size:11px; letter-spacing:1.5px; color:#FF3A3A; text-transform:uppercase; font-weight:600; margin-bottom:2px; }
 .db-reco-title { font-weight:600; font-size:14px; margin-bottom:4px; }
 .db-reco-meta { font-size:11px; color:rgba(255,255,255,.55); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -1187,10 +1180,6 @@ const DB_CSS = `
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
 .db-profile-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.db-profile-avatar.shield {
-  clip-path:polygon(50% 0%,100% 14%,100% 60%,50% 100%,0% 60%,0% 14%);
-  border-radius:0; width:86px; height:96px;
-}
 .db-profile-initials { font-family:'Russo One',sans-serif; font-size:30px; color:#fff; position:relative; z-index:1; }
 .db-online-dot {
   position:absolute; bottom:6px; right:6px; width:16px; height:16px;
