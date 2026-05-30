@@ -87,6 +87,7 @@ const IcoMail   = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M4 4h16
 const IcoChat   = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Svg>
 const IcoBook   = ({ s = 12 }: { s?: number }) => <Svg size={s}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></Svg>
 const IcoVideo  = ({ s = 12 }: { s?: number }) => <Svg size={s}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></Svg>
+const IcoGrad   = ({ s = 16 }: { s?: number }) => <Svg size={s} stroke="rgba(255,255,255,.6)"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></Svg>
 
 function getStrengthsByRole(role: string) {
   if (role === 'coach') return STRENGTHS_COACH
@@ -247,7 +248,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [clubTeamsCount, setClubTeamsCount] = useState((profile as any).club_teams_count != null ? String((profile as any).club_teams_count) : '')
   const [clubStadiumName, setClubStadiumName] = useState((profile as any).club_stadium_name || '')
   const [clubStadiumAddress, setClubStadiumAddress] = useState((profile as any).club_stadium_address || '')
-  const [clubColorPrimary, setClubColorPrimary] = useState((profile as any).club_color_primary || '#e63946')
+  const [clubColorPrimary, setClubColorPrimary] = useState((profile as any).club_color_primary || '#FF3A3A')
   const [clubColorSecondary, setClubColorSecondary] = useState((profile as any).club_color_secondary || '#ffffff')
   const [clubCategories, setClubCategories] = useState<string[]>(parseList((profile as any).club_categories))
 
@@ -505,7 +506,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             <div style={{ display:'flex', gap:8 }}>
               {(['homme','femme'] as const).map(g => (
                 <button key={g} type="button" onClick={() => { setGenre(g); setLigue('') }}
-                  className="pe-multi-chip" style={{ flex:1, ...(genre === g ? { borderColor:'#e63946', background:'rgba(230,57,70,0.2)', color:'white' } : {}) }}>
+                  className="pe-multi-chip" style={{ flex:1, ...(genre === g ? { borderColor:'#FF3A3A', background:'rgba(255,58,58,0.2)', color:'white' } : {}) }}>
                   {g === 'homme' ? t.profil.genre_homme[lang] : t.profil.genre_femme[lang]}
                 </button>
               ))}
@@ -742,7 +743,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             </div>
           ))}
         </div>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'rgba(255,255,255,0.45)' }}>{t.profil.prev_season[lang]}</div>
+        <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'rgba(255,255,255,0.45)' }}>{t.profil.prev_season[lang]}</div>
         <div className="form-grid-3">
           {[
             { v: goalsPrev, set: setGoalsPrev, label: t.profil.goals[lang] },
@@ -773,7 +774,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
           <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:16 }}>
             {coachCertificates.map((cert, i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:10, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.2)', borderRadius:9, padding:'9px 14px' }}>
-                <span style={{ fontSize:16 }}>🎓</span>
+                <IcoGrad s={16} />
                 <span style={{ flex:1, fontWeight:600, fontSize:14, color:'#fff' }}>{cert.name}</span>
                 {cert.year && <span style={{ fontSize:12, color:'rgba(255,255,255,.45)', fontWeight:600 }}>{cert.year}</span>}
                 <button
@@ -1064,8 +1065,9 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       </div>
 
       {saveError && (
-        <div style={{ background:'rgba(230,57,70,0.12)', border:'1px solid rgba(230,57,70,0.3)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#ff6b6b', marginBottom:14 }}>
-          ❌ {saveError}
+        <div style={{ background:'rgba(255,58,58,0.12)', border:'1px solid rgba(255,58,58,0.3)', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#FF3A3A', marginBottom:14, display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ width:7, height:7, borderRadius:'50%', background:'#FF3A3A', flexShrink:0 }} />
+          {saveError}
         </div>
       )}
 
