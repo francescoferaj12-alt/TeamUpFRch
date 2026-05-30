@@ -281,6 +281,7 @@ export const ligues = [
 
 export const liguesHomme = [
   { group: 'Actifs Hommes', items: ['2ème Ligue', '3ème Ligue', '4ème Ligue', '5ème Ligue'] },
+  { group: 'Youth League', items: ['Youth League A', 'Youth League B', 'Youth League C'] },
   { group: 'Juniors Garçons', items: [
     'Juniors A - Promotion', 'Juniors A - 1er degré', 'Juniors A - 2ème degré',
     'Juniors B - Promotion', 'Juniors B - 1er degré', 'Juniors B - 2ème degré',

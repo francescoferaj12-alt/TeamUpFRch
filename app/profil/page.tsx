@@ -527,8 +527,9 @@ export default function ProfilPage() {
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(28px, 4vw, 48px)', color:'#fff', letterSpacing:'normal', lineHeight:1, marginBottom:6 }}>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(28px, 4vw, 48px)', color:'#fff', letterSpacing:'normal', lineHeight:1, marginBottom:6, display:'flex', alignItems:'center', flexWrap:'wrap', gap:8 }}>
               {displayName}
+              {profile.verified && <VerifiedBadge size={22} />}
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
               <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)', display:'inline-flex', alignItems:'center', gap:5 }}>
@@ -549,7 +550,6 @@ export default function ProfilPage() {
                 <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
-              {profile.verified && <VerifiedBadge />}
               {profile.role === 'club' && profile.club_verification_status === 'approved' && (
                 <span style={{ background:'rgba(34,139,34,.2)', border:'1px solid rgba(76,219,122,.4)', color:'#2ED27F', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
                   <span style={{ width:7, height:7, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
@@ -695,7 +695,6 @@ export default function ProfilPage() {
               { label:'Ligue',       value: profile.ligue,  color:'#FF3A3A' },
               { label:'Zone',        value: profile.zone,   color:'#3A7AFF' },
               { label:'Recrutement', value: profile.available ? 'Ouvert' : 'Complet', color: profile.available ? '#2ED27F' : '#888' },
-              { label:'Vérifié',     value: profile.verified ? 'Oui ✓' : null, color:'#1d9bf0' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
