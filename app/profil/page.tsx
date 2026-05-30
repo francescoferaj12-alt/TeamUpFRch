@@ -507,8 +507,9 @@ export default function ProfilPage() {
           </div>
 
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6 }}>
+            <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.2rem', color:'#fff', letterSpacing:1, lineHeight:1, marginBottom:6, display:'flex', alignItems:'center', flexWrap:'wrap', gap:8 }}>
               {displayName}
+              {profile.verified && <VerifiedBadge size={22} />}
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
               <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
@@ -528,7 +529,6 @@ export default function ProfilPage() {
               <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>
-              {profile.verified && <VerifiedBadge />}
             </div>
 
             {strengthKeys.length > 0 && (
@@ -669,7 +669,6 @@ export default function ProfilPage() {
               { label:'Ligue',       value: profile.ligue,  color:'#e02020' },
               { label:'Zone',        value: profile.zone,   color:'#1a6fd4' },
               { label:'Recrutement', value: profile.available ? 'Ouvert' : 'Complet', color: profile.available ? '#0a7c3e' : '#888' },
-              { label:'Vérifié',     value: profile.verified ? 'Oui ✓' : null, color:'#1d9bf0' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
