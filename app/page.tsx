@@ -93,6 +93,7 @@ type LigueTab = 'all' | 'actifs_h' | 'juniors_g' | 'actives_f' | 'juniores_f'
 const allLigueItems = [
   ...liguesHomme[0].items.map(item => ({ item, cat: 'actifs_h'  as LigueTab })),
   ...liguesHomme[1].items.map(item => ({ item, cat: 'juniors_g' as LigueTab })),
+  ...liguesHomme[2].items.map(item => ({ item, cat: 'juniors_g' as LigueTab })),
   ...liguesFemme[0].items.map(item => ({ item, cat: 'actives_f' as LigueTab })),
   ...liguesFemme[1].items.map(item => ({ item, cat: 'juniores_f' as LigueTab })),
 ]
