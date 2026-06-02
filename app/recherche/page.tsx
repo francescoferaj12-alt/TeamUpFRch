@@ -404,7 +404,6 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
             ? <VerifiedBadge size={15} />
             : p.verified && <VerifiedBadge size={15} />}
         </div>
-        )}
         {subLine && <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', marginTop:2 }}>{subLine}</p>}
       </div>
 
