@@ -223,6 +223,9 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [video1, setVideo1] = useState(profile.video1_url || '')
   const [video2, setVideo2] = useState(profile.video2_url || '')
   const [video3, setVideo3] = useState(profile.video3_url || '')
+  const [video1Dur, setVideo1Dur] = useState<number | null>(null)
+  const [video2Dur, setVideo2Dur] = useState<number | null>(null)
+  const [video3Dur, setVideo3Dur] = useState<number | null>(null)
   const [coachExperience, setCoachExperience] = useState(profile.coach_experience || '')
   const [coachDiploma, setCoachDiploma] = useState(profile.coach_diploma || '')
   const [coachSpecialty, setCoachSpecialty] = useState(profile.coach_specialty || '')
@@ -1025,9 +1028,9 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
         </p>
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {[
-            { v: video1, set: setVideo1, label: t.profil.video1[lang], idx: 1 },
-            { v: video2, set: setVideo2, label: t.profil.video2[lang], idx: 2 },
-            { v: video3, set: setVideo3, label: t.profil.video3[lang], idx: 3 },
+            { v: video1, set: setVideo1, dur: video1Dur, setDur: setVideo1Dur, others: [video2Dur ?? 0, video3Dur ?? 0], label: t.profil.video1[lang], idx: 1 },
+            { v: video2, set: setVideo2, dur: video2Dur, setDur: setVideo2Dur, others: [video1Dur ?? 0, video3Dur ?? 0], label: t.profil.video2[lang], idx: 2 },
+            { v: video3, set: setVideo3, dur: video3Dur, setDur: setVideo3Dur, others: [video1Dur ?? 0, video2Dur ?? 0], label: t.profil.video3[lang], idx: 3 },
           ].map(f => (
             <VideoUploadInput
               key={f.idx}
@@ -1037,6 +1040,9 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               profileId={profile.id}
               index={f.idx}
               inpSt={{ width:'100%', background:'rgba(0,0,0,0.3)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, padding:'11px 13px', color:'#fff', fontSize:14, fontFamily:'inherit', boxSizing:'border-box' }}
+              otherDurations={f.others}
+              onDurationChange={f.setDur}
+              lang={lang}
             />
           ))}
         </div>

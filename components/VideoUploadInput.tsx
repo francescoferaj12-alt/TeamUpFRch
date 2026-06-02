@@ -10,9 +10,23 @@ interface Props {
   profileId: string
   index: number
   inpSt: React.CSSProperties
+  otherDurations?: number[]
+  onDurationChange?: (d: number | null) => void
+  lang?: string
 }
 
-export default function VideoUploadInput({ value, onChange, placeholder, profileId, index, inpSt }: Props) {
+function getVideoDuration(file: File): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(video.duration) }
+    video.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Cannot read duration')) }
+    video.src = url
+  })
+}
+
+export default function VideoUploadInput({ value, onChange, placeholder, profileId, index, inpSt, otherDurations, onDurationChange, lang }: Props) {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -22,6 +36,24 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
     if (!file) return
     if (!file.type.startsWith('video/')) { alert('Seuls les fichiers vidéo sont acceptés'); return }
     if (file.size > 200 * 1024 * 1024) { alert('Max 200 MB'); return }
+
+    // Duration check — YouTube links are exempt, only applies to file uploads
+    if (onDurationChange !== undefined || (otherDurations && otherDurations.length > 0)) {
+      let duration = 0
+      try { duration = await getVideoDuration(file) } catch { /* fail open if unreadable */ }
+      const othersSum = (otherDurations || []).reduce((a, b) => a + b, 0)
+      if (duration + othersSum > 900) {
+        const om = Math.floor(othersSum / 60), os = Math.round(othersSum % 60)
+        const tm = Math.floor(duration / 60)
+        const msg = lang === 'de'
+          ? `Maximale Gesamtdauer 15 Min. Aktuelle Videos: ${om} Min ${os} s. Dieses Video: ${tm} Min. Hinzufügen nicht möglich.`
+          : `Durée totale max 15 min. Vidéos actuelles: ${om} min ${os} s. Cette vidéo: ${tm} min. Impossible d'ajouter.`
+        alert(msg)
+        e.target.value = ''
+        return
+      }
+      onDurationChange?.(duration)
+    }
 
     setUploading(true)
     setProgress(0)
@@ -45,6 +77,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
 
     if (error) {
       alert('Erreur upload: ' + error.message)
+      onDurationChange?.(null)
       setUploading(false)
       setProgress(0)
       return
@@ -92,6 +125,13 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
         />
       </div>
 
+      {/* Duration hint */}
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 4, lineHeight: 1.4 }}>
+        {lang === 'de'
+          ? 'Video-Upload: max. 15 Min. insgesamt. YouTube-Link: unbegrenzt.'
+          : 'Vidéo importée : 15 min max au total. Lien YouTube : illimité.'}
+      </div>
+
       {/* Progress bar */}
       {uploading && (
         <div style={{ marginTop: 6, height: 3, background: 'rgba(255,255,255,.08)', borderRadius: 3, overflow: 'hidden' }}>
@@ -116,7 +156,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
           </div>
           <button
             type="button"
-            onClick={() => onChange('')}
+            onClick={() => { onChange(''); onDurationChange?.(null) }}
             style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,.6)', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             ✕
