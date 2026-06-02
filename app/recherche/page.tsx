@@ -236,7 +236,7 @@ export default function RecherchePage() {
               <select className="sr-sel" value={filterLigue} onChange={e => setFilterLigue(e.target.value)}>
                 <option value="" style={optSt}>{t.search.all_ligues[lang]}</option>
                 {ALL_LIGUE_GROUPS.map(g => (
-                  <optgroup key={g.group} label={g.group} style={{ background:'#081434' }}>
+                  <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group} style={{ background:'#081434' }}>
                     {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
                   </optgroup>
                 ))}

@@ -105,8 +105,8 @@ function SelectField({
 }
 
 function GroupedSelectField({
-  label, value, onChange, groups, placeholder,
-}: { label: string; value: string; onChange: (v: string) => void; groups: { group: string; items: string[] }[]; placeholder?: string }) {
+  label, value, onChange, groups, placeholder, lang,
+}: { label: string; value: string; onChange: (v: string) => void; groups: { group: string; groupDe?: string; items: string[] }[]; placeholder?: string; lang?: string }) {
   return (
     <div style={{ marginBottom: '1.25rem' }}>
       <label style={{ display: 'block', color: 'rgba(255,255,255,.7)', fontSize: 13, marginBottom: 6 }}>{label}</label>
@@ -117,7 +117,7 @@ function GroupedSelectField({
       >
         {placeholder && <option value="">{placeholder}</option>}
         {groups.map(g => (
-          <optgroup key={g.group} label={g.group} style={{ background: '#1a2a4a' }}>
+          <optgroup key={g.group} label={lang === 'de' ? (g.groupDe ?? g.group) : g.group} style={{ background: '#1a2a4a' }}>
             {g.items.map(item => <option key={item} value={item} style={{ background: '#1a2a4a', color: '#fff' }}>{item}</option>)}
           </optgroup>
         ))}
@@ -185,7 +185,7 @@ function CareerEditor({
             ? <SelectField label={o.career_role[lang]} value={entry.position} onChange={v => update(i, 'position', v)} options={positions} placeholder={t.onboarding.choose[lang]} />
             : <SelectField label={o.career_role[lang]} value={entry.coach_role} onChange={v => update(i, 'coach_role', v)} options={COACH_ROLE_OPTIONS} placeholder={t.onboarding.choose[lang]} />
           }
-          <GroupedSelectField label={o.career_league[lang]} value={entry.league} onChange={v => update(i, 'league', v)} groups={ligues} placeholder={t.onboarding.choose[lang]} />
+          <GroupedSelectField label={o.career_league[lang]} value={entry.league} onChange={v => update(i, 'league', v)} groups={ligues} placeholder={t.onboarding.choose[lang]} lang={lang} />
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <SelectField label={o.career_start[lang]} value={entry.start_date} onChange={v => update(i, 'start_date', v)} options={YEARS} placeholder="—" />
             {!entry.is_current && (
@@ -520,7 +520,7 @@ export default function OnboardingPage() {
       )
       if (step === 2) return (
         <>
-          <GroupedSelectField label={o.j2_ligue[lang]} value={jLigue} onChange={setJLigue} groups={ligues} placeholder={o.choose_ligue[lang]} />
+          <GroupedSelectField label={o.j2_ligue[lang]} value={jLigue} onChange={setJLigue} groups={ligues} placeholder={o.choose_ligue[lang]} lang={lang} />
           <SelectField label={o.j2_zone[lang]} value={jZone} onChange={setJZone} options={zones} placeholder={o.choose_zone[lang]} />
         </>
       )
@@ -568,7 +568,7 @@ export default function OnboardingPage() {
         <PhotoStep userId={userId} avatarUrl={clAvatarUrl} onUploaded={setClAvatarUrl} lang={lang} />
       )
       if (step === 1) return (
-        <GroupedSelectField label={o.cl1_title[lang]} value={clLigue} onChange={setClLigue} groups={ligues} placeholder={o.choose_ligue[lang]} />
+        <GroupedSelectField label={o.cl1_title[lang]} value={clLigue} onChange={setClLigue} groups={ligues} placeholder={o.choose_ligue[lang]} lang={lang} />
       )
       if (step === 2) return (
         <SelectField label={o.cl2_title[lang]} value={clZone} onChange={setClZone} options={zones} placeholder={o.choose_zone[lang]} />

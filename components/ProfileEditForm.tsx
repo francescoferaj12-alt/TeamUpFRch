@@ -605,7 +605,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               <select value={ligue} onChange={e => setLigue(e.target.value)}>
                 <option value="">—</option>
                 {(genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
-                  <optgroup key={g.group} label={g.group}>
+                  <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group}>
                     {g.items.map(l => <option key={l}>{l}</option>)}
                   </optgroup>
                 ))}

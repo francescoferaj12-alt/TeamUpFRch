@@ -332,7 +332,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
                   <select className="pm-select" value={ligue} onChange={e => setLigue(e.target.value)}>
                     <option value="">—</option>
                     {ALL_LIGUE_GROUPS.map(g => (
-                      <optgroup key={g.group} label={g.group}>
+                      <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group}>
                         {g.items.map(l => <option key={l} value={l}>{l}</option>)}
                       </optgroup>
                     ))}
