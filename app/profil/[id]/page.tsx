@@ -259,11 +259,6 @@ export default function PublicProfilPage() {
           </div>
         </div>
 
-        {/* Career section — player & coach only */}
-        {profile.role !== 'club' && (
-          <CareerSection experiences={experiences} role={profile.role as 'player'|'coach'} lang={lang} />
-        )}
-
         {/* Stats (player only) */}
         {profile.role === 'player' && (() => {
           const now = new Date()
@@ -372,6 +367,11 @@ export default function PublicProfilPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Career section — player & coach only */}
+        {profile.role !== 'club' && (
+          <CareerSection experiences={experiences} role={profile.role as 'player'|'coach'} lang={lang} />
         )}
 
         {/* Coach certificates */}
