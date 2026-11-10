@@ -49,10 +49,8 @@ export default function RecherchePage() {
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id,email,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,birthdate,genre,verified,club_verification_status')
-        .neq('hidden', true)
-        .or('role.neq.club,club_verification_status.eq.approved')
+        .from('public_profiles')
+        .select('id,age,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,genre,verified,club_verification_status,created_at')
         .order('created_at', { ascending: false })
         .limit(500)
       if (!error && data) setProfiles(data as Profile[])
@@ -84,7 +82,7 @@ export default function RecherchePage() {
       }
       return true
     })
-  }, [profiles, filterType, filterDispo, filterLigue, filterPos, filterZone, debouncedQuery, currentUser, filterVerifiedOnly])
+  }, [profiles, filterType, filterDispo, filterGenre, filterLigue, filterPos, filterZone, debouncedQuery, currentUser, filterVerifiedOnly])
 
   const counts = {
     all: filtered.length,
@@ -342,7 +340,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
   const name = p.role === 'club'
     ? (p.club_name || 'Club')
-    : `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email
+    : `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Profil'
 
   const initials = p.role === 'club'
     ? (p.club_name?.[0]?.toUpperCase() || 'C')
@@ -368,7 +366,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
     ? { background:'rgba(255,154,90,.12)', color:'#FF9A3A', border:'1px solid rgba(255,154,90,.3)' }
     : { background:'rgba(91,158,255,.12)', color:'#5b9eff', border:'1px solid rgba(91,158,255,.3)' }
 
-  const age = calcAge(p.birthdate)
+  const age = p.age ?? null
   const ageSuffix = t.general.age_suffix[lang]
   const subLine = [p.role !== 'club' ? (p.position || roleLabel) : null, age ? `${age}${ageSuffix}` : null].filter(Boolean).join(' · ')
 

@@ -493,7 +493,7 @@ export default function ProfilPage() {
       {postSuccess && (
         <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
           <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
-          Post publié ! Visible dans <a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>le fil d'annonces</a>.
+          Post publié ! Visible dans <a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>le fil d&apos;annonces</a>.
         </div>
       )}
 

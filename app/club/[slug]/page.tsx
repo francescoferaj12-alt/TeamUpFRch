@@ -54,12 +54,10 @@ export default function ClubPage() {
   // ——— Data fetch (unchanged logic) ————————————————
   useEffect(() => {
     async function load() {
-      const [{ data, error }, { data: auth }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', slug).eq('role', 'club').single(),
-        supabase.auth.getUser(),
-      ])
+      const { data, error } = await Promise.all([
+        supabase.from('public_profiles').select('*').eq('id', slug).eq('role', 'club').single(),
+      ]).then(([profile]) => profile)
       if (error || !data) { setNotFound(true); setLoading(false); return }
-      if (data.hidden && auth.user?.id !== data.id) { setNotFound(true); setLoading(false); return }
       setClub(data)
       const { data: ann } = await supabase
         .from('annonces').select('*')
@@ -123,7 +121,7 @@ export default function ClubPage() {
   if (club.ligue)   factRows.push({ k: 'Ligue',        v: club.ligue })
   factRows.push({ k: 'Recrutement', v: club.available ? 'Ouvert' : 'Complet', accent: !!club.available })
   if (club.verified) factRows.push({ k: 'Statut',      v: 'Vérifié' })
-  if (club.email)   factRows.push({ k: 'Email',        v: club.email, isEmail: true })
+  if (club.club_email_public) factRows.push({ k: 'Email', v: club.club_email_public, isEmail: true })
 
   // ——— Render —————————————————————————————————————
   return (
@@ -318,12 +316,12 @@ export default function ClubPage() {
 
             <div className="cd-contact-card">
               <h3 className="cd-contact-h3">Informations</h3>
-              {club.email && (
+              {club.club_email_public && (
                 <div className="cd-contact-line">
                   <div className="cd-contact-icon"><IcoMail s={16} /></div>
                   <div className="cd-contact-content">
                     <div className="cd-contact-label">Email</div>
-                    <div className="cd-contact-value"><a href={`mailto:${club.email}`}>{club.email}</a></div>
+                    <div className="cd-contact-value"><a href={`mailto:${club.club_email_public}`}>{club.club_email_public}</a></div>
                   </div>
                 </div>
               )}

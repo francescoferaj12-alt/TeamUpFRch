@@ -6,17 +6,18 @@ import { applicationStatusHtml, zoneLang } from '../../../../../lib/email-templa
 
 const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const appId = params.id
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: appId } = await params
   try {
     const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       token ? { global: { headers: { Authorization: `Bearer ${token}` } } } : {}
     )
 
-    const { data: { user }, error: authErr } = await supabase.auth.getUser()
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(token)
     if (authErr || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -39,8 +40,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     if (status !== 'pending' && process.env.RESEND_API_KEY) {
       try {
+        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!serviceRoleKey) throw new Error('Notification service is not configured')
+        const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        })
         const [{ data: applicant, error: applicantErr }, { data: annonce }] = await Promise.all([
-          supabase.from('profiles')
+          admin.from('profiles')
             .select('email,first_name,last_name,club_name,role,zone,notification_settings')
             .eq('id', app.applicant_id).single(),
           supabase.from('annonces')

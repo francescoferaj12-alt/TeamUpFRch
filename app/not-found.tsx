@@ -49,7 +49,7 @@ export default function NotFound() {
             fontSize: 14
           }}
         >
-          ← Retour à l'accueil
+          ← Retour à l&apos;accueil
         </Link>
       </div>
     </div>

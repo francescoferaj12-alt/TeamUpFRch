@@ -13,6 +13,12 @@ const RED = '#e63946'
 const BG = '#030a24'
 const CARD_BG = '#061540'
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[char]!)
+}
+
 function wrapper(content: string, lang: Lang): string {
   const footer = lang === 'de'
     ? 'Du erhältst diese E-Mail, weil du bei TeamUpFR registriert bist.'
@@ -59,7 +65,10 @@ export function newMessageHtml(opts: {
   fromUserId: string
   lang: Lang
 }): string {
-  const { toName, fromName, preview, fromUserId, lang } = opts
+  const { fromUserId, lang } = opts
+  const toName = escapeHtml(opts.toName.slice(0, 100))
+  const fromName = escapeHtml(opts.fromName.slice(0, 100))
+  const preview = escapeHtml(opts.preview.slice(0, 200))
   const de = lang === 'de'
   const msgUrl = `${BASE_URL}/messages?partner=${fromUserId}`
   const content = `
@@ -89,9 +98,12 @@ export function newApplicationHtml(opts: {
   annonceId: string
   lang: Lang
 }): string {
-  const { toName, applicantName, applicantRole, annonceTitle, applicantId, lang } = opts
+  const { applicantRole, applicantId, lang } = opts
+  const toName = escapeHtml(opts.toName)
+  const applicantName = escapeHtml(opts.applicantName)
+  const annonceTitle = escapeHtml(opts.annonceTitle)
   const de = lang === 'de'
-  const profileUrl = `${BASE_URL}/profil/${applicantId}`
+  const profileUrl = `${BASE_URL}/profil/${encodeURIComponent(applicantId)}`
   const appsUrl = `${BASE_URL}/candidatures`
   const roleLabel = de
     ? (applicantRole === 'player' ? 'Spieler' : applicantRole === 'coach' ? 'Trainer' : 'Verein')
@@ -128,7 +140,10 @@ export function applicationStatusHtml(opts: {
   annonceTitle: string
   lang: Lang
 }): string {
-  const { toName, status, clubName, annonceTitle, lang } = opts
+  const { status, lang } = opts
+  const toName = escapeHtml(opts.toName)
+  const clubName = escapeHtml(opts.clubName)
+  const annonceTitle = escapeHtml(opts.annonceTitle)
   const de = lang === 'de'
   const isAccepted = status === 'accepted'
   const msgUrl = `${BASE_URL}/messages`
@@ -224,7 +239,10 @@ export function newClubNotificationHtml(opts: {
   emailIsProfessional: boolean
   adminUrl: string
 }): string {
-  const { clubName, clubEmail, affClubName, emailIsProfessional, adminUrl } = opts
+  const { emailIsProfessional, adminUrl } = opts
+  const clubName = escapeHtml(opts.clubName.slice(0, 120))
+  const clubEmail = escapeHtml(opts.clubEmail.slice(0, 254))
+  const affClubName = opts.affClubName ? escapeHtml(opts.affClubName.slice(0, 120)) : null
   const lang: Lang = 'fr'
   const emailBadge = emailIsProfessional
     ? `<span style="display:inline-block;background:rgba(76,219,122,0.15);color:#4cdb7a;border:1px solid rgba(76,219,122,0.3);border-radius:100px;padding:2px 10px;font-size:12px;font-weight:700;">Email pro</span>`

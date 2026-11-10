@@ -8,6 +8,7 @@ import UserAvatar from '../../components/UserAvatar'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
+import { resolveMessageAttachments } from '../../lib/message-attachments'
 
 // ── SVG primitives (identici a /recherche e /annonces) ────────────────────────
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -57,7 +58,8 @@ export default function MessagesPage() {
   const [searchConv, setSearchConv] = useState('')
   const [searchNewUser, setSearchNewUser] = useState('')
   const [newUserResults, setNewUserResults] = useState<Profile[]>([])
-  const [pendingFile, setPendingFile] = useState<{ url: string; type: 'image' | 'video' | 'file'; name: string } | null>(null)
+  const [pendingFile, setPendingFile] = useState<{ path: string; url: string; type: 'image' | 'video' | 'file'; name: string } | null>(null)
+  const [sendError, setSendError] = useState('')
   const [uploadingFile, setUploadingFile] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mobileView, setMobileView] = useState<MobileView>('list')
@@ -141,10 +143,9 @@ export default function MessagesPage() {
     const q = searchNewUser.toLowerCase()
     const timer = setTimeout(async () => {
       const { data } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id,first_name,last_name,club_name,role,avatar_url,ligue')
         .neq('id', profile.id)
-        .neq('hidden', true)
         .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,club_name.ilike.%${q}%`)
         .limit(20)
       if (data) setNewUserResults(data as Profile[])
@@ -153,17 +154,18 @@ export default function MessagesPage() {
   }, [searchNewUser, profile?.id])
 
   async function loadMessages(prof: Profile) {
-    const { data: msgs } = await supabase
+    const { data: storedMessages } = await supabase
       .from('messages')
       .select('*')
       .or(`sender_id.eq.${prof.id},receiver_id.eq.${prof.id}`)
       .order('created_at', { ascending: true })
+    const msgs = storedMessages ? await resolveMessageAttachments(supabase, storedMessages) : null
 
     if (!msgs || msgs.length === 0) {
       if (partnerParam) {
         const { data: partner } = await supabase
-          .from('profiles')
-          .select('id,first_name,last_name,club_name,role,email,avatar_url')
+          .from('public_profiles')
+          .select('id,first_name,last_name,club_name,role,avatar_url,club_email_public')
           .eq('id', partnerParam).single()
         if (partner) {
           setConversations([{
@@ -172,7 +174,7 @@ export default function MessagesPage() {
               ? (partner.club_name || '—')
               : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
             partnerRole: partner.role,
-            partnerEmail: partner.email || '',
+            partnerEmail: partner.club_email_public || '',
             partnerAvatar: partner.avatar_url || null,
             lastMessage: '', lastTime: '', unread: 0, messages: [],
           }])
@@ -186,8 +188,8 @@ export default function MessagesPage() {
 
     const partnerIds = [...new Set(msgs.map((m: Message) => m.sender_id === prof.id ? m.receiver_id : m.sender_id))]
     const { data: partners } = await supabase
-      .from('profiles')
-      .select('id,first_name,last_name,club_name,role,email,avatar_url')
+      .from('public_profiles')
+      .select('id,first_name,last_name,club_name,role,avatar_url,club_email_public')
       .in('id', partnerIds)
 
     const partnerMap: Record<string, { name: string; role: string; email: string; avatar: string | null }> = {}
@@ -197,7 +199,7 @@ export default function MessagesPage() {
           ? (p.club_name || '—')
           : `${p.first_name || ''} ${p.last_name || ''}`.trim() || '—',
         role: p.role,
-        email: p.email || '',
+        email: p.club_email_public || '',
         avatar: p.avatar_url || null,
       }
     }
@@ -243,8 +245,8 @@ export default function MessagesPage() {
         if (isMobileRef.current) setMobileView('chat')
       } else {
         const { data: partner } = await supabase
-          .from('profiles')
-          .select('id,first_name,last_name,club_name,role,email,avatar_url')
+          .from('public_profiles')
+          .select('id,first_name,last_name,club_name,role,avatar_url,club_email_public')
           .eq('id', partnerParam).single()
         if (partner) {
           const virtualConv: Conversation = {
@@ -253,7 +255,7 @@ export default function MessagesPage() {
               ? (partner.club_name || '—')
               : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
             partnerRole: partner.role,
-            partnerEmail: partner.email || '',
+            partnerEmail: partner.club_email_public || '',
             partnerAvatar: partner.avatar_url || null,
             lastMessage: '', lastTime: '', unread: 0, messages: [],
           }
@@ -302,6 +304,17 @@ export default function MessagesPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id])
 
+  // Refresh private links before their one-hour expiry, including after a tab
+  // has been suspended in the background.
+  useEffect(() => {
+    if (!profile) return
+    const refresh = () => { if (document.visibilityState === 'visible') void loadMessages(profile) }
+    const timer = setInterval(refresh, 45 * 60 * 1000)
+    document.addEventListener('visibilitychange', refresh)
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id])
+
   // ── File upload ──────────────────────────────────────────────────────────────
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -310,72 +323,62 @@ export default function MessagesPage() {
     if (file.size > 20 * 1024 * 1024) { alert('Fichier trop lourd (max 20 Mo)'); return }
     setUploadingFile(true)
     const fileType = getFileType(file)
-    const timestamp = Date.now()
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const path = `${profile.id}/${timestamp}_${safeName}`
+    const path = `${profile.id}/${crypto.randomUUID()}_${safeName}`
     const { data, error } = await supabase.storage
       .from('message-files')
-      .upload(path, file, { upsert: false, contentType: file.type })
+      .upload(path, file, { upsert: false, contentType: file.type || 'application/octet-stream' })
     if (error) { alert('Erreur upload: ' + error.message); setUploadingFile(false); return }
-    const { data: urlData } = supabase.storage.from('message-files').getPublicUrl(data.path)
-    setPendingFile({ url: urlData.publicUrl, type: fileType, name: file.name })
+    const { data: urlData, error: urlError } = await supabase.storage.from('message-files').createSignedUrl(data.path, 3600)
+    if (urlError || !urlData) {
+      await supabase.storage.from('message-files').remove([data.path])
+      alert(lang === 'de' ? 'Die Datei konnte nicht geladen werden. Bitte erneut versuchen.' : 'Impossible de charger le fichier. Réessaie.')
+      setUploadingFile(false)
+      return
+    }
+    if (pendingFile) await supabase.storage.from('message-files').remove([pendingFile.path])
+    setPendingFile({ path: data.path, url: urlData.signedUrl, type: fileType, name: file.name })
     setUploadingFile(false)
   }
 
   // ── Send message ─────────────────────────────────────────────────────────────
   async function handleSend() {
     const txt = input.trim()
-    if ((!txt && !pendingFile) || !profile || !activePartnerId || sending) return
+    if ((!txt && !pendingFile) || !profile || !activePartnerId || sending || uploadingFile) return
     setSending(true)
-    const { data: newMsg } = await supabase.from('messages').insert({
+    setSendError('')
+    const { data: newMsg, error } = await supabase.from('messages').insert({
       sender_id: profile.id,
       receiver_id: activePartnerId,
       text: txt,
-      file_url: pendingFile?.url || null,
+      file_url: pendingFile?.path || null,
       file_type: pendingFile?.type || null,
       file_name: pendingFile?.name || null,
       read: false
     }).select().single()
+    if (error || !newMsg) {
+      setSendError(lang === 'de' ? 'Nachricht nicht gesendet. Dein Entwurf bleibt erhalten. Bitte erneut versuchen.' : 'Message non envoyé. Ton brouillon est conservé. Réessaie.')
+      setSending(false)
+      return
+    }
     if (newMsg) {
+      const displayMessage = { ...newMsg, file_url: pendingFile?.url || undefined }
       const timeStr = new Date().toLocaleTimeString(
         lang === 'fr' ? 'fr-CH' : 'de-CH',
         { hour: '2-digit', minute: '2-digit' }
       )
       const preview = txt || (pendingFile ? `📎 ${pendingFile.name}` : '')
       setConversations(prev => prev.map(c => c.partnerId === activePartnerId
-        ? { ...c, messages: [...c.messages, newMsg], lastMessage: preview, lastTime: timeStr }
+        ? { ...c, messages: [...c.messages, displayMessage], lastMessage: preview, lastTime: timeStr }
         : c
       ))
-      const _pid = activePartnerId
-      const _txt = txt
-      const _pf = pendingFile
-      ;(async () => {
-        try {
-          const { data: receiver } = await supabase.from('profiles')
-            .select('email,first_name,last_name,club_name,role,zone,notification_settings')
-            .eq('id', _pid).single()
-          if (!receiver?.email) return
-          if (receiver.notification_settings?.newMessage === false) return
-          const senderName = profile.role === 'club'
-            ? (profile.club_name || 'Un club')
-            : `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Un utilisateur'
-          const receiverName = receiver.role === 'club'
-            ? (receiver.club_name || '')
-            : `${receiver.first_name || ''} ${receiver.last_name || ''}`.trim()
-          await fetch('/api/send-message-notification', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              receiverEmail: receiver.email,
-              receiverName,
-              senderName,
-              senderUserId: profile.id,
-              messagePreview: _txt.slice(0, 120) || (_pf ? `[Fichier: ${_pf.name}]` : ''),
-              receiverZone: receiver.zone,
-            }),
-          })
-        } catch {}
-      })()
+      if (session?.access_token) {
+        fetch('/api/send-message-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ messageId: newMsg.id }),
+        }).catch(() => {})
+      }
     }
     setInput('')
     setPendingFile(null)
@@ -579,7 +582,7 @@ export default function MessagesPage() {
                 { hour: '2-digit', minute: '2-digit' }
               )
               const hasText = !!m.text
-              const hasFile = !!m.file_url
+              const hasFile = !!m.file_url || !!m.file_name
               return (
                 <div key={m.id || i} style={{ display:'flex', alignItems:'flex-end', gap:8, flexDirection: fromMe ? 'row-reverse' : 'row' }}>
                   {fromMe ? (
@@ -598,16 +601,17 @@ export default function MessagesPage() {
                       {hasText && <div>{m.text}</div>}
                       {hasFile && (
                         <div style={{ marginTop: hasText ? 8 : 0 }}>
-                          {m.file_type === 'image' && (
+                          {!m.file_url && <span>{lang === 'de' ? 'Anhang nicht verfügbar. Seite neu laden.' : 'Pièce jointe indisponible. Recharge la page.'}</span>}
+                          {m.file_url && m.file_type === 'image' && (
                             <img src={m.file_url} alt={m.file_name || 'image'}
                               style={{ maxWidth:220, maxHeight:200, borderRadius:8, display:'block', cursor:'pointer', objectFit:'cover' }}
                               onClick={() => window.open(m.file_url, '_blank')}
                             />
                           )}
-                          {m.file_type === 'video' && (
+                          {m.file_url && m.file_type === 'video' && (
                             <video src={m.file_url} controls playsInline style={{ maxWidth:260, borderRadius:8, display:'block' }} />
                           )}
-                          {m.file_type === 'file' && (
+                          {m.file_url && m.file_type === 'file' && (
                             <a href={m.file_url} target="_blank" rel="noopener noreferrer" download={m.file_name || 'fichier'}
                               style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 12px', background:'rgba(255,255,255,.15)', borderRadius:8, color:'#fff', textDecoration:'none', fontSize:13, fontWeight:600 }}>
                               <IcoPaperclip s={14} /> {m.file_name || (lang === 'fr' ? 'Télécharger' : 'Herunterladen')}
@@ -637,15 +641,19 @@ export default function MessagesPage() {
               <div style={{ flex:1, fontSize:12, color:'rgba(255,255,255,.5)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                 {pendingFile.type === 'image' ? pendingFile.name : ''}
               </div>
-              <button onClick={() => setPendingFile(null)} style={{ background:'rgba(255,255,255,.12)', border:'none', borderRadius:6, color:'rgba(255,255,255,.7)', cursor:'pointer', padding:'4px 8px', display:'flex', alignItems:'center', justifyContent:'center' }}><IcoX s={13} /></button>
+              <button disabled={sending || uploadingFile} onClick={() => {
+                void supabase.storage.from('message-files').remove([pendingFile.path])
+                setPendingFile(null)
+              }} style={{ background:'rgba(255,255,255,.12)', border:'none', borderRadius:6, color:'rgba(255,255,255,.7)', cursor:'pointer', padding:'4px 8px', display:'flex', alignItems:'center', justifyContent:'center' }}><IcoX s={13} /></button>
             </div>
           )}
 
           {/* Composer */}
+          {sendError && <div role="alert" style={{ padding: '8px 20px', color: '#ffb3b3', fontSize: 13 }}>{sendError}</div>}
           <div className="msg-input-wrap">
             <input ref={fileInputRef} type="file" style={{ display:'none' }} onChange={handleFileSelect}
               accept="image/*,video/*,.pdf,.doc,.docx,.zip" />
-            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadingFile}
+            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadingFile || sending}
               title={lang === 'fr' ? 'Joindre un fichier' : 'Datei anhängen'}
               style={{ width:38, height:38, background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, color:'rgba(255,255,255,.7)', cursor:'pointer', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
               {uploadingFile
@@ -660,7 +668,7 @@ export default function MessagesPage() {
               placeholder={t.messages.write_pl[lang]}
               style={{ flex:1, background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:10, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }}
             />
-            <button onClick={handleSend} disabled={sending || (!input.trim() && !pendingFile)}
+            <button onClick={handleSend} disabled={sending || uploadingFile || (!input.trim() && !pendingFile)}
               style={{ width:40, height:40, background:(input.trim() || pendingFile) ? '#FF3A3A' : 'rgba(255,255,255,.1)', border:'none', borderRadius:'999px', color:'#fff', cursor:(input.trim() || pendingFile) ? 'pointer' : 'default', flexShrink:0, transition:'background .15s', display:'flex', alignItems:'center', justifyContent:'center' }}>
               <IcoSend s={17} />
             </button>

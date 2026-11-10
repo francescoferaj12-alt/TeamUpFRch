@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { supabase, Profile, avatarSrc } from '../../lib/supabase'
 import VerifiedBadge from '../../components/VerifiedBadge'
 
@@ -36,6 +37,7 @@ export default function AdminPage() {
   async function setVerified(profileId: string, value: boolean) {
     setBusy(profileId)
     const profile = profiles.find(c => c.id === profileId)
+    if (profile?.role === 'club') { setBusy(null); return }
     const { error } = await supabase
       .from('profiles')
       .update({ verified: value })
@@ -44,16 +46,6 @@ export default function AdminPage() {
       alert('Erreur: ' + error.message)
     } else {
       setProfiles(prev => prev.map(c => c.id === profileId ? { ...c, verified: value } : c))
-      const displayName = profile?.role === 'club'
-        ? profile.club_name
-        : `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
-      if (profile?.email) {
-        await fetch('/api/send-verify-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clubName: displayName, clubEmail: profile.email, verified: value }),
-        })
-      }
     }
     setBusy(null)
   }
@@ -185,7 +177,10 @@ function ProfileRow({ profile, busy, onVerify, onRefuse }: {
         </div>
       </div>
       <div style={{ display:'flex', gap:8, flexShrink:0 }}>
-        {onVerify && (
+        {profile.role === 'club' && (
+          <Link href="/admin/clubs" style={{ background:'#e63946', color:'#fff', borderRadius:8, padding:'8px 18px', fontWeight:700, fontSize:13, textDecoration:'none' }}>Gérer la vérification du club</Link>
+        )}
+        {profile.role !== 'club' && onVerify && (
           <button
             onClick={onVerify}
             disabled={isBusy}
@@ -194,7 +189,7 @@ function ProfileRow({ profile, busy, onVerify, onRefuse }: {
             {isBusy ? '…' : '✓ Vérifier'}
           </button>
         )}
-        {onRefuse && (
+        {profile.role !== 'club' && onRefuse && (
           <button
             onClick={onRefuse}
             disabled={isBusy}

@@ -10,10 +10,9 @@ export async function GET() {
   )
 
   const { data, error } = await supabase
-    .from('profiles')
+    .from('public_profiles')
     .select('id, club_name, first_name, last_name, zone, avatar_url')
     .eq('role', 'club')
-    .neq('hidden', true)
     .order('created_at', { ascending: true })
 
   if (error) return NextResponse.json([], { status: 200 })

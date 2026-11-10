@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t, months } from '../../lib/translations'
@@ -181,10 +182,11 @@ function LoginForm() {
       setLoading(false)
       return
     }
+    const profileToken = crypto.randomUUID()
     const { data, error: signUpError } = await supabase.auth.signUp({
       email, password,
       options: {
-        data: { first_name: firstName, last_name: lastName, role },
+        data: { first_name: firstName, last_name: lastName, role, profile_creation_token: profileToken },
         emailRedirectTo: 'https://teamupfr.ch/verify-email'
       }
     })
@@ -214,7 +216,7 @@ function LoginForm() {
       const res = await fetch('/api/auth/create-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: data.user.id, profileData }),
+        body: JSON.stringify({ userId: data.user.id, profileData, profileToken }),
       })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
@@ -228,11 +230,12 @@ function LoginForm() {
         return
       }
       if (role === 'club') {
-        fetch('/api/send-club-notification', {
+        const notification = await fetch('/api/send-club-notification', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clubName, clubEmail: email, affClubName: selectedAffClubName || null, emailIsProfessional: isPro }),
-        }).catch(() => {})
+          body: JSON.stringify({ userId: data.user.id }),
+        }).catch(() => null)
+        if (!notification?.ok) sessionStorage.setItem('clubSignupNotificationFailed', 'true')
       }
     }
     if (typeof window !== 'undefined') sessionStorage.setItem('pendingVerifyEmail', email)
@@ -366,9 +369,9 @@ function LoginForm() {
               <span style={{ color: '#0a0a0a', background: '#fff', padding: '2px 4px', marginLeft: 4, borderRadius: 2 }}>F</span>
               <span style={{ color: '#fff', background: '#0a0a0a', padding: '2px 4px', borderRadius: 2 }}>R</span>
             </div>
-            <a href="/" className="ln-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,.6)', padding: '8px 14px', borderRadius: 999, border: '1px solid rgba(255,255,255,.12)', textDecoration: 'none', transition: 'color .3s, border-color .3s, background .3s' }}>
+            <Link href="/" className="ln-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,.6)', padding: '8px 14px', borderRadius: 999, border: '1px solid rgba(255,255,255,.12)', textDecoration: 'none', transition: 'color .3s, border-color .3s, background .3s' }}>
               <IcoArrow size={14} />{lang === 'fr' ? 'Retour' : 'Zurück'}
-            </a>
+            </Link>
           </div>
 
           {/* Brand content */}

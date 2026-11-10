@@ -21,11 +21,16 @@ export default function VerifyEmailPendingPage() {
   const [cooldown, setCooldown] = useState(0)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+  const [clubNoticeFailed, setClubNoticeFailed] = useState(false)
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     const stored = typeof window !== 'undefined' ? sessionStorage.getItem('pendingVerifyEmail') : ''
     if (stored) setEmail(stored)
+    if (sessionStorage.getItem('clubSignupNotificationFailed') === 'true') {
+      setClubNoticeFailed(true)
+      sessionStorage.removeItem('clubSignupNotificationFailed')
+    }
     return () => { if (cooldownRef.current) clearInterval(cooldownRef.current) }
   }, [])
 
@@ -86,6 +91,14 @@ export default function VerifyEmailPendingPage() {
           <p style={{ color: 'rgba(255,255,255,.35)', fontSize: 12, marginBottom: '1.75rem' }}>
             {t.login.verify_check_spam[lang]}
           </p>
+
+          {clubNoticeFailed && (
+            <div role="status" style={{ background: 'rgba(255,165,0,.1)', border: '1px solid rgba(255,165,0,.3)', borderRadius: 10, padding: '10px 16px', marginBottom: '1rem', fontSize: 13, color: '#ffc266' }}>
+              {lang === 'de'
+                ? 'Deine Bestätigungs-E-Mail wurde angefordert. Die Mitteilung an den Verein konnte nicht gesendet werden; kontaktiere uns bitte.'
+                : 'La demande de confirmation a été envoyée. La notification de ton club n’a pas pu partir ; contacte-nous, s’il te plaît.'}
+            </div>
+          )}
 
           {/* Sent banner */}
           {sent && (

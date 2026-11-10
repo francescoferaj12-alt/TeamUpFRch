@@ -8,7 +8,7 @@ export async function GET() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       { auth: { persistSession: false } }
     )
-    const { error } = await supabase.from('profiles').select('id').limit(1)
+    const { error } = await supabase.from('public_profiles').select('id').limit(1)
     if (error) throw error
 
     return NextResponse.json({
