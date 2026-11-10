@@ -187,9 +187,9 @@ function CareerEditor({
           }
           <GroupedSelectField label={o.career_league[lang]} value={entry.league} onChange={v => update(i, 'league', v)} groups={ligues} placeholder={t.onboarding.choose[lang]} lang={lang} />
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <SelectField label={o.career_start[lang]} value={entry.start_date} onChange={v => update(i, 'start_date', v)} options={YEARS} placeholder="—" />
+            <SelectField label={o.career_start[lang]} value={entry.start_date.slice(0, 4)} onChange={v => update(i, 'start_date', v)} options={YEARS} placeholder="—" />
             {!entry.is_current && (
-              <SelectField label={o.career_end[lang]} value={entry.end_date} onChange={v => update(i, 'end_date', v)} options={YEARS} placeholder="—" />
+              <SelectField label={o.career_end[lang]} value={entry.end_date.slice(0, 4)} onChange={v => update(i, 'end_date', v)} options={YEARS} placeholder="—" />
             )}
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: 'rgba(255,255,255,.7)', fontSize: 14, marginBottom: '0.5rem' }}>
@@ -281,6 +281,7 @@ export default function OnboardingPage() {
   const [userId, setUserId] = useState('')
   const [role, setRole] = useState<Role>('player')
   const [step, setStep] = useState(0)
+  const [careerLoaded, setCareerLoaded] = useState(false)
 
   // Joueur state
   const [jPosition, setJPosition] = useState('')
@@ -334,6 +335,21 @@ export default function OnboardingPage() {
         if (profile.onboarding_step && profile.onboarding_step > 0) {
           setStep(profile.onboarding_step)
         }
+        if (profile.role === 'player' || profile.role === 'coach') {
+          const { data: career, error: careerError } = await supabase.from('career_experiences')
+            .select('club_name,league,position,coach_role,start_date,end_date,is_current')
+            .eq('user_id', session.user.id).order('start_date', { ascending: false })
+          if (!careerError) {
+            const entries = (career || []).map(entry => ({
+              club_name: entry.club_name, league: entry.league || '', position: entry.position || '',
+              coach_role: entry.coach_role || '', start_date: entry.start_date,
+              end_date: entry.end_date || '', is_current: !!entry.is_current,
+            }))
+            if (profile.role === 'player') setJCareer(entries)
+            else setCCareer(entries)
+            setCareerLoaded(true)
+          }
+        }
       }
       setLoading(false)
     }
@@ -371,24 +387,32 @@ export default function OnboardingPage() {
   }
 
   const saveStep = async (targetStep: number) => {
+    // Do not replace an existing career with an empty form after a failed load.
+    if (step === 3 && role !== 'club' && !careerLoaded) { setError(o.error[lang]); return false }
     setSaving(true)
     setError('')
-    const { data: { session } } = await supabase.auth.getSession()
-    const stepData = getStepData()
-    const res = await fetch('/api/onboarding/save-step', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-      },
-      body: JSON.stringify({ stepIndex: step, role, data: stepData }),
-    })
-    setSaving(false)
-    if (!res.ok) { setError(o.error[lang]); return false }
-    const json = await res.json()
-    if (json.profile_completed) { router.push('/profil'); return false }
-    setStep(targetStep)
-    return true
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const stepData = getStepData()
+      const res = await fetch('/api/onboarding/save-step', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ stepIndex: step, role, data: stepData }),
+      })
+      if (!res.ok) { setError(o.error[lang]); return false }
+      const json = await res.json()
+      if (json.profile_completed) { router.push('/profil'); return false }
+      setStep(targetStep)
+      return true
+    } catch {
+      setError(o.error[lang])
+      return false
+    } finally {
+      setSaving(false)
+    }
   }
 
   const skipAndQuit = async () => {

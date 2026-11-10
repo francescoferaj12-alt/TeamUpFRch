@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { captureError } from '../../../../lib/logger'
+import { normalizeOnboardingCareer } from '../../../../lib/onboarding-career'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -21,46 +22,33 @@ export async function POST(req: NextRequest) {
   let body: Record<string, unknown>
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+  }
   const { stepIndex, role, data } = body as { stepIndex: number; role: string; data: Record<string, unknown> }
-  if (stepIndex === undefined || !role || !data) {
+  if (!Object.hasOwn(LAST_STEP, role) || !Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex > LAST_STEP[role]
+    || !data || typeof data !== 'object' || Array.isArray(data)) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
   const isLast = stepIndex === LAST_STEP[role]
 
   // career_experiences is handled separately
-  if (data.career_experiences) {
-    const experiences = data.career_experiences as Array<Record<string, unknown>>
-    if (experiences.length > 0) {
-      // Delete existing onboarding career entries for this user to avoid duplicates
-      await supabase.from('career_experiences').delete().eq('user_id', user.id)
-
-      const rows = experiences.map(exp => ({
-        user_id: user.id,
-        club_name: exp.club_name as string,
-        league: exp.league as string | undefined,
-        position: exp.position as string | undefined,
-        coach_role: exp.coach_role as string | undefined,
-        start_date: exp.start_date as string,
-        end_date: exp.end_date as string | undefined,
-        is_current: exp.is_current as boolean ?? false,
-      }))
-
-      const { error: careerErr } = await supabase.from('career_experiences').insert(rows)
-      if (careerErr) {
-        captureError(careerErr, { api: 'onboarding/save-step', step: 'career_insert', userId: user.id })
-        return NextResponse.json({ error: 'Career insert failed' }, { status: 500 })
-      }
+  if (Object.hasOwn(data, 'career_experiences')) {
+    if (stepIndex !== 3 || (role !== 'player' && role !== 'coach')) {
+      return NextResponse.json({ error: 'Invalid career step' }, { status: 400 })
     }
-
-    // Update onboarding_step only
-    const updatePayload: Record<string, unknown> = { onboarding_step: stepIndex }
-    if (isLast) {
-      updatePayload.profile_completed = true
-      updatePayload.onboarding_completed_at = new Date().toISOString()
+    let experiences
+    try { experiences = normalizeOnboardingCareer(data.career_experiences) } catch {
+      return NextResponse.json({ error: 'Invalid career entries' }, { status: 400 })
     }
-    await supabase.from('profiles').update(updatePayload).eq('id', user.id)
-    return NextResponse.json({ ok: true, profile_completed: isLast })
+    // One transaction: a failed insert must never erase the previous career.
+    const { error: careerErr } = await supabase.rpc('save_onboarding_career', { experiences })
+    if (careerErr) {
+      captureError(careerErr, { api: 'onboarding/save-step', step: 'career_save', userId: user.id })
+      return NextResponse.json({ error: 'Career save failed' }, { status: 500 })
+    }
+    return NextResponse.json({ ok: true, profile_completed: false })
   }
 
   // Build profile update from step data

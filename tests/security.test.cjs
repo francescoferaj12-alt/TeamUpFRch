@@ -24,6 +24,7 @@ function load(file, mocks = {}) {
       if (name.endsWith('/logger')) return { captureError() {} }
       if (name.endsWith('/email-throttle')) return { isThrottled: () => false }
       if (name.endsWith('/email-templates')) return load('lib/email-templates.ts')
+      if (name.endsWith('/onboarding-career')) return load('lib/onboarding-career.ts')
       return require(name)
     },
   }, { filename: file })
@@ -55,6 +56,59 @@ function profileHandler({ expectedProof = proof, existing = false, createdAt = n
 }
 
 const signup = { userId: uid, profileToken: proof, profileData: { email: 'owner@example.com', role: 'club', club_name: 'Test Club' } }
+
+function careerHandler({ error = null, signedIn = true } = {}) {
+  const saves = []
+  const client = {
+    auth: { getUser: async () => ({ data: { user: signedIn ? { id: uid } : null }, error: null }) },
+    rpc: async (name, data) => { saves.push({ name, data }); return { error } },
+    from: () => { throw new Error('Career must use a single atomic operation') },
+  }
+  return { saves, ...load('app/api/onboarding/save-step/route.ts', { '@supabase/supabase-js': { createClient: () => client } }) }
+}
+
+const careerRequest = entries => ({ stepIndex: 3, role: 'player', data: { career_experiences: entries } })
+
+test('onboarding converts selected years and clears an empty or current end date', async () => {
+  const api = careerHandler()
+  const response = await api.POST(request(careerRequest([
+    { club_name: ' Club ', start_date: '2019', end_date: '' },
+    { club_name: 'Current', start_date: '2024', end_date: '2023', is_current: true },
+  ])))
+  assert.equal(response.status, 200)
+  assert.equal(api.saves.length, 1)
+  assert.equal(api.saves[0].name, 'save_onboarding_career')
+  assert.equal(api.saves[0].data.experiences[0].start_date, '2019-01-01')
+  assert.equal(api.saves[0].data.experiences[0].club_name, 'Club')
+  assert.equal(api.saves[0].data.experiences[0].end_date, null)
+  assert.equal(api.saves[0].data.experiences[1].end_date, null)
+})
+
+test('invalid career dates or malformed entries never reach the database', async () => {
+  for (const entries of [null, {}, [null], [{ club_name: 'Club', start_date: '' }],
+    [{ club_name: 'Club', start_date: '2023-02-29' }],
+    [{ club_name: 'Club', start_date: '2024', end_date: '2020' }]]) {
+    const api = careerHandler()
+    assert.equal((await api.POST(request(careerRequest(entries)))).status, 400)
+    assert.equal(api.saves.length, 0)
+  }
+})
+
+test('career failures do not report success and unauthenticated calls cannot write', async () => {
+  const api = careerHandler({ error: { message: 'transaction rejected' } })
+  assert.equal((await api.POST(request(careerRequest([])))).status, 500)
+  const anonymous = careerHandler({ signedIn: false })
+  assert.equal((await anonymous.POST(request(careerRequest([]), ''))).status, 401)
+  assert.equal(anonymous.saves.length, 0)
+})
+
+test('empty career replacement is explicit and a different step cannot replace it', async () => {
+  const api = careerHandler()
+  assert.equal((await api.POST(request(careerRequest([])))).status, 200)
+  assert.equal(api.saves[0].data.experiences.length, 0)
+  assert.equal((await api.POST(request({ ...careerRequest([]), stepIndex: 6 }))).status, 400)
+  assert.equal(api.saves.length, 1)
+})
 
 test('registration without the account creation proof cannot create a profile', async () => {
   const api = profileHandler()
