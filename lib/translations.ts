@@ -284,7 +284,7 @@ export const t = {
     no_career: { fr: 'Aucun parcours renseigné.', de: 'Kein Werdegang angegeben.' },
     add_career: { fr: 'Ajouter mes clubs précédents →', de: 'Frühere Vereine hinzufügen →' },
     highlights: { fr: 'Highlights vidéo', de: 'Video-Highlights' },
-    video_soon: { fr: 'Upload de vidéos bientôt disponible (max 3 vidéos, 2 min, 100MB)', de: 'Video-Upload bald verfügbar (max. 3 Videos, 2 Min., 100 MB)' },
+    video_empty: { fr: 'Ajoute jusqu’à 3 vidéos ou liens YouTube.', de: 'Füge bis zu 3 Videos oder YouTube-Links hinzu.' },
     available_badge: { fr: 'Disponible', de: 'Verfügbar' },
     info: { fr: 'Informations', de: 'Informationen' },
     role_k: { fr: 'Rôle', de: 'Rolle' },
