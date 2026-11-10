@@ -5,9 +5,9 @@
 Le site utilise déjà Supabase (Auth, base de données et stockage), Resend et Sentry.
 Les « prochaines étapes » historiques ci-dessous ne décrivent plus l'état actuel.
 
-- Dernière publication directe vérifiée : `dpl_AvZHFZgWx8svjkDuPzQRNwUwVyPH`, projet `team-up-f-rch` (`prj_1sTKe47g53VCfpomVNDOWNJYeivM`), domaines `teamupfr.ch` et `www.teamupfr.ch`. Une publication GitHub ultérieure peut remplacer cet identifiant ; consulter le déploiement de production actuel dans Vercel.
+- Dernière publication applicative vérifiée : `dpl_A4RkkvpCAT2reh5d6MdKw41gXZvX`, commit GitHub `48d145646c45bb7ed2462e278415f06514648d4d`, projet `team-up-f-rch` (`prj_1sTKe47g53VCfpomVNDOWNJYeivM`), domaines `teamupfr.ch` et `www.teamupfr.ch`. Une publication ultérieure peut remplacer cet identifiant ; consulter le déploiement de production actuel dans Vercel.
 - Prévisualisation contrôlée : `dpl_7KLpWrmSdg6ZNPchJKAm9obn7q1B`.
-- Les corrections ont d'abord été publiées depuis les fichiers de ce dossier, puis préparées pour synchronisation GitHub depuis la base `ebd9529ca8eb14f0b36e477372870b2c8aebbb3f`. **Conserver les lectures via `public_profiles` dans les prochaines versions.** Un retour au code précédent casserait les lectures publiques après la restriction de confidentialité.
+- Les corrections sont intégrées à GitHub : PR #27 (confidentialité, vérification des clubs et messagerie) et PR #28 (menu et recherche sur petits écrans), toutes deux fusionnées et publiées. **Conserver les lectures via `public_profiles` dans les prochaines versions.** Un retour au code précédent casserait les lectures publiques après la restriction de confidentialité.
 - Exécution Vercel : Node 24. Dépendances : Next 15.5.29, React 19.3.1, PostCSS 8.5.32 via override de sécurité.
 
 ### Migrations appliquées à Supabase
@@ -33,12 +33,27 @@ Projet `iupcllegqqpmhxadcxqd`, dans cet ordre :
 - Vérification dans le navigateur intégré : recherche avec 11 profils, profil public d'un joueur accessible, 5 annonces chargées et lien de messagerie redirigeant un visiteur non connecté vers la connexion.
 - Les pièces jointes stockent un chemin privé et obtiennent un lien temporaire d'une heure, renouvelé lorsque la page redevient visible et toutes les 45 minutes. Un envoi de message refusé conserve le brouillon. La page générale d'administration renvoie les clubs vers leur procédure dédiée pour garder badge et approbation cohérents.
 
+### Essai réel autorisé avec deux comptes temporaires
+
+Le 10 novembre 2026, deux comptes appartenant au propriétaire ont été créés via le parcours public. Les liens de confirmation ont été ouverts par le propriétaire, qui a également approuvé le club de test depuis l'administration.
+
+- Création des profils, confirmation email et connexion par mot de passe réussies. Le club était initialement en attente ; son approbation et son badge ont ensuite été mis à jour ensemble.
+- Sauvegarde des profils et refus des modifications de leur propre badge vérifiés avec les sessions réelles. Les données privées d'un autre membre ne sont pas lisibles.
+- Messages dans les deux sens, accusé de lecture, fichier privé téléchargeable par son destinataire et accès anonyme refusé. Le destinataire ne peut pas réécrire le message ni déclencher un email au nom de l'expéditeur.
+- Création et remplacement d'un avatar réussis ; remplacement par l'autre compte refusé.
+- Publication d'une annonce de test par le club masqué, candidature du joueur, acceptation par le club et statut accepté visible par le joueur : réussis.
+- Dans le navigateur, connexion du club, lecture de la conversation, chargement puis envoi d'un PDF via le bouton de pièce jointe et déconnexion : réussis.
+- Livraison vérifiée directement dans Gmail, avec une recherche limitée aux alias des deux comptes : notifications de message dans les deux sens, nouvelle candidature, candidature acceptée, confirmations email et approbation du club. Aucun autre membre n'a été contacté.
+- Menu et recherche contrôlés à 390 px en français et 320 px en allemand : aucun débordement horizontal, menu ouvrable.
+- Nettoyage vérifié : les deux comptes, leurs sessions, trois messages, une annonce, une candidature et trois fichiers ont été supprimés. Retour à 12 profils privés, 11 profils publics, un message préexistant et zéro pièce jointe privée. Les emails de test restent dans la boîte du propriétaire.
+- `/api/health` répond 200 avec la base connectée après nettoyage. Aucun log applicatif d'erreur ou d'avertissement n'a été retourné par Vercel sur la fenêtre des essais de messagerie et de candidature.
+
 ### Points restant à vérifier ou corriger
 
 - `npm audit` : 0 critique, 0 élevée, 10 modérées dans les dépendances de construction/lint (glob, minimatch et dépendants).
 - Sentry : le build aboutit, mais l'envoi des source maps affiche « Project not found ». Vérifier la correspondance organisation/projet et les droits du jeton ; la réception réelle des erreurs n'est pas validée.
 - Supabase signale la [protection contre les mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) comme désactivée. Aucun abonnement n'a été modifié.
-- Livraison réelle des emails, parcours complets avec deux comptes connectés et revue mobile exhaustive non validés par ces tests. Les tests ne constituent pas une garantie de fonctionnement à 100 %.
+- L'essai réel couvre les parcours ci-dessus ; la revue de tous les appareils, navigateurs et cas limites n'est pas exhaustive. Les tests ne constituent pas une garantie de fonctionnement à 100 %.
 
 ---
 
