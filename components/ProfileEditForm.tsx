@@ -266,6 +266,8 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [hasChanges, setHasChanges] = useState(false)
   const dirtyRef = useRef(false)
   const hasChangesRef = useRef(false)
+  const revisionRef = useRef(0)
+  const queuedSave = useRef<(() => void) | null>(null)
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Prevent cert load from triggering autosave
   const skipCertDirty = useRef(0)
@@ -292,11 +294,12 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   useEffect(() => {
     if (!dirtyRef.current) { dirtyRef.current = true; return }
     if (skipCertDirty.current > 0) { skipCertDirty.current--; return }
+    const revision = ++revisionRef.current
     hasChangesRef.current = true
     setHasChanges(true)
-    setSaveStatus('idle')
+    if (!savingRef.current) setSaveStatus('idle')
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
-    autosaveTimerRef.current = setTimeout(() => { void doSave(true) }, 2000)
+    autosaveTimerRef.current = setTimeout(() => { void doSave(true, revision) }, 2000)
     return () => { if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bio, position, positionSecondary, genre, ligue, zone, foot, available, phone, career,
@@ -381,26 +384,23 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const persistedVideos = useRef(profileVideoFields.map(field => profile[field] || null))
   const pendingVideoCleanup = useRef(new Map<string, string>())
 
-  async function doSave(silent: boolean) {
-    if (!hasChangesRef.current && silent) return
-    if (savingRef.current) return
+  async function doSave(silent: boolean, revision = revisionRef.current) {
+    if (revision !== revisionRef.current || (!hasChangesRef.current && silent)) return
+    if (savingRef.current) {
+      queuedSave.current = () => { void doSave(silent, revision) }
+      return
+    }
     savingRef.current = true
     setSaveStatus('saving')
     setSaveError('')
     try {
       const { base, ext } = buildPayload()
-      const { error: e1 } = await supabase.from('profiles').update(base).eq('id', profile.id)
-      if (e1) {
-        setSaveStatus('error')
-        setSaveError([e1.message, e1.details, e1.hint].filter(Boolean).join(' — '))
-        return
-      }
       const nextVideos = profileVideoFields.map(field => ext[field] as string | null)
       for (const [index, field] of profileVideoFields.entries()) {
         const previous = persistedVideos.current[index]
         if (nextVideos[index] === previous) delete ext[field]
       }
-      let update = supabase.from('profiles').update(ext).eq('id', profile.id)
+      let update = supabase.from('profiles').update({ ...base, ...ext }).eq('id', profile.id)
       for (const [index, field] of profileVideoFields.entries()) {
         const previous = persistedVideos.current[index]
         update = previous === null ? update.is(field, null) : update.eq(field, previous)
@@ -456,15 +456,24 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
         for (const url of urls) pendingVideoCleanup.current.delete(ownedVideoPath(url, profile.id, storageUrl)!)
       }
 
-      hasChangesRef.current = false
-      setHasChanges(false)
-      setSaveStatus('saved')
-      onSaved(updatedProfile, silent)
-      if (silent) {
+      const changedWhileSaving = revisionRef.current !== revision
+      hasChangesRef.current = changedWhileSaving
+      setHasChanges(changedWhileSaving)
+      setSaveStatus(changedWhileSaving ? 'idle' : 'saved')
+      onSaved(updatedProfile, silent || changedWhileSaving)
+      if (silent && !changedWhileSaving) {
         setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2200)
       }
+    } catch {
+      setSaveStatus('error')
+      setSaveError(lang === 'de'
+        ? 'Das Profil konnte nicht gespeichert werden. Versuche es erneut.'
+        : 'Impossible d’enregistrer le profil. Réessaie.')
     } finally {
       savingRef.current = false
+      const next = queuedSave.current
+      queuedSave.current = null
+      next?.()
     }
   }
 

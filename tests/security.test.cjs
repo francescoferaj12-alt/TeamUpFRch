@@ -57,14 +57,26 @@ function profileHandler({ expectedProof = proof, existing = false, createdAt = n
 
 const signup = { userId: uid, profileToken: proof, profileData: { email: 'owner@example.com', role: 'club', club_name: 'Test Club' } }
 
-function careerHandler({ error = null, signedIn = true } = {}) {
+function careerHandler({ error = null, signedIn = true, actualRole = 'player', updateMissing = false } = {}) {
   const saves = []
+  const writes = []
   const client = {
     auth: { getUser: async () => ({ data: { user: signedIn ? { id: uid } : null }, error: null }) },
     rpc: async (name, data) => { saves.push({ name, data }); return { error } },
-    from: () => { throw new Error('Career must use a single atomic operation') },
+    from: table => {
+      assert.equal(table, 'profiles')
+      let update = false
+      return {
+        select() { return this },
+        eq(key, value) { assert.equal(value, uid); return this },
+        update(fields) { update = true; writes.push(fields); return this },
+        async maybeSingle() {
+          return { data: update ? (updateMissing ? null : { id: uid }) : (actualRole ? { role: actualRole } : null) }
+        },
+      }
+    },
   }
-  return { saves, ...load('app/api/onboarding/save-step/route.ts', { '@supabase/supabase-js': { createClient: () => client } }) }
+  return { saves, writes, ...load('app/api/onboarding/save-step/route.ts', { '@supabase/supabase-js': { createClient: () => client } }) }
 }
 
 const careerRequest = entries => ({ stepIndex: 3, role: 'player', data: { career_experiences: entries } })
@@ -336,5 +348,39 @@ test('daily job sends one admin reminder and one localized digest for opted-in m
   assert.match(sent[0].options.idempotencyKey, /^club-reminder\//)
   assert.equal(sent[1].message.to, 'receiver@example.test')
   assert.match(sent[1].message.subject, /neue Treffer/)
-  assert.match(sent[1].message.text, /^1 neue Anzeigen/)
+  assert.match(sent[0].message.text, /^Une demande de club est/)
+  assert.match(sent[1].message.text, /^Eine neue Anzeige passt/)
+})
+
+test('login preserves valid site routes and falls back for untrusted redirect targets', () => {
+  const { internalRedirect } = load('lib/internal-redirect.ts')
+  assert.equal(internalRedirect('/messages?partner=fixture#chat'), '/messages?partner=fixture#chat')
+  assert.equal(internalRedirect(null), '/profil')
+  assert.equal(internalRedirect('https://example.test'), '/profil')
+  assert.equal(internalRedirect('//example.test'), '/profil')
+})
+
+test('onboarding completes each actual role only on its final step', async () => {
+  for (const [role, stepIndex, field, value] of [
+    ['player', 6, 'video1_url', 'https://example.test/video'],
+    ['coach', 5, 'avatar_url', 'https://example.test/coach'],
+    ['club', 4, 'club_contact_role', 'Responsable sportif'],
+  ]) {
+    const api = careerHandler({ actualRole: role })
+    const early = await api.POST(request({ role, stepIndex: 0, data: {} }))
+    assert.equal((await early.json()).profile_completed, false)
+    const end = await api.POST(request({ role, stepIndex, data: { [field]: value, verified: true } }))
+    assert.equal(end.status, 200)
+    assert.equal((await end.json()).profile_completed, true)
+    assert.equal(api.writes[1][field], value)
+    assert.equal(api.writes[1].verified, undefined)
+  }
+})
+
+test('onboarding rejects a mismatched role and a missing profile update', async () => {
+  const mismatch = careerHandler({ actualRole: 'coach' })
+  assert.equal((await mismatch.POST(request({ role: 'club', stepIndex: 4, data: {} }))).status, 400)
+  assert.equal(mismatch.writes.length, 0)
+  const missing = careerHandler({ actualRole: 'player', updateMissing: true })
+  assert.equal((await missing.POST(request({ role: 'player', stepIndex: 6, data: {} }))).status, 404)
 })

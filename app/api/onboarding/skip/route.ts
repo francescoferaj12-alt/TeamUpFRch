@@ -14,15 +14,17 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .update({ onboarding_skipped: true })
     .eq('id', user.id)
+    .select('id').maybeSingle()
 
   if (error) {
     console.error('Onboarding skip error:', error)
     return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   }
 
+  if (!data) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   return NextResponse.json({ ok: true })
 }

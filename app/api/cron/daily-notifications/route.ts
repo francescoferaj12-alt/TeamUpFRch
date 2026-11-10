@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       from: sender,
       to: 'teamupfr.ch@gmail.com',
       subject: 'TeamUpFR — demandes de clubs à traiter',
-      text: `${pending.count} demande(s) de club sont en attente depuis plus de 24 h. https://teamupfr.ch/admin/clubs`,
+      text: `${pending.count === 1 ? 'Une demande de club est' : `${pending.count} demandes de clubs sont`} en attente depuis plus de 24 h. https://teamupfr.ch/admin/clubs`,
     }, { idempotencyKey: `club-reminder/${day}` }).catch(() => null)
     if (!result || result.error) failures++
     else sent++
@@ -81,8 +81,8 @@ export async function GET(req: NextRequest) {
           to: member.email,
           subject: de ? 'TeamUpFR — neue Treffer für deine Suchen' : 'TeamUpFR — nouvelles annonces pour tes recherches',
           text: de
-            ? `${ids.size} neue Anzeigen passen zu deinen gespeicherten Suchen. Öffne oder verwalte sie hier: https://teamupfr.ch/annonces`
-            : `${ids.size} nouvelles annonces correspondent à tes recherches enregistrées. Consulte-les ou gère tes alertes ici : https://teamupfr.ch/annonces`,
+            ? `${ids.size === 1 ? 'Eine neue Anzeige passt' : `${ids.size} neue Anzeigen passen`} zu deinen gespeicherten Suchen. Öffne oder verwalte sie hier: https://teamupfr.ch/annonces`
+            : `${ids.size === 1 ? 'Une nouvelle annonce correspond' : `${ids.size} nouvelles annonces correspondent`} à tes recherches enregistrées. Consulte les annonces ou gère tes alertes ici : https://teamupfr.ch/annonces`,
         }, { idempotencyKey: `saved-searches/${windowEnd.toISOString().slice(0, 10)}/${ownerId}` }).catch(() => null)
         if (!result || result.error) failures++
         else sent++
