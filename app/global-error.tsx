@@ -31,7 +31,7 @@ export default function GlobalError({
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
           <h1 style={{ fontSize: '1.75rem', marginBottom: '12px', fontWeight: 700 }}>
-            Une erreur s'est produite
+            Une erreur s&apos;est produite
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '32px', maxWidth: 400 }}>
             Notre équipe a été notifiée automatiquement.

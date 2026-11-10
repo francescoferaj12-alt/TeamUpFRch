@@ -18,11 +18,11 @@ async function requireAdmin(req: NextRequest) {
   return user
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminUser = await requireAdmin(req)
   if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = params
+  const { id } = await params
   const { reason } = await req.json()
   if (!reason?.trim()) return NextResponse.json({ error: 'Reason required' }, { status: 400 })
 

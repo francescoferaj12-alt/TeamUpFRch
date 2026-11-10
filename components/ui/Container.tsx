@@ -6,7 +6,7 @@ interface ContainerProps {
   size?: 'default' | 'legal'
   className?: string
   style?: CSSProperties
-  as?: keyof JSX.IntrinsicElements
+  as?: keyof React.JSX.IntrinsicElements
 }
 
 export default function Container({

@@ -25,11 +25,11 @@ async function requireAdmin(req: NextRequest) {
   return user
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminUser = await requireAdmin(req)
   if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = params
+  const { id } = await params
   console.log('[approve] Approving club id:', id)
 
   const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } })
@@ -39,6 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .from('profiles')
     .select('email,club_name,zone,verified,club_verification_status')
     .eq('id', id)
+    .eq('role', 'club')
     .single()
 
   if (fetchErr) {
@@ -51,13 +52,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
   console.log('[approve] Found club:', profile.club_name, 'current status:', profile.club_verification_status)
 
-  // Step 1: update verification status fields (new columns — should not be blocked by trigger)
+  // Badge and approval status must change together.
   const { error: statusErr } = await admin
     .from('profiles')
     .update({
       club_verification_status: 'approved',
       club_verified_at: new Date().toISOString(),
       club_rejection_reason: null,
+      verified: true,
     })
     .eq('id', id)
 
@@ -71,19 +73,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }, { status: 500 })
   }
   console.log('[approve] club_verification_status set to approved ✓')
-
-  // Step 2: try to set verified=true — may be blocked by profiles_block_protected_updates trigger
-  const { error: verifiedErr } = await admin
-    .from('profiles')
-    .update({ verified: true })
-    .eq('id', id)
-
-  if (verifiedErr) {
-    // Non-fatal: log but continue — club_verification_status is the source of truth
-    console.warn('[approve] verified=true blocked (trigger?):', verifiedErr.message, verifiedErr.code)
-  } else {
-    console.log('[approve] verified=true set ✓')
-  }
 
   // Send approval email (non-fatal)
   if (profile.email && process.env.RESEND_API_KEY) {

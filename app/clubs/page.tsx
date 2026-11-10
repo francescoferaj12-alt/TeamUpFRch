@@ -51,11 +51,9 @@ export default function ClubsPage() {
   useEffect(() => {
     async function load() {
       const { data } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('*')
         .eq('role', 'club')
-        .neq('hidden', true)
-        .eq('club_verification_status', 'approved')
         .order('created_at', { ascending: false })
       if (data) setClubs(data)
       setLoading(false)
@@ -307,7 +305,7 @@ export default function ClubsPage() {
         <div className="cb-ctaband">
           <div style={{ maxWidth:600 }}>
             <h2 style={{ fontFamily:"'Russo One',sans-serif", fontSize:'clamp(20px,2.5vw,30px)', lineHeight:1.1, marginBottom:10, letterSpacing:.5, textTransform:'uppercase' }}>
-              {lang === 'fr' ? <>Votre club n'est pas <span style={{ color:'#FF3A3A' }}>listé ?</span></> : <>Ihr Verein ist nicht <span style={{ color:'#FF3A3A' }}>aufgeführt?</span></>}
+              {lang === 'fr' ? <>Votre club n&apos;est pas <span style={{ color:'#FF3A3A' }}>listé ?</span></> : <>Ihr Verein ist nicht <span style={{ color:'#FF3A3A' }}>aufgeführt?</span></>}
             </h2>
             <p style={{ fontSize:15, color:'rgba(255,255,255,.6)', lineHeight:1.55 }}>
               {lang === 'fr'

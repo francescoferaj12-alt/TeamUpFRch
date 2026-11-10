@@ -13,7 +13,7 @@ import { relativeTime } from '../../lib/utils/time'
 import PostModal from '../../components/PostModal'
 
 type AppWithAnnonce = Application & { annonce_title?: string; annonce_author_name?: string }
-type FeedItem = { id: string; dotColor: 'green'|'red'|'blue'|'orange'; text: JSX.Element|string; timestamp: string }
+type FeedItem = { id: string; dotColor: 'green'|'red'|'blue'|'orange'; text: React.JSX.Element|string; timestamp: string }
 
 // ——— SVG helpers ————————————————————————————
 const Svg = ({ children, size=18, color='currentColor', ...p }: any) => (
@@ -919,7 +919,7 @@ function StatusBadge({ status }: { status: string }) {
 function Loading() {
   return <div className="db-section-loading"><div className="db-mini-spinner"/></div>
 }
-function Empty({ icon, msg, children }: { icon: JSX.Element; msg: string; children?: React.ReactNode }) {
+function Empty({ icon, msg, children }: { icon: React.JSX.Element; msg: string; children?: React.ReactNode }) {
   return (
     <div className="db-section-empty">
       {icon}

@@ -83,20 +83,25 @@ export default function PublicProfilPage() {
   const [showAllStrengths, setShowAllStrengths] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('profiles').select('*').eq('id', id).single(),
-      supabase.from('career_experiences').select('*').eq('user_id', id).order('start_date', { ascending: false }),
-      supabase.from('coach_certificates').select('*').eq('coach_id', id).order('created_at', { ascending: true }),
-      supabase.auth.getUser(),
-    ]).then(([{ data, error }, { data: exps }, { data: certs }, { data: auth }]) => {
+    async function loadProfile() {
+      const [{ data: auth }, { data: exps }, { data: certs }] = await Promise.all([
+        supabase.auth.getUser(),
+        supabase.from('career_experiences').select('*').eq('user_id', id).order('start_date', { ascending: false }),
+        supabase.from('coach_certificates').select('*').eq('coach_id', id).order('created_at', { ascending: true }),
+      ])
+      const ownProfile = auth.user?.id === id
+      const { data, error } = await supabase
+        .from(ownProfile ? 'profiles' : 'public_profiles')
+        .select('*')
+        .eq('id', id)
+        .single()
       if (error || !data) { setNotFound(true); setLoading(false); return }
-      // Block access to hidden (unverified) profiles unless it's the user's own profile
-      if (data.hidden && auth.user?.id !== data.id) { setNotFound(true); setLoading(false); return }
       setProfile(data)
       setExperiences(exps || [])
       setCertificates(certs || [])
       setLoading(false)
-    })
+    }
+    loadProfile()
   }, [id])
 
   if (loading) return (
@@ -163,7 +168,7 @@ export default function PublicProfilPage() {
             <div style={{ flex:1, minWidth:0 }}>
               {/* Display name */}
               <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(1.4rem, 4vw, 2rem)', color:'#fff', lineHeight:1.1, marginBottom:8, display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
-                {displayName || profile.email}
+                {displayName || 'Profil'}
                 {profile.verified && <VerifiedBadge size={22} />}
               </div>
 

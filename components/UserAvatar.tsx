@@ -16,7 +16,7 @@ export default function UserAvatar({ userId, size = 42, radius = 12, fallback }:
   useEffect(() => {
     if (!userId) return
     supabase
-      .from('profiles')
+      .from('public_profiles')
       .select('avatar_url')
       .eq('id', userId)
       .single()

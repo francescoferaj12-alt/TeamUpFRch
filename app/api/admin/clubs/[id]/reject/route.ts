@@ -19,13 +19,13 @@ async function requireAdmin(req: NextRequest) {
   return user
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminUser = await requireAdmin(req)
   if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = params
+  const { id } = await params
   const { reason } = await req.json()
-  if (!reason?.trim()) return NextResponse.json({ error: 'Reason required' }, { status: 400 })
+  if (typeof reason !== 'string' || !reason.trim()) return NextResponse.json({ error: 'Reason required' }, { status: 400 })
 
   console.log('[reject] Rejecting club id:', id, 'reason:', reason)
 
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .from('profiles')
     .select('email,club_name,zone')
     .eq('id', id)
+    .eq('role', 'club')
     .single()
 
   if (fetchErr || !profile) {
@@ -42,12 +43,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'Club not found' }, { status: 404 })
   }
 
-  // Step 1: update verification status fields
+  // Badge and approval status must change together.
   const { error: statusErr } = await admin
     .from('profiles')
     .update({
       club_verification_status: 'rejected',
       club_rejection_reason: reason.trim(),
+      club_verified_at: null,
+      verified: false,
     })
     .eq('id', id)
 
@@ -56,13 +59,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: statusErr.message, code: statusErr.code }, { status: 500 })
   }
   console.log('[reject] club_verification_status set to rejected ✓')
-
-  // Step 2: try verified=false — non-fatal if trigger blocks it
-  const { error: verifiedErr } = await admin
-    .from('profiles')
-    .update({ verified: false })
-    .eq('id', id)
-  if (verifiedErr) console.warn('[reject] verified=false blocked (trigger?):', verifiedErr.message)
 
   // Send rejection email (non-fatal)
   if (profile.email && process.env.RESEND_API_KEY) {

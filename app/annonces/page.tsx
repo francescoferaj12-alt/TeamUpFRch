@@ -96,14 +96,21 @@ export default function AnnoncesPage() {
   const router = useRouter()
   const { profile: currentUser } = useAuth()
 
-  // ——— Fetch (unchanged) ——————————————————————
+  // Public author details are loaded without exposing private profile fields.
   useEffect(() => {
     supabase.from('annonces')
-      .select('*, profiles!author_id(id, avatar_url, verified, hidden)')
+      .select('*')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        const visible = (data || []).filter((a: any) => !a.profiles?.hidden)
+      .then(async ({ data }) => {
+        const rows = data || []
+        const authorIds = [...new Set(rows.map(a => a.author_id))]
+        const { data: authors } = authorIds.length
+          ? await supabase.from('public_profiles').select('id,avatar_url,verified').in('id', authorIds)
+          : { data: [] }
+        const byId = new Map((authors || []).map(author => [author.id, author]))
+        const visible = rows.filter(a => byId.has(a.author_id))
+          .map(a => ({ ...a, profiles: byId.get(a.author_id) }))
         setAnnonces(visible as Annonce[])
         setLoading(false)
       })
@@ -147,7 +154,7 @@ export default function AnnoncesPage() {
         <div className="an-container">
           <div className="an-eyebrow">
             <IcoGrid s={14} />
-            Fil d'annonces
+            Fil d&apos;annonces
           </div>
           <span className="an-live-pulse">En direct</span>
           <h1 className="an-title">
@@ -827,7 +834,7 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: {
             <div className="an-modal-check"><IcoCheck s={32} /></div>
             <div className="an-modal-done-title">Candidature envoyée !</div>
             <div className="an-modal-done-sub">
-              Tu peux suivre l'état dans <strong>Mes candidatures</strong>.
+              Tu peux suivre l&apos;état dans <strong>Mes candidatures</strong>.
             </div>
           </div>
         ) : (
