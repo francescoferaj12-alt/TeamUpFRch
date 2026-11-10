@@ -1,5 +1,6 @@
 'use client'
 
+import { internalRedirect } from '../../lib/internal-redirect'
 import { footballLabel } from '../../lib/football-labels'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
@@ -95,7 +96,7 @@ function LoginForm() {
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') || '/profil'
+  const redirectTo = internalRedirect(searchParams.get('redirect'))
   const resetSuccess = searchParams.get('reset') === '1'
   const loginTriggered = useRef(false)
 

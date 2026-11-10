@@ -31,7 +31,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
-  const isLast = stepIndex === LAST_STEP[role]
+  const { data: profile, error: profileError } = await supabase.from('profiles')
+    .select('role').eq('id', user.id).maybeSingle()
+  if (profileError) {
+    captureError(profileError, { api: 'onboarding/save-step', step: 'profile_role', userId: user.id })
+    return NextResponse.json({ error: 'Profile lookup failed' }, { status: 500 })
+  }
+  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+  if (profile.role !== role) return NextResponse.json({ error: 'Role does not match profile' }, { status: 400 })
+  const isLast = stepIndex === LAST_STEP[profile.role]
 
   // career_experiences is handled separately
   if (Object.hasOwn(data, 'career_experiences')) {
@@ -114,11 +122,13 @@ export async function POST(req: NextRequest) {
     profileUpdate.onboarding_completed_at = new Date().toISOString()
   }
 
-  const { error: updateErr } = await supabase.from('profiles').update(profileUpdate).eq('id', user.id)
+  const { data: updated, error: updateErr } = await supabase.from('profiles')
+    .update(profileUpdate).eq('id', user.id).select('id').maybeSingle()
   if (updateErr) {
     captureError(updateErr, { api: 'onboarding/save-step', step: stepIndex, role, userId: user.id })
     return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   }
 
+  if (!updated) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   return NextResponse.json({ ok: true, profile_completed: isLast })
 }
