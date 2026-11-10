@@ -125,7 +125,7 @@ export default function RecherchePage() {
         /* Search bar */
         .sr-bar { display:flex; align-items:center; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.18); border-radius:999px; padding:8px 8px 8px 24px; transition:border-color .3s,background .3s,box-shadow .3s; max-width:800px; margin:0 auto; }
         .sr-bar:focus-within { border-color:#FF3A3A !important; background:rgba(255,255,255,.09) !important; box-shadow:0 0 0 4px rgba(255,58,58,.15) !important; }
-        .sr-inp { flex:1; background:transparent; border:0; outline:0; padding:13px 16px; font-size:16px; color:#fff; font-family:inherit; }
+        .sr-inp { flex:1; min-width:0; background:transparent; border:0; outline:0; padding:13px 16px; font-size:16px; color:#fff; font-family:inherit; }
         .sr-inp::placeholder { color:rgba(255,255,255,.4); }
         .sr-sbtn { background:#FF3A3A; color:#fff; border:none; border-radius:999px; padding:12px 24px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; letter-spacing:.3px; transition:transform .25s,box-shadow .25s; white-space:nowrap; }
         .sr-sbtn:hover { transform:translateY(-1px); box-shadow:0 10px 24px rgba(255,58,58,.4); }
@@ -149,7 +149,12 @@ export default function RecherchePage() {
         /* Filter grid — responsive */
         .sr-fgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
         @media (max-width:960px)  { .sr-fgrid { grid-template-columns:repeat(2,1fr) !important; } }
-        @media (max-width:520px)  { .sr-fgrid { grid-template-columns:1fr !important; } }
+        @media (max-width:520px)  {
+          .sr-fgrid { grid-template-columns:1fr !important; }
+          .sr-bar { padding:6px; }
+          .sr-inp { padding:12px 10px; }
+          .sr-sbtn { flex-shrink:0; padding:12px 16px; font-size:13px; }
+        }
         /* Reset button */
         .sr-reset { font-size:13px; font-weight:500; color:rgba(255,255,255,.45); display:inline-flex; align-items:center; gap:6px; padding:5px 0; background:none; border:none; cursor:pointer; font-family:inherit; transition:color .2s; letter-spacing:.3px; }
         .sr-reset:hover { color:#fff; }

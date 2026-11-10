@@ -453,6 +453,19 @@ textarea.input { resize: vertical; min-height: 80px; }
   .nav-desktop { display: none !important; }
   .nav-hamburger { display: flex !important; }
 }
+@media (max-width: 520px) {
+  .nav { padding: 0 12px; gap: 8px; }
+  .nav-logo { flex-shrink: 0; }
+  .nav .brand-text { font-size: 18px; }
+  .nav .brand-f, .nav .brand-r { width: 24px; height: 24px; font-size: 15px; }
+  .nav-right { gap: 4px; flex-shrink: 0; }
+  .nav-right .btn-sm { padding: 6px 9px; font-size: 11px; }
+}
+@media (max-width: 359px) {
+  .nav .brand-text { font-size: 16px; }
+  .nav .brand-f, .nav .brand-r { width: 20px; height: 22px; font-size: 14px; }
+  .nav-right .btn-sm { padding: 6px; font-size: 10px; }
+}
 
 /* ── CAREER SECTION ── */
 .career-section { margin-bottom: 1.25rem; }
