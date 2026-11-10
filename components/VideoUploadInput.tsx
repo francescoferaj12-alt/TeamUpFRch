@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, ChangeEvent } from 'react'
+import { ownedVideoPath } from '../lib/profile-videos'
 import { supabase } from '../lib/supabase'
 
 interface Props {
@@ -30,11 +31,12 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [deleteRequested, setDeleteRequested] = useState<string | null>(null)
 
   async function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('video/')) { alert('Seuls les fichiers vidéo sont acceptés'); return }
+    if (!file.type.startsWith('video/')) { alert(lang === 'de' ? 'Wähle eine Videodatei aus.' : 'Seuls les fichiers vidéo sont acceptés'); return }
     if (file.size > 200 * 1024 * 1024) { alert('Max 200 MB'); return }
 
     // Duration check — YouTube links are exempt, only applies to file uploads
@@ -59,8 +61,8 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
     setProgress(0)
     e.target.value = ''
 
-    const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4'
-    const path = `${profileId}/video_${index}.${ext}`
+    const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || 'mp4'
+    const path = `${profileId}/video_${index}_${crypto.randomUUID()}.${ext}`
 
     // Supabase JS doesn't expose upload progress natively — fake it smoothly
     let fakeP = 0
@@ -71,12 +73,12 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
 
     const { data, error } = await supabase.storage
       .from('videos')
-      .upload(path, file, { upsert: true, contentType: file.type })
+      .upload(path, file, { contentType: file.type })
 
     clearInterval(fakeInterval)
 
     if (error) {
-      alert('Erreur upload: ' + error.message)
+      alert(lang === 'de' ? 'Das Video konnte nicht hochgeladen werden. Versuche es erneut.' : 'Impossible de charger la vidéo. Réessaie.')
       onDurationChange?.(null)
       setUploading(false)
       setProgress(0)
@@ -89,6 +91,10 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
     setTimeout(() => { setUploading(false); setProgress(0) }, 600)
   }
 
+  const isUploaded = Boolean(ownedVideoPath(value, profileId, process.env.NEXT_PUBLIC_SUPABASE_URL || ''))
+  const removeLabel = isUploaded
+    ? (lang === 'de' ? 'Video endgültig löschen' : 'Supprimer définitivement la vidéo')
+    : (lang === 'de' ? 'Video vom Profil entfernen' : 'Retirer la vidéo du profil')
   const isVideo = value && !value.includes('youtube') && !value.includes('youtu.be')
 
   return (
@@ -104,7 +110,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          title="Choisir depuis la galerie"
+          aria-label={lang === 'de' ? 'Video aus der Galerie auswählen' : 'Choisir une vidéo dans la galerie'}
           style={{
             flexShrink: 0, width: 40, height: 40,
             background: uploading ? 'rgba(255,58,58,.15)' : 'rgba(255,255,255,.08)',
@@ -156,11 +162,36 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
           </div>
           <button
             type="button"
-            onClick={() => { onChange(''); onDurationChange?.(null) }}
+            aria-label={removeLabel}
+            title={removeLabel}
+            onClick={() => {
+              if (isUploaded) setDeleteRequested(value)
+              else {
+                onChange('')
+                onDurationChange?.(null)
+              }
+            }}
             style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,.6)', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             ✕
           </button>
+        </div>
+      )}
+      {deleteRequested !== null && deleteRequested === value && (
+        <div style={{ marginTop: 8, display: 'grid', gap: 8, fontSize: 13 }}>
+          <span>{lang === 'de'
+            ? 'Das Video wird nach dem Speichern endgültig gelöscht.'
+            : 'La vidéo sera définitivement supprimée après l’enregistrement.'}</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" onClick={() => {
+              setDeleteRequested(null)
+              onChange('')
+              onDurationChange?.(null)
+            }}>{lang === 'de' ? 'Löschen bestätigen' : 'Confirmer la suppression'}</button>
+            <button type="button" onClick={() => setDeleteRequested(null)}>
+              {lang === 'de' ? 'Abbrechen' : 'Annuler'}
+            </button>
+          </div>
         </div>
       )}
     </div>

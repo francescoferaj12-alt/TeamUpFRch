@@ -577,7 +577,7 @@ export default function ProfilPage() {
               onClick={() => setShowPostModal(true)}
               style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:6 }}
             >
-              <IcoMegaphone s={13} /> Publier un post
+              <IcoMegaphone s={13} /> {lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
             </button>
             <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,0.1)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
@@ -659,14 +659,14 @@ export default function ProfilPage() {
       {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
           <div style={{ background:'linear-gradient(135deg,#0D1F4A,#081434)', padding:'.85rem 1.25rem' }}>
-            <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Entraîneur</span>
+            <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{lang === 'de' ? 'Trainerprofil' : 'Profil Entraîneur'}</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
             {[
-              { label:'Expérience', value:profile.coach_experience, color:'#FF3A3A' },
-              { label:'Diplôme',    value:profile.coach_diploma,    color:'#3A7AFF' },
-              { label:'Spécialité', value:profile.coach_specialty,  color:'#2ED27F' },
-              { label:'Statut',     value:profile.coach_availability, color:'#b56cf0' },
+              { label:lang === 'de' ? 'Erfahrung' : 'Expérience', value:profile.coach_experience, color:'#FF3A3A' },
+              { label:lang === 'de' ? 'Diplom' : 'Diplôme',    value:profile.coach_diploma,    color:'#3A7AFF' },
+              { label:lang === 'de' ? 'Spezialgebiet' : 'Spécialité', value:profile.coach_specialty,  color:'#2ED27F' },
+              { label:lang === 'de' ? 'Status' : 'Statut',     value:profile.coach_availability, color:'#b56cf0' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
@@ -682,13 +682,13 @@ export default function ProfilPage() {
       {profile.role === 'club' && (
         <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
           <div style={{ background:'linear-gradient(135deg,#0D1F4A,#081434)', padding:'.85rem 1.25rem' }}>
-            <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>Profil Club</span>
+            <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{lang === 'de' ? 'Vereinsprofil' : 'Profil Club'}</span>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
             {[
-              { label:'Ligue',       value: profile.ligue,  color:'#FF3A3A' },
-              { label:'Zone',        value: profile.zone,   color:'#3A7AFF' },
-              { label:'Recrutement', value: profile.available ? 'Ouvert' : 'Complet', color: profile.available ? '#2ED27F' : '#888' },
+              { label:lang === 'de' ? 'Liga' : 'Ligue',       value: profile.ligue,  color:'#FF3A3A' },
+              { label:lang === 'de' ? 'Region' : 'Zone',        value: profile.zone,   color:'#3A7AFF' },
+              { label:lang === 'de' ? 'Spielersuche' : 'Recrutement', value: profile.available ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: profile.available ? '#2ED27F' : '#888' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
@@ -765,20 +765,20 @@ export default function ProfilPage() {
       <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
           <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1, display:'flex', alignItems:'center', gap:6 }}>
-            <IcoMegaphone s={15} /> Mes annonces ({myPosts.length})
+            <IcoMegaphone s={15} /> {lang === 'de' ? 'Meine Anzeigen' : 'Mes annonces'} ({myPosts.length})
           </div>
           <button
             onClick={() => setShowPostModal(true)}
             style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'5px 12px', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
           >
-            + Nouveau
+            {lang === 'de' ? '+ Neu' : '+ Nouveau'}
           </button>
         </div>
         {myPosts.length === 0 ? (
           <div style={{ textAlign:'center', padding:'1rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
-            Aucun post publié.{' '}
+            {lang === 'de' ? 'Noch keine Anzeigen veröffentlicht.' : 'Aucun post publié.'}{' '}
             <button onClick={() => setShowPostModal(true)} style={{ color:'#FF3A3A', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700, borderRadius:999 }}>
-              Publier →
+              {lang === 'de' ? 'Veröffentlichen →' : 'Publier →'}
             </button>
           </div>
         ) : (
@@ -798,7 +798,7 @@ export default function ProfilPage() {
                   )}
                   <button
                     onClick={async () => {
-                      if (!confirm('Supprimer ce post ?')) return
+                      if (!confirm(lang === 'de' ? 'Diese Anzeige löschen?' : 'Supprimer ce post ?')) return
                       const { error } = await supabase.from('annonces').delete().eq('id', post.id).eq('author_id', profile.id)
                       if (error) { alert('Erreur: ' + error.message); return }
                       setMyPosts(prev => prev.filter(p => p.id !== post.id))

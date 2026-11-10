@@ -1,5 +1,7 @@
 'use client'
 
+import MemberSafetyActions from '../../components/MemberSafetyActions'
+
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -357,7 +359,9 @@ export default function MessagesPage() {
       read: false
     }).select().single()
     if (error || !newMsg) {
-      setSendError(lang === 'de' ? 'Nachricht nicht gesendet. Dein Entwurf bleibt erhalten. Bitte erneut versuchen.' : 'Message non envoyé. Ton brouillon est conservé. Réessaie.')
+      setSendError(error?.code === '42501'
+        ? (lang === 'de' ? 'Du kannst diesem Mitglied keine Nachricht senden.' : 'Tu ne peux pas envoyer de message à ce membre.')
+        : (lang === 'de' ? 'Nachricht nicht gesendet. Dein Entwurf bleibt erhalten. Bitte erneut versuchen.' : 'Message non envoyé. Ton brouillon est conservé. Réessaie.'))
       setSending(false)
       return
     }
@@ -547,6 +551,9 @@ export default function MessagesPage() {
         </div>
       ) : (
         <>
+          <div style={{ padding: '8px 16px' }}>
+            <MemberSafetyActions key={activeConv.partnerId} memberId={activeConv.partnerId} />
+          </div>
           {/* Chat header */}
           <div className="msg-header">
             {isMobile && (

@@ -1,5 +1,7 @@
 'use client'
 
+import { footballLabel } from '../lib/football-labels'
+
 import { useState, useRef } from 'react'
 import { supabase, Profile, Annonce, avatarSrc } from '../lib/supabase'
 import { liguesHomme, liguesFemme } from '../lib/data'
@@ -54,12 +56,12 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
   async function handlePublish() {
     setSubmitted(true)
     if (!title.trim()) {
-      setError('Le titre est requis.')
+      setError(lang === 'de' ? 'Gib einen Titel ein.' : 'Le titre est requis.')
       setTimeout(() => titleRef.current?.focus(), 0)
       return
     }
     if (!body.trim()) {
-      setError('Le texte est requis.')
+      setError(lang === 'de' ? 'Gib eine Nachricht ein.' : 'Le texte est requis.')
       setTimeout(() => bodyRef.current?.focus(), 0)
       return
     }
@@ -74,7 +76,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
         .select()
         .single()
       setPublishing(false)
-      if (err) { setError('Erreur lors de la modification.'); return }
+      if (err) { setError(lang === 'de' ? 'Die Änderungen konnten nicht gespeichert werden.' : 'Erreur lors de la modification.'); return }
       onSuccess(data)
     } else {
       const { data, error: err } = await supabase.from('annonces').insert({
@@ -89,7 +91,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
         status: 'active',
       }).select().single()
       setPublishing(false)
-      if (err) { setError('Erreur lors de la publication. Réessaie.'); return }
+      if (err) { setError(lang === 'de' ? 'Die Anzeige konnte nicht veröffentlicht werden. Versuche es erneut.' : 'Erreur lors de la publication. Réessaie.'); return }
       onSuccess(data)
     }
   }
@@ -285,64 +287,64 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
                 <div className="pm-author-info">
                   <div className="pm-author-name">{authorName}</div>
                   <div className="pm-author-sub">
-                    {profile.role === 'player' ? 'Joueur' : profile.role === 'coach' ? 'Coach' : 'Club'}
+                    {profile.role === 'player' ? t.dash.role_player[lang] : profile.role === 'coach' ? t.dash.role_coach[lang] : t.dash.role_club[lang]}
                     {profile.zone ? ` · ${profile.zone}` : ''}
                   </div>
                 </div>
                 <div className="pm-header-mode">
-                  {editing ? <><IcoPencil s={13} />Modifier</> : <><IcoSend s={13} />Nouveau post</>}
+                  {editing ? <><IcoPencil s={13} />{lang === 'de' ? 'Bearbeiten' : 'Modifier'}</> : <><IcoSend s={13} />{lang === 'de' ? 'Neue Anzeige' : 'Nouveau post'}</>}
                 </div>
-                <button className="pm-close" onClick={onClose} aria-label="Fermer">
+                <button className="pm-close" onClick={onClose} aria-label={lang === 'de' ? 'Schliessen' : 'Fermer'}>
                   <IcoX s={16} />
                 </button>
               </div>
 
               {/* Title */}
               <div className="pm-field">
-                <label className="pm-label">Titre <span style={{ color: '#FF3A3A' }}>*</span></label>
+                <label className="pm-label">{lang === 'de' ? 'Titel' : 'Titre'} <span style={{ color: '#FF3A3A' }}>*</span></label>
                 <input
                   ref={titleRef}
                   autoFocus
                   className={`pm-input${submitted && !title.trim() ? ' pm-err' : ''}`}
                   value={title}
                   onChange={e => { setTitle(e.target.value); if (error) setError('') }}
-                  placeholder="Ex: Je cherche un club pour la saison prochaine"
+                  placeholder={lang === 'de' ? 'Beispiel: Ich suche einen Verein für die nächste Saison' : 'Ex: Je cherche un club pour la saison prochaine'}
                 />
-                {submitted && !title.trim() && <div className="pm-field-err">Titre requis</div>}
+                {submitted && !title.trim() && <div className="pm-field-err">{lang === 'de' ? 'Titel' : 'Titre'} requis</div>}
               </div>
 
               {/* Body */}
               <div className="pm-field">
-                <label className="pm-label">Message <span style={{ color: '#FF3A3A' }}>*</span></label>
+                <label className="pm-label">{lang === 'de' ? 'Nachricht' : 'Message'} <span style={{ color: '#FF3A3A' }}>*</span></label>
                 <textarea
                   ref={bodyRef}
                   rows={4}
                   className={`pm-textarea${submitted && !body.trim() ? ' pm-err' : ''}`}
                   value={body}
                   onChange={e => { setBody(e.target.value); if (error) setError('') }}
-                  placeholder="Décris ta situation, tes attentes, ta disponibilité…"
+                  placeholder={lang === 'de' ? 'Beschreibe deine Situation, Erwartungen und Verfügbarkeit…' : 'Décris ta situation, tes attentes, ta disponibilité…'}
                 />
-                {submitted && !body.trim() && <div className="pm-field-err">Message requis</div>}
+                {submitted && !body.trim() && <div className="pm-field-err">{lang === 'de' ? 'Nachricht' : 'Message'} requis</div>}
               </div>
 
               {/* Optional: Ligue + Zone */}
               <div className="pm-grid">
                 <div>
-                  <label className="pm-label">Ligue (optionnel)</label>
+                  <label className="pm-label">{lang === 'de' ? 'Liga (optional)' : 'Ligue (optionnel)'}</label>
                   <select className="pm-select" value={ligue} onChange={e => setLigue(e.target.value)}>
                     <option value="">—</option>
                     {ALL_LIGUE_GROUPS.map(g => (
                       <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group}>
-                        {g.items.map(l => <option key={l} value={l}>{l}</option>)}
+                        {g.items.map(l => <option key={l} value={l}>{footballLabel(l, lang)}</option>)}
                       </optgroup>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="pm-label">Zone (optionnel)</label>
+                  <label className="pm-label">{lang === 'de' ? 'Region (optional)' : 'Zone (optionnel)'}</label>
                   <select className="pm-select" value={zone} onChange={e => setZone(e.target.value)}>
                     <option value="">—</option>
-                    {ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+                    {ZONES.map(z => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
                   </select>
                 </div>
               </div>
@@ -356,13 +358,13 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
                   disabled={publishing || !title.trim() || !body.trim()}
                 >
                   {publishing
-                    ? 'En cours…'
+                    ? (lang === 'de' ? 'Wird gespeichert…' : 'En cours…')
                     : editing
-                    ? <><IcoSave s={16} />Enregistrer</>
-                    : <><IcoSend s={16} />Publier</>
+                    ? <><IcoSave s={16} />{lang === 'de' ? 'Speichern' : 'Enregistrer'}</>
+                    : <><IcoSend s={16} />{lang === 'de' ? 'Veröffentlichen' : 'Publier'}</>
                   }
                 </button>
-                <button className="pm-btn-cancel" onClick={onClose}>Annuler</button>
+                <button className="pm-btn-cancel" onClick={onClose}>{lang === 'de' ? 'Abbrechen' : 'Annuler'}</button>
               </div>
             </>
           )}

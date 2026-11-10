@@ -52,7 +52,7 @@ export default function VerifyEmailPendingPage() {
     const { error: resendError } = await supabase.auth.resend({
       type: 'signup',
       email,
-      options: { emailRedirectTo: 'https://teamupfr.ch/verify-email' }
+      options: { emailRedirectTo: `${window.location.origin}/verify-email` }
     })
     if (resendError) {
       setError(resendError.message)

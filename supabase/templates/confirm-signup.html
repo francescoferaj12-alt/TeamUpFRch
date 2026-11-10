@@ -1,0 +1,21 @@
+{{ if eq .Data.language "de" }}
+<!doctype html>
+<html lang="de">
+  <body>
+    <h1>Bestätige deine E-Mail-Adresse für TeamUpFR</h1>
+    <p>Willkommen bei TeamUpFR! Bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.</p>
+    <p><a href="{{ .ConfirmationURL }}">E-Mail-Adresse bestätigen</a></p>
+    <p>Wenn du kein Konto erstellt hast, kannst du diese E-Mail ignorieren.</p>
+  </body>
+</html>
+{{ else }}
+<!doctype html>
+<html lang="fr">
+  <body>
+    <h1>Confirme ton adresse e-mail pour TeamUpFR</h1>
+    <p>Bienvenue sur TeamUpFR ! Confirme ton adresse e-mail pour activer ton compte.</p>
+    <p><a href="{{ .ConfirmationURL }}">Confirmer mon adresse e-mail</a></p>
+    <p>Si tu n’as pas créé de compte, tu peux ignorer cet e-mail.</p>
+  </body>
+</html>
+{{ end }}

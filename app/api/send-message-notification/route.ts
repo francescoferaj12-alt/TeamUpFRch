@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { isThrottled } from '../../../lib/email-throttle'
-import { newMessageHtml, zoneLang } from '../../../lib/email-templates'
+import { newMessageHtml, notificationLang } from '../../../lib/email-templates'
 
 const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     ? (receiver.club_name || '')
     : `${receiver.first_name || ''} ${receiver.last_name || ''}`.trim()
   const preview = message.text?.slice(0, 120) || (message.file_name ? `[Fichier: ${message.file_name.slice(0, 80)}]` : '…')
-  const lang = zoneLang(receiver.zone)
+  const lang = notificationLang(receiver.zone, receiver.notification_settings?.language)
   const { error: sendError } = await new Resend(process.env.RESEND_API_KEY).emails.send({
     from: FROM,
     to: receiver.email,

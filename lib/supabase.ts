@@ -81,6 +81,7 @@ export type Profile = {
   club_email_public?: string
   verification_requested?: boolean
   notification_settings?: {
+    language?: 'fr' | 'de'
     newMessage?: boolean
     newApplication?: boolean
     applicationStatus?: boolean
