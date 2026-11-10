@@ -142,20 +142,20 @@ function DashboardOverview({ profile, onShowSettings, onProfileUpdate }: {
             <div>
               <div className="db-eyebrow">Dashboard</div>
               <h1 className="db-welcome-title">
-                Bonjour, <span className="db-em">{displayName}.</span>
+                {lang === 'de' ? 'Hallo,' : 'Bonjour,'} <span className="db-em">{displayName}.</span>
               </h1>
               <p className="db-welcome-sub">
                 {profile.role === 'club'
-                  ? 'Gérez votre club et vos recrutements.'
-                  : "Voici ce qui s'est passé pour toi cette semaine."}
+                  ? (lang === 'de' ? 'Verwalte deinen Verein und deine Ausschreibungen.' : 'Gérez votre club et vos recrutements.')
+                  : (lang === 'de' ? 'Das ist diese Woche passiert.' : "Voici ce qui s'est passé pour toi cette semaine.")}
               </p>
             </div>
             <div className="db-welcome-actions">
               <Link href="/annonces" className="db-btn-sec">
-                <IcoSearch s={14} />Explorer
+                <IcoSearch s={14} /> {lang === 'de' ? 'Entdecken' : 'Explorer'}
               </Link>
               <button className="db-btn-pri" onClick={() => setShowPostModal(true)}>
-                <IcoPlus s={14} />Publier une annonce
+                <IcoPlus s={14} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier une annonce'}
               </button>
             </div>
           </div>
@@ -203,6 +203,7 @@ function DashboardOverview({ profile, onShowSettings, onProfileUpdate }: {
 // STAT CARDS
 // ======================================================
 function StatCards({ profile, refreshKey }: { profile: Profile; refreshKey: number }) {
+  const { lang } = useLang()
   const [annoncesCount, setAnnoncesCount] = useState<number|null>(null)
   const [appsCount,     setAppsCount]     = useState<number|null>(null)
   const [pendingCount,  setPendingCount]  = useState<number|null>(null)
@@ -235,17 +236,17 @@ function StatCards({ profile, refreshKey }: { profile: Profile; refreshKey: numb
   }, [profile.id, profile.role, refreshKey])
 
   const cards = [
-    { value: annoncesCount, label: 'Mes annonces',
+    { value: annoncesCount, label: (lang === 'de' ? 'Meine Anzeigen' : 'Mes annonces'),
       color:'#3A7AFF', bg:'rgba(58,122,255,.12)', border:'rgba(58,122,255,.3)',
       icon: <IcoBuilding s={18} /> },
     { value: appsCount,
-      label: profile.role === 'club' ? 'Candidatures reçues' : 'Candidatures envoyées',
+      label: profile.role === 'club' ? (lang === 'de' ? 'Erhaltene Bewerbungen' : 'Candidatures reçues') : (lang === 'de' ? 'Gesendete Bewerbungen' : 'Candidatures envoyées'),
       color:'#FF3A3A', bg:'rgba(255,58,58,.12)', border:'rgba(255,58,58,.3)',
       icon: <IcoCheck s={18} /> },
-    { value: pendingCount, label: 'En attente',
+    { value: pendingCount, label: (lang === 'de' ? 'Offen' : 'En attente'),
       color:'#FF9A3A', bg:'rgba(255,154,58,.12)', border:'rgba(255,154,58,.3)',
       icon: <IcoClock s={18} /> },
-    { value: msgsCount, label: 'Messages non lus',
+    { value: msgsCount, label: (lang === 'de' ? 'Ungelesene Nachrichten' : 'Messages non lus'),
       color:'#2ED27F', bg:'rgba(46,210,127,.12)', border:'rgba(46,210,127,.3)',
       icon: <IcoMsg s={18} /> },
   ]
@@ -269,6 +270,7 @@ function StatCards({ profile, refreshKey }: { profile: Profile; refreshKey: numb
 // RECOMMENDED SECTION (joueur / coach)
 // ======================================================
 function RecommendedSection({ profile }: { profile: Profile }) {
+  const { lang } = useLang()
   const [annonces, setAnnonces] = useState<Annonce[]>([])
   const [loading,  setLoading]  = useState(true)
 
@@ -295,12 +297,12 @@ function RecommendedSection({ profile }: { profile: Profile }) {
   return (
     <div className="db-section-card">
       <div className="db-section-head">
-        <h2 className="db-section-title">Recommandé pour <span className="db-em">toi</span></h2>
-        <Link href="/annonces" className="db-section-link">Voir tout <IcoArrow s={12}/></Link>
+        <h2 className="db-section-title">{lang === 'de' ? 'Für dich empfohlen' : <>Recommandé pour <span className="db-em">toi</span></>}</h2>
+        <Link href="/annonces" className="db-section-link">{lang === 'de' ? 'Alle ansehen' : 'Voir tout'} <IcoArrow s={12}/></Link>
       </div>
       {loading ? <Loading /> : annonces.length === 0 ? (
         <Empty icon={<IcoEmpty s={28}/>} msg="Aucune annonce dans ta zone pour l'instant.">
-          <Link href="/annonces" className="db-empty-link">Explorer toutes les annonces <IcoArrow s={12}/></Link>
+          <Link href="/annonces" className="db-empty-link">{lang === 'de' ? 'Alle Anzeigen ansehen' : 'Explorer toutes les annonces'} <IcoArrow s={12}/></Link>
         </Empty>
       ) : (
         <div className="db-recos-list">
@@ -316,10 +318,10 @@ function RecommendedSection({ profile }: { profile: Profile }) {
                   <div className="db-reco-meta">
                     {a.zone   && <span><IcoPin s={10}/>{a.zone}</span>}
                     {a.ligue  && <span><IcoClock s={10}/>{a.ligue}</span>}
-                    <span>{relativeTime(a.created_at)}</span>
+                    <span>{relativeTime(a.created_at, lang)}</span>
                   </div>
                 </div>
-                {isNew(a.created_at) && <span className="db-badge-new">Nouveau</span>}
+                {isNew(a.created_at) && <span className="db-badge-new">{lang === 'de' ? 'Neu' : 'Nouveau'}</span>}
               </Link>
             )
           })}
@@ -333,6 +335,7 @@ function RecommendedSection({ profile }: { profile: Profile }) {
 // CANDIDATURES PREVIEW (joueur / coach — sent)
 // ======================================================
 function CandidaturesPreview({ profile }: { profile: Profile }) {
+  const { lang } = useLang()
   const [apps,    setApps]    = useState<AppWithAnnonce[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -352,12 +355,12 @@ function CandidaturesPreview({ profile }: { profile: Profile }) {
   return (
     <div className="db-section-card">
       <div className="db-section-head">
-        <h2 className="db-section-title">Mes <span className="db-em">candidatures</span></h2>
-        <Link href="/candidatures" className="db-section-link">Voir tout <IcoArrow s={12}/></Link>
+        <h2 className="db-section-title">{lang === 'de' ? 'Meine Bewerbungen' : <>Mes <span className="db-em">candidatures</span></>}</h2>
+        <Link href="/candidatures" className="db-section-link">{lang === 'de' ? 'Alle ansehen' : 'Voir tout'} <IcoArrow s={12}/></Link>
       </div>
       {loading ? <Loading /> : apps.length === 0 ? (
-        <Empty icon={<IcoEmpty s={28}/>} msg="Aucune candidature envoyée pour l'instant.">
-          <Link href="/annonces" className="db-empty-link">Explorer les annonces <IcoArrow s={12}/></Link>
+        <Empty icon={<IcoEmpty s={28}/>} msg={lang === 'de' ? 'Du hast noch keine Bewerbungen gesendet.' : "Aucune candidature envoyée pour l'instant."}>
+          <Link href="/annonces" className="db-empty-link">{lang === 'de' ? 'Anzeigen ansehen' : 'Explorer les annonces'} <IcoArrow s={12}/></Link>
         </Empty>
       ) : (
         <div className="db-cands-list">
@@ -369,7 +372,7 @@ function CandidaturesPreview({ profile }: { profile: Profile }) {
                   {a.annonce_title || 'Annonce'}
                   {a.annonce_author_name && <span className="db-cand-sub2"> — {a.annonce_author_name}</span>}
                 </div>
-                <div className="db-cand-date">Envoyée {relativeTime(a.created_at)}</div>
+                <div className="db-cand-date">{lang === 'de' ? 'Gesendet' : 'Envoyée'} {relativeTime(a.created_at, lang)}</div>
               </div>
               <StatusBadge status={a.status} />
             </div>
@@ -384,6 +387,7 @@ function CandidaturesPreview({ profile }: { profile: Profile }) {
 // CANDIDATURES PENDING (club — received, with accept/refuse)
 // ======================================================
 function CandidaturesPending({ profile }: { profile: Profile }) {
+  const { lang } = useLang()
   const [apps,    setApps]    = useState<AppWithAnnonce[]>([])
   const [loading, setLoading] = useState(true)
   const [toast,   setToast]   = useState<{ text: string; ok: boolean } | null>(null)
@@ -414,10 +418,10 @@ function CandidaturesPending({ profile }: { profile: Profile }) {
         headers:{ 'Content-Type':'application/json', ...(session?.access_token ? { Authorization:`Bearer ${session.access_token}` } : {}) },
         body: JSON.stringify({ status }),
       })
-      if (!res.ok) { popToast('Erreur, réessayez.', false) }
-      else { popToast(status === 'accepted' ? 'Candidature acceptée !' : 'Candidature refusée.') }
+      if (!res.ok) { popToast((lang === 'de' ? 'Ein Fehler ist aufgetreten. Versuche es erneut.' : 'Erreur, réessayez.'), false) }
+      else { popToast(status === 'accepted' ? (lang === 'de' ? 'Bewerbung angenommen!' : 'Candidature acceptée !') : (lang === 'de' ? 'Bewerbung abgelehnt.' : 'Candidature refusée.')) }
     } catch {
-      popToast('Erreur réseau.', false)
+      popToast((lang === 'de' ? 'Netzwerkfehler.' : 'Erreur réseau.'), false)
     }
   }
 
@@ -429,11 +433,11 @@ function CandidaturesPending({ profile }: { profile: Profile }) {
         </div>
       )}
       <div className="db-section-head">
-        <h2 className="db-section-title">Candidatures <span className="db-em">en attente</span></h2>
-        <Link href="/candidatures" className="db-section-link">Voir tout <IcoArrow s={12}/></Link>
+        <h2 className="db-section-title">{lang === 'de' ? 'Offene Bewerbungen' : <>Candidatures <span className="db-em">en attente</span></>}</h2>
+        <Link href="/candidatures" className="db-section-link">{lang === 'de' ? 'Alle ansehen' : 'Voir tout'} <IcoArrow s={12}/></Link>
       </div>
       {loading ? <Loading /> : apps.length === 0 ? (
-        <Empty icon={<IcoEmpty s={28}/>} msg="Aucune candidature en attente." />
+        <Empty icon={<IcoEmpty s={28}/>} msg={lang === 'de' ? 'Keine offenen Bewerbungen.' : 'Aucune candidature en attente.'} />
       ) : (
         <div className="db-cands-list">
           {apps.map(a => (
@@ -443,14 +447,14 @@ function CandidaturesPending({ profile }: { profile: Profile }) {
               </Link>
               <div className="db-cand-content">
                 <Link href={`/profil/${a.applicant_id}`} className="db-cand-name">{a.applicant_name}</Link>
-                <div className="db-cand-date">{a.annonce_title} · {relativeTime(a.created_at)}</div>
+                <div className="db-cand-date">{a.annonce_title} · {relativeTime(a.created_at, lang)}</div>
               </div>
               <div className="db-cand-btns">
                 <button className="db-btn-accept" onClick={() => handleStatus(a.id, 'accepted')}>
-                  <IcoCheck s={12}/>Accepter
+                  <IcoCheck s={12}/> {lang === 'de' ? 'Annehmen' : 'Accepter'}
                 </button>
                 <button className="db-btn-refuse" onClick={() => handleStatus(a.id, 'rejected')}>
-                  <IcoX s={12}/>Refuser
+                  <IcoX s={12}/> {lang === 'de' ? 'Ablehnen' : 'Refuser'}
                 </button>
               </div>
             </div>
@@ -486,12 +490,12 @@ function MesAnnonces({ profile, refreshKey, onOpenPublish }: {
   return (
     <div className="db-section-card">
       <div className="db-section-head">
-        <h2 className="db-section-title">Mes <span className="db-em">annonces</span></h2>
-        <button className="db-section-link" onClick={onOpenPublish}><IcoPlus s={12}/>Publier</button>
+        <h2 className="db-section-title">{lang === 'de' ? 'Meine Anzeigen' : <>Mes <span className="db-em">annonces</span></>}</h2>
+        <button className="db-section-link" onClick={onOpenPublish}><IcoPlus s={12}/>{lang === 'de' ? 'Veröffentlichen' : 'Publier'}</button>
       </div>
       {loading ? <Loading /> : annonces.length === 0 ? (
-        <Empty icon={<IcoEmpty s={28}/>} msg="Aucune annonce publiée pour l'instant.">
-          <button className="db-empty-link" onClick={onOpenPublish}>Publier ta première annonce <IcoArrow s={12}/></button>
+        <Empty icon={<IcoEmpty s={28}/>} msg={lang === 'de' ? 'Du hast noch keine Anzeigen veröffentlicht.' : "Aucune annonce publiée pour l'instant."}>
+          <button className="db-empty-link" onClick={onOpenPublish}>{lang === 'de' ? 'Erste Anzeige veröffentlichen' : 'Publier ta première annonce'} <IcoArrow s={12}/></button>
         </Empty>
       ) : (
         <div className="db-annonces-list">
@@ -502,7 +506,7 @@ function MesAnnonces({ profile, refreshKey, onOpenPublish }: {
                 <div className="db-annonce-meta">
                   {a.ligue && <span>{a.ligue}</span>}
                   {a.zone  && <span>{a.zone}</span>}
-                  <span>{relativeTime(a.created_at)}</span>
+                  <span>{relativeTime(a.created_at, lang)}</span>
                 </div>
               </div>
               <div className="db-annonce-right">
@@ -527,6 +531,7 @@ function MesAnnonces({ profile, refreshKey, onOpenPublish }: {
 // ACTIVITY FEED
 // ======================================================
 function ActivityFeed({ profile, refreshKey }: { profile: Profile; refreshKey: number }) {
+  const { lang } = useLang()
   const [items,   setItems]   = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -543,7 +548,7 @@ function ActivityFeed({ profile, refreshKey }: { profile: Profile; refreshKey: n
           .then(({ data }) => {
             for (const a of (data || []) as any[]) {
               feed.push({ id:`app_${a.id}`, dotColor:'orange',
-                text: <><strong>{a.applicant_name}</strong> a postulé à <strong>{a.annonces?.title || 'une annonce'}</strong></>,
+                text: <><strong>{a.applicant_name}</strong> {lang === 'de' ? 'hat sich beworben für' : 'a postulé à'} <strong>{a.annonces?.title || (lang === 'de' ? 'eine Anzeige' : 'une annonce')}</strong></>,
                 timestamp: a.created_at })
             }
           })
@@ -556,14 +561,14 @@ function ActivityFeed({ profile, refreshKey }: { profile: Profile; refreshKey: n
           .order('created_at', { ascending: false }).limit(5)
           .then(({ data }) => {
             for (const a of (data || []) as any[]) {
-              const title  = a.annonces?.title      || 'annonce'
-              const author = a.annonces?.author_name || 'un club'
+              const title  = a.annonces?.title      || (lang === 'de' ? 'Anzeige' : 'annonce')
+              const author = a.annonces?.author_name || (lang === 'de' ? 'einem Verein' : 'un club')
               const dotColor: FeedItem['dotColor'] = a.status === 'accepted' ? 'green' : a.status === 'rejected' ? 'red' : 'blue'
               const text = a.status === 'accepted'
-                ? <><strong>{author}</strong> a accepté ta candidature pour <strong>{title}</strong></>
+                ? <><strong>{author}</strong> {lang === 'de' ? 'hat deine Bewerbung angenommen für' : 'a accepté ta candidature pour'} <strong>{title}</strong></>
                 : a.status === 'rejected'
-                ? <><strong>{author}</strong> a refusé ta candidature pour <strong>{title}</strong></>
-                : <>Candidature envoyée à <strong>{author}</strong> pour <strong>{title}</strong></>
+                ? <><strong>{author}</strong> {lang === 'de' ? 'hat deine Bewerbung abgelehnt für' : 'a refusé ta candidature pour'} <strong>{title}</strong></>
+                : <>{lang === 'de' ? 'Bewerbung gesendet an' : 'Candidature envoyée à'} <strong>{author}</strong> {lang === 'de' ? 'für' : 'pour'} <strong>{title}</strong></>
               feed.push({ id:`app_${a.id}`, dotColor, text, timestamp: a.created_at })
             }
           })
@@ -577,7 +582,7 @@ function ActivityFeed({ profile, refreshKey }: { profile: Profile; refreshKey: n
         .then(({ data }) => {
           for (const m of (data || [])) {
             feed.push({ id:`msg_${m.id}`, dotColor:'blue',
-              text: 'Nouveau message reçu', timestamp: m.created_at })
+              text: (lang === 'de' ? 'Neue Nachricht erhalten' : 'Nouveau message reçu'), timestamp: m.created_at })
           }
         })
     )
@@ -587,19 +592,19 @@ function ActivityFeed({ profile, refreshKey }: { profile: Profile; refreshKey: n
       setItems(feed.slice(0, 5))
       setLoading(false)
     })
-  }, [profile.id, profile.role, refreshKey])
+  }, [profile.id, profile.role, refreshKey, lang])
 
   const emptyHint = profile.role === 'club'
-    ? 'Publie ta première annonce pour commencer.'
-    : 'Explore les annonces pour trouver ton prochain club.'
+    ? (lang === 'de' ? 'Veröffentliche deine erste Anzeige.' : 'Publie ta première annonce pour commencer.')
+    : (lang === 'de' ? 'Finde deinen nächsten Verein in den Anzeigen.' : 'Explore les annonces pour trouver ton prochain club.')
 
   return (
     <div className="db-section-card">
       <div className="db-section-head">
-        <h2 className="db-section-title">Activité <span className="db-em">récente</span></h2>
+        <h2 className="db-section-title">{lang === 'de' ? 'Letzte Aktivitäten' : <>Activité <span className="db-em">récente</span></>}</h2>
       </div>
       {loading ? <Loading /> : items.length === 0 ? (
-        <Empty icon={<IcoActivity s={28}/>} msg="Pas encore d'activité.">
+        <Empty icon={<IcoActivity s={28}/>} msg={lang === 'de' ? 'Noch keine Aktivitäten.' : "Pas encore d'activité."}>
           <span style={{ fontSize:13, color:'rgba(255,255,255,.4)' }}>{emptyHint}</span>
         </Empty>
       ) : (
@@ -609,7 +614,7 @@ function ActivityFeed({ profile, refreshKey }: { profile: Profile; refreshKey: n
               <div className={`db-activity-dot ${item.dotColor}`} />
               <div>
                 <div className="db-activity-text">{item.text}</div>
-                <div className="db-activity-time">{relativeTime(item.timestamp)}</div>
+                <div className="db-activity-time">{relativeTime(item.timestamp, lang)}</div>
               </div>
             </div>
           ))}
@@ -694,14 +699,14 @@ function ProfileSidebar({ profile, onShowSettings, lang }: {
 
       <div className="db-completion">
         <div className="db-completion-head">
-          <span>Profil complété</span>
+          <span>{lang === 'de' ? 'Profil vervollständigt' : 'Profil complété'}</span>
           <span className="db-completion-pct">{completion}%</span>
         </div>
         <div className="db-completion-track">
           <div className="db-completion-fill" style={{ width:`${completion}%` }} />
         </div>
         {completion < 90 && (
-          <p className="db-completion-hint">Complétez votre profil pour être mieux vu</p>
+          <p className="db-completion-hint">{lang === 'de' ? 'Vervollständige dein Profil, um besser gefunden zu werden' : 'Complétez votre profil pour être mieux vu'}</p>
         )}
       </div>
 
@@ -710,7 +715,7 @@ function ProfileSidebar({ profile, onShowSettings, lang }: {
           <IcoPencil s={14}/>{t.dash.see_profile[lang]}
         </Link>
         <button className="db-btn-settings-link" onClick={onShowSettings}>
-          <IcoSettings s={14}/>Paramètres
+          <IcoSettings s={14}/> {lang === 'de' ? 'Einstellungen' : 'Paramètres'}
         </button>
       </div>
     </div>
@@ -764,9 +769,12 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
 
   async function handleSaveNotif() {
     setSavingNotif(true)
-    await supabase.from('profiles').update({ notification_settings: notif }).eq('id', profile.id)
+    const { error } = await supabase.from('profiles').update({ notification_settings: notif }).eq('id', profile.id)
     setSavingNotif(false)
-    setNotifMsg(t.dash.notif_saved[lang])
+    if (!error) onSaved({ ...profile, notification_settings: notif })
+    setNotifMsg(error
+      ? (lang === 'de' ? 'Speichern fehlgeschlagen.' : 'Impossible de sauvegarder.')
+      : t.dash.notif_saved[lang])
     setTimeout(() => setNotifMsg(''), 3000)
   }
 
@@ -863,6 +871,21 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
               {notifMsg}
             </div>
           )}
+          <label style={lbl}>
+            {lang === 'de' ? 'Sprache der E-Mails' : 'Langue des e-mails'}
+            <select
+              value={notif.language ?? ''}
+              onChange={e => {
+                const value = e.target.value
+                setNotif(previous => ({ ...previous, language: value === 'fr' || value === 'de' ? value : undefined }))
+              }}
+              style={inp}
+            >
+              <option value="">{lang === 'de' ? 'Automatisch nach Region' : 'Automatique selon la région'}</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </label>
           {[
             { key:'newMessage',      label:t.dash.notif_new_message[lang],  desc:t.dash.notif_new_message_desc[lang]  },
             ...(profile.role === 'club' ? [{ key:'newApplication', label:t.dash.notif_new_app[lang], desc:t.dash.notif_new_app_desc[lang] }] : []),

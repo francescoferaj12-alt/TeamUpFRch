@@ -19,7 +19,7 @@ const IcoCheckCircle = ({ s = 36 }: { s?: number }) => <Svg size={s} stroke="#2E
 const IcoXCircle     = ({ s = 36 }: { s?: number }) => <Svg size={s} stroke="#FF3A3A" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></Svg>
 
 export default function VerifyEmailPage() {
-  const { lang } = useLang()
+  const { lang, setLang } = useLang()
   const router = useRouter()
   const [state, setState] = useState<State>('loading')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -34,10 +34,13 @@ export default function VerifyEmailPage() {
 
     timeoutRef.current = setTimeout(() => setState('invalid'), 10000)
 
-    const markVerified = async (userId: string) => {
+    let started = false
+    const markVerified = async (userId: string, preferredLanguage: unknown) => {
+      if (started) return
+      started = true
+      if (preferredLanguage === 'fr' || preferredLanguage === 'de') setLang(preferredLanguage)
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       await supabase.from('profiles').update({ hidden: false }).eq('id', userId)
-      setState('success')
       sessionStorage.removeItem('pendingVerifyEmail')
       // Check onboarding status to decide redirect target
       const { data: profile } = await supabase
@@ -48,23 +51,24 @@ export default function VerifyEmailPage() {
       if (profile && profile.profile_completed === false && profile.onboarding_skipped !== true) {
         redirectTarget.current = '/onboarding'
       }
+      setState('success')
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user?.email_confirmed_at) {
-        markVerified(session.user.id)
+        setTimeout(() => { void markVerified(session.user.id, session.user.user_metadata?.language) }, 0)
       }
     })
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email_confirmed_at) markVerified(session.user.id)
+      if (session?.user?.email_confirmed_at) void markVerified(session.user.id, session.user.user_metadata?.language)
     })
 
     return () => {
       subscription.unsubscribe()
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
-  }, [])
+  }, [setLang])
 
   useEffect(() => {
     if (state === 'success') {

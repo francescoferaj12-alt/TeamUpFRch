@@ -1,14 +1,19 @@
 'use client'
 
+import { matchesAnnonce } from '../../lib/annonce-search'
+import { footballLabel } from '../../lib/football-labels'
+
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, Annonce, Profile, avatarSrc } from '../../lib/supabase'
 import { ligues, zones, positions } from '../../lib/data'
+import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import ClubCrest from '../../components/ClubCrest'
 import { relativeTime } from '../../lib/utils/time'
+import SavedAnnonceSearches from '../../components/SavedAnnonceSearches'
 import PostModal from '../../components/PostModal'
 
 // ——— SVG helpers ————————————————————————————
@@ -68,22 +73,23 @@ const GRADS = [
 ]
 
 // ——— Type badge config ————————————————————————
-const TYPE_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  club:   { label: 'Club recrute',  color: '#3A7AFF', bg: 'rgba(58,122,255,.12)',  border: 'rgba(58,122,255,.3)'  },
-  coach:  { label: 'Coach dispo',   color: '#FF9A3A', bg: 'rgba(255,154,58,.12)',  border: 'rgba(255,154,58,.3)'  },
-  player: { label: 'Joueur dispo',  color: '#2ED27F', bg: 'rgba(46,210,127,.12)', border: 'rgba(46,210,127,.3)' },
+const TYPE_CFG: Record<string, { label: { fr: string; de: string }; color: string; bg: string; border: string }> = {
+  club:   { label: { fr: 'Club recrute', de: 'Verein sucht Verstärkung' },  color: '#3A7AFF', bg: 'rgba(58,122,255,.12)',  border: 'rgba(58,122,255,.3)'  },
+  coach:  { label: { fr: 'Coach dispo', de: 'Trainer verfügbar' },   color: '#FF9A3A', bg: 'rgba(255,154,58,.12)',  border: 'rgba(255,154,58,.3)'  },
+  player: { label: { fr: 'Joueur dispo', de: 'Spieler verfügbar' },  color: '#2ED27F', bg: 'rgba(46,210,127,.12)', border: 'rgba(46,210,127,.3)' },
 }
 
 // ——— Tab config ——————————————————————————————
 const TABS = [
-  { key: '',       label: 'Tous',     Icon: IcoGrid    },
-  { key: 'club',   label: 'Clubs',    Icon: IcoBuilding },
-  { key: 'coach',  label: 'Coachs',   Icon: IcoCoach   },
-  { key: 'player', label: 'Joueurs',  Icon: IcoPlayer  },
+  { key: '',       label: { fr: 'Tous', de: 'Alle' },     Icon: IcoGrid    },
+  { key: 'club',   label: { fr: 'Clubs', de: 'Vereine' },    Icon: IcoBuilding },
+  { key: 'coach',  label: { fr: 'Coachs', de: 'Trainer' },   Icon: IcoCoach   },
+  { key: 'player', label: { fr: 'Joueurs', de: 'Spieler' },  Icon: IcoPlayer  },
 ] as const
 
 // ——— Main page ————————————————————————————————
 export default function AnnoncesPage() {
+  const { lang } = useLang()
   const [annonces, setAnnonces]     = useState<Annonce[]>([])
   const [loading, setLoading]       = useState(true)
   const [filterLigue, setFilterLigue] = useState('')
@@ -118,17 +124,9 @@ export default function AnnoncesPage() {
 
   // ——— Filtered (unchanged) ———————————————————
   const filtered = useMemo(() => {
-    return annonces.filter((a) => {
-      if (filterLigue && a.ligue !== filterLigue) return false
-      if (filterZone  && a.zone  !== filterZone)  return false
-      if (filterPos   && a.position !== filterPos) return false
-      if (filterType  && a.author_type !== filterType) return false
-      if (query) {
-        const q = query.toLowerCase()
-        if (!a.title.toLowerCase().includes(q) && !a.body.toLowerCase().includes(q) && !a.author_name.toLowerCase().includes(q)) return false
-      }
-      return true
-    })
+    return annonces.filter(annonce => matchesAnnonce({
+      query, ligue: filterLigue, zone: filterZone, position: filterPos, author_type: filterType,
+    }, annonce))
   }, [annonces, filterLigue, filterZone, filterPos, filterType, query])
 
   // ——— Tab counters ————————————————————————————
@@ -154,14 +152,14 @@ export default function AnnoncesPage() {
         <div className="an-container">
           <div className="an-eyebrow">
             <IcoGrid s={14} />
-            Fil d&apos;annonces
+            {lang === 'de' ? 'Anzeigenübersicht' : "Fil d'annonces"}
           </div>
-          <span className="an-live-pulse">En direct</span>
+          <span className="an-live-pulse">{lang === 'de' ? 'Aktuell' : 'En direct'}</span>
           <h1 className="an-title">
-            Offres &amp;<br /><span className="em">Recherches.</span>
+            {lang === 'de' ? 'Angebote &' : 'Offres &'}<br /><span className="em">{lang === 'de' ? 'Gesuche.' : 'Recherches.'}</span>
           </h1>
           <p className="an-sub">
-            Clubs, coachs et joueurs publient leurs besoins en temps réel. Trouve ton match en quelques clics.
+            {lang === 'de' ? 'Vereine, Trainer und Spieler veröffentlichen hier ihre Angebote und Gesuche. Finde, was zu dir passt.' : 'Clubs, coachs et joueurs publient leurs besoins en temps réel. Trouve ton match en quelques clics.'}
           </p>
           <div className="an-search-wrap">
             <IcoSearch s={18} />
@@ -169,7 +167,8 @@ export default function AnnoncesPage() {
               className="an-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Chercher une annonce, un club, une position…"
+              maxLength={120}
+              placeholder={lang === 'de' ? 'Anzeige, Verein oder Position suchen…' : 'Chercher une annonce, un club, une position…'}
             />
           </div>
         </div>
@@ -190,7 +189,7 @@ export default function AnnoncesPage() {
                 className={`an-tab${filterType === key ? ' act' : ''}`}
               >
                 <Icon s={16} />
-                {label}
+                {label[lang]}
                 <span className="an-tab-count">{typeCounts[key as keyof typeof typeCounts] ?? 0}</span>
               </button>
             ))}
@@ -198,38 +197,53 @@ export default function AnnoncesPage() {
 
           {/* Dropdowns + Publish */}
           <div className="an-filters-grid">
-            <select className="an-select" value={filterLigue} onChange={(e) => setFilterLigue(e.target.value)} aria-label="Ligue">
-              <option value="">Toutes les ligues</option>
-              {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l}>{l}</option>)}
+            <select className="an-select" value={filterLigue} onChange={(e) => setFilterLigue(e.target.value)} aria-label={lang === 'de' ? 'Liga' : 'Ligue'}>
+              <option value="">{lang === 'de' ? 'Alle Ligen' : 'Toutes les ligues'}</option>
+              {ligues.flatMap((g) => g.items).map((l) => <option key={l} value={l}>{footballLabel(l, lang)}</option>)}
             </select>
             <select className="an-select" value={filterPos} onChange={(e) => setFilterPos(e.target.value)} aria-label="Position">
-              <option value="">Toutes positions</option>
-              {positions.map((p) => <option key={p} value={p}>{p}</option>)}
+              <option value="">{lang === 'de' ? 'Alle Positionen' : 'Toutes positions'}</option>
+              {positions.map((p) => <option key={p} value={p}>{footballLabel(p, lang)}</option>)}
             </select>
-            <select className="an-select" value={filterZone} onChange={(e) => setFilterZone(e.target.value)} aria-label="Zone">
-              <option value="">Toute la zone</option>
-              {zones.map((z) => <option key={z} value={z}>{z}</option>)}
+            <select className="an-select" value={filterZone} onChange={(e) => setFilterZone(e.target.value)} aria-label={lang === 'de' ? 'Region' : 'Zone'}>
+              <option value="">{lang === 'de' ? 'Alle Regionen' : 'Toute la zone'}</option>
+              {zones.map((z) => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
             </select>
             {currentUser ? (
               <button className="an-publish-btn" onClick={() => setShowPublishModal(true)}>
-                <IcoPlus s={16} />Publier un post
+                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
               </button>
             ) : (
               <Link href="/login" className="an-publish-btn">
-                <IcoPlus s={16} />Publier un post
+                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
               </Link>
             )}
           </div>
+
+          {currentUser && (
+            <SavedAnnonceSearches
+              key={currentUser.id}
+              userId={currentUser.id}
+              filters={{ query, ligue: filterLigue, zone: filterZone, position: filterPos, author_type: filterType }}
+              apply={search => {
+                setQuery(search.query)
+                setFilterLigue(search.ligue)
+                setFilterZone(search.zone)
+                setFilterPos(search.position)
+                setFilterType(search.author_type)
+              }}
+            />
+          )}
 
           {/* Results bar */}
           <div className="an-results-bar">
             <span>
               <span className="an-results-num">{loading ? '—' : filtered.length}</span>
-              {' '}annonce{filtered.length !== 1 ? 's' : ''} affichée{filtered.length !== 1 ? 's' : ''}
+              {' '}{lang === 'de' ? (filtered.length === 1 ? 'Anzeige gefunden' : 'Anzeigen gefunden') : (filtered.length === 1 ? 'annonce affichée' : 'annonces affichées')}
             </span>
             {hasFilters && (
               <button className="an-reset" onClick={resetFilters}>
-                Réinitialiser les filtres
+                {lang === 'de' ? 'Filter zurücksetzen' : 'Réinitialiser les filtres'}
               </button>
             )}
           </div>
@@ -242,20 +256,20 @@ export default function AnnoncesPage() {
           {loading ? (
             <div className="an-loading">
               <div className="an-spinner" />
-              Chargement des annonces…
+              {lang === 'de' ? 'Anzeigen werden geladen…' : 'Chargement des annonces…'}
             </div>
           ) : filtered.length === 0 ? (
             <div className="an-empty">
               <div className="an-empty-icon"><IcoEmpty s={36} /></div>
               {annonces.length === 0 ? (
                 <>
-                  <h3 className="an-empty-title">Aucune annonce publiée</h3>
-                  <p className="an-empty-sub">Sois le premier à publier une annonce.</p>
+                  <h3 className="an-empty-title">{lang === 'de' ? 'Noch keine Anzeigen' : 'Aucune annonce publiée'}</h3>
+                  <p className="an-empty-sub">{lang === 'de' ? 'Veröffentliche die erste Anzeige.' : 'Sois le premier à publier une annonce.'}</p>
                 </>
               ) : (
                 <>
-                  <h3 className="an-empty-title">Aucun résultat</h3>
-                  <p className="an-empty-sub">Aucune annonce ne correspond à ces critères. Élargis ta recherche.</p>
+                  <h3 className="an-empty-title">{lang === 'de' ? 'Keine Treffer' : 'Aucun résultat'}</h3>
+                  <p className="an-empty-sub">{lang === 'de' ? 'Keine Anzeige passt zu diesen Kriterien. Erweitere deine Suche.' : 'Aucune annonce ne correspond à ces critères. Élargis ta recherche.'}</p>
                 </>
               )}
             </div>
@@ -684,6 +698,7 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
   currentUser: Profile | null
   onPostuler: () => void
 }) {
+  const { lang } = useLang()
   const type = TYPE_CFG[annonce.author_type] ?? TYPE_CFG.player
   const isClub   = annonce.author_type === 'club'
   const isAuthor = currentUser?.id === annonce.author_id
@@ -695,10 +710,10 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
   const canApply  = !isAuthor && currentUser != null && currentUser.role !== 'club'
 
   const authorSub = isClub
-    ? [annonce.ligue, annonce.zone].filter(Boolean).join(' · ')
+    ? [annonce.ligue, annonce.zone].filter((value): value is string => Boolean(value)).map(value => footballLabel(value, lang)).join(' · ')
     : annonce.author_type === 'coach'
-      ? [annonce.position, annonce.zone].filter(Boolean).join(' · ')
-      : annonce.position || annonce.zone || ''
+      ? [annonce.position, annonce.zone].filter((value): value is string => Boolean(value)).map(value => footballLabel(value, lang)).join(' · ')
+      : footballLabel(annonce.position || annonce.zone || '', lang)
 
   const TypeIcon = isClub ? IcoBuilding : annonce.author_type === 'coach' ? IcoCoach : IcoPlayer
 
@@ -707,10 +722,10 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
       {/* Header */}
       <div className="an-card-header">
         <span className="an-type-badge" style={{ background: type.bg, border: `1px solid ${type.border}`, color: type.color }}>
-          <TypeIcon s={12} />{type.label}
+          <TypeIcon s={12} />{type.label[lang]}
         </span>
         <span className={`an-timestamp${isRecent ? ' recent' : ''}`}>
-          {relativeTime(annonce.created_at)}
+          {relativeTime(annonce.created_at, lang)}
         </span>
       </div>
 
@@ -741,9 +756,9 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
       {/* Tags */}
       {(annonce.position || annonce.ligue || annonce.zone) && (
         <div className="an-tags">
-          {annonce.position && <span className="an-tag"><IcoStar s={10} color="#FF3A3A" />{annonce.position}</span>}
-          {annonce.ligue    && <span className="an-tag"><IcoClock s={10} color="#FF3A3A" />{annonce.ligue}</span>}
-          {annonce.zone     && <span className="an-tag"><IcoPin s={10} color="#FF3A3A" />{annonce.zone}</span>}
+          {annonce.position && <span className="an-tag"><IcoStar s={10} color="#FF3A3A" />{footballLabel(annonce.position, lang)}</span>}
+          {annonce.ligue    && <span className="an-tag"><IcoClock s={10} color="#FF3A3A" />{footballLabel(annonce.ligue, lang)}</span>}
+          {annonce.zone     && <span className="an-tag"><IcoPin s={10} color="#FF3A3A" />{footballLabel(annonce.zone, lang)}</span>}
         </div>
       )}
 
@@ -753,27 +768,27 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
           {/* 1. Postuler — primary red button */}
           {canApply ? (
             <button className="an-btn-pri" onClick={onPostuler}>
-              Postuler <IcoArrow s={14} />
+              {lang === 'de' ? 'Bewerben' : 'Postuler'} <IcoArrow s={14} />
             </button>
           ) : !currentUser ? (
             <Link href="/login" className="an-btn-pri">
-              Postuler <IcoArrow s={14} />
+              {lang === 'de' ? 'Bewerben' : 'Postuler'} <IcoArrow s={14} />
             </Link>
           ) : isAuthor ? (
             <Link href="/candidatures" className="an-btn-author">
-              Candidatures <IcoArrow s={12} />
+              {lang === 'de' ? 'Bewerbungen' : 'Candidatures'} <IcoArrow s={12} />
             </Link>
           ) : null}
           {/* 2. Message — ghost button (hidden for author) */}
           {(!currentUser || !isAuthor) && (
             <Link href={`/messages?partner=${annonce.author_id}`} className="an-btn-msg">
-              <IcoMsg s={14} />Message
+              <IcoMsg s={14} /> {lang === 'de' ? 'Nachricht' : 'Message'}
             </Link>
           )}
         </div>
         {/* 3. Voir profil — always visible */}
         <Link href={`/profil/${authorId}`} className="an-view-profile">
-          Voir profil →
+          {lang === 'de' ? 'Profil ansehen →' : 'Voir profil →'}
         </Link>
       </div>
     </article>
@@ -787,13 +802,14 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: {
   onClose: () => void
   onSuccess: () => void
 }) {
+  const { lang } = useLang()
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [done, setDone]       = useState(false)
   const [error, setError]     = useState('')
 
   async function handleSubmit() {
-    if (!message.trim()) { setError('Merci d\'écrire un message de motivation.'); return }
+    if (!message.trim()) { setError(lang === 'de' ? 'Bitte schreibe eine kurze Motivation.' : 'Merci d\'écrire un message de motivation.'); return }
     setSending(true)
     setError('')
     const applicantName = currentUser.role === 'club'
@@ -816,13 +832,13 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: {
         }),
       })
       setSending(false)
-      if (!res.ok) { setError('Erreur lors de la candidature. Réessaie.'); return }
+      if (!res.ok) { setError(lang === 'de' ? 'Die Bewerbung konnte nicht gesendet werden. Versuche es erneut.' : 'Erreur lors de la candidature. Réessaie.'); return }
       setDone(true)
       setTimeout(onSuccess, 2000)
     } catch (e) {
       console.error('Application submit network error:', e)
       setSending(false)
-      setError('Erreur réseau. Réessaie.')
+      setError(lang === 'de' ? 'Netzwerkfehler. Versuche es erneut.' : 'Erreur réseau. Réessaie.')
     }
   }
 
@@ -832,32 +848,32 @@ function PostulerModal({ annonce, currentUser, onClose, onSuccess }: {
         {done ? (
           <div className="an-modal-done">
             <div className="an-modal-check"><IcoCheck s={32} /></div>
-            <div className="an-modal-done-title">Candidature envoyée !</div>
+            <div className="an-modal-done-title">{lang === 'de' ? 'Bewerbung gesendet!' : 'Candidature envoyée !'}</div>
             <div className="an-modal-done-sub">
-              Tu peux suivre l&apos;état dans <strong>Mes candidatures</strong>.
+              {lang === 'de' ? <>Den Status findest du unter <strong>Meine Bewerbungen</strong>.</> : <>Tu peux suivre l&apos;état dans <strong>Mes candidatures</strong>.</>}
             </div>
           </div>
         ) : (
           <>
-            <div className="an-modal-title">Postuler à cette annonce</div>
+            <div className="an-modal-title">{lang === 'de' ? 'Für diese Anzeige bewerben' : 'Postuler à cette annonce'}</div>
             <div className="an-modal-ann">{annonce.title} — {annonce.author_name}</div>
-            <label className="an-modal-label">Message de motivation</label>
+            <label className="an-modal-label">{lang === 'de' ? 'Motivationsschreiben' : 'Message de motivation'}</label>
             <textarea
               className="an-modal-textarea"
               rows={5}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Présente-toi brièvement, explique pourquoi tu es intéressé(e) et ce que tu peux apporter…"
+              placeholder={lang === 'de' ? 'Stell dich kurz vor und beschreibe, warum dich die Anzeige interessiert und was du mitbringst.' : 'Présente-toi brièvement, explique pourquoi tu es intéressé(e) et ce que tu peux apporter…'}
             />
             {error && <div className="an-modal-error">{error}</div>}
             <div className="an-modal-btns">
               <button className="an-modal-submit" onClick={handleSubmit} disabled={sending}>
                 {sending
-                  ? 'Envoi en cours…'
-                  : <><IcoSend s={16} />Envoyer la candidature</>
+                  ? (lang === 'de' ? 'Wird gesendet…' : 'Envoi en cours…')
+                  : <><IcoSend s={16} />{lang === 'de' ? 'Bewerbung senden' : 'Envoyer la candidature'}</>
                 }
               </button>
-              <button className="an-modal-cancel" onClick={onClose}>Annuler</button>
+              <button className="an-modal-cancel" onClick={onClose}>{lang === 'de' ? 'Abbrechen' : 'Annuler'}</button>
             </div>
           </>
         )}

@@ -3,9 +3,12 @@
 export type Lang = 'fr' | 'de'
 
 /** Infer language from profile zone — Sensebezirk is German-speaking */
-export function zoneLang(zone?: string | null): Lang {
+export function notificationLang(zone?: string | null, preference?: unknown): Lang {
+  if (preference === 'fr' || preference === 'de') return preference
   return zone === 'Sensebezirk' ? 'de' : 'fr'
 }
+
+export const zoneLang = notificationLang
 
 const BASE_URL = 'https://teamupfr.ch'
 const LOGO = `${BASE_URL}/images/logo-official.jpeg`

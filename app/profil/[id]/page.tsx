@@ -1,9 +1,12 @@
 'use client'
 
+import { footballLabel } from '../../../lib/football-labels'
+
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile, CareerExperience, CoachCertificate, avatarSrc } from '../../../lib/supabase'
+import MemberSafetyActions from '../../../components/MemberSafetyActions'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import CareerSection from '../../../components/CareerSection'
 import { useLang } from '../../../lib/lang-context'
@@ -114,9 +117,9 @@ export default function PublicProfilPage() {
   if (notFound || !profile) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', background:'#081434', color:'#fff', gap:16, padding:'2rem', textAlign:'center' }}>
       <div style={{ color:'rgba(255,255,255,.25)' }}><IcoUserX s={52} /></div>
-      <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.8rem', letterSpacing:1 }}>Profil introuvable</div>
+      <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.8rem', letterSpacing:1 }}>{lang === 'de' ? 'Profil nicht gefunden' : 'Profil introuvable'}</div>
       <Link href="/recherche" style={{ display:'inline-flex', alignItems:'center', gap:6, color:'#FF3A3A', textDecoration:'none', fontWeight:700, fontSize:14 }}>
-        <IcoArrowLeft s={14} /> Voir tous les profils
+        <IcoArrowLeft s={14} /> {lang === 'de' ? 'Alle Profile ansehen' : 'Voir tous les profils'}
       </Link>
     </div>
   )
@@ -128,10 +131,10 @@ export default function PublicProfilPage() {
     profile.role === 'club' ? <IcoStadium s={s} /> : profile.role === 'coach' ? <IcoCoach s={s} /> : <IcoPlayer s={s} />
   const coachBadge = profile.role === 'coach' ? (profile.coach_specialty || null) : null
   const roleLabel = profile.role === 'player'
-    ? (profile.genre === 'femme' ? 'Joueuse' : 'Joueur')
+    ? (profile.genre === 'femme' ? (lang === 'de' ? 'Spielerin' : 'Joueuse') : (lang === 'de' ? 'Spieler' : 'Joueur'))
     : profile.role === 'coach'
-    ? (profile.genre === 'femme' ? 'Coache' : 'Coach')
-    : 'Club'
+    ? (profile.genre === 'femme' ? (lang === 'de' ? 'Trainerin' : 'Coache') : (lang === 'de' ? 'Trainer' : 'Coach'))
+    : (lang === 'de' ? 'Verein' : 'Club')
   const strengths = (profile.strengths || '').split(',').map(s => s.trim()).filter(Boolean)
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
 
@@ -144,16 +147,16 @@ export default function PublicProfilPage() {
 
   return (
     <div style={{ background:'#081434', minHeight:'100vh', color:'#fff' }}>
-      <div style={{ maxWidth:860, margin:'0 auto', padding:'1.5rem' }}>
+      <div className="pub-container" style={{ maxWidth:860, margin:'0 auto' }}>
 
         {/* Back */}
         <Link href="/annonces" style={{ display:'inline-flex', alignItems:'center', gap:6, color:'rgba(255,255,255,.5)', textDecoration:'none', fontSize:13, marginBottom:'1.25rem' }}>
-          <IcoArrowLeft s={14} /> Retour aux annonces
+          <IcoArrowLeft s={14} /> {lang === 'de' ? 'Zurück zu den Anzeigen' : 'Retour aux annonces'}
         </Link>
 
         {/* Hero */}
-        <div style={{ background:'#0D1F4A', border:'1px solid rgba(255,255,255,.1)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'1.5rem', flexWrap:'wrap' }}>
+        <div className="pub-hero" style={{ background:'#0D1F4A', border:'1px solid rgba(255,255,255,.1)', borderRadius:20, marginBottom:'1.25rem' }}>
+          <div className="pub-hero-content">
 
             {/* Avatar */}
             <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', flexShrink:0 }}>
@@ -177,28 +180,32 @@ export default function PublicProfilPage() {
 
                 {/* Role badge */}
                 <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:'rgba(255,255,255,.12)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
-                  {roleIcon(13)} {coachBadge || profile.position || roleLabel}
+                  {roleIcon(13)} {roleLabel}
                 </span>
 
+
+                {(coachBadge || profile.position) && (
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>{coachBadge || footballLabel(profile.position!, lang)}</span>
+                )}
 
                 {/* Ligue */}
                 {profile.ligue && (
                   <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100, color:'rgba(255,255,255,.85)' }}>
-                    <IcoTrophy s={12} /> {profile.ligue}
+                    <IcoTrophy s={12} /> {footballLabel(profile.ligue, lang)}
                   </span>
                 )}
 
                 {/* Zone */}
                 {profile.zone && (
                   <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:13, color:'rgba(255,255,255,.6)' }}>
-                    <IcoMapPin s={13} /> {profile.zone}
+                    <IcoMapPin s={13} /> {footballLabel(profile.zone, lang)}
                   </span>
                 )}
 
                 {/* Player: foot */}
                 {profile.role === 'player' && profile.foot && (
                   <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100, color:'rgba(255,255,255,.85)' }}>
-                    {profile.foot}
+                    {footballLabel(profile.foot, lang)}
                   </span>
                 )}
 
@@ -219,21 +226,21 @@ export default function PublicProfilPage() {
                 {/* Club: founded year */}
                 {profile.role === 'club' && (profile as any).club_founded_year != null && (
                   <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100, color:'rgba(255,255,255,.85)' }}>
-                    <IcoCalendar s={12} /> Fondé en {(profile as any).club_founded_year}
+                    <IcoCalendar s={12} /> {lang === 'de' ? 'Gegründet' : 'Fondé en'} {(profile as any).club_founded_year}
                   </span>
                 )}
 
                 {/* Club: teams count */}
                 {profile.role === 'club' && (profile as any).club_teams_count != null && (
                   <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', fontSize:12, padding:'4px 12px', borderRadius:100, color:'rgba(255,255,255,.85)' }}>
-                    <IcoUsers s={12} /> {(profile as any).club_teams_count} équipes
+                    <IcoUsers s={12} /> {(profile as any).club_teams_count} {lang === 'de' ? 'Teams' : 'équipes'}
                   </span>
                 )}
 
                 {/* Availability */}
                 <span style={{ display:'inline-flex', alignItems:'center', gap:6, background: profile.available ? 'rgba(46,210,127,.12)' : 'rgba(255,58,58,.1)', border:`1px solid ${profile.available ? 'rgba(46,210,127,.3)' : 'rgba(255,58,58,.25)'}`, color:'rgba(255,255,255,.9)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
                   <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : '#FF3A3A', flexShrink:0 }} />
-                  {profile.available ? 'Disponible' : 'Non disponible'}
+                  {profile.available ? (lang === 'de' ? 'Verfügbar' : 'Disponible') : (lang === 'de' ? 'Nicht verfügbar' : 'Non disponible')}
                 </span>
               </div>
 
@@ -250,7 +257,7 @@ export default function PublicProfilPage() {
                       onClick={() => setShowAllStrengths(true)}
                       style={{ cursor:'pointer', display:'inline-flex', alignItems:'center', padding:'4px 12px', borderRadius:999, background:'rgba(255,58,58,.12)', border:'1px solid rgba(255,58,58,.3)', fontSize:12, fontWeight:700, color:'#FF3A3A', fontFamily:'inherit' }}
                     >
-                      +{strengths.length - 5} de plus
+                      +{strengths.length - 5} {lang === 'de' ? 'weitere' : 'de plus'}
                     </button>
                   )}
                 </div>
@@ -258,11 +265,13 @@ export default function PublicProfilPage() {
             </div>
 
             {/* Message button */}
-            <Link href={`/messages?partner=${id}`} style={{ display:'inline-flex', alignItems:'center', gap:8, background:'#FF3A3A', color:'#fff', borderRadius:999, padding:'10px 22px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0, boxShadow:'0 4px 14px rgba(255,58,58,.35)' }}>
-              <IcoChatBubble s={15} /> Envoyer un message
+            <Link className="pub-contact" href={`/messages?partner=${id}`} style={{ display:'inline-flex', alignItems:'center', gap:8, background:'#FF3A3A', color:'#fff', borderRadius:999, padding:'10px 22px', fontWeight:700, fontSize:13, textDecoration:'none', flexShrink:0, boxShadow:'0 4px 14px rgba(255,58,58,.35)' }}>
+              <IcoChatBubble s={15} /> {lang === 'de' ? 'Nachricht senden' : 'Envoyer un message'}
             </Link>
           </div>
         </div>
+
+        <div style={{ marginBottom: '1.25rem' }}><MemberSafetyActions key={id} memberId={id} /></div>
 
         {/* Stats (player only) */}
         {profile.role === 'player' && (() => {
@@ -274,20 +283,20 @@ export default function PublicProfilPage() {
           const hasPrev    = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
           if (!hasCurrent && !hasPrev) return null
           const currentStats = [
-            { v: profile.goals ?? 0,   k: 'Buts',   color:'#FF3A3A' },
-            { v: profile.assists ?? 0, k: 'Assists', color:'#3A7AFF' },
-            { v: profile.matches ?? 0, k: 'Matchs',  color:'#2ED27F' },
+            { v: profile.goals ?? 0,   k: (lang === 'de' ? 'Tore' : 'Buts'),   color:'#FF3A3A' },
+            { v: profile.assists ?? 0, k: (lang === 'de' ? 'Vorlagen' : 'Assists'), color:'#3A7AFF' },
+            { v: profile.matches ?? 0, k: (lang === 'de' ? 'Spiele' : 'Matchs'),  color:'#2ED27F' },
           ]
           const prevStats = [
-            { v: profile.goals_prev,   k: 'Buts',   color:'#FF3A3A' },
-            { v: profile.assists_prev, k: 'Assists', color:'#3A7AFF' },
-            { v: profile.matches_prev, k: 'Matchs',  color:'#2ED27F' },
+            { v: profile.goals_prev,   k: (lang === 'de' ? 'Tore' : 'Buts'),   color:'#FF3A3A' },
+            { v: profile.assists_prev, k: (lang === 'de' ? 'Vorlagen' : 'Assists'), color:'#3A7AFF' },
+            { v: profile.matches_prev, k: (lang === 'de' ? 'Spiele' : 'Matchs'),  color:'#2ED27F' },
           ]
           return (
             <div style={{ background:'#0D1F4A', border:'1px solid rgba(255,255,255,.1)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
               {/* Current season */}
               <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #081434 100%)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
-                <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>Saison actuelle</span>
+                <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>{lang === 'de' ? 'Aktuelle Saison' : 'Saison actuelle'}</span>
                 <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', fontWeight:600 }}>{seasonNow}</span>
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
@@ -311,7 +320,7 @@ export default function PublicProfilPage() {
               {hasPrev && (
                 <>
                   <div style={{ background:'rgba(255,255,255,.04)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
-                    <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'rgba(255,255,255,.6)', letterSpacing:2 }}>Saison précédente</span>
+                    <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'rgba(255,255,255,.6)', letterSpacing:2 }}>{lang === 'de' ? 'Letzte Saison' : 'Saison précédente'}</span>
                     <span style={{ fontSize:11, color:'rgba(255,255,255,.4)', fontWeight:600 }}>{seasonPrev}</span>
                   </div>
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
@@ -332,14 +341,14 @@ export default function PublicProfilPage() {
         {profile.role === 'club' && (
           <div style={{ background:'#0D1F4A', border:'1px solid rgba(255,255,255,.1)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
             <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #081434 100%)', padding:'.85rem 1.25rem', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
-              <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>Profil Club</span>
+              <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>{lang === 'de' ? 'Vereinsprofil' : 'Profil Club'}</span>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
               {[
-                { label:'Ligue',       value: profile.ligue,  color:'#FF3A3A' },
-                { label:'Zone',        value: profile.zone,   color:'#3A7AFF' },
-                { label:'Recrutement', value: profile.available ? 'Ouvert' : 'Complet', color: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)' },
-                { label:'Vérifié',     value: profile.verified ? 'Oui ✓' : null, color:'#3A7AFF' },
+                { label:(lang === 'de' ? 'Liga' : 'Ligue'),       value: profile.ligue,  color:'#FF3A3A' },
+                { label:(lang === 'de' ? 'Region' : 'Zone'),        value: profile.zone,   color:'#3A7AFF' },
+                { label:(lang === 'de' ? 'Spielersuche' : 'Recrutement'), value: profile.available ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)' },
+                { label:(lang === 'de' ? 'Verifiziert' : 'Vérifié'),     value: profile.verified ? (lang === 'de' ? 'Ja ✓' : 'Oui ✓') : null, color:'#3A7AFF' },
               ].filter(s => s.value).map((s, i, arr) => (
                 <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                   <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
@@ -355,14 +364,14 @@ export default function PublicProfilPage() {
         {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
           <div style={{ background:'#0D1F4A', border:'1px solid rgba(255,255,255,.1)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
             <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #081434 100%)', padding:'.85rem 1.25rem', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
-              <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>Profil Entraîneur</span>
+              <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>{lang === 'de' ? 'Trainerprofil' : 'Profil Entraîneur'}</span>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
               {[
-                { label:'Expérience', value:profile.coach_experience, color:'#FF3A3A' },
-                { label:'Diplôme',    value:profile.coach_diploma,    color:'#3A7AFF' },
-                { label:'Spécialité', value:profile.coach_specialty,  color:'#2ED27F' },
-                { label:'Statut',     value:profile.coach_availability, color:'#FF9A3A' },
+                { label:(lang === 'de' ? 'Erfahrung' : 'Expérience'), value:profile.coach_experience, color:'#FF3A3A' },
+                { label:(lang === 'de' ? 'Diplom' : 'Diplôme'),    value:profile.coach_diploma,    color:'#3A7AFF' },
+                { label:(lang === 'de' ? 'Spezialgebiet' : 'Spécialité'), value:profile.coach_specialty,  color:'#2ED27F' },
+                { label:(lang === 'de' ? 'Status' : 'Statut'),     value:profile.coach_availability, color:'#FF9A3A' },
               ].filter(s => s.value).map((s, i, arr) => (
                 <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                   <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
@@ -370,6 +379,31 @@ export default function PublicProfilPage() {
                   <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Videos — hidden for clubs */}
+        {profile.role !== 'club' && videoUrls.length > 0 && (
+          <div style={{ ...darkCard, marginBottom: '1.25rem' }}>
+            <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.75rem', color:'rgba(255,255,255,.9)' }}>Highlights</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+              {videoUrls.map((url, i) => {
+                const embed = getYouTubeEmbed(url)
+                const isNative = !embed && /\.(mp4|mov|webm)(\?|$)/i.test(url)
+                if (embed) return (
+                  <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
+                    <iframe loading="lazy" src={embed} title={`Video ${i+1}`} frameBorder="0" allowFullScreen
+                      style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
+                  </div>
+                )
+                if (isNative) return (
+                  <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
+                    <video preload="metadata" src={url} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
+                  </div>
+                )
+                return null
+              })}
             </div>
           </div>
         )}
@@ -406,7 +440,7 @@ export default function PublicProfilPage() {
             {/* Bio */}
             {profile.bio && (
               <div style={darkCard}>
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.75rem', color:'rgba(255,255,255,.9)' }}>À propos</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.75rem', color:'rgba(255,255,255,.9)' }}>{lang === 'de' ? 'Über mich' : 'À propos'}</div>
                 <p style={{ fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.7, margin:0 }}>{profile.bio}</p>
               </div>
             )}
@@ -432,55 +466,31 @@ export default function PublicProfilPage() {
               </div>
             )}
 
-            {/* Videos — hidden for clubs */}
-            {profile.role !== 'club' && videoUrls.length > 0 && (
-              <div style={darkCard}>
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.75rem', color:'rgba(255,255,255,.9)' }}>Highlights</div>
-                <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
-                  {videoUrls.map((url, i) => {
-                    const embed = getYouTubeEmbed(url)
-                    const isNative = !embed && /\.(mp4|mov|webm)(\?|$)/i.test(url)
-                    if (embed) return (
-                      <div key={i} style={{ position:'relative', paddingBottom:'56.25%', borderRadius:12, overflow:'hidden', background:'#000' }}>
-                        <iframe src={embed} title={`Video ${i+1}`} frameBorder="0" allowFullScreen
-                          style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%' }} />
-                      </div>
-                    )
-                    if (isNative) return (
-                      <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
-                        <video src={url} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
-                      </div>
-                    )
-                    return null
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
           <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
             <div style={darkCard}>
-              <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'1rem', color:'rgba(255,255,255,.9)' }}>Informations</div>
+              <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'1rem', color:'rgba(255,255,255,.9)' }}>{lang === 'de' ? 'Informationen' : 'Informations'}</div>
               {[
-                profile.role === 'player' && profile.foot ? ['Pied', profile.foot] : null,
-                profile.role === 'player' && (profile as any).position_secondary ? ['Position 2', (profile as any).position_secondary] : null,
-                profile.role === 'player' && (profile as any).height_cm ? ['Taille', `${(profile as any).height_cm} cm`] : null,
-                profile.role === 'player' && (profile as any).level ? ['Niveau', (profile as any).level] : null,
-                profile.zone ? ['Zone', profile.zone] : null,
-                profile.role !== 'coach' && profile.ligue ? ['Ligue', profile.ligue] : null,
+                profile.role === 'player' && profile.foot ? [(lang === 'de' ? 'Starker Fuss' : 'Pied'), profile.foot] : null,
+                profile.role === 'player' && (profile as any).position_secondary ? [(lang === 'de' ? 'Zweitposition' : 'Position 2'), (profile as any).position_secondary] : null,
+                profile.role === 'player' && (profile as any).height_cm ? [(lang === 'de' ? 'Grösse' : 'Taille'), `${(profile as any).height_cm} cm`] : null,
+                profile.role === 'player' && (profile as any).level ? [(lang === 'de' ? 'Niveau' : 'Niveau'), (profile as any).level] : null,
+                profile.zone ? [(lang === 'de' ? 'Region' : 'Zone'), profile.zone] : null,
+                profile.role !== 'coach' && profile.ligue ? [(lang === 'de' ? 'Liga' : 'Ligue'), profile.ligue] : null,
                 profile.role === 'player' && profile.position ? ['Position', profile.position] : null,
-                profile.club_name && profile.role !== 'club' ? ['Club', profile.club_name] : null,
-                profile.role === 'coach' && profile.coach_experience ? ['Expérience', profile.coach_experience] : null,
-                profile.role === 'coach' && profile.coach_diploma ? ['Diplôme', profile.coach_diploma] : null,
-                profile.role === 'coach' && profile.coach_specialty ? ['Spécialité', profile.coach_specialty] : null,
-                profile.role === 'coach' && profile.coach_availability ? ['Disponibilité', profile.coach_availability] : null,
-                profile.role === 'club' && (profile as any).club_stadium_name ? ['Stade', (profile as any).club_stadium_name] : null,
-                profile.role === 'club' && (profile as any).club_stadium_address ? ['Adresse', (profile as any).club_stadium_address] : null,
+                profile.club_name && profile.role !== 'club' ? [(lang === 'de' ? 'Verein' : 'Club'), profile.club_name] : null,
+                profile.role === 'coach' && profile.coach_experience ? [(lang === 'de' ? 'Erfahrung' : 'Expérience'), profile.coach_experience] : null,
+                profile.role === 'coach' && profile.coach_diploma ? [(lang === 'de' ? 'Diplom' : 'Diplôme'), profile.coach_diploma] : null,
+                profile.role === 'coach' && profile.coach_specialty ? [(lang === 'de' ? 'Spezialgebiet' : 'Spécialité'), profile.coach_specialty] : null,
+                profile.role === 'coach' && profile.coach_availability ? [(lang === 'de' ? 'Verfügbarkeit' : 'Disponibilité'), profile.coach_availability] : null,
+                profile.role === 'club' && (profile as any).club_stadium_name ? [(lang === 'de' ? 'Stadion' : 'Stade'), (profile as any).club_stadium_name] : null,
+                profile.role === 'club' && (profile as any).club_stadium_address ? [(lang === 'de' ? 'Adresse' : 'Adresse'), (profile as any).club_stadium_address] : null,
               ].filter((r): r is [string, string] => Array.isArray(r)).map(([k, v]) => (
                 <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
                   <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
-                  <span style={{ fontWeight:600, color:'#fff' }}>{v}</span>
+                  <span style={{ fontWeight:600, color:'#fff' }}>{footballLabel(v, lang)}</span>
                 </div>
               ))}
             </div>
@@ -488,12 +498,19 @@ export default function PublicProfilPage() {
         </div>
 
         <style>{`
+          .pub-container { padding: 1.5rem; }
+          .pub-hero { padding: 2rem; }
+          .pub-hero-content { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
           .pub-grid {
             display: grid;
             grid-template-columns: minmax(0, 1fr) 280px;
             gap: 1.25rem;
           }
           @media (max-width: 720px) {
+            .pub-container { padding: 1rem; }
+            .pub-hero { padding: 1.25rem; }
+            .pub-hero-content { gap: 1rem; }
+            .pub-contact { width: 100%; min-height: 44px; justify-content: center; }
             .pub-grid { grid-template-columns: minmax(0, 1fr); }
           }
         `}</style>

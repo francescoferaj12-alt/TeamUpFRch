@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { isThrottled } from '../../../../../lib/email-throttle'
-import { applicationStatusHtml, zoneLang } from '../../../../../lib/email-templates'
+import { applicationStatusHtml, notificationLang } from '../../../../../lib/email-templates'
 
 const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
@@ -68,7 +68,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
               ? (applicant.club_name || 'Club')
               : `${applicant.first_name || ''} ${applicant.last_name || ''}`.trim() || applicant.email
 
-            const lang = zoneLang(applicant.zone)
+            const lang = notificationLang(applicant.zone, applicant.notification_settings?.language)
             const isAccepted = status === 'accepted'
             const resend = new Resend(process.env.RESEND_API_KEY)
             const { error: sendErr } = await resend.emails.send({

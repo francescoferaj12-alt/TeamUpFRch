@@ -1,5 +1,7 @@
 'use client'
 
+import { footballLabel } from '../../lib/football-labels'
+
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -162,7 +164,7 @@ function LoginForm() {
   async function handleResend() {
     if (!email) return
     setResendLoading(true)
-    await supabase.auth.resend({ type: 'signup', email })
+    await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${window.location.origin}/verify-email` } })
     setResendLoading(false)
     setResendSent(true)
     setTimeout(() => setResendSent(false), 5000)
@@ -186,8 +188,8 @@ function LoginForm() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email, password,
       options: {
-        data: { first_name: firstName, last_name: lastName, role, profile_creation_token: profileToken },
-        emailRedirectTo: 'https://teamupfr.ch/verify-email'
+        data: { first_name: firstName, last_name: lastName, role, language: lang, profile_creation_token: profileToken },
+        emailRedirectTo: `${window.location.origin}/verify-email`
       }
     })
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
@@ -441,7 +443,7 @@ function LoginForm() {
                     <div style={{ marginBottom: 16 }}>
                       <label style={lbl}>{t.login.email[lang]}</label>
                       <div style={{ position: 'relative' }}>
-                        <input className="ln-inp" style={inpIcon} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ton@email.ch" required />
+                        <input className="ln-inp" style={inpIcon} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.ch" required />
                         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><IcoMail size={18} color="rgba(255,255,255,.35)" /></span>
                       </div>
                     </div>
@@ -538,11 +540,11 @@ function LoginForm() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                       <div>
                         <label style={lbl}>{t.login.firstname[lang]}</label>
-                        <input className="ln-inp" style={inp} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Prénom" required />
+                        <input className="ln-inp" style={inp} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder={lang === 'de' ? 'Vorname' : 'Prénom'} required />
                       </div>
                       <div>
                         <label style={lbl}>{t.login.lastname[lang]}</label>
-                        <input className="ln-inp" style={inp} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Nom" required />
+                        <input className="ln-inp" style={inp} value={lastName} onChange={e => setLastName(e.target.value)} placeholder={lang === 'de' ? 'Nachname' : 'Nom'} required />
                       </div>
                     </div>
 
@@ -571,7 +573,7 @@ function LoginForm() {
                           <label style={lbl}>{t.login.position[lang]}</label>
                           <select className="ln-inp" style={inp} value={position} onChange={e => setPosition(e.target.value)} required>
                             <option value="">{t.login.choose[lang]}</option>
-                            {POSITIONS.map(p => <option key={p}>{p}</option>)}
+                            {POSITIONS.map(p => <option key={p} value={p}>{footballLabel(p, lang)}</option>)}
                           </select>
                         </div>
                         <div>
@@ -594,7 +596,7 @@ function LoginForm() {
                             <option value="">{t.login.choose[lang]}</option>
                             {(role === 'club' ? [...liguesHomme, ...liguesFemme] : genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
                               <optgroup key={g.group} label={g.group} style={{ background: '#0D1F4A' }}>
-                                {g.items.map(l => <option key={l} style={{ background: '#0D1F4A' }}>{l}</option>)}
+                                {g.items.map(l => <option key={l} style={{ background: '#0D1F4A' }} value={l}>{footballLabel(l, lang)}</option>)}
                               </optgroup>
                             ))}
                           </select>
@@ -603,7 +605,7 @@ function LoginForm() {
                           <label style={lbl}>{t.login.zone[lang]}</label>
                           <select className="ln-inp" style={inp} value={zone} onChange={e => setZone(e.target.value)} required>
                             <option value="">{t.login.choose[lang]}</option>
-                            {ZONES.map(z => <option key={z}>{z}</option>)}
+                            {ZONES.map(z => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
                           </select>
                         </div>
                       </div>
@@ -612,7 +614,7 @@ function LoginForm() {
                         <label style={lbl}>{t.login.zone[lang]}</label>
                         <select className="ln-inp" style={inp} value={zone} onChange={e => setZone(e.target.value)} required>
                           <option value="">{t.login.choose[lang]}</option>
-                          {ZONES.map(z => <option key={z}>{z}</option>)}
+                          {ZONES.map(z => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
                         </select>
                       </div>
                     )}
@@ -628,7 +630,7 @@ function LoginForm() {
                           </select>
                           <select className="ln-inp" style={inp} value={birthMonth} onChange={e => setBirthMonth(e.target.value)} required>
                             <option value="">{t.login.month[lang]}</option>
-                            {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                            {MONTHS.map((m, i) => <option key={m} value={i + 1}>{footballLabel(m, lang)}</option>)}
                           </select>
                           <select className="ln-inp" style={inp} value={birthYear} onChange={e => setBirthYear(e.target.value)} required>
                             <option value="">{t.login.year[lang]}</option>
@@ -645,14 +647,14 @@ function LoginForm() {
                           <label style={lbl}>Expérience</label>
                           <select className="ln-inp" style={inp} value={coachExperience} onChange={e => setCoachExperience(e.target.value)} required>
                             <option value="">Choisir…</option>
-                            {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v}>{v}</option>)}
+                            {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                         <div>
                           <label style={lbl}>Diplôme</label>
                           <select className="ln-inp" style={inp} value={coachDiploma} onChange={e => setCoachDiploma(e.target.value)} required>
                             <option value="">Choisir…</option>
-                            {['Sans diplôme','UEFA C','UEFA B','UEFA A','UEFA Pro','Diplôme CFE','BBaby','BFut'].map(v => <option key={v}>{v}</option>)}
+                            {['Sans diplôme','UEFA C','UEFA B','UEFA A','UEFA Pro','Diplôme CFE','BBaby','BFut'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                       </div>
@@ -661,14 +663,14 @@ function LoginForm() {
                           <label style={lbl}>Spécialité</label>
                           <select className="ln-inp" style={inp} value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)} required>
                             <option value="">Choisir…</option>
-                            {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens'].map(v => <option key={v}>{v}</option>)}
+                            {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                         <div>
                           <label style={lbl}>Disponibilité</label>
                           <select className="ln-inp" style={inp} value={coachAvailability} onChange={e => setCoachAvailability(e.target.value)} required>
                             <option value="">Choisir…</option>
-                            {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v}>{v}</option>)}
+                            {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                       </div>
@@ -692,7 +694,7 @@ function LoginForm() {
                           setEmail(e.target.value)
                           if (mode === 'register' && role === 'club') setEmailIsProfessional(!isPersonalEmail(e.target.value))
                         }}
-                        placeholder="ton@email.ch" required />
+                        placeholder="name@example.ch" required />
                       <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
                         <IcoMail size={18} color="rgba(255,255,255,.35)" />
                       </span>
@@ -725,7 +727,7 @@ function LoginForm() {
                       <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
                         <IcoLock size={18} color="rgba(255,255,255,.35)" />
                       </span>
-                      <button type="button" onClick={() => setShowPwd(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.4)', padding: 4, display: 'flex' }} aria-label={showPwd ? 'Masquer' : 'Afficher'}>
+                      <button type="button" onClick={() => setShowPwd(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.4)', padding: 4, display: 'flex' }} aria-label={showPwd ? (lang === 'de' ? 'Passwort ausblenden' : 'Masquer le mot de passe') : (lang === 'de' ? 'Passwort anzeigen' : 'Afficher le mot de passe')}>
                         {showPwd ? <IcoEyeOff size={18} /> : <IcoEye size={18} />}
                       </button>
                     </div>
@@ -750,7 +752,7 @@ function LoginForm() {
                         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
                           <IcoLock size={18} color="rgba(255,255,255,.35)" />
                         </span>
-                        <button type="button" onClick={() => setShowConfirmPwd(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.4)', padding: 4, display: 'flex' }} aria-label={showConfirmPwd ? 'Masquer' : 'Afficher'}>
+                        <button type="button" onClick={() => setShowConfirmPwd(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.4)', padding: 4, display: 'flex' }} aria-label={showConfirmPwd ? (lang === 'de' ? 'Passwort ausblenden' : 'Masquer le mot de passe') : (lang === 'de' ? 'Passwort anzeigen' : 'Afficher le mot de passe')}>
                           {showConfirmPwd ? <IcoEyeOff size={18} /> : <IcoEye size={18} />}
                         </button>
                       </div>

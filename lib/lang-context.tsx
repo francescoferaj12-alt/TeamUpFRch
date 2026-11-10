@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { Lang } from './translations'
 
 const LangContext = createContext<{
@@ -16,10 +16,14 @@ export function LangProvider({ children }: { children: ReactNode }) {
     if (saved === 'fr' || saved === 'de') setLangState(saved)
   }, [])
 
-  function setLang(l: Lang) {
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
+
+  const setLang = useCallback((l: Lang) => {
     setLangState(l)
     localStorage.setItem('teamupfr-lang', l)
-  }
+  }, [])
 
   return (
     <LangContext.Provider value={{ lang, setLang }}>

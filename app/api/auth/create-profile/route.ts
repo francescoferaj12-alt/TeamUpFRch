@@ -81,6 +81,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email does not match the account' }, { status: 403 })
   }
   safe.email = authUser.user.email
+  const language = authUser.user.user_metadata?.language
+  if (language === 'fr' || language === 'de') safe.notification_settings = { language }
   // These fields must never be granted by a public sign-up request.
   safe.hidden = true
   if (safe.role === 'club') safe.club_verification_status = 'pending'

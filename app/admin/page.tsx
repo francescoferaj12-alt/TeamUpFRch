@@ -1,5 +1,7 @@
 'use client'
 
+import MemberReports from '../../components/MemberReports'
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase, Profile, avatarSrc } from '../../lib/supabase'
@@ -80,6 +82,7 @@ export default function AdminPage() {
           <a href="/admin/clubs" style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.1)', borderRadius:10, padding:'8px 16px', color:'rgba(255,255,255,.7)', fontSize:13, fontWeight:600, textDecoration:'none', marginTop:8 }}>
             🏟️ Valider les clubs →
           </a>
+          <MemberReports />
         </div>
 
         {/* Stats */}

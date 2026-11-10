@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { ownedVideoPath, profileVideoFields } from '../lib/profile-videos'
 import { supabase, Profile } from '../lib/supabase'
 import { t, months, Lang } from '../lib/translations'
 import { liguesHomme, liguesFemme } from '../lib/data'
@@ -264,6 +265,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [saveError, setSaveError] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
   const dirtyRef = useRef(false)
+  const hasChangesRef = useRef(false)
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Prevent cert load from triggering autosave
   const skipCertDirty = useRef(0)
@@ -290,6 +292,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   useEffect(() => {
     if (!dirtyRef.current) { dirtyRef.current = true; return }
     if (skipCertDirty.current > 0) { skipCertDirty.current--; return }
+    hasChangesRef.current = true
     setHasChanges(true)
     setSaveStatus('idle')
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
@@ -375,9 +378,11 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   }
 
   const savingRef = useRef(false)
+  const persistedVideos = useRef(profileVideoFields.map(field => profile[field] || null))
+  const pendingVideoCleanup = useRef(new Map<string, string>())
 
   async function doSave(silent: boolean) {
-    if (!hasChanges && silent) return
+    if (!hasChangesRef.current && silent) return
     if (savingRef.current) return
     savingRef.current = true
     setSaveStatus('saving')
@@ -390,12 +395,32 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
         setSaveError([e1.message, e1.details, e1.hint].filter(Boolean).join(' — '))
         return
       }
-      const { error: e2 } = await supabase.from('profiles').update(ext).eq('id', profile.id)
-      if (e2 && !silent) {
+      const nextVideos = profileVideoFields.map(field => ext[field] as string | null)
+      for (const [index, field] of profileVideoFields.entries()) {
+        const previous = persistedVideos.current[index]
+        if (nextVideos[index] === previous) delete ext[field]
+      }
+      let update = supabase.from('profiles').update(ext).eq('id', profile.id)
+      for (const [index, field] of profileVideoFields.entries()) {
+        const previous = persistedVideos.current[index]
+        update = previous === null ? update.is(field, null) : update.eq(field, previous)
+      }
+      const { data: updated, error: e2 } = await update.select('id').maybeSingle()
+      if (e2 || !updated) {
         setSaveStatus('error')
-        setSaveError([e2.message, e2.details, e2.hint].filter(Boolean).join(' — '))
+        setSaveError(e2 ? [e2.message, e2.details, e2.hint].filter(Boolean).join(' — ') : (lang === 'de'
+          ? 'Das Profil wurde in einem anderen Fenster geändert. Öffne den Editor erneut.'
+          : 'Le profil a été modifié dans une autre fenêtre. Rouvre le formulaire.'))
         return
       }
+      const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const activePaths = new Set(nextVideos.map(url => ownedVideoPath(url || '', profile.id, storageUrl)))
+      for (const oldUrl of persistedVideos.current) {
+        const path = ownedVideoPath(oldUrl || '', profile.id, storageUrl)
+        if (oldUrl && path && !activePaths.has(path)) pendingVideoCleanup.current.set(path, oldUrl)
+      }
+      persistedVideos.current = nextVideos
+
       // Sync coach certificates — delete all then re-insert current list
       if (profile.role === 'coach') {
         await supabase.from('coach_certificates').delete().eq('coach_id', profile.id)
@@ -405,9 +430,36 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
           )
         }
       }
+      const updatedProfile = {
+        ...profile, ...base, ...ext,
+        video1_url: nextVideos[0],
+        video2_url: nextVideos[1],
+        video3_url: nextVideos[2],
+      } as Profile
+
+      while (pendingVideoCleanup.current.size > 0) {
+        const { data: { session } } = await supabase.auth.getSession()
+        const urls = [...pendingVideoCleanup.current.values()].slice(0, 3)
+        const response = session && await fetch('/api/profile/obsolete-videos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ urls }),
+        }).catch(() => null)
+        if (!response?.ok) {
+          onSaved(updatedProfile, true)
+          setSaveStatus('error')
+          setSaveError(lang === 'de'
+            ? 'Das Profil wurde gespeichert. Speichere erneut, um die alten Videodateien zu löschen.'
+            : 'Le profil a été enregistré. Enregistre à nouveau pour supprimer les anciens fichiers vidéo.')
+          return
+        }
+        for (const url of urls) pendingVideoCleanup.current.delete(ownedVideoPath(url, profile.id, storageUrl)!)
+      }
+
+      hasChangesRef.current = false
       setHasChanges(false)
       setSaveStatus('saved')
-      onSaved({ ...profile, ...base, ...ext } as Profile, silent)
+      onSaved(updatedProfile, silent)
       if (silent) {
         setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2200)
       }
@@ -1036,7 +1088,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               key={f.idx}
               value={f.v}
               onChange={f.set}
-              placeholder={`${f.label} — YouTube ou vidéo`}
+              placeholder={`${f.label} — ${lang === 'de' ? 'YouTube oder Video' : 'YouTube ou vidéo'}`}
               profileId={profile.id}
               index={f.idx}
               inpSt={{ width:'100%', background:'rgba(0,0,0,0.3)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, padding:'11px 13px', color:'#fff', fontSize:14, fontFamily:'inherit', boxSizing:'border-box' }}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { clubDeletedHtml, zoneLang } from '../../../../../../lib/email-templates'
+import { clubDeletedHtml, notificationLang } from '../../../../../../lib/email-templates'
 
 const ADMIN_EMAIL = 'teamupfr.ch@gmail.com'
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // Fetch profile before deletion (for email)
   const { data: profile } = await admin
     .from('profiles')
-    .select('email,club_name,zone')
+    .select('email,club_name,zone,notification_settings')
     .eq('id', id)
     .single()
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (profile?.email && process.env.RESEND_API_KEY) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY)
-      const lang = zoneLang(profile.zone)
+      const lang = notificationLang(profile.zone, profile.notification_settings?.language)
       await resend.emails.send({
         from: 'TeamUpFR <noreply@teamupfr.ch>',
         to: profile.email,

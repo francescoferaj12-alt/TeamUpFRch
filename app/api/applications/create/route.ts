@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { isThrottled } from '../../../../lib/email-throttle'
-import { newApplicationHtml, zoneLang } from '../../../../lib/email-templates'
+import { newApplicationHtml, notificationLang } from '../../../../lib/email-templates'
 
 const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
         if (!authorErr && author?.email && author.notification_settings?.newApplication !== false) {
           if (!isThrottled(author.email, 'newApplication')) {
-            const lang = zoneLang(author.zone)
+            const lang = notificationLang(author.zone, author.notification_settings?.language)
             const toName = author.role === 'club'
               ? (author.club_name || 'Club')
               : `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.email

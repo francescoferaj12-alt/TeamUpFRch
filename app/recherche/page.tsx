@@ -1,5 +1,7 @@
 'use client'
 
+import { footballLabel } from '../../lib/football-labels'
+
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { supabase, Profile, avatarSrc } from '../../lib/supabase'
@@ -240,7 +242,7 @@ export default function RecherchePage() {
                 <option value="" style={optSt}>{t.search.all_ligues[lang]}</option>
                 {ALL_LIGUE_GROUPS.map(g => (
                   <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group} style={{ background:'#081434' }}>
-                    {g.items.map(l => <option key={l} style={optSt}>{l}</option>)}
+                    {g.items.map(l => <option key={l} style={optSt} value={l}>{footballLabel(l, lang)}</option>)}
                   </optgroup>
                 ))}
               </select>
@@ -249,14 +251,14 @@ export default function RecherchePage() {
               <label className="sr-lbl">{lang === 'fr' ? 'Position' : 'Position'}</label>
               <select className="sr-sel" value={filterPos} onChange={e => setFilterPos(e.target.value)}>
                 <option value="" style={optSt}>{t.search.all_positions[lang]}</option>
-                {POSITIONS.map(o => <option key={o} style={optSt}>{o}</option>)}
+                {POSITIONS.map(o => <option key={o} style={optSt} value={o}>{footballLabel(o, lang)}</option>)}
               </select>
             </div>
             <div>
               <label className="sr-lbl">{lang === 'fr' ? 'Zone' : 'Zone'}</label>
               <select className="sr-sel" value={filterZone} onChange={e => setFilterZone(e.target.value)}>
                 <option value="" style={optSt}>{t.search.all_zones[lang]}</option>
-                {ZONES.map(o => <option key={o} style={optSt}>{o}</option>)}
+                {ZONES.map(o => <option key={o} style={optSt} value={o}>{footballLabel(o, lang)}</option>)}
               </select>
             </div>
           </div>
