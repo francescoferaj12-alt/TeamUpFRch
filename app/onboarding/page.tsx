@@ -12,6 +12,7 @@ import { ligues, zones, positions } from '../../lib/data'
 type Role = 'player' | 'coach' | 'club'
 
 interface CareerEntry {
+  id: string
   club_name: string
   league: string
   position: string   // joueur
@@ -166,9 +167,12 @@ function CareerEditor({
 }: { entries: CareerEntry[]; onChange: (e: CareerEntry[]) => void; roleType: 'player' | 'coach'; lang: 'fr' | 'de' }) {
   const o = t.onboarding
 
-  const addEntry = () => onChange([...entries, { club_name: '', league: '', position: '', coach_role: '', start_date: '', end_date: '', is_current: false }])
+  const addEntry = () => onChange([...entries, {
+    id: crypto.randomUUID(),
+    club_name: '', league: '', position: '', coach_role: '', start_date: '', end_date: '', is_current: false,
+  }])
   const removeEntry = (i: number) => onChange(entries.filter((_, idx) => idx !== i))
-  const update = (i: number, field: keyof CareerEntry, val: string | boolean) => {
+  const update = (i: number, field: keyof Omit<CareerEntry, 'id'>, val: string | boolean) => {
     const next = entries.map((e, idx) => idx === i ? { ...e, [field]: val } : e)
     onChange(next)
   }
@@ -179,7 +183,7 @@ function CareerEditor({
         <p style={{ color: 'rgba(255,255,255,.3)', fontSize: 14, marginBottom: '1rem' }}>{o.career_none[lang]}</p>
       )}
       {entries.map((entry, i) => (
-        <div key={i} style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 12, padding: '1rem', marginBottom: '0.75rem' }}>
+        <div key={entry.id} style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 12, padding: '1rem', marginBottom: '0.75rem' }}>
           <TextField label={o.career_club[lang]} value={entry.club_name} onChange={v => update(i, 'club_name', v)} />
           {roleType === 'player'
             ? <SelectField label={o.career_role[lang]} value={entry.position} onChange={v => update(i, 'position', v)} options={positions} placeholder={t.onboarding.choose[lang]} />
@@ -337,10 +341,11 @@ export default function OnboardingPage() {
         }
         if (profile.role === 'player' || profile.role === 'coach') {
           const { data: career, error: careerError } = await supabase.from('career_experiences')
-            .select('club_name,league,position,coach_role,start_date,end_date,is_current')
+            .select('id,club_name,league,position,coach_role,start_date,end_date,is_current')
             .eq('user_id', session.user.id).order('start_date', { ascending: false })
           if (!careerError) {
             const entries = (career || []).map(entry => ({
+              id: entry.id,
               club_name: entry.club_name, league: entry.league || '', position: entry.position || '',
               coach_role: entry.coach_role || '', start_date: entry.start_date,
               end_date: entry.end_date || '', is_current: !!entry.is_current,

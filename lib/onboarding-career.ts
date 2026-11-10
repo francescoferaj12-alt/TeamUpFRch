@@ -16,6 +16,10 @@ export function normalizeOnboardingCareer(value: unknown) {
   if (!Array.isArray(value) || value.length > 50) throw new Error('Invalid career entries')
   return value.map(entry => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new Error('Invalid career entry')
+    const id = entry.id
+    if (id !== undefined && (typeof id !== 'string' || !/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(id))) {
+      throw new Error('Invalid career ID')
+    }
     const text = (field: string, required = false) => {
       const raw = entry[field]
       if (raw != null && typeof raw !== 'string') throw new Error('Invalid career field')
@@ -29,6 +33,7 @@ export function normalizeOnboardingCareer(value: unknown) {
     const end = isCurrent ? null : careerDate(entry.end_date, false)
     if (end && end < start) throw new Error('End date precedes start date')
     return {
+      id,
       club_name: text('club_name', true), league: text('league'),
       position: text('position'), coach_role: text('coach_role'),
       start_date: start, end_date: end, is_current: isCurrent,

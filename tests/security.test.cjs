@@ -72,12 +72,13 @@ const careerRequest = entries => ({ stepIndex: 3, role: 'player', data: { career
 test('onboarding converts selected years and clears an empty or current end date', async () => {
   const api = careerHandler()
   const response = await api.POST(request(careerRequest([
-    { club_name: ' Club ', start_date: '2019', end_date: '' },
+    { id: uid, club_name: ' Club ', start_date: '2019', end_date: '' },
     { club_name: 'Current', start_date: '2024', end_date: '2023', is_current: true },
   ])))
   assert.equal(response.status, 200)
   assert.equal(api.saves.length, 1)
   assert.equal(api.saves[0].name, 'save_onboarding_career')
+  assert.equal(api.saves[0].data.experiences[0].id, uid)
   assert.equal(api.saves[0].data.experiences[0].start_date, '2019-01-01')
   assert.equal(api.saves[0].data.experiences[0].club_name, 'Club')
   assert.equal(api.saves[0].data.experiences[0].end_date, null)
@@ -86,6 +87,7 @@ test('onboarding converts selected years and clears an empty or current end date
 
 test('invalid career dates or malformed entries never reach the database', async () => {
   for (const entries of [null, {}, [null], [{ club_name: 'Club', start_date: '' }],
+    [{ id: 'invalid', club_name: 'Club', start_date: '2024' }],
     [{ club_name: 'Club', start_date: '2023-02-29' }],
     [{ club_name: 'Club', start_date: '2024', end_date: '2020' }]]) {
     const api = careerHandler()
