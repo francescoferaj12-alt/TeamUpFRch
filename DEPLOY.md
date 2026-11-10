@@ -5,7 +5,7 @@
 Le site utilise déjà Supabase (Auth, base de données et stockage), Resend et Sentry.
 Les « prochaines étapes » historiques ci-dessous ne décrivent plus l'état actuel.
 
-- Dernière publication applicative vérifiée : `dpl_A4RkkvpCAT2reh5d6MdKw41gXZvX`, commit GitHub `48d145646c45bb7ed2462e278415f06514648d4d`, projet `team-up-f-rch` (`prj_1sTKe47g53VCfpomVNDOWNJYeivM`), domaines `teamupfr.ch` et `www.teamupfr.ch`. Une publication ultérieure peut remplacer cet identifiant ; consulter le déploiement de production actuel dans Vercel.
+- Publication contrôlée lors de l'essai complet : `dpl_A4RkkvpCAT2reh5d6MdKw41gXZvX`, commit GitHub `48d145646c45bb7ed2462e278415f06514648d4d`, projet `team-up-f-rch` (`prj_1sTKe47g53VCfpomVNDOWNJYeivM`), domaines `teamupfr.ch` et `www.teamupfr.ch`. Consulter le déploiement de production actuel dans Vercel pour les publications suivantes.
 - Prévisualisation contrôlée : `dpl_7KLpWrmSdg6ZNPchJKAm9obn7q1B`.
 - Les corrections sont intégrées à GitHub : PR #27 (confidentialité, vérification des clubs et messagerie) et PR #28 (menu et recherche sur petits écrans), toutes deux fusionnées et publiées. **Conserver les lectures via `public_profiles` dans les prochaines versions.** Un retour au code précédent casserait les lectures publiques après la restriction de confidentialité.
 - Exécution Vercel : Node 24. Dépendances : Next 15.5.29, React 19.3.1, PostCSS 8.5.32 via override de sécurité.
@@ -55,12 +55,13 @@ Le 10 novembre 2026, deux comptes appartenant au propriétaire ont été créés
 - La reprise de l'onboarding recharge le parcours existant. Un échec de chargement empêche son remplacement accidentel par un formulaire vide ; une coupure réseau pendant la sauvegarde libère le bouton et affiche l'erreur existante FR/DE.
 - `node --test tests/security.test.cjs` : 15 tests réussis. `tests/onboarding-career.sql` : 6 contrôles réussis sur Supabase avec ROLLBACK, dont conservation du parcours après une insertion invalide et absence de modification des autres membres. `npm run build` et `git diff --check` réussis.
 - Audit des dépendances : **0 vulnérabilité signalée** après overrides ciblés de `glob` 14.0.2 pour Sentry et de `minimatch` 11.0.1 pour le parseur TypeScript. Les API utilisées ont été inspectées ; les versions historiques utilisées par ESLint restent inchangées. Sources : [avis glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4), [avis minimatch](https://github.com/advisories/GHSA-g3hv-75wg-m249).
-- Accès Sentry vérifié : organisation `teamupfr`, projet `javascript-nextjs`, ID `4511416746180688`. Le panneau contient bien des erreurs du site. Les valeurs organisation/projet de Vercel ont été alignées sur ces identifiants ; le prochain build doit confirmer l'envoi des source maps.
+- Accès Sentry vérifié : organisation `teamupfr`, projet `javascript-nextjs`, ID `4511416746180688`. Le panneau contient bien des erreurs du site. Les valeurs organisation/projet de Vercel ont été alignées sur ces identifiants. La prévisualisation `dpl_9QYcvQn8pPBTLf9bqdzvRMzP93fz` est READY et ses logs confirment l'envoi des source maps, sans « Project not found ».
+- PR #29 fusionnée : `e4f78ed6ae16988d6719db5a017121306845beb9`. Aucun compte de test supplémentaire créé pour cette correction ; validation du handler avec adaptateurs isolés et de la transaction directement dans Supabase.
 
 ### Points restant à vérifier ou corriger
 
-- Sentry : vérifier l'envoi des source maps sur la prochaine publication après correction organisation/projet. La réception d'erreurs historiques est confirmée ; un nouvel événement synthétique n'a pas été envoyé.
-- Supabase signale la [protection contre les mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) comme désactivée. Aucun abonnement n'a été modifié.
+- Sentry : la réception d'erreurs historiques et l'envoi des source maps sont confirmés ; un nouvel événement synthétique n'a pas été envoyé.
+- Supabase signale la [protection contre les mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) comme désactivée. Le plan FREE a été confirmé ; cette fonction demande Supabase Pro ou supérieur. Aucun abonnement n'a été modifié.
 - L'essai réel couvre les parcours ci-dessus ; la revue de tous les appareils, navigateurs et cas limites n'est pas exhaustive. Les tests ne constituent pas une garantie de fonctionnement à 100 %.
 
 ---
