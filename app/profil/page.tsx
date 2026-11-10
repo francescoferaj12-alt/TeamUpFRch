@@ -860,7 +860,7 @@ export default function ProfilPage() {
             </div>
             {videoUrls.length === 0 ? (
               <div style={{ background:'rgba(255,255,255,.03)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed rgba(255,255,255,.12)' }}>
-                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)', display:'flex', alignItems:'center', gap:6 }}><IcoFilm s={16}/>{t.profil.video_soon[lang]}</div>
+                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)', display:'flex', alignItems:'center', gap:6 }}><IcoFilm s={16}/>{t.profil.video_empty[lang]}</div>
                 <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
                   {t.profil.edit_videos[lang]} →
                 </button>
