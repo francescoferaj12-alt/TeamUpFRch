@@ -269,7 +269,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
                 ? <div className="pm-gate-callout">{t.clubVerif.post_blocked_rejected[lang]}</div>
                 : <p className="pm-gate-note">{t.clubVerif.post_blocked_pending[lang]}</p>
               }
-              <button className="pm-gate-close" onClick={onClose}>Fermer</button>
+              <button className="pm-gate-close" onClick={onClose}>{lang === 'de' ? 'Schliessen' : 'Fermer'}</button>
             </div>
           )}
 

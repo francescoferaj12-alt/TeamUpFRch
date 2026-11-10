@@ -210,7 +210,7 @@ export default function Navbar() {
           <button
             onClick={() => setMenuOpen(o => !o)}
             className="nav-hamburger"
-            aria-label="Menu"
+            aria-label={lang === 'de' ? 'Menü' : 'Menu'}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexDirection: 'column', gap: 5 }}
           >
             <span style={{ width: 22, height: 2, background: 'rgba(255,255,255,.85)', borderRadius: 2, display: 'block', transition: 'all .2s', transform: menuOpen ? 'rotate(45deg) translate(0,7px)' : 'none' }} />
