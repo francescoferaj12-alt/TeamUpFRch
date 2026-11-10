@@ -19,6 +19,7 @@ Projet `iupcllegqqpmhxadcxqd`, dans cet ordre :
 3. Après publication du frontend compatible, `20261111_private_profile_access.sql` : lecture des profils privés réservée au propriétaire et à l'administrateur.
 4. `20261110155134_media_and_message_access.sql` : remplacement des médias du propriétaire, pièces jointes privées de 20 Mo maximum, contenu des messages et identité des candidats non modifiables par le destinataire.
 5. `20261110155834_prevent_self_accepted_applications.sql` : candidature initialement en attente et message initialement non lu, même via un appel direct à l'API.
+6. `20261110164725_atomic_onboarding_career.sql` : remplacement du parcours sportif et sauvegarde de l'étape dans une seule transaction, sous les permissions du membre connecté. Une erreur conserve le parcours précédent ; aucun appel anonyme n'est autorisé.
 
 `public_profiles` est volontairement une vue SECURITY DEFINER : elle expose seulement les colonnes publiques des profils visibles (clubs approuvés uniquement). L'[avertissement Supabase correspondant](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view) est attendu. Ne pas passer cette vue à SECURITY INVOKER sans repenser la lecture publique. INSERT/UPDATE/DELETE sont révoqués pour anon et authenticated.
 
@@ -48,10 +49,17 @@ Le 10 novembre 2026, deux comptes appartenant au propriétaire ont été créés
 - Nettoyage vérifié : les deux comptes, leurs sessions, trois messages, une annonce, une candidature et trois fichiers ont été supprimés. Retour à 12 profils privés, 11 profils publics, un message préexistant et zéro pièce jointe privée. Les emails de test restent dans la boîte du propriétaire.
 - `/api/health` répond 200 avec la base connectée après nettoyage. Aucun log applicatif d'erreur ou d'avertissement n'a été retourné par Vercel sur la fenêtre des essais de messagerie et de candidature.
 
+### Corrections complémentaires du 10 novembre
+
+- L'erreur Sentry `invalid input syntax for type date: "2019"` provenait des années envoyées directement dans une colonne date. L'API convertit maintenant les années sélectionnées en dates, refuse les dates impossibles et utilise la sauvegarde transactionnelle ci-dessus.
+- La reprise de l'onboarding recharge le parcours existant. Un échec de chargement empêche son remplacement accidentel par un formulaire vide ; une coupure réseau pendant la sauvegarde libère le bouton et affiche l'erreur existante FR/DE.
+- `node --test tests/security.test.cjs` : 15 tests réussis. `tests/onboarding-career.sql` : 6 contrôles réussis sur Supabase avec ROLLBACK, dont conservation du parcours après une insertion invalide et absence de modification des autres membres. `npm run build` et `git diff --check` réussis.
+- Audit des dépendances : **0 vulnérabilité signalée** après overrides ciblés de `glob` 14.0.2 pour Sentry et de `minimatch` 11.0.1 pour le parseur TypeScript. Les API utilisées ont été inspectées ; les versions historiques utilisées par ESLint restent inchangées. Sources : [avis glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4), [avis minimatch](https://github.com/advisories/GHSA-g3hv-75wg-m249).
+- Accès Sentry vérifié : organisation `teamupfr`, projet `javascript-nextjs`, ID `4511416746180688`. Le panneau contient bien des erreurs du site. Les valeurs organisation/projet de Vercel ont été alignées sur ces identifiants ; le prochain build doit confirmer l'envoi des source maps.
+
 ### Points restant à vérifier ou corriger
 
-- `npm audit` : 0 critique, 0 élevée, 10 modérées dans les dépendances de construction/lint (glob, minimatch et dépendants).
-- Sentry : le build aboutit, mais l'envoi des source maps affiche « Project not found ». Vérifier la correspondance organisation/projet et les droits du jeton ; la réception réelle des erreurs n'est pas validée.
+- Sentry : vérifier l'envoi des source maps sur la prochaine publication après correction organisation/projet. La réception d'erreurs historiques est confirmée ; un nouvel événement synthétique n'a pas été envoyé.
 - Supabase signale la [protection contre les mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) comme désactivée. Aucun abonnement n'a été modifié.
 - L'essai réel couvre les parcours ci-dessus ; la revue de tous les appareils, navigateurs et cas limites n'est pas exhaustive. Les tests ne constituent pas une garantie de fonctionnement à 100 %.
 
