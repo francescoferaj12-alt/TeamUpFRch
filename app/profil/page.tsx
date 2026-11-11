@@ -672,7 +672,7 @@ export default function ProfilPage() {
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
@@ -694,7 +694,7 @@ export default function ProfilPage() {
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
