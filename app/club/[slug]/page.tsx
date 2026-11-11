@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase, Profile, Annonce, avatarSrc } from '../../../lib/supabase'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import ClubCrest from '../../../components/ClubCrest'
+import ClubLocationMap from '../../../components/ClubLocationMap'
 
 // ——— SVG helpers ————————————————————————————
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -347,28 +348,18 @@ export default function ClubPage() {
               </div>
             </div>
 
-            {/* CSS map placeholder */}
-            <div className="cd-map-card">
-              <div className="cd-map-bg" />
-              <div className="cd-map-pin-shadow" />
-              <div className="cd-map-pin">
-                <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="white" strokeWidth="2.5" aria-hidden="true">
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </div>
-              <div className="cd-map-overlay">
-                <div className="cd-map-overlay-title">{club.club_name || 'Club'}</div>
-                <div className="cd-map-overlay-sub">{club.zone || 'Canton de Fribourg'}</div>
-              </div>
-            </div>
+            <ClubLocationMap
+              name={club.club_name || 'Club'}
+              zone={club.zone}
+              stadiumName={club.club_stadium_name}
+              address={club.club_stadium_address}
+            />
           </div>
         </div>
       </section>
 
       <style>{`
         @keyframes spin        { to { transform:rotate(360deg); } }
-        @keyframes mapBounce   { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-50%,-60%)} }
-        @keyframes shadowPulse { 0%,100%{width:30px;opacity:.4} 50%{width:22px;opacity:.25} }
 
         .cd-page {
           background:
@@ -582,50 +573,6 @@ export default function ClubPage() {
         .cd-contact-value { font-size:14px; color:#fff; font-weight:500; word-break:break-word; }
         .cd-contact-value a { color:#fff; text-decoration:none; transition:color .3s; }
         .cd-contact-value a:hover { color:#FF3A3A; }
-
-        /* CSS Map */
-        .cd-map-card {
-          background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 100%);
-          border:1px solid rgba(255,255,255,.12); border-radius:20px; overflow:hidden;
-          position:relative; min-height:320px;
-        }
-        .cd-map-bg {
-          position:absolute; inset:0;
-          background:
-            radial-gradient(circle at 30% 40%,rgba(58,122,255,.15) 0%,transparent 40%),
-            radial-gradient(circle at 70% 70%,rgba(46,210,127,.1) 0%,transparent 40%),
-            linear-gradient(135deg,#081434 0%,#0D1F4A 100%);
-        }
-        .cd-map-bg::before {
-          content:''; position:absolute; inset:0;
-          background-image:
-            linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
-            linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
-          background-size:40px 40px;
-        }
-        .cd-map-pin {
-          position:absolute; top:45%; left:50%; transform:translate(-50%,-50%);
-          width:48px; height:48px;
-          background:#FF3A3A; border-radius:50% 50% 50% 0; rotate:-45deg;
-          display:flex; align-items:center; justify-content:center;
-          box-shadow:0 12px 28px rgba(255,58,58,.4); z-index:2;
-          animation:mapBounce 2s ease-in-out infinite;
-        }
-        .cd-map-pin svg { rotate:45deg; }
-        .cd-map-pin-shadow {
-          position:absolute; top:58%; left:50%; transform:translateX(-50%);
-          width:30px; height:8px; background:rgba(0,0,0,.4); border-radius:50%;
-          filter:blur(4px); z-index:1;
-          animation:shadowPulse 2s ease-in-out infinite;
-        }
-        .cd-map-overlay {
-          position:absolute; bottom:20px; left:20px; right:20px;
-          padding:16px 20px;
-          background:rgba(13,31,74,.85); backdrop-filter:blur(10px);
-          border:1px solid rgba(255,255,255,.12); border-radius:12px; z-index:3;
-        }
-        .cd-map-overlay-title { font-family:'Russo One',sans-serif; font-size:14px; letter-spacing:.5px; margin-bottom:4px; }
-        .cd-map-overlay-sub   { font-size:12px; color:rgba(255,255,255,.6); }
 
         /* Responsive */
         @media (max-width:860px) {

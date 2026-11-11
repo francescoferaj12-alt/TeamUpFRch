@@ -1,5 +1,6 @@
 'use client'
 
+import { footballLabel } from '../../lib/football-labels'
 import MemberSafetyActions from '../../components/MemberSafetyActions'
 
 import { useState, useEffect, useRef } from 'react'
@@ -60,6 +61,10 @@ export default function MessagesPage() {
   const [searchConv, setSearchConv] = useState('')
   const [searchNewUser, setSearchNewUser] = useState('')
   const [newUserResults, setNewUserResults] = useState<Profile[]>([])
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [membersError, setMembersError] = useState(false)
+  const [memberLimit, setMemberLimit] = useState(50)
+  const [hasMoreMembers, setHasMoreMembers] = useState(false)
   const [pendingFile, setPendingFile] = useState<{ path: string; url: string; type: 'image' | 'video' | 'file'; name: string } | null>(null)
   const [sendError, setSendError] = useState('')
   const [uploadingFile, setUploadingFile] = useState(false)
@@ -92,11 +97,11 @@ export default function MessagesPage() {
 
   // Auto-focus new chat input when view opens
   useEffect(() => {
-    if (mobileView === 'newChat') {
+    if (mobileView === 'newChat' && !isMobile) {
       const timer = setTimeout(() => newChatInputRef.current?.focus(), 60)
       return () => clearTimeout(timer)
     }
-  }, [mobileView])
+  }, [mobileView, isMobile])
 
   // Keep ref in sync for realtime handler
   useEffect(() => { activePartnerRef.current = activePartnerId }, [activePartnerId])
@@ -136,24 +141,33 @@ export default function MessagesPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, session, authProfile])
 
-  // Debounced user search for new chat
+  // Load the directory as soon as the picker opens; ignore stale search responses.
   useEffect(() => {
-    if (!searchNewUser || searchNewUser.length < 2 || !profile) {
-      setNewUserResults([])
-      return
-    }
-    const q = searchNewUser.toLowerCase()
+    if (mobileView !== 'newChat' || !profile?.id) return
+    let active = true
+    setMembersLoading(true)
+    setMembersError(false)
     const timer = setTimeout(async () => {
-      const { data } = await supabase
-        .from('public_profiles')
+      let query = supabase.from('public_profiles')
         .select('id,first_name,last_name,club_name,role,avatar_url,ligue')
         .neq('id', profile.id)
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,club_name.ilike.%${q}%`)
-        .limit(20)
-      if (data) setNewUserResults(data as Profile[])
-    }, 250)
-    return () => clearTimeout(timer)
-  }, [searchNewUser, profile?.id])
+        .order('first_name', { ascending: true, nullsFirst: false })
+        .order('last_name', { ascending: true, nullsFirst: false })
+        .order('club_name', { ascending: true, nullsFirst: false })
+        .order('id')
+      for (const word of searchNewUser.trim().split(/\s+/).filter(Boolean)) {
+        const pattern = JSON.stringify('%' + word.replace(/[\\%_]/g, '\\$&') + '%')
+        query = query.or(`first_name.ilike.${pattern},last_name.ilike.${pattern},club_name.ilike.${pattern}`)
+      }
+      const { data, error } = await query.limit(memberLimit + 1)
+      if (!active) return
+      setMembersLoading(false)
+      setMembersError(!!error)
+      setNewUserResults(error ? [] : (data ?? []).slice(0, memberLimit) as Profile[])
+      setHasMoreMembers(!error && (data?.length ?? 0) > memberLimit)
+    }, searchNewUser.trim() ? 250 : 0)
+    return () => { active = false; clearTimeout(timer) }
+  }, [searchNewUser, profile?.id, mobileView, memberLimit])
 
   async function loadMessages(prof: Profile) {
     const { data: storedMessages } = await supabase
@@ -465,7 +479,7 @@ export default function MessagesPage() {
         </div>
         <button
           className="msg-plus-btn"
-          onClick={() => setMobileView('newChat')}
+          onClick={() => { setSearchNewUser(''); setMemberLimit(50); setNewUserResults([]); setMembersLoading(true); setMobileView('newChat') }}
           title={t.messages.new_msg_btn[lang]}
           aria-label={t.messages.new_msg_btn[lang]}
         >
@@ -492,7 +506,7 @@ export default function MessagesPage() {
                 <div style={{ marginBottom:10, opacity:.4, color:'rgba(255,255,255,.7)' }}><IcoChatBubble s={48} /></div>
                 <div style={{ marginBottom:14 }}>{t.messages.no_conv_yet[lang]}</div>
                 <button
-                  onClick={() => setMobileView('newChat')}
+                  onClick={() => { setSearchNewUser(''); setMemberLimit(50); setNewUserResults([]); setMembersLoading(true); setMobileView('newChat') }}
                   style={{ background:'#FF3A3A', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}
                 >
                   + {t.messages.new_msg_btn[lang]}
@@ -707,7 +721,7 @@ export default function MessagesPage() {
         <input
           ref={newChatInputRef}
           value={searchNewUser}
-          onChange={e => setSearchNewUser(e.target.value)}
+          onChange={e => { setSearchNewUser(e.target.value); setMemberLimit(50) }}
           placeholder={t.messages.search_users_pl[lang]}
           style={{ width:'100%', background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:8, padding:'10px 14px', fontSize:14, fontFamily:'inherit', outline:'none', boxSizing:'border-box' }}
         />
@@ -715,26 +729,27 @@ export default function MessagesPage() {
 
       {/* Results */}
       <div style={{ flex:1, overflowY:'auto', padding:'0 .5rem .75rem' }}>
-        {searchNewUser.length < 2 && (
-          <div style={{ padding:'2rem 1rem', textAlign:'center', color:'rgba(255,255,255,.4)', fontSize:13 }}>
-            {t.messages.search_min_chars[lang]}
-          </div>
+        <p style={{ padding:'0 12px', fontSize:12, color:'rgba(255,255,255,.6)' }}>
+          {lang === 'de' ? 'Mitglieder — wähle eine Person oder suche nach einem Namen.' : 'Membres inscrits — choisis une personne ou recherche un nom.'}
+        </p>
+        {membersLoading && <p role="status" style={{ padding:'1rem', color:'rgba(255,255,255,.6)' }}>{lang === 'de' ? 'Mitglieder werden geladen…' : 'Chargement des membres…'}</p>}
+        {membersError && <p role="alert" style={{ padding:'1rem', color:'#ff9a9a' }}>{lang === 'de' ? 'Mitglieder konnten nicht geladen werden. Öffne die Liste erneut.' : 'Impossible de charger les membres. Rouvre la liste pour réessayer.'}</p>}
+        {!membersLoading && !membersError && newUserResults.length === 0 && (
+          <p role="status" style={{ padding:'2rem 1rem', textAlign:'center', color:'rgba(255,255,255,.6)', fontSize:13 }}>
+            {searchNewUser.trim() ? `${t.messages.no_user_found_pre[lang]} «${searchNewUser}»` : (lang === 'de' ? 'Noch keine anderen Mitglieder verfügbar.' : 'Aucun autre membre disponible pour le moment.')}
+          </p>
         )}
-        {searchNewUser.length >= 2 && newUserResults.length === 0 && (
-          <div style={{ padding:'2rem 1rem', textAlign:'center', color:'rgba(255,255,255,.4)', fontSize:13 }}>
-            {t.messages.no_user_found_pre[lang]} «{searchNewUser}»
-          </div>
-        )}
-        {newUserResults.map(user => {
+        {!membersLoading && newUserResults.map(user => {
           const userName = user.role === 'club'
             ? (user.club_name || '—')
             : `${user.first_name || ''} ${user.last_name || ''}`.trim() || '—'
           return (
-            <div
+            <button
+              type="button"
               key={user.id}
               onClick={() => startNewChat(user)}
               className="msg-user-result"
-              style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', cursor:'pointer', borderRadius:12, border:'1px solid transparent', marginBottom:2, transition:'all .15s' }}
+              style={{ display:'flex', width:'100%', background:'transparent', textAlign:'left', fontFamily:'inherit', alignItems:'center', gap:12, padding:'10px 12px', cursor:'pointer', borderRadius:12, border:'1px solid transparent', marginBottom:2, transition:'all .15s' }}
             >
               <div style={{ width:42, height:42, borderRadius:12, overflow:'hidden', flexShrink:0 }}>
                 <UserAvatar userId={user.id} size={42} radius={12}
@@ -744,12 +759,15 @@ export default function MessagesPage() {
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontWeight:700, fontSize:14, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{userName}</div>
                 <div style={{ fontSize:12, color:'rgba(255,255,255,.5)', textTransform:'uppercase', letterSpacing:.5 }}>
-                  {roleLabel(user.role)}{user.ligue ? ` · ${user.ligue}` : ''}
+                  {roleLabel(user.role)}{user.ligue ? ` · ${footballLabel(user.ligue, lang)}` : ''}
                 </div>
               </div>
-            </div>
+            </button>
           )
         })}
+        {hasMoreMembers && !membersError && <button type="button" disabled={membersLoading} className="msg-plus-btn" onClick={() => setMemberLimit(limit => limit + 50)} style={{ width:'100%', marginTop:12 }}>
+          {lang === 'de' ? 'Weitere Mitglieder anzeigen' : 'Afficher plus de membres'}
+        </button>}
       </div>
     </div>
   )
