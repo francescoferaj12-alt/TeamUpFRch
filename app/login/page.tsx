@@ -193,7 +193,15 @@ function LoginForm() {
         emailRedirectTo: `${window.location.origin}/verify-email`
       }
     })
-    if (signUpError) { setError(signUpError.message); setLoading(false); return }
+    if (signUpError) {
+      setError(signUpError.status === 429 || signUpError.code === 'over_email_send_rate_limit'
+        ? (lang === 'de'
+          ? 'Aktuell gibt es viele Anfragen. Bitte versuche es später erneut. Wenn du bereits eine Bestätigungs-E-Mail erhalten hast, verwende den Link darin.'
+          : 'Il y a beaucoup de demandes actuellement. Réessaie plus tard. Si tu as déjà reçu un e-mail de confirmation, utilise le lien qu’il contient.')
+        : signUpError.message)
+      setLoading(false)
+      return
+    }
     if (data.user) {
       const birthdate = (birthDay && birthMonth && birthYear)
         ? `${birthYear}-${birthMonth.toString().padStart(2,'0')}-${birthDay.toString().padStart(2,'0')}`
