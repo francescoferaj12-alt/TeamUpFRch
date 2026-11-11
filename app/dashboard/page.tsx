@@ -11,6 +11,7 @@ import { useAuth } from '../../lib/auth-context'
 import ClubCrest from '../../components/ClubCrest'
 import { relativeTime } from '../../lib/utils/time'
 import PostModal from '../../components/PostModal'
+import { footballLabel } from '../../lib/football-labels'
 
 type AppWithAnnonce = Application & { annonce_title?: string; annonce_author_name?: string }
 type FeedItem = { id: string; dotColor: 'green'|'red'|'blue'|'orange'; text: React.JSX.Element|string; timestamp: string }
@@ -643,6 +644,14 @@ function ProfileSidebar({ profile, onShowSettings, lang }: {
     : 'linear-gradient(135deg,#FF3A3A 0%,#c41f1f 100%)'
   const roleLabel = isClub ? t.dash.role_club[lang] : profile.role === 'coach' ? t.dash.role_coach[lang] : t.dash.role_player[lang]
 
+  const cardLabel = (value: string) => lang === 'de'
+    ? ({ Ligue: 'Liga', Âge: 'Alter', Taille: 'Grösse', Statut: 'Status',
+        Vérifié: 'Verifiziert', 'Non vérifié': 'Nicht verifiziert',
+        Spécialité: 'Spezialgebiet', Disponibilité: 'Verfügbarkeit',
+        Disponible: 'Verfügbar', 'Non disponible': 'Nicht verfügbar',
+        Immédiate: 'Sofort' } as Record<string, string>)[value] ?? footballLabel(value, lang)
+    : value
+
   const attrs = isClub
     ? [{ num: profile.ligue||'—', label:'Ligue' }, { num: profile.zone||'—', label:'Zone' }]
     : [{ num: profile.age ? `${profile.age}` : '—', label:'Âge' },
@@ -677,13 +686,13 @@ function ProfileSidebar({ profile, onShowSettings, lang }: {
           </div>
       }
       <h3 className="db-profile-name">{displayName}</h3>
-      <p className="db-profile-role">{roleLabel}{profile.position ? ` · ${profile.position}` : ''}</p>
+      <p className="db-profile-role">{roleLabel}{profile.position ? ` · ${footballLabel(profile.position, lang)}` : ''}</p>
 
       <div className="db-profile-attrs">
         {attrs.map((a, i) => (
           <div key={i} className="db-profile-attr">
-            <div className="db-attr-num">{a.num}</div>
-            <div className="db-attr-label">{a.label}</div>
+            <div className="db-attr-num">{cardLabel(a.num)}</div>
+            <div className="db-attr-label">{cardLabel(a.label)}</div>
           </div>
         ))}
       </div>
@@ -691,8 +700,8 @@ function ProfileSidebar({ profile, onShowSettings, lang }: {
       <div className="db-profile-info">
         {infoRows.map((r, i) => (
           <div key={i} className="db-info-row">
-            <span className="db-info-label">{r.label}</span>
-            <span className="db-info-value">{r.value}</span>
+            <span className="db-info-label">{cardLabel(r.label)}</span>
+            <span className="db-info-value">{cardLabel(r.value)}</span>
           </div>
         ))}
       </div>
@@ -732,7 +741,7 @@ function SettingsWrapper({ profile, onBack, onSaved, lang }: {
     <div className="db-settings-page">
       <div className="db-container" style={{ paddingTop:120, paddingBottom:80 }}>
         <button className="db-back-btn" onClick={onBack}>
-          <IcoBack s={16}/>Retour au dashboard
+          <IcoBack s={16}/>{lang === 'de' ? 'Zurück zum Dashboard' : 'Retour au dashboard'}
         </button>
         <SettingsSection profile={profile} onSaved={onSaved} />
       </div>
@@ -822,14 +831,14 @@ function SettingsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: 
             <label style={lbl}>{t.dash.ligue_req[lang].replace(' *','')}</label>
             <select style={inp} value={ligue} onChange={e => setLigue(e.target.value)}>
               <option value="" style={optSt}>—</option>
-              {ligues.flatMap(g => g.items).map(l => <option key={l} value={l} style={optSt}>{l}</option>)}
+              {ligues.flatMap(g => g.items).map(l => <option key={l} value={l} style={optSt}>{footballLabel(l, lang)}</option>)}
             </select>
           </div>
           <div>
             <label style={lbl}>{t.dash.zone_label[lang]}</label>
             <select style={inp} value={zone} onChange={e => setZone(e.target.value)}>
               <option value="" style={optSt}>—</option>
-              {zones.map(z => <option key={z} value={z} style={optSt}>{z}</option>)}
+              {zones.map(z => <option key={z} value={z} style={optSt}>{footballLabel(z, lang)}</option>)}
             </select>
           </div>
         </div>
