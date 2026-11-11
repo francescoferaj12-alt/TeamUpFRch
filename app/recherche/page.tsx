@@ -80,11 +80,12 @@ export default function RecherchePage() {
       if (filterVerifiedOnly && p.role === 'club' && p.club_verification_status !== 'approved') return false
       if (q) {
         const name = `${p.first_name || ''} ${p.last_name || ''} ${p.club_name || ''}`.toLowerCase()
-        if (!name.includes(q) && !(p.position || '').toLowerCase().includes(q) && !(p.ligue || '').toLowerCase().includes(q) && !(p.zone || '').toLowerCase().includes(q)) return false
+        const labels = [p.position, p.ligue, p.zone].filter(Boolean) as string[]
+        if (!name.includes(q) && !labels.some(value => value.toLowerCase().includes(q) || footballLabel(value, lang).toLowerCase().includes(q))) return false
       }
       return true
     })
-  }, [profiles, filterType, filterDispo, filterGenre, filterLigue, filterPos, filterZone, debouncedQuery, currentUser, filterVerifiedOnly])
+  }, [profiles, filterType, filterDispo, filterGenre, filterLigue, filterPos, filterZone, debouncedQuery, currentUser, filterVerifiedOnly, lang])
 
   const counts = {
     all: filtered.length,
@@ -186,7 +187,7 @@ export default function RecherchePage() {
             {lang === 'fr' ? 'Recherche avancée' : 'Erweiterte Suche'}
           </span>
           <h1 style={{ fontFamily:"'Russo One',sans-serif", fontSize:'clamp(2rem,6vw,3.25rem)', lineHeight:.95, letterSpacing:'-.5px', textTransform:'uppercase', marginBottom:14, color:'#fff' }}>
-            {t.search.title[lang]} <span style={{ color:'#FF3A3A' }}>{t.search.advanced[lang]}</span>
+            {lang === 'de' ? 'Erweiterte' : t.search.title[lang]} <span style={{ color:'#FF3A3A' }}>{lang === 'de' ? 'Suche' : t.search.advanced[lang]}</span>
           </h1>
           <p style={{ color:'rgba(255,255,255,.5)', fontSize:15, fontWeight:300, lineHeight:1.6, marginBottom:'2rem', maxWidth:520, margin:'0 auto 2rem' }}>
             {t.search.subtitle[lang]}
@@ -375,7 +376,7 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
   const age = p.age ?? null
   const ageSuffix = t.general.age_suffix[lang]
-  const subLine = [p.role !== 'club' ? (p.position || roleLabel) : null, age ? `${age}${ageSuffix}` : null].filter(Boolean).join(' · ')
+  const subLine = [p.role !== 'club' ? (p.position ? footballLabel(p.position, lang) : roleLabel) : null, age ? `${age}${ageSuffix}` : null].filter(Boolean).join(' · ')
 
   return (
     <div className="sr-card">
@@ -418,21 +419,21 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
           <div className="sr-meta">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             <span className="sr-meta-lbl">{lang === 'fr' ? 'Ligue' : 'Liga'}</span>
-            <span className="sr-meta-val">{p.ligue}</span>
+            <span className="sr-meta-val">{footballLabel(p.ligue, lang)}</span>
           </div>
         )}
         {p.zone && (
           <div className="sr-meta">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span className="sr-meta-lbl">Zone</span>
-            <span className="sr-meta-val">{p.zone}</span>
+            <span className="sr-meta-val">{footballLabel(p.zone, lang)}</span>
           </div>
         )}
         {p.foot && (
           <div className="sr-meta">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FF3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             <span className="sr-meta-lbl">{lang === 'fr' ? 'Pied' : 'Fuss'}</span>
-            <span className="sr-meta-val">{p.foot}</span>
+            <span className="sr-meta-val">{footballLabel(p.foot, lang)}</span>
           </div>
         )}
       </div>

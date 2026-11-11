@@ -8,6 +8,7 @@ import { useAuth } from '../../lib/auth-context'
 import { t } from '../../lib/translations'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import ClubCrest from '../../components/ClubCrest'
+import { footballLabel } from '../../lib/football-labels'
 
 // ── SVG primitives ────────────────────────────────────────────────────────────
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -188,7 +189,7 @@ export default function ClubsPage() {
           </div>
           <select className="cb-zsel" value={filterZone} onChange={e => setFilterZone(e.target.value)}>
             <option value="" style={optSt}>{t.clubs.all_zones[lang]}</option>
-            {ZONES.map(z => <option key={z} style={optSt}>{z}</option>)}
+            {ZONES.map(z => <option key={z} value={z} style={optSt}>{footballLabel(z, lang)}</option>)}
           </select>
         </div>
       </div>
@@ -263,14 +264,14 @@ export default function ClubsPage() {
                       <div className="cb-meta">
                         <IcoPin s={13} color="#FF3A3A" />
                         <span className="cb-meta-lbl">Zone</span>
-                        <span className="cb-meta-val">{club.zone}</span>
+                        <span className="cb-meta-val">{footballLabel(club.zone, lang)}</span>
                       </div>
                     )}
                     {club.ligue && (
                       <div className="cb-meta">
                         <IcoClock s={13} color="#FF3A3A" />
                         <span className="cb-meta-lbl">{lang === 'fr' ? 'Ligue' : 'Liga'}</span>
-                        <span className="cb-meta-val">{club.ligue}</span>
+                        <span className="cb-meta-val">{footballLabel(club.ligue, lang)}</span>
                       </div>
                     )}
                   </div>
