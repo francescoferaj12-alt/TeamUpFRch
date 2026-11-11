@@ -1,5 +1,7 @@
 'use client'
 
+import { footballLabel } from '../../lib/football-labels'
+
 import { useEffect, useState, useRef, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -436,15 +438,15 @@ export default function ProfilPage() {
     displayAge ? [t.profil.age_k[lang], `${displayAge}${ageSuffix}`] : null,
     profile.birthdate ? [t.profil.birth_k[lang], new Date(profile.birthdate).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'de-CH', { day: 'numeric', month: 'long', year: 'numeric' })] : null,
     profile.role === 'player' && profile.foot ? [t.profil.foot_k[lang], translateFoot(profile.foot, lang)] : null,
-    profile.zone ? [t.profil.zone_k[lang], profile.zone] : null,
-    profile.role !== 'coach' && profile.ligue ? [t.profil.ligue_k[lang], profile.ligue] : null,
-    profile.role === 'player' && profile.position ? [t.profil.position_k[lang], profile.position] : null,
+    profile.zone ? [t.profil.zone_k[lang], footballLabel(profile.zone, lang)] : null,
+    profile.role !== 'coach' && profile.ligue ? [t.profil.ligue_k[lang], footballLabel(profile.ligue, lang)] : null,
+    profile.role === 'player' && profile.position ? [t.profil.position_k[lang], footballLabel(profile.position, lang)] : null,
     profile.club_name ? [t.profil.club_k[lang], profile.club_name] : null,
     profile.phone ? [t.profil.phone_k[lang], profile.phone] : null,
-    profile.role === 'coach' && profile.coach_experience ? ['Expérience', profile.coach_experience] : null,
-    profile.role === 'coach' && profile.coach_diploma ? ['Diplôme', profile.coach_diploma] : null,
-    profile.role === 'coach' && profile.coach_specialty ? ['Spécialité', profile.coach_specialty] : null,
-    profile.role === 'coach' && profile.coach_availability ? ['Disponibilité', profile.coach_availability] : null,
+    profile.role === 'coach' && profile.coach_experience ? [lang === 'de' ? 'Erfahrung' : 'Expérience', footballLabel(profile.coach_experience, lang)] : null,
+    profile.role === 'coach' && profile.coach_diploma ? [lang === 'de' ? 'Diplom' : 'Diplôme', footballLabel(profile.coach_diploma, lang)] : null,
+    profile.role === 'coach' && profile.coach_specialty ? [lang === 'de' ? 'Spezialgebiet' : 'Spécialité', footballLabel(profile.coach_specialty, lang)] : null,
+    profile.role === 'coach' && profile.coach_availability ? [lang === 'de' ? 'Verfügbarkeit' : 'Disponibilité', footballLabel(profile.coach_availability, lang)] : null,
   ]
 
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
@@ -533,7 +535,7 @@ export default function ProfilPage() {
             </div>
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:'.75rem', alignItems:'center' }}>
               <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)', display:'inline-flex', alignItems:'center', gap:5 }}>
-                {roleIcon(12)} {profile.role === 'coach' ? (profile.coach_specialty || roleLabel) : (profile.position || roleLabel)}
+                {roleIcon(12)} {profile.role === 'coach' ? (profile.coach_specialty ? footballLabel(profile.coach_specialty, lang) : roleLabel) : (profile.position ? footballLabel(profile.position, lang) : roleLabel)}
               </span>
               {profile.role === 'player' && profile.foot && (
                 <span style={{ background:'rgba(255,255,255,.15)', padding:'4px 12px', borderRadius:100, fontSize:12, fontWeight:600, color:'rgba(255,255,255,.9)' }}>
@@ -541,11 +543,11 @@ export default function ProfilPage() {
                 </span>
               )}
               {displayAge && (
-                <span style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{displayAge}{ageSuffix}{profile.zone ? ` · ${profile.zone}` : ''}</span>
+                <span style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{displayAge}{ageSuffix}{profile.zone ? ` · ${footballLabel(profile.zone, lang)}` : ''}</span>
               )}
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
-              {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:5 }}><IcoTrophy s={11} />{profile.ligue}</span>}
+              {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:5 }}><IcoTrophy s={11} />{footballLabel(profile.ligue, lang)}</span>}
               <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
                 <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
@@ -670,7 +672,7 @@ export default function ProfilPage() {
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
@@ -686,13 +688,13 @@ export default function ProfilPage() {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))' }}>
             {[
-              { label:lang === 'de' ? 'Liga' : 'Ligue',       value: profile.ligue,  color:'#FF3A3A' },
-              { label:lang === 'de' ? 'Region' : 'Zone',        value: profile.zone,   color:'#3A7AFF' },
+              { label:lang === 'de' ? 'Liga' : 'Ligue',       value: profile.ligue ? footballLabel(profile.ligue, lang) : null,  color:'#FF3A3A' },
+              { label:lang === 'de' ? 'Region' : 'Zone',        value: profile.zone ? footballLabel(profile.zone, lang) : null,   color:'#3A7AFF' },
               { label:lang === 'de' ? 'Spielersuche' : 'Recrutement', value: profile.available ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: profile.available ? '#2ED27F' : '#888' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
+                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
