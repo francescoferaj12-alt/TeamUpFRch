@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../lib/auth-context'
 import { footballLabel } from '../lib/football-labels'
 import { liguesHomme, liguesFemme } from '../lib/data'
 import { supabase } from '../lib/supabase'
@@ -180,6 +182,17 @@ function HowSection({ lang }: { lang: Lang }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
+  const { session, authLoading } = useAuth()
+  const { lang } = useLang()
+  const router = useRouter()
+  useEffect(() => {
+    if (!authLoading && session) router.replace('/annonces')
+  }, [authLoading, session, router])
+  if (authLoading || session) return <div className="home-session-loading" role="status">{lang === 'de' ? 'Wird geladen…' : 'Chargement…'}</div>
+  return <LandingPage />
+}
+
+function LandingPage() {
   const { lang } = useLang()
   const [activeTab, setActiveTab] = useState<LigueTab>('all')
   const [counts, statsRef] = useCounters()
@@ -248,8 +261,7 @@ export default function HomePage() {
           muted
           loop
           playsInline
-          preload="metadata"
-          poster="/images/home/fribourg-aerial.jpg"
+          preload="auto"
         />
         <div className="hp-hero-veil" />
         <div className="hp-hero-content">

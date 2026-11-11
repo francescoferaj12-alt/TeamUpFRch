@@ -320,7 +320,7 @@ export default function PublicProfilPage() {
                 )
                 if (isNative) return (
                   <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
-                    <video preload="metadata" src={url} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
+                    <video preload="none" src={url} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
                   </div>
                 )
                 return null

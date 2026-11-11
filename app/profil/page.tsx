@@ -1,6 +1,7 @@
 'use client'
 
 import SeasonStats from '../../components/SeasonStats'
+import AccountTabs from '../../components/AccountTabs'
 import { strengthLabel } from '../../lib/strength-labels'
 import { footballLabel } from '../../lib/football-labels'
 
@@ -392,6 +393,7 @@ export default function ProfilPage() {
 
   return (
     <div style={{ background:'#081434', minHeight:'100vh', color:'#fff' }}>
+      <AccountTabs />
       {cropSrc && (
         <AvatarCropModal
           src={cropSrc}
@@ -752,7 +754,7 @@ export default function ProfilPage() {
                   )
                   if (isNativeVideo) return (
                     <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
-                      <video src={url} controls playsInline style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }} />
+                      <video preload="none" src={url} controls playsInline style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }} />
                     </div>
                   )
                   return (

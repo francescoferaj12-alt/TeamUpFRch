@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { supabase, avatarSrc } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
+import MobileBottomNav from './MobileBottomNav'
 import { useLang } from '../lib/lang-context'
 import { t } from '../lib/translations'
 import { useAuth } from '../lib/auth-context'
@@ -16,7 +17,6 @@ export default function Navbar() {
   const router = useRouter()
   const { lang } = useLang()
   const { session, profile } = useAuth()
-  const [menuOpen, setMenuOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   const [unreadApps, setUnreadApps] = useState(0)
   const [scrolled, setScrolled] = useState(false)
@@ -47,9 +47,6 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  // Close mobile menu on navigation
-  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   // ── Messages badge ──────────────────────────────────────────────────────────
   // Strategy: query once on session load + Realtime for new arrivals.
@@ -154,7 +151,8 @@ export default function Navbar() {
   return (
     <>
       <nav className={`nav${scrolled ? ' nav-scrolled' : ''}`}>
-        <Link href="/" className="nav-logo" style={{ textDecoration: 'none' }}>
+        <Link href={user ? "/annonces" : "/"} className="nav-logo" aria-label="TeamUpFR" style={{ textDecoration: 'none' }}>
+          <span className="official-brand-logo"><img src="/images/logo-official.jpeg" width="48" height="48" alt="" /></span>
           <span className="brand-text">
             <span className="brand-teamup">TeamUp</span>
             <span className="brand-f">F</span>
@@ -205,63 +203,16 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <Link href="/login" className="btn btn-red btn-sm">
+            <Link href="/login" className="btn btn-red btn-sm nav-login">
               {t.nav.connexion[lang]}
             </Link>
           )}
 
-          {/* Hamburger */}
-          <button
-            onClick={() => setMenuOpen(o => !o)}
-            className="nav-hamburger"
-            aria-label={lang === 'de' ? 'Menü' : 'Menu'}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexDirection: 'column', gap: 5 }}
-          >
-            <span style={{ width: 22, height: 2, background: 'rgba(255,255,255,.85)', borderRadius: 2, display: 'block', transition: 'all .2s', transform: menuOpen ? 'rotate(45deg) translate(0,7px)' : 'none' }} />
-            <span style={{ width: 22, height: 2, background: 'rgba(255,255,255,.85)', borderRadius: 2, display: 'block', opacity: menuOpen ? 0 : 1, transition: 'all .2s' }} />
-            <span style={{ width: 22, height: 2, background: 'rgba(255,255,255,.85)', borderRadius: 2, display: 'block', transition: 'all .2s', transform: menuOpen ? 'rotate(-45deg) translate(0,-7px)' : 'none' }} />
-          </button>
         </div>
       </nav>
 
-      {/* Mobile dropdown */}
-      {menuOpen && (
-        <div style={{ position: 'fixed', top: 60, left: 0, right: 0, background: 'rgba(3,10,36,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,.08)', zIndex: 199, boxShadow: '0 8px 32px rgba(0,0,0,.5)' }}>
-          <div style={{ padding: '1rem' }}>
-            {links.map(l => (
-              <Link
-                key={l.href}
-                href={l.href}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 10, color: pathname?.startsWith(l.href) ? '#fff' : 'rgba(255,255,255,.7)', fontWeight: pathname?.startsWith(l.href) ? 700 : 500, fontSize: 15, background: pathname?.startsWith(l.href) ? 'rgba(255,255,255,.1)' : 'transparent', marginBottom: 4, textDecoration: 'none' }}
-              >
-                {l.label}
-                {l.href === '/messages' && unread > 0 && (
-                  <span style={badgeStyle}>{unread > 9 ? '9+' : unread}</span>
-                )}
-                {l.href === '/candidatures' && unreadApps > 0 && (
-                  <span style={badgeStyle}>{unreadApps > 9 ? '9+' : unreadApps}</span>
-                )}
-              </Link>
-            ))}
-            <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop: '.5rem', paddingTop: '.75rem' }}>
-              {user ? (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Link href="/profil" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1a6fd4', color: '#fff', padding: '11px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
-                    {t.nav.my_profile[lang]}
-                  </Link>
-                  <button onClick={handleLogout} style={{ flex: 1, background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)', padding: '11px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
-                    {t.nav.deconnexion[lang]}
-                  </button>
-                </div>
-              ) : (
-                <Link href="/login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FF3A3A', color: '#fff', padding: '13px', borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 4px 14px rgba(255,58,58,0.35)' }}>
-                  {t.nav.connexion[lang]}
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <MobileBottomNav lang={lang} signedIn={!!session} unread={unread} />
+
     </>
   )
 }

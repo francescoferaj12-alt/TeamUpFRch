@@ -1,11 +1,12 @@
 'use client'
 
+import { mergeMessages, pageCursor } from '../../lib/message-pages'
 import { realtimeFallback } from '../../lib/realtime-fallback'
 
 import { footballLabel } from '../../lib/football-labels'
 import MemberSafetyActions from '../../components/MemberSafetyActions'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, Profile, Message, avatarSrc } from '../../lib/supabase'
@@ -13,7 +14,7 @@ import UserAvatar from '../../components/UserAvatar'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
-import { resolveMessageAttachments } from '../../lib/message-attachments'
+import { resolveMessageAttachments, type AttachmentCache } from '../../lib/message-attachments'
 
 // ── SVG primitives (identici a /recherche e /annonces) ────────────────────────
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -40,6 +41,8 @@ type Conversation = {
   partnerAvatar: string | null
   lastMessage: string
   lastTime: string
+  lastAt?: string
+  lastId?: string
   unread: number
   messages: Message[]
 }
@@ -57,6 +60,18 @@ export default function MessagesPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activePartnerId, setActivePartnerId] = useState<string | null>(null)
+  const [inboxHasMore, setInboxHasMore] = useState(false)
+  const [inboxBusy, setInboxBusy] = useState(false)
+  const [inboxError, setInboxError] = useState(false)
+  const [thread, setThread] = useState<{partner:string;items:Message[];hasMore:boolean;loading:boolean;error:boolean}>({partner:'',items:[],hasMore:false,loading:false,error:false})
+  const threadRef=useRef(thread); threadRef.current=thread
+  const inboxRequestRef=useRef(0)
+  const inboxCursorRef=useRef<{p_before?:string;p_before_id?:string}>({})
+  const inboxQueryRef=useRef('')
+  const threadRequestRef=useRef(0)
+  const attachmentCacheRef=useRef<AttachmentCache>(new Map())
+  const rawThreadRef=useRef<{partner:string;items:Message[]}>({partner:'',items:[]})
+  const olderScrollRef=useRef<{height:number;top:number}|null>(null)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
@@ -78,6 +93,7 @@ export default function MessagesPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const newChatInputRef = useRef<HTMLInputElement>(null)
   const activePartnerRef = useRef<string | null>(null)
+  useEffect(()=>{attachmentCacheRef.current.clear()},[profile?.id])
   const isMobileRef = useRef(false)
 
   const router = useRouter()
@@ -139,9 +155,23 @@ export default function MessagesPage() {
     if (!session || !authProfile) { router.push('/login'); return }
     if (!session.user.email_confirmed_at) { router.push('/verify-email-pending'); return }
     setProfile(authProfile)
-    loadMessages(authProfile)
+    loadMessages(authProfile, 'reset')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, session, authProfile])
+
+  useEffect(() => {
+    if (!profile) return
+    const timer=setTimeout(() => { inboxQueryRef.current=searchConv.trim().slice(0,120); void loadMessages(profile,'reset') },250)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[searchConv,profile?.id])
+
+  useEffect(() => {
+    activePartnerRef.current=activePartnerId
+    if (!profile || !activePartnerId) return
+    void loadThread(profile,activePartnerId,'reset')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[activePartnerId,profile?.id])
 
   // Load the directory as soon as the picker opens; ignore stale search responses.
   useEffect(() => {
@@ -171,155 +201,104 @@ export default function MessagesPage() {
     return () => { active = false; clearTimeout(timer) }
   }, [searchNewUser, profile?.id, mobileView, memberPage])
 
-  async function loadMessages(prof: Profile) {
-    const { data: storedMessages } = await supabase
-      .from('messages')
-      .select('*')
-      .or(`sender_id.eq.${prof.id},receiver_id.eq.${prof.id}`)
-      .order('created_at', { ascending: true })
-    const msgs = storedMessages ? await resolveMessageAttachments(supabase, storedMessages) : null
-
-    if (!msgs || msgs.length === 0) {
-      if (partnerParam) {
-        const { data: partner } = await supabase
-          .from('public_profiles')
-          .select('id,first_name,last_name,club_name,role,avatar_url,club_email_public')
-          .eq('id', partnerParam).single()
-        if (partner) {
-          setConversations([{
-            partnerId: partner.id,
-            partnerName: partner.role === 'club'
-              ? (partner.club_name || '—')
-              : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
-            partnerRole: partner.role,
-            partnerEmail: partner.club_email_public || '',
-            partnerAvatar: partner.avatar_url || null,
-            lastMessage: '', lastTime: '', unread: 0, messages: [],
-          }])
-          setActivePartnerId(partnerParam)
-          if (isMobileRef.current) setMobileView('chat')
-        }
-      }
-      setLoading(false)
-      return
+  async function loadMessages(prof:Profile,mode:'reset'|'refresh'|'more'='refresh') {
+    const request=++inboxRequestRef.current
+    setInboxBusy(true); setInboxError(false)
+    const {data,error}=await supabase.rpc('message_inbox',{p_query:inboxQueryRef.current,p_size:30,...(mode==='more'?inboxCursorRef.current:{})})
+    if(request!==inboxRequestRef.current) return
+    setLoading(false);setInboxBusy(false)
+    if(error || !data){setInboxError(true);return}
+    const rows=data.items as {partnerId:string;partnerName:string;partnerRole:string;partnerAvatar:string|null;lastMessage:string|null;lastFileName:string|null;lastAt:string;lastId:string;unread:number}[]
+    let list:Conversation[]=rows.map(row=>({...row,partnerEmail:'',lastMessage:row.lastMessage || (row.lastFileName ? `📎 ${row.lastFileName}` : ''),lastTime:new Date(row.lastAt).toLocaleTimeString(lang==='de'?'de-CH':'fr-CH',{hour:'2-digit',minute:'2-digit'}),messages:[]}))
+    const last=rows.at(-1)
+    if(mode!=='refresh' || !inboxCursorRef.current.p_before){
+      setInboxHasMore(data.hasMore)
+      inboxCursorRef.current=last?{p_before:last.lastAt,p_before_id:last.lastId}:{}
     }
-
-    const partnerIds = [...new Set(msgs.map((m: Message) => m.sender_id === prof.id ? m.receiver_id : m.sender_id))]
-    const { data: partners } = await supabase
-      .from('public_profiles')
-      .select('id,first_name,last_name,club_name,role,avatar_url,club_email_public')
-      .in('id', partnerIds)
-
-    const partnerMap: Record<string, { name: string; role: string; email: string; avatar: string | null }> = {}
-    for (const p of (partners || [])) {
-      partnerMap[p.id] = {
-        name: p.role === 'club'
-          ? (p.club_name || '—')
-          : `${p.first_name || ''} ${p.last_name || ''}`.trim() || '—',
-        role: p.role,
-        email: p.club_email_public || '',
-        avatar: p.avatar_url || null,
-      }
-    }
-
-    const convMap: Record<string, Conversation> = {}
-    for (const m of msgs) {
-      const partnerId = m.sender_id === prof.id ? m.receiver_id : m.sender_id
-      if (!convMap[partnerId]) {
-        convMap[partnerId] = {
-          partnerId,
-          partnerName: partnerMap[partnerId]?.name || '—',
-          partnerRole: partnerMap[partnerId]?.role || '',
-          partnerEmail: partnerMap[partnerId]?.email || '',
-          partnerAvatar: partnerMap[partnerId]?.avatar || null,
-          lastMessage: '',
-          lastTime: '',
-          unread: 0,
-          messages: []
-        }
-      }
-      convMap[partnerId].messages.push(m)
-      convMap[partnerId].lastMessage = m.text || (m.file_url ? `📎 ${m.file_name || 'Fichier'}` : '')
-      convMap[partnerId].lastTime = new Date(m.created_at).toLocaleTimeString(
-        lang === 'fr' ? 'fr-CH' : 'de-CH',
-        { hour: '2-digit', minute: '2-digit' }
-      )
-      if (!m.read && m.receiver_id === prof.id) convMap[partnerId].unread++
-    }
-
-    const convList = Object.values(convMap).sort((a, b) => {
-      const aLast = a.messages[a.messages.length - 1]?.created_at || ''
-      const bLast = b.messages[b.messages.length - 1]?.created_at || ''
-      return bLast.localeCompare(aLast)
+    setConversations(previous=>{
+      if(mode==='reset') return list
+      const merged=new Map(previous.map(item=>[item.partnerId,item]))
+      for(const item of list) merged.set(item.partnerId,item)
+      return [...merged.values()].sort((a,b)=>(b.lastAt||'').localeCompare(a.lastAt||'') || (b.lastId||'').localeCompare(a.lastId||''))
     })
-
-    if (partnerParam) {
-      const existing = convList.find(c => c.partnerId === partnerParam)
-      if (existing) {
-        setConversations(convList)
-        setActivePartnerId(partnerParam)
-        await supabase.from('messages').update({ read: true })
-          .eq('sender_id', partnerParam).eq('receiver_id', prof.id).eq('read', false)
-        if (isMobileRef.current) setMobileView('chat')
-      } else {
-        const { data: partner } = await supabase
-          .from('public_profiles')
-          .select('id,first_name,last_name,club_name,role,avatar_url,club_email_public')
-          .eq('id', partnerParam).single()
-        if (partner) {
-          const virtualConv: Conversation = {
-            partnerId: partner.id,
-            partnerName: partner.role === 'club'
-              ? (partner.club_name || '—')
-              : `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || '—',
-            partnerRole: partner.role,
-            partnerEmail: partner.club_email_public || '',
-            partnerAvatar: partner.avatar_url || null,
-            lastMessage: '', lastTime: '', unread: 0, messages: [],
-          }
-          setConversations([virtualConv, ...convList])
-          setActivePartnerId(partnerParam)
-          if (isMobileRef.current) setMobileView('chat')
-        } else {
-          setConversations(convList)
-          if (convList.length > 0 && !isMobileRef.current) setActivePartnerId(current => current && convList.some(c => c.partnerId === current) ? current : convList[0].partnerId)
-        }
+    // A profile link can start a conversation that has no messages yet.
+    if(partnerParam && !activePartnerRef.current){
+      const existing=list.find(item=>item.partnerId===partnerParam)
+      if(!existing){
+        const {data:partner}=await supabase.from('public_profiles').select('id,first_name,last_name,club_name,role,avatar_url').eq('id',partnerParam).maybeSingle()
+        if(request!==inboxRequestRef.current) return
+        if(partner) setConversations(previous=>previous.some(c=>c.partnerId===partner.id)?previous:[{partnerId:partner.id,partnerName:partner.role==='club'?partner.club_name || '—':`${partner.first_name || ''} ${partner.last_name || ''}`.trim()||'—',partnerRole:partner.role,partnerEmail:'',partnerAvatar:partner.avatar_url||null,lastMessage:'',lastTime:'',unread:0,messages:[]},...previous])
+        else return
       }
-    } else {
-      setConversations(convList)
-      if (convList.length > 0 && !isMobileRef.current) setActivePartnerId(current => current && convList.some(c => c.partnerId === current) ? current : convList[0].partnerId)
-    }
-    setLoading(false)
+      setActivePartnerId(partnerParam)
+      if(isMobileRef.current)setMobileView('chat')
+    }else if(!activePartnerRef.current && list.length && !isMobileRef.current){setActivePartnerId(list[0].partnerId)}
   }
 
-  // Scroll to bottom when messages change or conversation switches
-  useEffect(() => {
-    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
-  }, [activePartnerId, conversations])
+  async function loadThread(prof:Profile,partner:string,mode:'reset'|'refresh'|'older'='refresh') {
+    const request=++threadRequestRef.current
+    if(mode==='reset')rawThreadRef.current={partner,items:[]}
+    const previous=threadRef.current.partner===partner?threadRef.current.items:[]
+    const raw=rawThreadRef.current.partner===partner?rawThreadRef.current.items:[]
+    const cursor=mode==='older'?pageCursor([...raw].reverse()):{}
+    if(mode==='older' && bodyRef.current)olderScrollRef.current={height:bodyRef.current.scrollHeight,top:bodyRef.current.scrollTop}
+    setThread(current=>mode==='reset'||current.partner!==partner?{partner,items:[],hasMore:false,loading:true,error:false}:{...current,loading:true,error:false})
+    const {data,error}=await supabase.rpc('message_thread',{p_partner:partner,p_size:50,...cursor})
+    if(request!==threadRequestRef.current || activePartnerRef.current!==partner)return
+    if(error || !data){olderScrollRef.current=null;setThread(current=>({...current,loading:false,error:true}));return}
+    const rawItems=data.items as Message[]
+    const display=await resolveMessageAttachments(supabase,rawItems,attachmentCacheRef.current)
+    if(request!==threadRequestRef.current || activePartnerRef.current!==partner)return
+    rawThreadRef.current={partner,items:mergeMessages(rawThreadRef.current.partner===partner?rawThreadRef.current.items:[],rawItems)}
+    setThread(current=>({partner,items:mergeMessages(current.partner===partner?current.items:previous,display),hasMore:mode==='refresh'&&previous.length?current.hasMore:data.hasMore,loading:false,error:false}))
+  }
+
+  useLayoutEffect(()=>{
+    if(olderScrollRef.current && bodyRef.current){
+      bodyRef.current.scrollTop=olderScrollRef.current.top+bodyRef.current.scrollHeight-olderScrollRef.current.height
+      olderScrollRef.current=null
+    }
+  },[thread.items])
+  const lastThreadMessageId=thread.items.at(-1)?.id
+  useEffect(()=>{
+    if(bodyRef.current)bodyRef.current.scrollTop=bodyRef.current.scrollHeight
+  },[activePartnerId,lastThreadMessageId])
 
   // Realtime: incoming messages
   useEffect(() => {
     if (!profile) return
-    const fallback = realtimeFallback(() => { void loadMessages(profile) })
+    let stopped=false, running=false, queued=false, markRead=false
+    let timer:ReturnType<typeof setTimeout>|undefined
+    const refresh=async()=>{
+      timer=undefined
+      if(stopped)return
+      if(running){queued=true;return}
+      running=true
+      try{
+        const partner=activePartnerRef.current
+        if(markRead && partner){
+          markRead=false
+          await supabase.from('messages').update({read:true}).eq('sender_id',partner).eq('receiver_id',profile.id).eq('read',false)
+        }
+        await Promise.all([loadMessages(profile),partner?loadThread(profile,partner):Promise.resolve()])
+      }finally{
+        running=false
+        if(queued && !stopped){queued=false;timer=setTimeout(refresh,500)}
+      }
+    }
+    const schedule=()=>{if(!timer && !stopped)timer=setTimeout(refresh,250)}
+    const fallback = realtimeFallback(schedule)
     const channel = supabase
       .channel(`msg-rt-${profile.id}`)
       .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `receiver_id=eq.${profile.id}`,
-      }, async (payload: any) => {
-        const incomingSenderId = payload.new?.sender_id
-        if (incomingSenderId && incomingSenderId === activePartnerRef.current) {
-          await supabase.from('messages').update({ read: true })
-            .eq('sender_id', incomingSenderId)
-            .eq('receiver_id', profile.id)
-            .eq('read', false)
-        }
-        loadMessages(profile)
+        event: 'INSERT',schema:'public',table:'messages',filter:`receiver_id=eq.${profile.id}`,
+      }, (payload:any)=>{
+        if(payload.new?.sender_id===activePartnerRef.current)markRead=true
+        schedule()
       })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages',filter:`sender_id=eq.${profile.id}`},schedule)
       .subscribe(fallback.status)
-    return () => { fallback.stop(); supabase.removeChannel(channel) }
+    return () => { stopped=true;clearTimeout(timer);fallback.stop();supabase.removeChannel(channel) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id])
 
@@ -327,7 +306,15 @@ export default function MessagesPage() {
   // has been suspended in the background.
   useEffect(() => {
     if (!profile) return
-    const refresh = () => { if (document.visibilityState === 'visible') void loadMessages(profile) }
+    const refresh = async () => {
+      if(document.visibilityState!=='visible')return
+      void loadMessages(profile)
+      const snapshot=rawThreadRef.current
+      if(snapshot.partner!==activePartnerRef.current)return
+      const items=await resolveMessageAttachments(supabase,snapshot.items,attachmentCacheRef.current)
+      if(snapshot.partner===activePartnerRef.current)setThread(current=>({...current,items:mergeMessages(current.items,items)}))
+      if(activePartnerRef.current)void loadThread(profile,activePartnerRef.current)
+    }
     const timer = setInterval(refresh, 45 * 60 * 1000)
     document.addEventListener('visibilitychange', refresh)
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
@@ -390,9 +377,14 @@ export default function MessagesPage() {
       )
       const preview = txt || (pendingFile ? `📎 ${pendingFile.name}` : '')
       setConversations(prev => prev.map(c => c.partnerId === activePartnerId
-        ? { ...c, messages: [...c.messages, displayMessage], lastMessage: preview, lastTime: timeStr }
+        ? { ...c, lastMessage: preview, lastTime: timeStr, lastAt:newMsg.created_at,lastId:newMsg.id }
         : c
       ))
+      if(activePartnerRef.current===activePartnerId){
+        rawThreadRef.current={partner:activePartnerId,items:mergeMessages(rawThreadRef.current.partner===activePartnerId?rawThreadRef.current.items:[],[newMsg])}
+        setThread(current=>current.partner===activePartnerId?({...current,items:mergeMessages(current.items,[displayMessage])}):current)
+      }
+      void loadMessages(profile)
       if (session?.access_token) {
         fetch('/api/send-message-notification', {
           method: 'POST',
@@ -401,8 +393,7 @@ export default function MessagesPage() {
         }).catch(() => {})
       }
     }
-    setInput('')
-    setPendingFile(null)
+    if(activePartnerRef.current===activePartnerId){setInput('');setPendingFile(null)}
     setSending(false)
   }
 
@@ -448,10 +439,11 @@ export default function MessagesPage() {
   }
 
   // ── Derived values ────────────────────────────────────────────────────────────
-  const activeConv = conversations.find(c => c.partnerId === activePartnerId)
-  const filteredConvs = conversations.filter(c =>
-    !searchConv || c.partnerName.toLowerCase().includes(searchConv.toLowerCase())
-  )
+  const selectedConversationRef=useRef<Conversation|null>(null)
+  const activeConv = conversations.find(c => c.partnerId === activePartnerId) || (selectedConversationRef.current?.partnerId===activePartnerId?selectedConversationRef.current:null)
+  if(activeConv)selectedConversationRef.current=activeConv
+  const filteredConvs = conversations
+  const activeMessages=thread.partner===activePartnerId?thread.items:[]
   const roleLabel = (role: string) =>
     role === 'club' ? t.messages.role_club[lang]
     : role === 'coach' ? t.messages.role_coach[lang]
@@ -500,6 +492,7 @@ export default function MessagesPage() {
         />
       </div>
 
+      {inboxError && <div role="alert" style={{padding:12,color:'#ffb3bb'}}>{lang==='de'?'Gespräche konnten nicht geladen werden.':'Impossible de charger les conversations.'}<button onClick={()=>profile&&loadMessages(profile,'reset')}>{lang==='de'?'Erneut versuchen':'Réessayer'}</button></div>}
       {/* Conversation list */}
       <div style={{ flex:1, overflowY:'auto' }}>
         {filteredConvs.length === 0 ? (
@@ -551,6 +544,7 @@ export default function MessagesPage() {
             </div>
           )
         })}
+        {inboxHasMore && <button type="button" disabled={inboxBusy} onClick={()=>profile&&loadMessages(profile,'more')} style={{width:'100%',padding:12}}>{lang==='de'?'Weitere Gespräche laden':'Charger plus de conversations'}</button>}
       </div>
     </aside>
   )
@@ -599,7 +593,10 @@ export default function MessagesPage() {
 
           {/* Messages */}
           <div className="msg-body" ref={bodyRef}>
-            {activeConv.messages.map((m, i) => {
+            {thread.loading && <p role="status" style={{textAlign:'center',color:'#c7d1e3'}}>{lang==='de'?'Nachrichten werden geladen…':'Chargement des messages…'}</p>}
+            {thread.error && <button onClick={()=>profile&&activePartnerId&&loadThread(profile,activePartnerId)}>{lang==='de'?'Erneut versuchen':'Réessayer'}</button>}
+            {thread.hasMore && <button type="button" disabled={thread.loading} onClick={()=>profile&&activePartnerId&&loadThread(profile,activePartnerId,'older')} style={{alignSelf:'center',padding:'10px 16px',marginBottom:12}}>{lang==='de'?'Ältere Nachrichten laden':'Charger les messages précédents'}</button>}
+            {activeMessages.map((m, i) => {
               const fromMe = m.sender_id === profile?.id
               const time = new Date(m.created_at).toLocaleTimeString(
                 lang === 'fr' ? 'fr-CH' : 'de-CH',

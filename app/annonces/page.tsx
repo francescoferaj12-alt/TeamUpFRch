@@ -1,9 +1,9 @@
 'use client'
 
-import { matchesAnnonce } from '../../lib/annonce-search'
+import { directoryQueries } from '../../lib/directory-search'
 import { footballLabel } from '../../lib/football-labels'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, Annonce, Profile, avatarSrc } from '../../lib/supabase'
@@ -90,52 +90,39 @@ const TABS = [
 // ——— Main page ————————————————————————————————
 export default function AnnoncesPage() {
   const { lang } = useLang()
-  const [annonces, setAnnonces]     = useState<Annonce[]>([])
+  const [directory,setDirectory]=useState<{items:Annonce[];total:number;counts:Record<string,number>}>({items:[],total:0,counts:{'':0,club:0,coach:0,player:0}})
+  const [pageState,setPageState]=useState({key:'',page:0})
+  const [loadError,setLoadError]=useState(false)
+  const [retry,setRetry]=useState(0)
+  const [debouncedQuery,setDebouncedQuery]=useState('')
   const [loading, setLoading]       = useState(true)
   const [filterLigue, setFilterLigue] = useState('')
   const [filterZone, setFilterZone]   = useState('')
   const [filterPos, setFilterPos]     = useState('')
   const [filterType, setFilterType]   = useState('')
   const [query, setQuery]             = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [postulerModal, setPostulerModal] = useState<Annonce | null>(null)
   const [showPublishModal, setShowPublishModal] = useState(false)
   const router = useRouter()
   const { profile: currentUser } = useAuth()
 
-  // Public author details are loaded without exposing private profile fields.
-  useEffect(() => {
-    supabase.from('annonces')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .then(async ({ data }) => {
-        const rows = data || []
-        const authorIds = [...new Set(rows.map(a => a.author_id))]
-        const { data: authors } = authorIds.length
-          ? await supabase.from('public_profiles').select('id,avatar_url,verified').in('id', authorIds)
-          : { data: [] }
-        const byId = new Map((authors || []).map(author => [author.id, author]))
-        const visible = rows.filter(a => byId.has(a.author_id))
-          .map(a => ({ ...a, profiles: byId.get(a.author_id) }))
-        setAnnonces(visible as Annonce[])
-        setLoading(false)
-      })
-  }, [])
-
-  // ——— Filtered (unchanged) ———————————————————
-  const filtered = useMemo(() => {
-    return annonces.filter(annonce => matchesAnnonce({
-      query, ligue: filterLigue, zone: filterZone, position: filterPos, author_type: filterType,
-    }, annonce))
-  }, [annonces, filterLigue, filterZone, filterPos, filterType, query])
-
-  // ——— Tab counters ————————————————————————————
-  const typeCounts = useMemo(() => ({
-    '':      annonces.length,
-    club:    annonces.filter(a => a.author_type === 'club').length,
-    coach:   annonces.filter(a => a.author_type === 'coach').length,
-    player:  annonces.filter(a => a.author_type === 'player').length,
-  }), [annonces])
+  useEffect(()=>{const timer=setTimeout(()=>setDebouncedQuery(query),250);return()=>clearTimeout(timer)},[query])
+  const filterKey=JSON.stringify({queries:directoryQueries(debouncedQuery,lang,[...ligues.flatMap(group=>group.items),...positions,...zones]),ligue:filterLigue,zone:filterZone,position:filterPos,author_type:filterType})
+  const page=pageState.key===filterKey?pageState.page:0
+  useEffect(()=>{
+    let active=true;setLoading(true);setLoadError(false)
+    supabase.rpc('browse_annonces',{p_filters:JSON.parse(filterKey),p_page:page,p_size:24}).then(({data,error})=>{
+      if(!active)return
+      setLoading(false);setLoadError(!!error)
+      if(!error&&data)setDirectory(data)
+    })
+    return()=>{active=false}
+  },[filterKey,page,retry])
+  const annonces=directory.items
+  const filtered=annonces
+  const total=directory.total
+  const typeCounts=directory.counts
 
   const hasFilters = !!(filterLigue || filterZone || filterPos || filterType || query)
 
@@ -145,7 +132,7 @@ export default function AnnoncesPage() {
 
   // ——— Render —————————————————————————————————
   return (
-    <div className="an-page">
+    <div className={`an-page${currentUser ? ' an-feed' : ''}`}>
 
       {/* PAGE HEADER */}
       <header className="an-header">
@@ -156,11 +143,19 @@ export default function AnnoncesPage() {
           </div>
           <span className="an-live-pulse">{lang === 'de' ? 'Aktuell' : 'En direct'}</span>
           <h1 className="an-title">
-            {lang === 'de' ? 'Angebote &' : 'Offres &'}<br /><span className="em">{lang === 'de' ? 'Gesuche.' : 'Recherches.'}</span>
+            {currentUser
+              ? (lang === 'de' ? <>Fussball <span className="em">aktuell.</span></> : <>Le fil <span className="em">du foot.</span></>)
+              : <>{lang === 'de' ? 'Angebote &' : 'Offres &'}<br /><span className="em">{lang === 'de' ? 'Gesuche.' : 'Recherches.'}</span></>}
           </h1>
           <p className="an-sub">
-            {lang === 'de' ? 'Vereine, Trainer und Spieler veröffentlichen hier ihre Angebote und Gesuche. Finde, was zu dir passt.' : 'Clubs, coachs et joueurs publient leurs besoins en temps réel. Trouve ton match en quelques clics.'}
+            {lang === 'de' ? 'Vereine, Spieler und Trainer: alle Angebote und Gesuche an einem Ort.' : 'Clubs, joueurs et coachs : toutes les opportunités, au même endroit.'}
           </p>
+          {currentUser && <div className="an-feed-shortcuts">
+            <Link href="/clubs">{lang === 'de' ? 'Vereine' : 'Clubs'}</Link>
+            <Link href="/candidatures">{lang === 'de' ? 'Bewerbungen' : 'Candidatures'}</Link>
+            <Link href="/dashboard">{lang === 'de' ? 'Mein Überblick' : 'Mon tableau de bord'}</Link>
+            <Link href="/publier" className="an-feed-post"><IcoPlus />{lang === 'de' ? 'Anzeige erstellen' : 'Publier une annonce'}</Link>
+          </div>}
           <div className="an-search-wrap">
             <IcoSearch s={18} />
             <input
@@ -195,6 +190,10 @@ export default function AnnoncesPage() {
             ))}
           </div>
 
+          <button className="an-filter-toggle" type="button" aria-expanded={filtersOpen} aria-controls="annonce-filters" onClick={() => setFiltersOpen(open => !open)}>
+            {lang === 'de' ? 'Filter & Suchaufträge' : 'Filtres et alertes'} {filtersOpen ? '−' : '+'}
+          </button>
+          <div id="annonce-filters" hidden={!filtersOpen}>
           {/* Dropdowns + Publish */}
           <div className="an-filters-grid">
             <select className="an-select" value={filterLigue} onChange={(e) => setFilterLigue(e.target.value)} aria-label={lang === 'de' ? 'Liga' : 'Ligue'}>
@@ -211,11 +210,11 @@ export default function AnnoncesPage() {
             </select>
             {currentUser ? (
               <button className="an-publish-btn" onClick={() => setShowPublishModal(true)}>
-                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
+                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier une annonce'}
               </button>
             ) : (
               <Link href="/login" className="an-publish-btn">
-                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
+                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier une annonce'}
               </Link>
             )}
           </div>
@@ -235,11 +234,13 @@ export default function AnnoncesPage() {
             />
           )}
 
+          </div>
+
           {/* Results bar */}
           <div className="an-results-bar">
             <span>
-              <span className="an-results-num">{loading ? '—' : filtered.length}</span>
-              {' '}{lang === 'de' ? (filtered.length === 1 ? 'Anzeige gefunden' : 'Anzeigen gefunden') : (filtered.length === 1 ? 'annonce affichée' : 'annonces affichées')}
+              <span className="an-results-num">{loading ? '—' : total}</span>
+              {' '}{lang === 'de' ? (total === 1 ? 'Anzeige gefunden' : 'Anzeigen gefunden') : (total === 1 ? 'annonce affichée' : 'annonces affichées')}
             </span>
             {hasFilters && (
               <button className="an-reset" onClick={resetFilters}>
@@ -253,7 +254,7 @@ export default function AnnoncesPage() {
       {/* GRID */}
       <section className="an-grid-section">
         <div className="an-container">
-          {loading ? (
+          {loadError ? <div className="an-empty" role="alert"><p>{lang==='de'?'Anzeigen konnten nicht geladen werden.':'Impossible de charger les annonces.'}</p><button onClick={()=>setRetry(n=>n+1)}>{lang==='de'?'Erneut versuchen':'Réessayer'}</button></div> : loading ? (
             <div className="an-loading">
               <div className="an-spinner" />
               {lang === 'de' ? 'Anzeigen werden geladen…' : 'Chargement des annonces…'}
@@ -261,7 +262,7 @@ export default function AnnoncesPage() {
           ) : filtered.length === 0 ? (
             <div className="an-empty">
               <div className="an-empty-icon"><IcoEmpty s={36} /></div>
-              {annonces.length === 0 ? (
+              {!hasFilters ? (
                 <>
                   <h3 className="an-empty-title">{lang === 'de' ? 'Noch keine Anzeigen' : 'Aucune annonce publiée'}</h3>
                   <p className="an-empty-sub">{lang === 'de' ? 'Veröffentliche die erste Anzeige.' : 'Sois le premier à publier une annonce.'}</p>
@@ -291,6 +292,11 @@ export default function AnnoncesPage() {
         </div>
       </section>
 
+      {!loading&&!loadError&&total>24&&<nav aria-label={lang==='de'?'Anzeigenseiten':'Pages des annonces'} style={{display:'flex',justifyContent:'center',alignItems:'center',gap:20,padding:'0 16px 32px'}}>
+        <button disabled={page===0} onClick={()=>setPageState({key:filterKey,page:page-1})}>{lang==='de'?'Zurück':'Précédent'}</button>
+        <span>{page+1} / {Math.ceil(total/24)}</span>
+        <button disabled={(page+1)*24>=total} onClick={()=>setPageState({key:filterKey,page:page+1})}>{lang==='de'?'Weiter':'Suivant'}</button>
+      </nav>}
       {/* POSTULER MODAL */}
       {postulerModal && (
         <PostulerModal
@@ -306,7 +312,7 @@ export default function AnnoncesPage() {
         <PostModal
           profile={currentUser}
           onClose={() => setShowPublishModal(false)}
-          onSuccess={(a) => { setAnnonces(prev => [a, ...prev]); setShowPublishModal(false) }}
+          onSuccess={() => { setPageState({key:filterKey,page:0});setRetry(n=>n+1);setShowPublishModal(false) }}
         />
       )}
 
@@ -331,6 +337,14 @@ export default function AnnoncesPage() {
           padding:140px 0 56px;
           text-align:center; position:relative;
         }
+        .an-feed .an-header { padding:32px 0 24px; }
+        .an-feed .an-title { font-size:clamp(30px,4.5vw,52px); line-height:1.15; margin-bottom:12px; }
+        .an-feed .an-eyebrow, .an-feed .an-live-pulse { margin-bottom:14px; }
+        .an-feed .an-sub { margin-bottom:16px; font-weight:400; color:#c7d1e3; }
+        .an-feed-shortcuts { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 18px; margin-bottom:20px; }
+        .an-feed-shortcuts a { color:#c7d1e3; font-size:13px; text-decoration:none; padding:6px 0; }
+        .an-feed-shortcuts .an-feed-post { display:inline-flex; align-items:center; gap:6px; background:#FF3A3A; padding:9px 14px; color:white; border-radius:9px; font-weight:700; }
+        .an-filter-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; background:transparent; border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:10px 14px; margin-bottom:12px; color:#c7d1e3; font:inherit; font-size:13px; cursor:pointer; }
         .an-header::before {
           content:''; position:absolute;
           top:0; left:50%; transform:translateX(-50%);
@@ -681,7 +695,19 @@ export default function AnnoncesPage() {
           .an-filters-grid { grid-template-columns:1fr 1fr; }
           .an-publish-btn  { grid-column:span 2; justify-content:center; }
         }
-        @media (max-width:720px)  { .an-grid { grid-template-columns:1fr; } }
+        @media (max-width:720px) {
+          .an-grid { grid-template-columns:1fr; }
+          .an-feed .an-header { padding:16px 0; }
+          .an-feed .an-eyebrow, .an-feed .an-live-pulse { display:none; }
+          .an-feed .an-eyebrow { font-size:10px; letter-spacing:2px; }
+          .an-feed .an-sub { font-size:14px; line-height:1.5; }
+          .an-feed-shortcuts { gap:4px 14px; margin-bottom:16px; }
+          .an-feed-post { display:none !important; }
+          .an-feed .an-filters { padding:14px 0; }
+          .an-tabs-row { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; margin-bottom:10px; }
+          .an-tab { flex-shrink:0; padding:9px 12px; gap:6px; }
+          .an-feed .an-grid-section { padding-top:20px; }
+        }
         @media (max-width:600px)  { .an-container { padding:0 16px; } }
         @media (max-width:520px) {
           .an-filters-grid { grid-template-columns:1fr; }

@@ -1311,3 +1311,54 @@ textarea.input { resize: vertical; min-height: 80px; }
   .season-stat-label { letter-spacing: .3px; }
   .career-section .career-tab { min-height: 44px; padding: 5px 12px; }
 }
+
+/* The official mark stays visible while mobile navigation moves to the thumb. */
+.official-brand-logo { display:block; width:46px; height:46px; overflow:hidden; border-radius:10px; border:1px solid rgba(255,255,255,.18); flex-shrink:0; background:#081434; }
+.official-brand-logo img { display:block; width:100%; height:100%; object-fit:cover; transform:scale(1.35); }
+.mobile-bottom-nav { display:none; }
+.home-session-loading, .publish-page { min-height:65vh; padding:48px 24px; color:#c7d1e3; text-align:center; }
+.publish-page h1 { font-family:'Russo One',sans-serif; font-size:clamp(24px,4vw,40px); color:#fff; margin-bottom:20px; }
+@media (max-width:768px) {
+  :root { --mobile-nav-space:calc(66px + env(safe-area-inset-bottom, 0px)); }
+  body::after { content:""; display:block; height:var(--mobile-nav-space); }
+  .nav-hamburger { display:none !important; }
+  .nav .nav-avatar, .nav .nav-login { display:none; }
+  .nav-logo { gap:8px; }
+  .official-brand-logo { width:40px; height:40px; border-radius:9px; }
+  .mobile-bottom-nav { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); position:fixed; left:0; right:0; bottom:0; z-index:210; height:var(--mobile-nav-space); padding:5px 4px calc(5px + env(safe-area-inset-bottom, 0px)); background:rgba(8,20,52,.98); border-top:1px solid rgba(255,255,255,.14); box-shadow:0 -8px 24px rgba(0,0,0,.18); }
+  .mobile-nav-item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-width:0; min-height:48px; color:#c7d1e3; text-decoration:none; font-size:10px; font-weight:600; line-height:1.2; }
+  .mobile-nav-item.active { color:#ffadb5; }
+  .mobile-nav-icon { display:flex; align-items:center; justify-content:center; position:relative; width:32px; height:30px; }
+  .mobile-nav-publish .mobile-nav-icon { width:40px; height:34px; background:#FF3A3A; border-radius:11px; color:#fff; }
+  .mobile-nav-badge { position:absolute; right:-5px; top:-4px; background:#FF3A3A; color:white; font-size:9px; border-radius:10px; min-width:17px; padding:2px 3px; text-align:center; border:2px solid #081434; }
+  .mobile-nav-item:focus-visible { outline:2px solid #fff; outline-offset:-3px; border-radius:8px; }
+  .msg-wrap { height:calc(100dvh - 60px - var(--mobile-nav-space)) !important; }
+  .pm-overlay { padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px)) !important; }
+  .an-search, .pm-modal input, .pm-modal textarea, .pm-modal select, .msg-main input { font-size:16px !important; }
+}
+
+@media (max-width:768px) {
+  .mobile-bottom-nav-six { grid-template-columns:repeat(6,minmax(0,1fr)); gap:0; padding-left:2px; padding-right:2px; }
+  .mobile-bottom-nav-six .mobile-nav-item { font-size:10px; letter-spacing:-.1px; }
+  .mobile-bottom-nav-six .mobile-nav-icon { width:28px; }
+  .mobile-bottom-nav-six .mobile-nav-publish .mobile-nav-icon { width:36px; }
+}
+
+.account-space-header { background:#081434; border-bottom:1px solid rgba(255,255,255,.1); color:#fff; padding:18px 24px; }
+.account-space-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.account-space-title { font-family:'Russo One',sans-serif; font-size:16px; }
+.account-space-tabs { display:flex; gap:6px; padding:4px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; }
+.account-space-tabs a { color:#c7d1e3; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; }
+.account-space-tabs a[aria-current="page"] { background:#FF3A3A; color:#fff; }
+.account-space-tabs a:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+@media(max-width:768px) {
+  .account-space-header { padding:16px; }
+  .account-space-inner { gap:12px; }
+  .account-space-title { font-size:15px; }
+  .account-space-tabs { width:100%; }
+  .account-space-tabs a { flex:1; text-align:center; padding:11px 8px; }
+  .account-space-header + .db-page .db-welcome { padding-top:28px; }
+}
+@media(max-width:359px) {
+  .mobile-bottom-nav-six .mobile-nav-item { font-size:9px; }
+}
