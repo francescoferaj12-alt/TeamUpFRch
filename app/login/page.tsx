@@ -790,10 +790,10 @@ function LoginForm() {
             )}
 
             {/* Legal links */}
-            <div className="ln-legal" style={{ marginTop: 40, display: 'flex', justifyContent: 'center', gap: 24, fontSize: 12, color: 'rgba(255,255,255,.35)' }}>
-              <a href="/cgu" style={{ textDecoration: 'none', color: 'inherit', transition: 'color .3s' }}>CGU</a>
-              <a href="/privacy" style={{ textDecoration: 'none', color: 'inherit', transition: 'color .3s' }}>Confidentialité</a>
-              <a href="mailto:teamupfr.ch@gmail.com" style={{ textDecoration: 'none', color: 'inherit', transition: 'color .3s' }}>Contact</a>
+            <div className="ln-legal" style={{ marginTop: 40, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 24, fontSize: 12, color: 'rgba(255,255,255,.35)' }}>
+              <a href="/cgu" style={{ textDecoration: 'none', color: 'inherit', transition: 'color .3s' }}>{lang === 'fr' ? 'CGU' : 'Nutzungsbedingungen'}</a>
+              <a href="/privacy" style={{ textDecoration: 'none', color: 'inherit', transition: 'color .3s' }}>{lang === 'fr' ? 'Confidentialité' : 'Datenschutz'}</a>
+              <a href="mailto:teamupfr.ch@gmail.com" style={{ textDecoration: 'none', color: 'inherit', transition: 'color .3s' }}>{lang === 'fr' ? 'Contact' : 'Kontakt'}</a>
             </div>
 
           </div>
