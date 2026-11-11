@@ -6,7 +6,11 @@ const germanLabels: Record<string, string> = {
   'Milieu défensif': 'Defensives Mittelfeld',
   'Défenseur central': 'Innenverteidigung',
   'Défenseur latéral': 'Aussenverteidigung',
-  Gardien: 'Tor',
+  Gardien: 'Torwart',
+  beginner: 'Anfänger',
+  amateur: 'Amateur',
+  confirmed: 'Fortgeschritten',
+  experienced: 'Erfahren',
   'Fribourg-Ville': 'Stadt Freiburg',
   Droit: 'Rechts',
   Gauche: 'Links',
@@ -14,6 +18,8 @@ const germanLabels: Record<string, string> = {
   Ambidextre: 'Beidfüssig',
   'Entraîneur principal': 'Cheftrainer',
   'Entraîneur assistant': 'Assistenztrainer',
+  'Entraîneur adjoint': 'Assistenztrainer',
+  'Responsable technique': 'Technischer Leiter',
   'Préparateur physique': 'Athletiktrainer',
   'Entraîneur des gardiens': 'Torwarttrainer',
   Aucune: 'Keine',
@@ -34,4 +40,5 @@ export function footballLabel(value: string, lang: Lang): string {
     .replace(/^(\d+)ème Ligue( Féminine)?$/, (_, number, women) => `${number}. Liga${women ? ' Frauen' : ''}`)
     .replace(/^Juniors (.+) - (\d+)(?:er|ème) degré$/, 'Junioren $1 - $2. Stärkeklasse')
     .replace(/^Juniors /, 'Junioren ')
+    .replace(/^Junior ([A-D])$/, 'Junioren $1')
 }

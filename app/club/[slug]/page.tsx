@@ -1,5 +1,9 @@
 'use client'
 
+import { useLang } from '../../../lib/lang-context'
+import { footballLabel } from '../../../lib/football-labels'
+import { strengthLabel } from '../../../lib/strength-labels'
+import { clubCopy, relativeTime } from '../../../lib/club-copy'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -34,17 +38,9 @@ const IcoShield   = ({ s = 64 }: { s?: number }) => (
 )
 const IcoCheck    = ({ s = 10 }: { s?: number }) => <Svg size={s}><polyline points="20 6 9 17 4 12"/></Svg>
 
-function relativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const h = Math.floor(diff / 3_600_000)
-  if (h < 1)  return 'il y a quelques min'
-  if (h < 24) return `il y a ${h}h`
-  const d = Math.floor(h / 24)
-  if (d < 30) return `il y a ${d}j`
-  return `il y a ${Math.floor(d / 30)}m`
-}
-
 export default function ClubPage() {
+  const { lang } = useLang()
+  const copy = clubCopy[lang]
   const { slug } = useParams<{ slug: string }>()
   const [club, setClub]       = useState<Profile | null>(null)
   const [annonces, setAnnonces] = useState<Annonce[]>([])
@@ -99,30 +95,23 @@ export default function ClubPage() {
   if (notFound || !club) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', background:'#0D1F4A', color:'#fff', gap:16 }}>
       <div style={{ opacity:.25 }}><IcoShield s={64} /></div>
-      <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1.75rem', textTransform:'uppercase', letterSpacing:1 }}>Club introuvable</div>
-      <Link href="/clubs" style={{ color:'#FF3A3A', textDecoration:'none', fontWeight:600, fontSize:14 }}>Voir tous les clubs</Link>
+      <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1.75rem', textTransform:'uppercase', letterSpacing:1 }}>{copy.notFound}</div>
+      <Link href="/clubs" style={{ color:'#FF3A3A', textDecoration:'none', fontWeight:600, fontSize:14 }}>{copy.allClubs}</Link>
     </div>
   )
 
   // ——— Derived values ——————————————————————————————
+  const isVerified = club.verified || club.club_verification_status === 'approved'
   const strengths = (club.strengths || '').split(',').map((s: string) => s.trim()).filter(Boolean)
-  const strengthLabels: Record<string, string> = {
-    infrastructure: 'Infrastructure de qualité', family:      'Esprit familial',
-    ambition:       'Ambition sportive',         youth:       'Formation jeunes',
-    competitive:    'Équipe compétitive',         atmosphere:  'Bonne ambiance',
-    professional:   'Structure sérieuse',         social:      'Vie sociale active',
-    equipment:      'Bons équipements',           local:       'Ancrage local',
-    growing:        'Club en développement',      welcoming:   'Accueil de nouveaux joueurs',
-  }
   const initials = (club.club_name || 'C').split(' ').map((w: string) => w[0]).join('').slice(0, 3).toUpperCase()
 
-  type FactRow = { k: string; v: string; accent?: boolean; isEmail?: boolean }
+  type FactRow = { k: string; v: string; accent?: boolean; isEmail?: boolean; verified?: boolean }
   const factRows: FactRow[] = []
-  if (club.zone)    factRows.push({ k: 'Zone',         v: club.zone })
-  if (club.ligue)   factRows.push({ k: 'Ligue',        v: club.ligue })
-  factRows.push({ k: 'Recrutement', v: club.available ? 'Ouvert' : 'Complet', accent: !!club.available })
-  if (club.verified) factRows.push({ k: 'Statut',      v: 'Vérifié' })
-  if (club.club_email_public) factRows.push({ k: 'Email', v: club.club_email_public, isEmail: true })
+  if (club.zone)    factRows.push({ k: copy.zone, v: footballLabel(club.zone, lang) })
+  if (club.ligue)   factRows.push({ k: copy.league, v: footballLabel(club.ligue, lang) })
+  factRows.push({ k: copy.recruitment, v: club.available ? copy.open : copy.closed, accent: !!club.available })
+  if (isVerified) factRows.push({ k: copy.status, v: copy.verified, verified:true })
+  if (club.club_email_public) factRows.push({ k: copy.email, v: club.club_email_public, isEmail: true })
 
   // ——— Render —————————————————————————————————————
   return (
@@ -131,7 +120,7 @@ export default function ClubPage() {
       {/* BREADCRUMB */}
       <div className="cd-breadcrumb">
         <div className="cd-container">
-          <Link href="/clubs" className="cd-bc-link">Clubs</Link>
+          <Link href="/clubs" className="cd-bc-link">{copy.clubs}</Link>
           <IcoChevron s={12} />
           <span className="cd-bc-current">{club.club_name || 'Club'}</span>
         </div>
@@ -149,25 +138,25 @@ export default function ClubPage() {
               <div className="cd-tags">
                 {club.ligue && (
                   <span className="cd-tag cd-tag-primary">
-                    <IcoStar s={12} color="currentColor" />{club.ligue}
+                    <IcoStar s={12} color="currentColor" />{footballLabel(club.ligue, lang)}
                   </span>
                 )}
                 {club.zone && (
                   <span className="cd-tag">
-                    <IcoPin s={12} color="currentColor" />{club.zone}
+                    <IcoPin s={12} color="currentColor" />{footballLabel(club.zone, lang)}
                   </span>
                 )}
                 {club.available != null && (
                   <span className={`cd-tag${club.available ? ' cd-tag-green' : ''}`}>
-                    {club.available ? 'Recrute' : 'Complet'}
+                    {club.available ? copy.recruits : copy.closed}
                   </span>
                 )}
               </div>
               <h1 className="cd-name">{club.club_name || 'Club'}</h1>
-              {club.verified && (
+              {isVerified && (
                 <div className="cd-verified">
                   <VerifiedBadge size={16} />
-                  <span>Club vérifié</span>
+                  <span>{copy.verifiedClub}</span>
                 </div>
               )}
             </div>
@@ -175,7 +164,7 @@ export default function ClubPage() {
             {/* Actions */}
             <div className="cd-hero-actions">
               <Link href={`/messages?partner=${club.id}`} className="cd-btn-pri">
-                <IcoMsg s={16} />Contacter
+                <IcoMsg s={16} />{copy.contactAction}
               </Link>
             </div>
           </div>
@@ -184,24 +173,24 @@ export default function ClubPage() {
           <div className="cd-strip">
             <div className="cd-stat">
               <div className={`cd-stat-num${annonces.length > 0 ? ' em' : ''}`}>{annonces.length}</div>
-              <div className="cd-stat-label">Annonces actives</div>
+              <div className="cd-stat-label">{copy.activeAds}</div>
             </div>
             <div className="cd-stat">
               <div className={`cd-stat-num${club.available ? ' green' : ''}`}>
-                {club.available ? 'Recrute' : 'Complet'}
+                {club.available ? copy.recruits : copy.closed}
               </div>
-              <div className="cd-stat-label">Recrutement</div>
+              <div className="cd-stat-label">{copy.recruitment}</div>
             </div>
             {club.ligue && (
               <div className="cd-stat">
-                <div className="cd-stat-num">{club.ligue}</div>
-                <div className="cd-stat-label">Ligue</div>
+                <div className="cd-stat-num">{footballLabel(club.ligue, lang)}</div>
+                <div className="cd-stat-label">{copy.league}</div>
               </div>
             )}
             {club.zone && (
               <div className="cd-stat">
-                <div className="cd-stat-num">{club.zone}</div>
-                <div className="cd-stat-label">Zone</div>
+                <div className="cd-stat-num">{footballLabel(club.zone, lang)}</div>
+                <div className="cd-stat-label">{copy.zone}</div>
               </div>
             )}
           </div>
@@ -209,10 +198,10 @@ export default function ClubPage() {
       </section>
 
       {/* TAB NAV */}
-      <nav className="cd-tabnav" aria-label="Sections du club">
+      <nav className="cd-tabnav" aria-label={copy.sections}>
         <div className="cd-tabnav-inner">
           {(['about', 'annonces', 'contact'] as const).map(id => {
-            const labels: Record<string, string> = { about: 'À propos', annonces: 'Annonces', contact: 'Contact' }
+            const labels: Record<string, string> = { about: copy.about, annonces: copy.ads, contact: copy.contact }
             return (
               <a key={id} href={`#cd-${id}`} className={`cd-tab${activeTab === id ? ' act' : ''}`}
                 onClick={() => setActiveTab(id)}>
@@ -226,20 +215,20 @@ export default function ClubPage() {
       {/* ABOUT */}
       <section className="cd-section" id="cd-about">
         <div className="cd-container">
-          <div className="cd-eyebrow">À propos</div>
-          <h2 className="cd-stitle">Le <span className="em">club.</span></h2>
+          <div className="cd-eyebrow">{copy.about}</div>
+          <h2 className="cd-stitle">{copy.the} <span className="em">{copy.club}.</span></h2>
           <div className="cd-about-grid">
             <div className="cd-about-text">
               {club.bio
                 ? <p>{club.bio}</p>
-                : <p style={{ color: 'rgba(255,255,255,.35)', fontStyle: 'italic' }}>Aucune description disponible pour ce club.</p>
+                : <p style={{ color:'#c7d1e3', fontStyle: 'italic' }}>{copy.noDescription}</p>
               }
               {strengths.length > 0 && (
                 <div className="cd-strengths">
-                  <div className="cd-strengths-title">Points forts</div>
+                  <div className="cd-strengths-title">{copy.strengths}</div>
                   <div className="cd-strengths-grid">
                     {strengths.map(k => (
-                      <span key={k} className="cd-strength-pill">{strengthLabels[k] || k}</span>
+                      <span key={k} className="cd-strength-pill">{strengthLabel(k, lang, 'club')}</span>
                     ))}
                   </div>
                 </div>
@@ -247,12 +236,12 @@ export default function ClubPage() {
             </div>
 
             <aside className="cd-facts-card">
-              <div className="cd-facts-title">Infos clés</div>
-              {factRows.map(({ k, v, accent, isEmail }) => (
+              <div className="cd-facts-title">{copy.keyInfo}</div>
+              {factRows.map(({ k, v, accent, isEmail, verified }) => (
                 <div key={k} className="cd-fact-row">
                   <span className="cd-fact-label">{k}</span>
                   <span className={`cd-fact-value${accent ? ' green' : ''}`}>
-                    {k === 'Statut' ? (
+                    {verified ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                         {v} <IcoCheck s={10} />
                       </span>
@@ -270,16 +259,16 @@ export default function ClubPage() {
       {/* ANNONCES */}
       <section className="cd-section cd-section-alt" id="cd-annonces">
         <div className="cd-container">
-          <div className="cd-eyebrow">Recrutement en cours</div>
+          <div className="cd-eyebrow">{copy.recruitmentNow}</div>
           <h2 className="cd-stitle">
             {annonces.length > 0
-              ? <>{annonces.length} poste{annonces.length !== 1 ? 's' : ''} <span className="em">ouvert{annonces.length !== 1 ? 's' : ''}.</span></>
-              : <>Annonces <span className="em">actives.</span></>
+              ? <>{annonces.length} {annonces.length === 1 ? copy.position : copy.positions} <span className="em">{annonces.length === 1 ? copy.openPosition : copy.openPositions}.</span></>
+              : <>{copy.adsTitleStart} <span className="em">{copy.adsTitleAccent}.</span></>
             }
           </h2>
           {annonces.length === 0 ? (
-            <p style={{ color: 'rgba(255,255,255,.4)', fontStyle: 'italic', fontSize: 15 }}>
-              Aucune annonce active pour le moment.
+            <p style={{ color:'#c7d1e3', fontStyle: 'italic', fontSize: 15 }}>
+              {copy.noAds}
             </p>
           ) : (
             <div className="cd-ann-list">
@@ -291,19 +280,19 @@ export default function ClubPage() {
                   <div className="cd-ann-content">
                     <div className="cd-ann-title">{a.title}</div>
                     <div className="cd-ann-meta">
-                      {a.position && <span>{a.position}</span>}
-                      {a.ligue    && <span>{a.ligue}</span>}
-                      {a.zone     && <span>{a.zone}</span>}
-                      {a.created_at && <span>{relativeTime(a.created_at)}</span>}
+                      {a.position && <span>{footballLabel(a.position, lang)}</span>}
+                      {a.ligue    && <span>{footballLabel(a.ligue, lang)}</span>}
+                      {a.zone     && <span>{footballLabel(a.zone, lang)}</span>}
+                      {a.created_at && <span>{relativeTime(a.created_at, lang)}</span>}
                     </div>
                   </div>
-                  <span className="cd-ann-action">Postuler <IcoArrow s={14} /></span>
+                  <span className="cd-ann-action">{copy.apply} <IcoArrow s={14} /></span>
                 </Link>
               ))}
             </div>
           )}
           <Link href="/annonces" className="cd-see-all">
-            Voir toutes les annonces <IcoArrow s={14} />
+            {copy.allAds} <IcoArrow s={14} />
           </Link>
         </div>
       </section>
@@ -311,17 +300,17 @@ export default function ClubPage() {
       {/* CONTACT */}
       <section className="cd-section" id="cd-contact">
         <div className="cd-container">
-          <div className="cd-eyebrow">Contact</div>
-          <h2 className="cd-stitle">Contacter <span className="em">le club.</span></h2>
+          <div className="cd-eyebrow">{copy.contact}</div>
+          <h2 className="cd-stitle">{copy.contactHeading} <span className="em">{copy.contactAccent}.</span></h2>
           <div className="cd-contact-grid">
 
             <div className="cd-contact-card">
-              <h3 className="cd-contact-h3">Informations</h3>
+              <h3 className="cd-contact-h3">{copy.information}</h3>
               {club.club_email_public && (
                 <div className="cd-contact-line">
                   <div className="cd-contact-icon"><IcoMail s={16} /></div>
                   <div className="cd-contact-content">
-                    <div className="cd-contact-label">Email</div>
+                    <div className="cd-contact-label">{copy.email}</div>
                     <div className="cd-contact-value"><a href={`mailto:${club.club_email_public}`}>{club.club_email_public}</a></div>
                   </div>
                 </div>
@@ -330,18 +319,18 @@ export default function ClubPage() {
                 <div className="cd-contact-line">
                   <div className="cd-contact-icon"><IcoPin s={16} color="#FF3A3A" /></div>
                   <div className="cd-contact-content">
-                    <div className="cd-contact-label">Zone</div>
-                    <div className="cd-contact-value">{club.zone}</div>
+                    <div className="cd-contact-label">{copy.zone}</div>
+                    <div className="cd-contact-value">{footballLabel(club.zone, lang)}</div>
                   </div>
                 </div>
               )}
               <div className="cd-contact-line">
                 <div className="cd-contact-icon"><IcoMsg s={16} /></div>
                 <div className="cd-contact-content">
-                  <div className="cd-contact-label">Messagerie</div>
+                  <div className="cd-contact-label">{copy.messaging}</div>
                   <div className="cd-contact-value">
                     <Link href={`/messages?partner=${club.id}`} style={{ color: '#FF3A3A', textDecoration: 'none' }}>
-                      Envoyer un message
+                      {copy.sendMessage}
                     </Link>
                   </div>
                 </div>
@@ -373,9 +362,9 @@ export default function ClubPage() {
         .cd-container { max-width:1100px; margin:0 auto; padding:0 24px; }
 
         /* Breadcrumb */
-        .cd-breadcrumb { padding:104px 0 0; font-size:13px; color:rgba(255,255,255,.6); }
+        .cd-breadcrumb { padding:104px 0 0; font-size:13px; color:#c7d1e3; }
         .cd-breadcrumb .cd-container { display:flex; align-items:center; gap:8px; }
-        .cd-bc-link { color:rgba(255,255,255,.6); text-decoration:none; transition:color .3s; }
+        .cd-bc-link { color:#c7d1e3; text-decoration:none; transition:color .3s; }
         .cd-bc-link:hover { color:#fff; }
         .cd-bc-current { color:#fff; font-weight:500; }
 
@@ -407,7 +396,7 @@ export default function ClubPage() {
           font-size:clamp(32px,5vw,64px);
           line-height:.95; letter-spacing:-1px; text-transform:uppercase; margin-bottom:8px;
         }
-        .cd-verified { display:flex; align-items:center; gap:6px; font-size:13px; color:rgba(255,255,255,.6); margin-top:4px; }
+        .cd-verified { display:flex; align-items:center; gap:6px; font-size:13px; color:#c7d1e3; margin-top:4px; }
 
         /* Hero action */
         .cd-hero-actions { display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
@@ -437,7 +426,7 @@ export default function ClubPage() {
         }
         .cd-stat-num.em    { color:#FF3A3A; }
         .cd-stat-num.green { color:#2ED27F; }
-        .cd-stat-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.6); margin-top:8px; }
+        .cd-stat-label { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#c7d1e3; margin-top:8px; }
 
         /* Tab nav */
         .cd-tabnav {
@@ -454,7 +443,7 @@ export default function ClubPage() {
         .cd-tabnav-inner::-webkit-scrollbar { display:none; }
         .cd-tab {
           padding:16px 20px; font-size:13px; font-weight:600; letter-spacing:.5px;
-          color:rgba(255,255,255,.6); white-space:nowrap;
+          color:#c7d1e3; white-space:nowrap;
           border-bottom:2px solid transparent;
           transition:color .3s,border-color .3s; text-decoration:none;
         }
@@ -462,7 +451,7 @@ export default function ClubPage() {
         .cd-tab.act   { color:#fff; border-bottom-color:#FF3A3A; }
 
         /* Section common */
-        .cd-section     { padding:72px 0; }
+        .cd-section     { padding:72px 0; scroll-margin-top:160px; }
         .cd-section-alt { background:rgba(255,255,255,.02); }
         .cd-eyebrow {
           font-family:'Russo One',sans-serif;
@@ -484,7 +473,7 @@ export default function ClubPage() {
         .cd-strengths { margin-top:32px; }
         .cd-strengths-title {
           font-family:'Russo One',sans-serif;
-          font-size:11px; letter-spacing:2px; color:rgba(255,255,255,.45); text-transform:uppercase;
+          font-size:11px; letter-spacing:2px; color:#c7d1e3; text-transform:uppercase;
           margin-bottom:12px;
         }
         .cd-strengths-grid { display:flex; gap:8px; flex-wrap:wrap; }
@@ -505,12 +494,13 @@ export default function ClubPage() {
           margin-bottom:20px;
         }
         .cd-fact-row {
+          gap:16px;
           display:flex; justify-content:space-between; align-items:center;
           padding:14px 0; border-bottom:1px solid rgba(255,255,255,.08); font-size:14px;
         }
         .cd-fact-row:last-child { border-bottom:0; }
-        .cd-fact-label { color:rgba(255,255,255,.6); }
-        .cd-fact-value { color:#fff; font-weight:500; text-align:right; }
+        .cd-fact-label { color:#c7d1e3; }
+        .cd-fact-value { min-width:0; overflow-wrap:anywhere; color:#fff; font-weight:500; text-align:right; }
         .cd-fact-value.green { color:#2ED27F; }
         .cd-fact-value a { color:#fff; text-decoration:none; transition:color .3s; }
         .cd-fact-value a:hover { color:#FF3A3A; }
@@ -534,7 +524,7 @@ export default function ClubPage() {
         }
         .cd-ann-content { min-width:0; }
         .cd-ann-title   { font-weight:600; font-size:15px; margin-bottom:4px; }
-        .cd-ann-meta    { font-size:12px; color:rgba(255,255,255,.6); display:flex; flex-wrap:wrap; gap:12px; }
+        .cd-ann-meta    { font-size:12px; color:#c7d1e3; display:flex; flex-wrap:wrap; gap:12px; }
         .cd-ann-action  {
           font-size:12px; font-weight:600; color:#FF3A3A;
           letter-spacing:.5px; text-transform:uppercase;
@@ -569,7 +559,7 @@ export default function ClubPage() {
           flex-shrink:0; color:#FF3A3A;
         }
         .cd-contact-content { flex:1; min-width:0; }
-        .cd-contact-label { font-size:11px; letter-spacing:1.5px; color:rgba(255,255,255,.6); text-transform:uppercase; margin-bottom:4px; }
+        .cd-contact-label { font-size:12px; letter-spacing:1.5px; color:#c7d1e3; text-transform:uppercase; margin-bottom:4px; }
         .cd-contact-value { font-size:14px; color:#fff; font-weight:500; word-break:break-word; }
         .cd-contact-value a { color:#fff; text-decoration:none; transition:color .3s; }
         .cd-contact-value a:hover { color:#FF3A3A; }

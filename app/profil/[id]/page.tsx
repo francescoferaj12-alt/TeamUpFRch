@@ -1,5 +1,7 @@
 'use client'
 
+import SeasonStats from '../../../components/SeasonStats'
+import { strengthLabel } from '../../../lib/strength-labels'
 import { footballLabel } from '../../../lib/football-labels'
 
 import { useEffect, useState } from 'react'
@@ -40,26 +42,6 @@ const CATEGORY_LABELS: Record<string, { fr: string; de: string }> = {
   cat_juniors_d:  { fr: 'Juniors D',      de: 'Junioren D' },
   cat_juniores_f: { fr: 'Juniors filles', de: 'Juniorinnen' },
   cat_veterans:   { fr: 'Vétérans',       de: 'Veteranen' },
-}
-
-function strengthLabel(key: string) {
-  const map: Record<string, string> = {
-    fast:'Rapide', technical:'Technique', physical:'Physique', dribbling:'Dribble',
-    shooting:'Frappe puissante', finishing:'Finition', passing:'Passes précises',
-    vision:'Vision du jeu', aerial:'Jeu aérien', onevsone:'1 contre 1',
-    sprint:'Vitesse de pointe', pressing:'Pressing', defensive:'Défensif',
-    offensive:'Offensif', leadership:'Leadership', hardworking:'Travailleur',
-    composed:'Calme', precise:'Précis', tactical:'Tactique', motivator:'Motivateur',
-    communication:'Communication', experienced:'Expérimenté', video:'Analyse vidéo',
-    youth:'Formation des jeunes', defense:'Défense organisée', counter:'Contre-attaque',
-    possession:'Jeu de possession', innovative:'Innovateur', fitness:'Préparation physique',
-    infrastructure:'Infrastructure de qualité', family:'Esprit familial',
-    ambition:'Ambition sportive', competitive:'Équipe compétitive',
-    atmosphere:'Bonne ambiance', professional:'Structure sérieuse',
-    social:'Vie sociale active', equipment:'Bons équipements',
-    local:'Ancrage local', growing:'Club en développement', welcoming:'Accueil ouvert',
-  }
-  return map[key] || key
 }
 
 function getYouTubeEmbed(url: string): string | null {
@@ -150,8 +132,8 @@ export default function PublicProfilPage() {
       <div className="pub-container" style={{ maxWidth:860, margin:'0 auto' }}>
 
         {/* Back */}
-        <Link href="/annonces" style={{ display:'inline-flex', alignItems:'center', gap:6, color:'rgba(255,255,255,.5)', textDecoration:'none', fontSize:13, marginBottom:'1.25rem' }}>
-          <IcoArrowLeft s={14} /> {lang === 'de' ? 'Zurück zu den Anzeigen' : 'Retour aux annonces'}
+        <Link href="/recherche" style={{ display:'inline-flex', alignItems:'center', gap:6, color:'#c7d1e3', textDecoration:'none', fontSize:13, marginBottom:'1.25rem' }}>
+          <IcoArrowLeft s={14} /> {lang === 'de' ? 'Zurück zur Suche' : 'Retour à la recherche'}
         </Link>
 
         {/* Hero */}
@@ -172,7 +154,7 @@ export default function PublicProfilPage() {
               {/* Display name */}
               <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(1.4rem, 4vw, 2rem)', color:'#fff', lineHeight:1.1, marginBottom:8, display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
                 {displayName || 'Profil'}
-                {profile.verified && <VerifiedBadge size={22} />}
+                {(profile.verified || (profile.role === 'club' && profile.club_verification_status === 'approved')) && <VerifiedBadge size={22} />}
               </div>
 
               {/* Badges row */}
@@ -185,7 +167,7 @@ export default function PublicProfilPage() {
 
 
                 {(coachBadge || profile.position) && (
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{coachBadge || footballLabel(profile.position!, lang)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>{footballLabel(coachBadge || profile.position!, lang)}</span>
                 )}
 
                 {/* Ligue */}
@@ -197,7 +179,7 @@ export default function PublicProfilPage() {
 
                 {/* Zone */}
                 {profile.zone && (
-                  <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:13, color:'rgba(255,255,255,.6)' }}>
+                  <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:13, color:'#c7d1e3' }}>
                     <IcoMapPin s={13} /> {footballLabel(profile.zone, lang)}
                   </span>
                 )}
@@ -249,7 +231,7 @@ export default function PublicProfilPage() {
                 <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginTop:10 }}>
                   {(showAllStrengths ? strengths : strengths.slice(0, 5)).map(k => (
                     <span key={k} style={{ display:'inline-flex', alignItems:'center', padding:'4px 12px', borderRadius:999, background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.15)', fontSize:12, fontWeight:600, color:'rgba(255,255,255,.8)', whiteSpace:'nowrap' }}>
-                      {strengthLabel(k)}
+                      {strengthLabel(k, lang, profile.role)}
                     </span>
                   ))}
                   {strengths.length > 5 && !showAllStrengths && (
@@ -274,68 +256,7 @@ export default function PublicProfilPage() {
         <div style={{ marginBottom: '1.25rem' }}><MemberSafetyActions key={id} memberId={id} /></div>
 
         {/* Stats (player only) */}
-        {profile.role === 'player' && (() => {
-          const now = new Date()
-          const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
-          const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
-          const seasonPrev = `${sy - 1} – ${String(sy).slice(2)}`
-          const hasCurrent = profile.goals || profile.assists || profile.matches
-          const hasPrev    = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
-          if (!hasCurrent && !hasPrev) return null
-          const currentStats = [
-            { v: profile.goals ?? 0,   k: (lang === 'de' ? 'Tore' : 'Buts'),   color:'#FF3A3A' },
-            { v: profile.assists ?? 0, k: (lang === 'de' ? 'Vorlagen' : 'Assists'), color:'#3A7AFF' },
-            { v: profile.matches ?? 0, k: (lang === 'de' ? 'Spiele' : 'Matchs'),  color:'#2ED27F' },
-          ]
-          const prevStats = [
-            { v: profile.goals_prev,   k: (lang === 'de' ? 'Tore' : 'Buts'),   color:'#FF3A3A' },
-            { v: profile.assists_prev, k: (lang === 'de' ? 'Vorlagen' : 'Assists'), color:'#3A7AFF' },
-            { v: profile.matches_prev, k: (lang === 'de' ? 'Spiele' : 'Matchs'),  color:'#2ED27F' },
-          ]
-          return (
-            <div style={{ background:'#0D1F4A', border:'1px solid rgba(255,255,255,.1)', borderRadius:16, marginBottom:'1.25rem', overflow:'hidden' }}>
-              {/* Current season */}
-              <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #081434 100%)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid rgba(255,255,255,.07)' }}>
-                <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'#fff', letterSpacing:2 }}>{lang === 'de' ? 'Aktuelle Saison' : 'Saison actuelle'}</span>
-                <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', fontWeight:600 }}>{seasonNow}</span>
-              </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
-                {currentStats.map((s, i) => {
-                  const prev = prevStats[i].v
-                  const delta = prev != null ? s.v - prev : null
-                  return (
-                    <div key={s.k} style={{ padding:'1.2rem .5rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none' }}>
-                      <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'2.4rem', color:s.color, lineHeight:1 }}>{s.v}</div>
-                      <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:4, fontWeight:700 }}>{s.k}</div>
-                      {delta !== null && (
-                        <div style={{ marginTop:6, fontSize:11, fontWeight:700, color: delta > 0 ? '#2ED27F' : delta < 0 ? '#FF3A3A' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(46,210,127,.12)' : delta < 0 ? 'rgba(255,58,58,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 8px', display:'inline-block' }}>
-                          {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Previous season */}
-              {hasPrev && (
-                <>
-                  <div style={{ background:'rgba(255,255,255,.04)', padding:'.75rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
-                    <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'.9rem', color:'rgba(255,255,255,.6)', letterSpacing:2 }}>{lang === 'de' ? 'Letzte Saison' : 'Saison précédente'}</span>
-                    <span style={{ fontSize:11, color:'rgba(255,255,255,.4)', fontWeight:600 }}>{seasonPrev}</span>
-                  </div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', textAlign:'center' }}>
-                    {prevStats.map((s, i) => (
-                      <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', background:'rgba(255,255,255,.02)' }}>
-                        <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.8rem', color:s.color, opacity:.75, lineHeight:1 }}>{s.v ?? '—'}</div>
-                        <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:4, fontWeight:700 }}>{s.k}</div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )
-        })()}
+        {profile.role === 'player' && <SeasonStats profile={profile} lang={lang} />}
 
         {/* Club info card */}
         {profile.role === 'club' && (
@@ -352,8 +273,8 @@ export default function PublicProfilPage() {
               ].filter(s => s.value).map((s, i, arr) => (
                 <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                   <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                  <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.15rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
-                  <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
+                  <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.15rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
+                  <div style={{ fontSize:10, color:'#c7d1e3', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -375,8 +296,8 @@ export default function PublicProfilPage() {
               ].filter(s => s.value).map((s, i, arr) => (
                 <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                   <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                  <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.15rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value}</div>
-                  <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
+                  <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.15rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
+                  <div style={{ fontSize:10, color:'#c7d1e3', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -427,7 +348,7 @@ export default function PublicProfilPage() {
                 <div key={c.id} style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(58,122,255,.1)', border:'1px solid rgba(58,122,255,.25)', borderRadius:10, padding:'8px 16px' }}>
                   <IcoGradCap s={15} />
                   <span style={{ fontWeight:700, fontSize:14, color:'#fff' }}>{c.name}</span>
-                  {c.year && <span style={{ fontSize:12, color:'rgba(255,255,255,.4)', fontWeight:600 }}>{c.year}</span>}
+                  {c.year && <span style={{ fontSize:12, color:'#c7d1e3', fontWeight:600 }}>{c.year}</span>}
                 </div>
               ))}
             </div>
@@ -441,7 +362,7 @@ export default function PublicProfilPage() {
             {profile.bio && (
               <div style={darkCard}>
                 <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.75rem', color:'rgba(255,255,255,.9)' }}>{lang === 'de' ? 'Über mich' : 'À propos'}</div>
-                <p style={{ fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.7, margin:0 }}>{profile.bio}</p>
+                <p style={{ fontSize:15, color:'#c7d1e3', lineHeight:1.75, margin:0 }}>{profile.bio}</p>
               </div>
             )}
 
@@ -488,9 +409,9 @@ export default function PublicProfilPage() {
                 profile.role === 'club' && (profile as any).club_stadium_name ? [(lang === 'de' ? 'Stadion' : 'Stade'), (profile as any).club_stadium_name] : null,
                 profile.role === 'club' && (profile as any).club_stadium_address ? [(lang === 'de' ? 'Adresse' : 'Adresse'), (profile as any).club_stadium_address] : null,
               ].filter((r): r is [string, string] => Array.isArray(r)).map(([k, v]) => (
-                <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
-                  <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
-                  <span style={{ fontWeight:600, color:'#fff' }}>{footballLabel(v, lang)}</span>
+                <div key={k} className="profile-info-row" style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
+                  <span style={{ color:'#c7d1e3' }}>{k}</span>
+                  <span className="profile-info-value" style={{ fontWeight:600, color:'#fff' }}>{footballLabel(v, lang)}</span>
                 </div>
               ))}
             </div>

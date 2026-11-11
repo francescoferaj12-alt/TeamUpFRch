@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { footballLabel } from '../lib/football-labels'
 import { liguesHomme, liguesFemme } from '../lib/data'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../lib/lang-context'
@@ -226,7 +227,7 @@ export default function HomePage() {
   ]
 
   const statItems = [
-    { value: '24',                   label: lang === 'fr' ? 'Ligues' : 'Ligen' },
+    { value: String(allLigueItems.length),                   label: lang === 'fr' ? 'Ligues' : 'Ligen' },
     { value: String(counts.clubs),   label: lang === 'fr' ? 'Clubs inscrits' : 'Eingetragene Vereine' },
     { value: String(counts.players), label: lang === 'fr' ? 'Joueurs visibles' : 'Sichtbare Spieler' },
     { value: '2',                    label: lang === 'fr' ? 'Langues' : 'Sprachen' },
@@ -234,7 +235,7 @@ export default function HomePage() {
 
   const statMotivation = lang === 'fr'
     ? 'Sois parmi les premiers à rejoindre la communauté du football fribourgeois.'
-    : 'Sei einer der Ersten, der der Fribourg-Fußball-Community beitritt.'
+    : 'Sei von Anfang an Teil der Freiburger Fussballgemeinschaft.'
 
   return (
     <>
@@ -338,7 +339,7 @@ export default function HomePage() {
         <div className="hp-marquee-wrap">
           <div className="hp-marquee-track">
             {[...allLigueItems, ...allLigueItems].map((l, i) => (
-              <span key={i} className="hp-marquee-item">{l.item}</span>
+              <span key={i} className="hp-marquee-item">{footballLabel(l.item, lang)}</span>
             ))}
           </div>
         </div>
@@ -359,7 +360,7 @@ export default function HomePage() {
             {filteredLigues.map(l => (
               <div key={l.item} className="hp-ligue-item">
                 <div className={`hp-ligue-dot${l.cat === 'actives_f' || l.cat === 'juniores_f' ? ' female' : ' male'}`} />
-                <span>{l.item}</span>
+                <span>{footballLabel(l.item, lang)}</span>
               </div>
             ))}
           </div>

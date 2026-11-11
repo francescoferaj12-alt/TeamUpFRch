@@ -1,5 +1,7 @@
 'use client'
 
+import SeasonStats from '../../components/SeasonStats'
+import { strengthLabel } from '../../lib/strength-labels'
 import { footballLabel } from '../../lib/football-labels'
 
 import { useEffect, useState, useRef, ChangeEvent } from 'react'
@@ -39,73 +41,6 @@ const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur 
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
 // ── Role-specific strength tags ──────────────────────────────────────────────
-const STRENGTHS_PLAYER = [
-  { key: 'fast',        fr: 'Rapide',             de: 'Schnell' },
-  { key: 'technical',   fr: 'Technique',          de: 'Technisch' },
-  { key: 'physical',    fr: 'Physique',           de: 'Körperlich' },
-  { key: 'dribbling',   fr: 'Dribble',            de: 'Dribbling' },
-  { key: 'shooting',    fr: 'Frappe puissante',   de: 'Schussstärke' },
-  { key: 'finishing',   fr: 'Finition',           de: 'Abschluss' },
-  { key: 'passing',     fr: 'Passes précises',    de: 'Genaue Pässe' },
-  { key: 'vision',      fr: 'Vision du jeu',      de: 'Spielübersicht' },
-  { key: 'aerial',      fr: 'Jeu aérien',         de: 'Kopfballspiel' },
-  { key: 'onevsone',    fr: '1 contre 1',         de: '1 gegen 1' },
-  { key: 'sprint',      fr: 'Vitesse de pointe',  de: 'Sprintschnelligkeit' },
-  { key: 'pressing',    fr: 'Pressing',           de: 'Pressing' },
-  { key: 'defensive',   fr: 'Défensif',           de: 'Defensiv' },
-  { key: 'offensive',   fr: 'Offensif',           de: 'Offensiv' },
-  { key: 'leadership',  fr: 'Leadership',         de: 'Führungsstärke' },
-  { key: 'hardworking', fr: 'Travailleur',        de: 'Fleissig' },
-  { key: 'composed',    fr: 'Calme',              de: 'Ruhig' },
-  { key: 'precise',     fr: 'Précis',             de: 'Präzise' },
-]
-
-const STRENGTHS_COACH = [
-  { key: 'tactical',    fr: 'Tactique',              de: 'Taktisch' },
-  { key: 'motivator',   fr: 'Motivateur',            de: 'Motivator' },
-  { key: 'communication', fr: 'Communication',       de: 'Kommunikation' },
-  { key: 'experienced', fr: 'Expérimenté',           de: 'Erfahren' },
-  { key: 'video',       fr: 'Analyse vidéo',         de: 'Videoanalyse' },
-  { key: 'youth',       fr: 'Formation des jeunes',  de: 'Jugendausbildung' },
-  { key: 'defense',     fr: 'Défense organisée',     de: 'Organisierte Abwehr' },
-  { key: 'counter',     fr: 'Contre-attaque',        de: 'Konterspiel' },
-  { key: 'possession',  fr: 'Jeu de possession',     de: 'Ballbesitzspiel' },
-  { key: 'pressing',    fr: 'Jeu de pression',       de: 'Pressing-Spiel' },
-  { key: 'leadership',  fr: 'Leadership',            de: 'Führungsstärke' },
-  { key: 'passionate',  fr: 'Passionné',             de: 'Leidenschaftlich' },
-  { key: 'innovative',  fr: 'Innovateur',            de: 'Innovativ' },
-  { key: 'composed',    fr: 'Calme',                 de: 'Ruhig' },
-  { key: 'fitness',     fr: 'Préparation physique',  de: 'Fitness-Training' },
-]
-
-const STRENGTHS_CLUB = [
-  { key: 'infrastructure', fr: 'Infrastructure de qualité', de: 'Gute Infrastruktur' },
-  { key: 'family',         fr: 'Esprit familial',           de: 'Familiäre Atmosphäre' },
-  { key: 'ambition',       fr: 'Ambition sportive',         de: 'Sportlicher Ehrgeiz' },
-  { key: 'youth',          fr: 'Formation jeunes',          de: 'Jugendförderung' },
-  { key: 'competitive',    fr: 'Équipe compétitive',        de: 'Wettbewerbsfähig' },
-  { key: 'atmosphere',     fr: 'Bonne ambiance',            de: 'Gute Stimmung' },
-  { key: 'professional',   fr: 'Structure sérieuse',        de: 'Seriöse Struktur' },
-  { key: 'social',         fr: 'Vie sociale active',        de: 'Aktives Sozialleben' },
-  { key: 'equipment',      fr: 'Bons équipements',          de: 'Gute Ausrüstung' },
-  { key: 'local',          fr: 'Ancrage local',             de: 'Lokale Verankerung' },
-  { key: 'growing',        fr: 'Club en développement',     de: 'Wachsender Verein' },
-  { key: 'welcoming',      fr: 'Accueil de nouveaux joueurs', de: 'Offene Aufnahme' },
-]
-
-const ALL_STRENGTHS = [...STRENGTHS_PLAYER, ...STRENGTHS_COACH, ...STRENGTHS_CLUB]
-
-function getStrengthsByRole(role: string) {
-  if (role === 'coach') return STRENGTHS_COACH
-  if (role === 'club') return STRENGTHS_CLUB
-  return STRENGTHS_PLAYER
-}
-
-function strengthLabel(key: string, lang: Lang) {
-  const s = ALL_STRENGTHS.find(x => x.key === key)
-  return s ? s[lang] : key
-}
-
 function parseStrengths(raw?: string): string[] {
   if (!raw) return []
   return raw.split(',').map(s => s.trim()).filter(Boolean)
@@ -407,7 +342,7 @@ export default function ProfilPage() {
   if (loading || authLoading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'1rem', background:'#081434' }}>
       <div style={{ width:40, height:40, border:'4px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
-      <div style={{ color:'rgba(255,255,255,.4)', fontSize:14 }}>{t.profil.loading[lang]}</div>
+      <div style={{ color:'#c7d1e3', fontSize:14 }}>{t.profil.loading[lang]}</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   )
@@ -430,7 +365,6 @@ export default function ProfilPage() {
   const displayAge = calcAge(profile.birthdate)
   const ageSuffix = t.general.age_suffix[lang]
   const strengthKeys = parseStrengths(profile.strengths)
-  const roleStrengths = getStrengthsByRole(profile.role)
 
   const infoRows: ([string, string] | null)[] = [
     [t.profil.role_k[lang], roleLabel],
@@ -453,7 +387,7 @@ export default function ProfilPage() {
 
   const darkCard: React.CSSProperties = { background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'1.25rem' }
   const inpSt: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:9, padding:'10px 14px', fontSize:14, outline:'none', fontFamily:'inherit' }
-  const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'rgba(255,255,255,.55)', marginBottom:6 }
+  const lblSt: React.CSSProperties = { display:'block', fontSize:13, fontWeight:600, color:'#c7d1e3', marginBottom:6 }
   const optSt = { background:'#0D1F4A' }
 
   return (
@@ -543,7 +477,7 @@ export default function ProfilPage() {
                 </span>
               )}
               {displayAge && (
-                <span style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{displayAge}{ageSuffix}{profile.zone ? ` · ${footballLabel(profile.zone, lang)}` : ''}</span>
+                <span style={{ fontSize:13, color:'#c7d1e3' }}>{displayAge}{ageSuffix}{profile.zone ? ` · ${footballLabel(profile.zone, lang)}` : ''}</span>
               )}
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
@@ -558,7 +492,7 @@ export default function ProfilPage() {
               <div className="strengths-row">
                 {(showAllStrengths ? strengthKeys : strengthKeys.slice(0, 5)).map(key => (
                   <span key={key} className="strength-tag">
-                    {strengthLabel(key, lang)}
+                    {strengthLabel(key, lang, profile.role)}
                   </span>
                 ))}
                 {strengthKeys.length > 5 && !showAllStrengths && (
@@ -567,7 +501,7 @@ export default function ProfilPage() {
                     className="strength-tag strength-more"
                     style={{ cursor:'pointer', border:'none', fontFamily:'inherit' }}
                   >
-                    +{strengthKeys.length - 5} de plus
+                    +{strengthKeys.length - 5} {lang === 'de' ? 'weitere' : 'de plus'}
                   </button>
                 )}
               </div>
@@ -584,7 +518,7 @@ export default function ProfilPage() {
             <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,0.1)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
-            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.6)', border:'1px solid rgba(255,255,255,.12)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'#c7d1e3', border:'1px solid rgba(255,255,255,.12)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
           </div>
@@ -592,70 +526,7 @@ export default function ProfilPage() {
       </div>
 
       {/* ── STATS (joueur uniquement) ── */}
-      {profile.role === 'player' && (() => {
-        const now = new Date()
-        const sy = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
-        const seasonNow  = `${sy} – ${String(sy + 1).slice(2)}`
-        const seasonPrev = `${sy - 1} – ${String(sy).slice(2)}`
-        const hasPrev = profile.goals_prev != null || profile.assists_prev != null || profile.matches_prev != null
-        const stats = [
-          { v: profile.goals   ?? 0, k: t.profil.goals[lang],   prev: profile.goals_prev,   color:'#FF3A3A' },
-          { v: profile.assists ?? 0, k: t.profil.assists[lang], prev: profile.assists_prev, color:'#3A7AFF' },
-          { v: profile.matches ?? 0, k: t.profil.matches[lang], prev: profile.matches_prev, color:'#2ED27F' },
-        ]
-        return (
-          <div style={{ background:'rgba(255,255,255,.04)', borderRadius:16, border:'1px solid rgba(255,255,255,.08)', marginBottom:'1.25rem', overflow:'hidden' }}>
-            {/* CURRENT SEASON header */}
-            <div style={{ background:'linear-gradient(135deg,#0D1F4A,#081434)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.current_season[lang]}</span>
-              <span style={{ fontSize:11, color:'rgba(255,255,255,.5)', letterSpacing:1, fontWeight:600 }}>{seasonNow}</span>
-            </div>
-
-            {/* Current big numbers */}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
-              {stats.map((s, i) => {
-                const delta = s.prev != null ? s.v - s.prev : null
-                return (
-                  <div key={s.k} style={{ padding:'1.4rem .5rem 1.1rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
-                    <div style={{ position:'absolute', top:0, left:'25%', right:'25%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
-                    <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'3rem', color:s.color, lineHeight:1 }}>{s.v}</div>
-                    <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
-                    {delta !== null && (
-                      <div style={{ marginTop:7, fontSize:11, fontWeight:700, color: delta > 0 ? '#2ED27F' : delta < 0 ? '#FF3A3A' : 'rgba(255,255,255,.4)', background: delta > 0 ? 'rgba(76,219,122,.12)' : delta < 0 ? 'rgba(255,58,58,.12)' : 'rgba(255,255,255,.06)', borderRadius:100, padding:'2px 9px', display:'inline-block', letterSpacing:.3 }}>
-                        {delta > 0 ? '▲' : delta < 0 ? '▼' : '–'} {Math.abs(delta)}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {hasPrev && (
-              <>
-                {/* PREVIOUS SEASON header — same style as current but lighter */}
-                <div style={{ background:'linear-gradient(135deg,#3a4a66,#5a6c8a)', padding:'.85rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,.07)' }}>
-                  <span style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', color:'#fff', letterSpacing:2 }}>{t.profil.prev_season[lang]}</span>
-                  <span style={{ fontSize:11, color:'rgba(255,255,255,.55)', letterSpacing:1, fontWeight:600 }}>{seasonPrev}</span>
-                </div>
-
-                {/* Previous numbers — smaller */}
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)' }}>
-                  {[
-                    { v: profile.goals_prev,   k: t.profil.goals[lang],   color:'#FF3A3A' },
-                    { v: profile.assists_prev, k: t.profil.assists[lang], color:'#3A7AFF' },
-                    { v: profile.matches_prev, k: t.profil.matches[lang], color:'#2ED27F' },
-                  ].map((s, i) => (
-                    <div key={s.k} style={{ padding:'1rem .5rem .9rem', borderRight: i < 2 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', background:'rgba(255,255,255,.02)' }}>
-                      <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.9rem', color: s.color, opacity:.85, lineHeight:1 }}>{s.v ?? '—'}</div>
-                      <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{s.k}</div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )
-      })()}
+      {profile.role === 'player' && <SeasonStats profile={profile} lang={lang} large />}
 
       {/* ── COACH INFO CARD ── */}
       {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
@@ -673,7 +544,7 @@ export default function ProfilPage() {
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
                 <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
-                <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
+                <div style={{ fontSize:10, color:'#c7d1e3', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -695,7 +566,7 @@ export default function ProfilPage() {
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
                 <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', color:s.color, lineHeight:1.2, marginBottom:4 }}>{s.value ? footballLabel(s.value, lang) : null}</div>
-                <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
+                <div style={{ fontSize:10, color:'#c7d1e3', textTransform:'uppercase', letterSpacing:1.5, fontWeight:700 }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -777,7 +648,7 @@ export default function ProfilPage() {
           </button>
         </div>
         {myPosts.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'1rem', color:'rgba(255,255,255,.35)', fontSize:14 }}>
+          <div style={{ textAlign:'center', padding:'1rem', color:'#c7d1e3', fontSize:14 }}>
             {lang === 'de' ? 'Noch keine Anzeigen veröffentlicht.' : 'Aucun post publié.'}{' '}
             <button onClick={() => setShowPostModal(true)} style={{ color:'#FF3A3A', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700, borderRadius:999 }}>
               {lang === 'de' ? 'Veröffentlichen →' : 'Publier →'}
@@ -789,7 +660,7 @@ export default function ProfilPage() {
               <div key={post.id} style={{ background:'rgba(255,255,255,.03)', borderRadius:10, padding:'.75rem 1rem', borderLeft:`3px solid ${post.status === 'active' ? '#FF3A3A' : 'rgba(255,255,255,.15)'}`, display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12, flexWrap:'wrap' }}>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontWeight:700, fontSize:14, marginBottom:2, color: post.status === 'active' ? '#fff' : 'rgba(255,255,255,.4)' }}>{post.title}</div>
-                  <div style={{ fontSize:12, color:'rgba(255,255,255,.35)' }}>
+                  <div style={{ fontSize:12, color:'#c7d1e3' }}>
                     {new Date(post.created_at).toLocaleDateString('fr-CH', { day:'numeric', month:'short', year:'numeric' })}
                     {post.ligue ? ` · ${post.ligue}` : ''}{post.zone ? ` · ${post.zone}` : ''}
                   </div>
@@ -847,8 +718,8 @@ export default function ProfilPage() {
               {t.profil.about[lang]}
             </div>
             {profile.bio
-              ? <p style={{ fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.7 }}>{profile.bio}</p>
-              : <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', fontStyle:'italic' }}>
+              ? <p style={{ fontSize:15, color:'#c7d1e3', lineHeight:1.75 }}>{profile.bio}</p>
+              : <p style={{ fontSize:14, color:'#c7d1e3', fontStyle:'italic' }}>
                   {t.profil.no_bio[lang]}{' '}
                   <button onClick={() => setEditing(true)} style={{ color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>{t.profil.add_bio[lang]}</button>
                 </p>
@@ -862,7 +733,7 @@ export default function ProfilPage() {
             </div>
             {videoUrls.length === 0 ? (
               <div style={{ background:'rgba(255,255,255,.03)', borderRadius:12, padding:'2rem', textAlign:'center', border:'2px dashed rgba(255,255,255,.12)' }}>
-                <div style={{ fontSize:14, color:'rgba(255,255,255,.4)', display:'flex', alignItems:'center', gap:6 }}><IcoFilm s={16}/>{t.profil.video_empty[lang]}</div>
+                <div style={{ fontSize:14, color:'#c7d1e3', display:'flex', alignItems:'center', gap:6 }}><IcoFilm s={16}/>{t.profil.video_empty[lang]}</div>
                 <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', color:'#3a8cff', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:13, fontWeight:600 }}>
                   {t.profil.edit_videos[lang]} →
                 </button>
@@ -911,9 +782,9 @@ export default function ProfilPage() {
             )}
             <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.1rem', letterSpacing:1, marginBottom:'1rem' }}>{t.profil.info[lang]}</div>
             {infoRows.filter((item): item is [string, string] => Array.isArray(item)).map(([k, v]) => (
-              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
-                <span style={{ color:'rgba(255,255,255,.5)' }}>{k}</span>
-                <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', wordBreak:'break-all', color:'#fff' }}>{v}</span>
+              <div key={k} className="profile-info-row" style={{ display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,.07)', fontSize:14 }}>
+                <span style={{ color:'#c7d1e3' }}>{k}</span>
+                <span style={{ fontWeight:600, maxWidth:'60%', textAlign:'right', overflowWrap:'anywhere', color:'#fff' }}>{v}</span>
               </div>
             ))}
           </div>
@@ -931,7 +802,7 @@ export default function ProfilPage() {
           {/* Conseil */}
           <div style={{ ...darkCard, background:'rgba(58,140,255,.08)', border:'1px solid rgba(58,140,255,.25)' }}>
             <div style={{ fontSize:13, color:'#3a8cff', fontWeight:600, marginBottom:'.5rem' }}>{t.profil.conseil[lang]}</div>
-            <div style={{ fontSize:13, color:'rgba(255,255,255,.55)', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
+            <div style={{ fontSize:13, color:'#c7d1e3', lineHeight:1.6 }}>{t.profil.conseil_text[lang]}</div>
             <button onClick={() => setEditing(true)} style={{ marginTop:'.75rem', width:'100%', background:'#FF3A3A', color:'#fff', border:'none', borderRadius:999, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.complete[lang]}
             </button>

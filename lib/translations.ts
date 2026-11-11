@@ -90,7 +90,7 @@ export const t = {
     step2_desc: { fr: "Recherche des clubs, joueurs ou coachs avec nos filtres avancés par ligue et zone.", de: 'Suche Vereine, Spieler oder Trainer mit unseren erweiterten Filtern nach Liga und Zone.' },
     step3_title: { fr: 'Postule ou recrute', de: 'Bewerben oder rekrutieren' },
     step3_desc: { fr: "Envoie ta candidature ou publie une annonce. Gère tout depuis ton dashboard.", de: 'Sende deine Bewerbung oder veröffentliche eine Anzeige. Verwalte alles über dein Dashboard.' },
-    step4_title: { fr: 'Joue !', de: 'Spiel!' },
+    step4_title: { fr: 'Joue !', de: 'Spiel mit!' },
     step4_desc: { fr: "Trouve ton équipe, ton joueur ou ton coach idéal. C'est parti !", de: "Finde dein Team, deinen Spieler oder deinen idealen Trainer. Los geht's!" },
   },
 
@@ -466,7 +466,7 @@ export const t = {
     goals:       { fr: 'Buts',                           de: 'Tore' },
     assists:     { fr: 'Assists',                        de: 'Vorlagen' },
     wins:        { fr: 'Victoires',                      de: 'Siege' },
-    win_rate:    { fr: 'Win rate',                       de: 'Win rate' },
+    win_rate:    { fr: 'Taux de victoire',                de: 'Siegquote' },
     add_title:   { fr: 'Ajouter une expérience',         de: 'Erfahrung hinzufügen' },
     edit_title:  { fr: 'Modifier une expérience',        de: 'Erfahrung bearbeiten' },
     club_name:   { fr: 'Nom du club *',                  de: 'Vereinsname *' },
@@ -892,7 +892,7 @@ export const months: { fr: string[]; de: string[] } = {
 export const tagsByRole = {
   player: {
     fr: ['Stats & Highlights', 'Candidatures', 'Messagerie'],
-    de: ['Stats & Highlights', 'Bewerbungen', 'Messaging'],
+    de: ['Statistiken & Highlights', 'Bewerbungen', 'Nachrichten'],
   },
   coach: {
     fr: ['Licences UEFA', 'Philosophie', 'Recrutement'],

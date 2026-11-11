@@ -1,5 +1,6 @@
 'use client'
 
+import { footballLabel } from '../lib/football-labels'
 import { useState, useEffect } from 'react'
 import { supabase, CareerExperience } from '../lib/supabase'
 import { t } from '../lib/translations'
@@ -24,9 +25,9 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
   const tc = t.career_section
   const inpSt: React.CSSProperties = {
     width: '100%', background: 'rgba(255,255,255,.07)', border: '1.5px solid rgba(255,255,255,.12)',
-    color: '#fff', borderRadius: 9, padding: '10px 14px', fontSize: 14, outline: 'none', fontFamily: 'inherit'
+    color: '#fff', borderRadius: 9, padding: '10px 14px', fontSize: 16, outline: 'none', fontFamily: 'inherit'
   }
-  const lblSt: React.CSSProperties = { display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.55)', marginBottom: 5 }
+  const lblSt: React.CSSProperties = { display: 'block', fontSize: 13, fontWeight: 600, color: '#c7d1e3', marginBottom: 5 }
   const optSt = { background: '#061540' }
   const MONTHS = lang === 'fr' ? MONTHS_FR : MONTHS_DE
   const currentYear = new Date().getFullYear()
@@ -80,8 +81,8 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
   }, [experience])
 
   async function handleSave() {
-    if (!clubName.trim()) { setError('Le nom du club est requis.'); return }
-    if (!startMonth || !startYear) { setError('La date de début est requise.'); return }
+    if (!clubName.trim()) { setError(lang === 'de' ? 'Bitte gib den Vereinsnamen an.' : 'Le nom du club est requis.'); return }
+    if (!startMonth || !startYear) { setError(lang === 'de' ? 'Bitte gib das Startdatum an.' : 'La date de début est requise.'); return }
     setSaving(true); setError('')
 
     const startDate = `${startYear}-${startMonth}-01`
@@ -128,12 +129,12 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ background:'#061540', border:'1px solid rgba(255,255,255,.12)', borderRadius:20, padding:'1.75rem', width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto' }}>
+      <div role="dialog" aria-modal="true" aria-label={experience ? tc.edit_title[lang] : tc.add_title[lang]} style={{ background:'#061540', border:'1px solid rgba(255,255,255,.12)', borderRadius:20, padding:'1.75rem', width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.25rem' }}>
           <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.3rem', letterSpacing:1, color:'#fff' }}>
             {experience ? tc.edit_title[lang] : tc.add_title[lang]}
           </div>
-          <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.5)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
+          <button aria-label={lang === 'de' ? 'Schliessen' : 'Fermer'} onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.5)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
         </div>
 
         {error && <div style={{ background:'rgba(255,58,58,.12)', border:'1px solid rgba(255,58,58,.3)', borderRadius:8, padding:'8px 12px', fontSize:13, color:'#FF3A3A', marginBottom:'1rem' }}>{error}</div>}
@@ -141,26 +142,26 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
         <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
           <div>
             <label style={lblSt}>{tc.club_name[lang]}</label>
-            <input style={inpSt} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Bulle" />
+            <input style={inpSt} aria-label={tc.club_name[lang]} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Bulle" />
           </div>
 
           <div>
             <label style={lblSt}>{tc.ligue[lang]}</label>
-            <input style={inpSt} value={league} onChange={e => setLeague(e.target.value)} placeholder="3ème Ligue" />
+            <input style={inpSt} aria-label={tc.ligue[lang]} value={league} onChange={e => setLeague(e.target.value)} placeholder={lang === 'de' ? '3. Liga' : '3ème Ligue'} />
           </div>
 
           {role === 'player' && (
             <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'1rem' }}>
               <div>
                 <label style={lblSt}>{tc.position[lang]}</label>
-                <select style={inpSt} value={position} onChange={e => setPosition(e.target.value)}>
+                <select style={inpSt} aria-label={tc.position[lang]} value={position} onChange={e => setPosition(e.target.value)}>
                   <option value="" style={optSt}>—</option>
-                  {POSITIONS.map(p => <option key={p} style={optSt}>{p}</option>)}
+                  {POSITIONS.map(p => <option key={p} value={p} style={optSt}>{footballLabel(p, lang)}</option>)}
                 </select>
               </div>
               <div>
                 <label style={lblSt}>{tc.jersey[lang]}</label>
-                <input style={inpSt} type="number" min={1} max={99} value={jerseyNumber} onChange={e => setJerseyNumber(e.target.value)} placeholder="10" />
+                <input style={inpSt} type="number" min={1} max={99} aria-label={tc.jersey[lang]} value={jerseyNumber} onChange={e => setJerseyNumber(e.target.value)} placeholder="10" />
               </div>
             </div>
           )}
@@ -168,9 +169,9 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
           {role === 'coach' && (
             <div>
               <label style={lblSt}>{tc.coach_role[lang]}</label>
-              <select style={inpSt} value={coachRole} onChange={e => setCoachRole(e.target.value)}>
+              <select style={inpSt} aria-label={tc.coach_role[lang]} value={coachRole} onChange={e => setCoachRole(e.target.value)}>
                 <option value="" style={optSt}>—</option>
-                {COACH_ROLES.map(r => <option key={r} style={optSt}>{r}</option>)}
+                {COACH_ROLES.map(r => <option key={r} value={r} style={optSt}>{footballLabel(r, lang)}</option>)}
               </select>
             </div>
           )}
@@ -179,11 +180,11 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
           <div>
             <label style={lblSt}>{tc.start[lang]}</label>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              <select style={inpSt} value={startMonth} onChange={e => setStartMonth(e.target.value)}>
-                <option value="" style={optSt}>— Mois</option>
+              <select style={inpSt} aria-label={tc.start[lang] + ' — ' + (lang === 'de' ? 'Monat' : 'Mois')} value={startMonth} onChange={e => setStartMonth(e.target.value)}>
+                <option value="" style={optSt}>{lang === 'de' ? '— Monat' : '— Mois'}</option>
                 {MONTHS.map((m, i) => <option key={i} value={String(i+1).padStart(2,'0')} style={optSt}>{m}</option>)}
               </select>
-              <select style={inpSt} value={startYear} onChange={e => setStartYear(e.target.value)}>
+              <select style={inpSt} aria-label={tc.start[lang] + ' — ' + (lang === 'de' ? 'Jahr' : 'Année')} value={startYear} onChange={e => setStartYear(e.target.value)}>
                 {years.map(y => <option key={y} style={optSt}>{y}</option>)}
               </select>
             </div>
@@ -203,12 +204,12 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
             <div>
               <label style={lblSt}>{tc.end[lang]}</label>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-                <select style={inpSt} value={endMonth} onChange={e => setEndMonth(e.target.value)}>
-                  <option value="" style={optSt}>— Mois</option>
+                <select style={inpSt} aria-label={tc.end[lang] + ' — ' + (lang === 'de' ? 'Monat' : 'Mois')} value={endMonth} onChange={e => setEndMonth(e.target.value)}>
+                  <option value="" style={optSt}>{lang === 'de' ? '— Monat' : '— Mois'}</option>
                   {MONTHS.map((m, i) => <option key={i} value={String(i+1).padStart(2,'0')} style={optSt}>{m}</option>)}
                 </select>
-                <select style={inpSt} value={endYear} onChange={e => setEndYear(e.target.value)}>
-                  <option value="" style={optSt}>— Année</option>
+                <select style={inpSt} aria-label={tc.end[lang] + ' — ' + (lang === 'de' ? 'Jahr' : 'Année')} value={endYear} onChange={e => setEndYear(e.target.value)}>
+                  <option value="" style={optSt}>{lang === 'de' ? '— Jahr' : '— Année'}</option>
                   {years.map(y => <option key={y} style={optSt}>{y}</option>)}
                 </select>
               </div>
@@ -217,32 +218,32 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
 
           {/* Stats */}
           <div>
-            <label style={{ ...lblSt, marginBottom:8 }}>Statistiques (optionnel)</label>
+            <label style={{ ...lblSt, marginBottom:8 }}>{lang === 'de' ? 'Statistiken (optional)' : 'Statistiques (optionnel)'}</label>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
               <div>
                 <label style={{ ...lblSt, fontSize:11 }}>{tc.matches[lang]}</label>
-                <input style={inpSt} type="number" min={0} value={matches} onChange={e => setMatches(e.target.value)} placeholder="0" />
+                <input style={inpSt} type="number" min={0} aria-label={tc.matches[lang]} value={matches} onChange={e => setMatches(e.target.value)} placeholder="0" />
               </div>
               {role === 'player' ? (
                 <>
                   <div>
                     <label style={{ ...lblSt, fontSize:11 }}>{tc.goals[lang]}</label>
-                    <input style={inpSt} type="number" min={0} value={goals} onChange={e => setGoals(e.target.value)} placeholder="0" />
+                    <input style={inpSt} type="number" min={0} aria-label={tc.goals[lang]} value={goals} onChange={e => setGoals(e.target.value)} placeholder="0" />
                   </div>
                   <div>
                     <label style={{ ...lblSt, fontSize:11 }}>{tc.assists[lang]}</label>
-                    <input style={inpSt} type="number" min={0} value={assists} onChange={e => setAssists(e.target.value)} placeholder="0" />
+                    <input style={inpSt} type="number" min={0} aria-label={tc.assists[lang]} value={assists} onChange={e => setAssists(e.target.value)} placeholder="0" />
                   </div>
                 </>
               ) : (
                 <>
                   <div>
                     <label style={{ ...lblSt, fontSize:11 }}>{tc.wins[lang]}</label>
-                    <input style={inpSt} type="number" min={0} value={wins} onChange={e => setWins(e.target.value)} placeholder="0" />
+                    <input style={inpSt} type="number" min={0} aria-label={tc.wins[lang]} value={wins} onChange={e => setWins(e.target.value)} placeholder="0" />
                   </div>
                   <div>
                     <label style={{ ...lblSt, fontSize:11 }}>{tc.win_rate[lang]} %</label>
-                    <input style={inpSt} type="number" min={0} max={100} value={winRate} onChange={e => setWinRate(e.target.value)} placeholder="0" />
+                    <input style={inpSt} type="number" min={0} max={100} aria-label={tc.win_rate[lang]} value={winRate} onChange={e => setWinRate(e.target.value)} placeholder="0" />
                   </div>
                 </>
               )}
@@ -251,7 +252,7 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
 
           <div>
             <label style={lblSt}>{tc.description[lang]}</label>
-            <textarea style={{ ...inpSt, resize:'vertical' }} rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="Notes sur cette expérience…" />
+            <textarea style={{ ...inpSt, resize:'vertical' }} rows={3} aria-label={tc.description[lang]} value={description} onChange={e => setDescription(e.target.value)} placeholder={lang === 'de' ? 'Notizen zu dieser Station…' : 'Notes sur cette expérience…'} />
           </div>
         </div>
 
@@ -261,14 +262,14 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
             {saving ? tc.saving[lang] : tc.save[lang]}
           </button>
           {experience && onDeleted && (
-            <button onClick={handleDelete}
+            <button aria-label={lang === 'de' ? 'Löschen' : 'Supprimer'} onClick={handleDelete}
               style={{ background:'rgba(255,58,58,.12)', color:'#FF3A3A', border:'1px solid rgba(255,58,58,.3)', borderRadius:9, padding:'11px 14px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center' }}>
               <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </button>
           )}
           <button onClick={onClose}
             style={{ background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.7)', border:'1px solid rgba(255,255,255,.12)', borderRadius:9, padding:'11px 14px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
-            Annuler
+            {lang === 'de' ? 'Abbrechen' : 'Annuler'}
           </button>
         </div>
       </div>
