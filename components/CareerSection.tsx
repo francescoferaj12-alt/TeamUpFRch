@@ -1,5 +1,6 @@
 'use client'
 
+import { footballLabel } from '../lib/football-labels'
 import { useState } from 'react'
 import ClubCrest from './ClubCrest'
 import { CareerExperience } from '../lib/supabase'
@@ -67,7 +68,7 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
         <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
           <div className="career-filters">
             {(['all','current','past'] as const).map(f => (
-              <button key={f} className={`career-tab${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
+              <button key={f} type="button" aria-pressed={filter === f} className={`career-tab${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
                 {f === 'all' ? tc.tab_all[lang] : f === 'current' ? tc.tab_current[lang] : tc.tab_past[lang]}
               </button>
             ))}
@@ -84,7 +85,7 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
       {filtered.length === 0 && experiences.length === 0 ? (
         <div className="career-empty">
           <div className="career-empty-icon"><IcoClipboard s={32} /></div>
-          <p>{tc.empty_text[lang]}</p>
+          <p>{canEdit ? tc.empty_text[lang] : lang === 'de' ? 'Noch kein Werdegang angegeben.' : 'Parcours non renseigné pour le moment.'}</p>
           {canEdit && onAdd && (
             <button onClick={onAdd}
               style={{ background:'#FF3A3A', color:'#fff', border:'none', borderRadius:10, padding:'10px 24px', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
@@ -94,7 +95,7 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign:'center', padding:'1.5rem', color:'rgba(255,255,255,.4)', fontSize:13 }}>
-          Aucun résultat pour ce filtre.
+          {lang === 'de' ? 'Keine Einträge für diesen Filter.' : 'Aucun résultat pour ce filtre.'}
         </div>
       ) : (
         <div className="timeline-vertical">
@@ -108,7 +109,7 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
                 <div className="career-club-info">
                   <div className="career-club-name">
                     {exp.club_name}
-                    {exp.league && <> · <span className="career-league">{exp.league}</span></>}
+                    {exp.league && <> · <span className="career-league">{footballLabel(exp.league, lang)}</span></>}
                   </div>
                   <div className="career-dates">
                     {formatDate(exp.start_date, lang)} — {exp.is_current ? tc.present[lang] : formatDate(exp.end_date, lang)}
@@ -123,11 +124,11 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
                 )}
               </div>
 
-              {(role === 'player' ? exp.position : exp.coach_role) && (
+              {(role === 'player' ? exp.position : footballLabel(exp.coach_role!, lang)) && (
                 <div className="career-role-pill">
                   {role === 'player'
-                    ? `${exp.position}${exp.jersey_number ? ` · #${exp.jersey_number}` : ''}`
-                    : exp.coach_role
+                    ? `${footballLabel(exp.position!, lang)}${exp.jersey_number ? ` · #${exp.jersey_number}` : ''}`
+                    : footballLabel(exp.coach_role!, lang)
                   }
                 </div>
               )}
@@ -157,13 +158,13 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
                   {onEdit && (
                     <button onClick={() => onEdit(exp)}
                       style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'4px 12px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:5 }}>
-                      <IcoPen s={11} /> Modifier
+                      <IcoPen s={11} /> {lang === 'de' ? 'Bearbeiten' : 'Modifier'}
                     </button>
                   )}
                   {onDelete && (
                     <button onClick={() => { if (confirm(tc.delete_confirm[lang])) onDelete(exp.id) }}
                       style={{ background:'rgba(255,58,58,.12)', color:'#FF3A3A', border:'1px solid rgba(255,58,58,.3)', borderRadius:7, padding:'4px 12px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:5 }}>
-                      <IcoTrash s={11} /> Supprimer
+                      <IcoTrash s={11} /> {lang === 'de' ? 'Löschen' : 'Supprimer'}
                     </button>
                   )}
                 </div>

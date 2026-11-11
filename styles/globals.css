@@ -1273,3 +1273,41 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 /* Accent */
 .ds-accent-red { color: var(--ds-red); }
+
+/* Profile readability: retain the existing cards and blue/red palette. */
+.profile-info-row { gap: 16px; align-items: flex-start; line-height: 1.65; }
+.profile-info-row > :first-child { flex-shrink: 0; max-width: 45%; }
+.profile-info-value { min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.career-section .career-dates,
+.career-section .career-league,
+.career-section .career-description,
+.career-section .career-stat .l,
+.career-section .career-empty p { color: #c7d1e3; }
+.career-section .career-dates { font-size: 13px; line-height: 1.6; }
+.career-section .career-description { font-size: 15px; line-height: 1.75; }
+.career-section .career-stat .l { font-size: 12px; letter-spacing: .04em; }
+.career-section .career-club-name { overflow-wrap: anywhere; line-height: 1.35; }
+.career-section .career-tab { color: #c7d1e3; min-height: 40px; }
+.career-section .career-tab.active { color: #ffadb5; }
+.career-section button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.season-stats { background: #0D1F4A; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; margin-bottom: 1.25rem; overflow: hidden; }
+.season-stats-heading { background: linear-gradient(135deg,#0D1F4A,#081434); padding: .85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.season-stats-heading h3 { font-family: 'Russo One',sans-serif; font-size: .95rem; color: #fff; letter-spacing: 1px; line-height: 1.5; margin: 0; }
+.season-stats-heading span { font-size: 12px; color: #c7d1e3; white-space: nowrap; }
+.season-stats-heading.previous { background: rgba(255,255,255,.04); border-top: 1px solid rgba(255,255,255,.07); }
+.season-stats-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); text-align: center; }
+.season-stat { padding: 1.2rem .5rem; min-width: 0; }
+.season-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,.07); }
+.season-stat-value { font-family: 'Russo One',sans-serif; font-size: 2.4rem; line-height: 1.2; }
+.season-stats.large .season-stats-row:not(.previous) .season-stat-value { font-size: 3rem; }
+.season-stats-row.previous .season-stat-value { font-size: 1.8rem; }
+.season-stat-label { font-size: 12px; color: #c7d1e3; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; font-weight: 700; overflow-wrap: anywhere; }
+.season-stat-delta { margin-top: 6px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,.06); border-radius: 100px; padding: 2px 8px; display: inline-block; }
+.season-stats-note { font-size: 13px; color: #c7d1e3; margin: 0; padding: .75rem 1.25rem; border-top: 1px solid rgba(255,255,255,.07); }
+@media(max-width:400px) {
+  .season-stats-heading { padding: .75rem 1rem; }
+  .season-stats-heading h3 { font-size: .85rem; letter-spacing: .5px; }
+  .season-stats.large .season-stats-row:not(.previous) .season-stat-value { font-size: 2.4rem; }
+  .season-stat-label { letter-spacing: .3px; }
+  .career-section .career-tab { min-height: 44px; padding: 5px 12px; }
+}
