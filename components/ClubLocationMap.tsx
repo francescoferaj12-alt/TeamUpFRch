@@ -13,7 +13,7 @@ export default function ClubLocationMap({ name, zone, stadiumName, address }: Pr
   const { lang } = useLang()
   const de = lang === 'de'
   const location = address?.trim()
-    ? [stadiumName?.trim() || name, address.trim(), 'Suisse']
+    ? [name, stadiumName?.trim(), address.trim(), 'Suisse']
     : [stadiumName?.trim(), name, zone?.trim(), 'Suisse']
   const query = location.filter(Boolean).join(', ')
   const embed = new URL('https://maps.google.com/maps')
