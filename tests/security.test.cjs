@@ -385,3 +385,31 @@ test('onboarding rejects a mismatched role and a missing profile update', async 
   const missing = careerHandler({ actualRole: 'player', updateMissing: true })
   assert.equal((await missing.POST(request({ role: 'player', stepIndex: 6, data: {} }))).status, 404)
 })
+
+test('abandoned video cleanup preserves active files and recent drafts and fails closed on listing errors', async () => {
+  const base='https://example.supabase.co/storage/v1/object/public/videos'
+  const active='video_1_00000000-0000-4000-8000-000000000011.mp4'
+  const old='video_2_00000000-0000-4000-8000-000000000012.mp4'
+  const recent='video_3_00000000-0000-4000-8000-000000000013.mp4'
+  const removed=[]; let listingError=false
+  const client={
+    auth:{getUser:async()=>({data:{user:{id:uid}}})},
+    from(){return{select(){return this},eq(){return this},single:async()=>({data:{video1_url:`${base}/${uid}/${active}`}})}},
+    storage:{from(){return{
+      list:async owner=>{assert.equal(owner,uid);return listingError?{error:{message:'offline'}}:{data:[
+        {name:active,updated_at:'2020-01-01T00:00:00Z'},
+        {name:old,updated_at:'2020-01-01T00:00:00Z'},
+        {name:recent,updated_at:new Date().toISOString()},
+        {name:`../${receiverId}/${old}`,updated_at:'2020-01-01T00:00:00Z'},
+        {name:'unrecognized.mp4',updated_at:'2020-01-01T00:00:00Z'},
+      ]}},
+      remove:async paths=>{removed.push(...paths);return{}},
+    }}},
+  }
+  const api=load('app/api/profile/obsolete-videos/route.ts',{'@supabase/supabase-js':{createClient:()=>client},'../../../../lib/profile-videos':load('lib/profile-videos.ts')})
+  assert.equal((await api.POST(request({urls:[],cleanup:true}))).status,200)
+  assert.deepEqual(removed,[`${uid}/${old}`])
+  listingError=true
+  assert.equal((await api.POST(request({urls:[],cleanup:true}))).status,502)
+  assert.equal(removed.length,1)
+})
