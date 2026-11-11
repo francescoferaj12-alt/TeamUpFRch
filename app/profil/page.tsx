@@ -443,10 +443,10 @@ export default function ProfilPage() {
     profile.role === 'player' && profile.position ? [t.profil.position_k[lang], footballLabel(profile.position, lang)] : null,
     profile.club_name ? [t.profil.club_k[lang], profile.club_name] : null,
     profile.phone ? [t.profil.phone_k[lang], profile.phone] : null,
-    profile.role === 'coach' && profile.coach_experience ? ['Expérience', profile.coach_experience] : null,
-    profile.role === 'coach' && profile.coach_diploma ? ['Diplôme', profile.coach_diploma] : null,
-    profile.role === 'coach' && profile.coach_specialty ? ['Spécialité', profile.coach_specialty] : null,
-    profile.role === 'coach' && profile.coach_availability ? ['Disponibilité', profile.coach_availability] : null,
+    profile.role === 'coach' && profile.coach_experience ? [lang === 'de' ? 'Erfahrung' : 'Expérience', footballLabel(profile.coach_experience, lang)] : null,
+    profile.role === 'coach' && profile.coach_diploma ? [lang === 'de' ? 'Diplom' : 'Diplôme', footballLabel(profile.coach_diploma, lang)] : null,
+    profile.role === 'coach' && profile.coach_specialty ? [lang === 'de' ? 'Spezialgebiet' : 'Spécialité', footballLabel(profile.coach_specialty, lang)] : null,
+    profile.role === 'coach' && profile.coach_availability ? [lang === 'de' ? 'Verfügbarkeit' : 'Disponibilité', footballLabel(profile.coach_availability, lang)] : null,
   ]
 
   const videoUrls = [profile.video1_url, profile.video2_url, profile.video3_url].filter(Boolean) as string[]
