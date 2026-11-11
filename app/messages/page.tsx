@@ -156,7 +156,7 @@ export default function MessagesPage() {
         .order('club_name', { ascending: true, nullsFirst: false })
         .order('id')
       for (const word of searchNewUser.trim().split(/\s+/).filter(Boolean)) {
-        const pattern = '"%' + word.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/[%_]/g, '\\$&') + '%"'
+        const pattern = JSON.stringify('%' + word.replace(/[\\%_]/g, '\\$&') + '%')
         query = query.or(`first_name.ilike.${pattern},last_name.ilike.${pattern},club_name.ilike.${pattern}`)
       }
       const { data, error } = await query.limit(memberLimit + 1)
