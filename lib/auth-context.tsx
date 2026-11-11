@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react'
 import { Session } from '@supabase/supabase-js'
 import { supabase, Profile } from './supabase'
 
@@ -40,11 +40,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const activeUserRef = useRef<string | null>(null)
+  const pendingProfiles = useRef(new Map<string, Promise<void>>())
 
   async function loadProfile(uid: string) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', uid).single()
-    setProfile(data ?? null)
-    writeCachedProfile(data ?? null)
+    const existing = pendingProfiles.current.get(uid)
+    if (existing) return existing
+    const pending = (async () => {
+      const { data } = await supabase.from('profiles').select('*').eq('id', uid).single()
+      if (activeUserRef.current !== uid) return
+      setProfile(data ?? null)
+      writeCachedProfile(data ?? null)
+    })().finally(() => { pendingProfiles.current.delete(uid) })
+    pendingProfiles.current.set(uid, pending)
+    return pending
   }
 
   const refreshProfile = async () => {
@@ -61,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 2. Validate session — fast (reads localStorage)
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       if (!mounted) return
+      activeUserRef.current = s?.user.id ?? null
       setSession(s)
 
       if (s) {
@@ -80,8 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (!mounted) return
+      activeUserRef.current = s?.user.id ?? null
       setSession(s)
       if (!s) {
         setProfile(null)
@@ -92,17 +103,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (c && c.id === s.user.id) {
           setProfile(c)
           setAuthLoading(false)
-          loadProfile(s.user.id)
+          // Auth callbacks run under the session lock. Defer database calls
+          // until the callback returns so they cannot wait on their own lock.
+          setTimeout(() => { if (mounted) void loadProfile(s.user.id) }, 0)
         } else {
           setAuthLoading(true)
-          await loadProfile(s.user.id)
-          if (mounted) setAuthLoading(false)
+          setTimeout(() => {
+            if (!mounted) return
+            void loadProfile(s.user.id).finally(() => {
+              if (mounted && activeUserRef.current === s.user.id) setAuthLoading(false)
+            })
+          }, 0)
         }
       }
     })
 
     return () => {
       mounted = false
+      activeUserRef.current = null
       subscription.unsubscribe()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

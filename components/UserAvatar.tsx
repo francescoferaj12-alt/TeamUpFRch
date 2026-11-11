@@ -5,35 +5,39 @@ import { supabase, avatarSrc } from '../lib/supabase'
 
 interface Props {
   userId: string
+  avatarUrl?: string | null
   size?: number
   radius?: number
   fallback: React.ReactNode
 }
 
-export default function UserAvatar({ userId, size = 42, radius = 12, fallback }: Props) {
-  const [src, setSrc] = useState<string | null>(null)
+export default function UserAvatar({ userId, avatarUrl, size = 42, radius = 12, fallback }: Props) {
+  const [loaded, setLoaded] = useState<{ userId: string; src: string | null } | null>(null)
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!userId) return
+    if (!userId || avatarUrl !== undefined) return
+    let active = true
     supabase
       .from('public_profiles')
       .select('avatar_url')
       .eq('id', userId)
       .single()
       .then(({ data }) => {
-        const url = avatarSrc(data?.avatar_url)
-        if (url) setSrc(url)
+        if (active) setLoaded({ userId, src: avatarSrc(data?.avatar_url) ?? null })
       })
-  }, [userId])
+    return () => { active = false }
+  }, [userId, avatarUrl])
 
-  if (!src) return <>{fallback}</>
+  const src = avatarUrl !== undefined ? avatarSrc(avatarUrl) : loaded?.userId === userId ? loaded.src : null
+  if (!src || src === brokenSrc) return <>{fallback}</>
 
   return (
     <img
       src={src}
       alt=""
       style={{ width: size, height: size, borderRadius: radius, objectFit: 'cover', display: 'block' }}
-      onError={() => setSrc(null)}
+      onError={() => setBrokenSrc(src)}
     />
   )
 }

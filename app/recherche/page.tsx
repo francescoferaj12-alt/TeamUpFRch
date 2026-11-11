@@ -1,8 +1,9 @@
 'use client'
 
 import { footballLabel } from '../../lib/football-labels'
+import { directoryQueries } from '../../lib/directory-search'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase, Profile, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
@@ -37,7 +38,10 @@ const IcoCheck   = ({ s = 11 }: { s?: number }) => <Svg size={s}><polyline point
 export default function RecherchePage() {
   const { lang } = useLang()
   const { profile: currentUser } = useAuth()
-  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [directory, setDirectory] = useState<{ items: Profile[]; total: number; counts: Record<FilterType, number> }>({ items: [], total: 0, counts: { all: 0, player: 0, coach: 0, club: 0 } })
+  const [pageState, setPageState] = useState({ key: '', page: 0 })
+  const [loadError, setLoadError] = useState(false)
+  const [retry, setRetry] = useState(0)
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [filterType, setFilterType] = useState<FilterType>('all')
@@ -48,51 +52,36 @@ export default function RecherchePage() {
   const [filterGenre, setFilterGenre] = useState('')
   const [filterVerifiedOnly, setFilterVerifiedOnly] = useState(false)
 
-  useEffect(() => {
-    async function load() {
-      const { data, error } = await supabase
-        .from('public_profiles')
-        .select('id,age,role,first_name,last_name,position,ligue,zone,foot,available,bio,club_name,avatar_url,genre,verified,club_verification_status,created_at')
-        .order('created_at', { ascending: false })
-        .limit(500)
-      if (!error && data) setProfiles(data as Profile[])
-      setLoading(false)
-    }
-    load()
-  }, [])
-
   const [debouncedQuery, setDebouncedQuery] = useState('')
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(query), 200)
     return () => clearTimeout(id)
   }, [query])
 
-  const filtered = useMemo(() => {
-    const q = debouncedQuery.toLowerCase()
-    return profiles.filter(p => {
-      if (currentUser && p.id === currentUser.id) return false
-      if (filterType !== 'all' && p.role !== filterType) return false
-      if (filterDispo && !p.available) return false
-      if (filterGenre && p.role !== 'club' && p.genre !== filterGenre) return false
-      if (filterLigue && p.ligue !== filterLigue) return false
-      if (filterPos && p.position !== filterPos) return false
-      if (filterZone && p.zone !== filterZone) return false
-      if (filterVerifiedOnly && p.role === 'club' && p.club_verification_status !== 'approved') return false
-      if (q) {
-        const name = `${p.first_name || ''} ${p.last_name || ''} ${p.club_name || ''}`.toLowerCase()
-        const labels = [p.position, p.ligue, p.zone].filter(Boolean) as string[]
-        if (!name.includes(q) && !labels.some(value => value.toLowerCase().includes(q) || footballLabel(value, lang).toLowerCase().includes(q))) return false
-      }
-      return true
-    })
-  }, [profiles, filterType, filterDispo, filterGenre, filterLigue, filterPos, filterZone, debouncedQuery, currentUser, filterVerifiedOnly, lang])
-
-  const counts = {
-    all: filtered.length,
-    player: filtered.filter(p => p.role === 'player').length,
-    coach: filtered.filter(p => p.role === 'coach').length,
-    club: filtered.filter(p => p.role === 'club').length,
+  const filters = {
+    queries: directoryQueries(debouncedQuery, lang, [...POSITIONS, ...ALL_LIGUES_FLAT, ...ZONES]),
+    role: filterType, ligue: filterLigue, position: filterPos, zone: filterZone,
+    available: filterDispo, genre: filterGenre, exclude: currentUser?.id || '',
   }
+  const filterKey = JSON.stringify(filters)
+  const page = pageState.key === filterKey ? pageState.page : 0
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setLoadError(false)
+    supabase.rpc('browse_public_profiles', { p_filters: JSON.parse(filterKey), p_page: page, p_size: 24 })
+      .then(({ data, error }) => {
+        if (!active) return
+        setLoading(false)
+        setLoadError(!!error)
+        if (!error && data) setDirectory(data)
+      })
+    return () => { active = false }
+  }, [filterKey, page, retry])
+  const profiles = directory.items
+  const filtered = profiles
+  const counts = directory.counts
+  const total = directory.total
 
   const tabs = [
     ['all',    t.search.all[lang],     counts.all],
@@ -284,8 +273,8 @@ export default function RecherchePage() {
               )}
             </div>
             <span style={{ fontSize:12, color:'rgba(255,255,255,.45)', letterSpacing:.5, textTransform:'uppercase' }}>
-              <span style={{ fontFamily:"'Russo One',sans-serif", color:'#fff', fontSize:15, marginRight:5 }}>{filtered.length}</span>
-              {filtered.length > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
+              <span style={{ fontFamily:"'Russo One',sans-serif", color:'#fff', fontSize:15, marginRight:5 }}>{total}</span>
+              {total > 1 ? t.search.results_pl[lang] : t.search.results[lang]}
             </span>
           </div>
         </div>
@@ -293,7 +282,10 @@ export default function RecherchePage() {
 
       {/* ── RESULTS ─────────────────────────────────────────────────────────── */}
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'2rem 1.5rem' }}>
-        {loading ? (
+        {loadError ? <div role="alert" style={{ textAlign:'center', padding:32 }}>
+          <p>{lang === 'de' ? 'Profile konnten nicht geladen werden.' : 'Impossible de charger les profils.'}</p>
+          <button className="sr-reset" style={{ margin:'16px auto' }} onClick={() => setRetry(value => value + 1)}>{lang === 'de' ? 'Erneut versuchen' : 'Réessayer'}</button>
+        </div> : loading ? (
           <div style={{ textAlign:'center', padding:'4rem', color:'rgba(255,255,255,.4)' }}>
             <div style={{ width:36, height:36, border:'3px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
             <div style={{ fontSize:14 }}>{t.search.loading[lang]}</div>
@@ -303,7 +295,7 @@ export default function RecherchePage() {
             <div style={{ width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px' }}>
               <IcoSearch s={36} color="rgba(255,255,255,.3)" />
             </div>
-            {profiles.length === 0 ? (
+            {!hasActiveFilters ? (
               <>
                 <h3 style={{ fontFamily:"'Russo One',sans-serif", fontSize:22, marginBottom:12 }}>{t.search.empty_title[lang]}</h3>
                 <p style={{ color:'rgba(255,255,255,.5)', maxWidth:440, margin:'0 auto 28px', lineHeight:1.65, fontSize:15 }}>{t.search.empty_msg[lang]}</p>
@@ -328,6 +320,11 @@ export default function RecherchePage() {
             {filtered.map(p => <ProfileCard key={p.id} profile={p} />)}
           </div>
         )}
+        {!loading && !loadError && total > 24 && <nav aria-label={lang === 'de' ? 'Ergebnisseiten' : 'Pages des résultats'} style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:20, paddingTop:28 }}>
+          <button className="sr-reset" disabled={page === 0} onClick={() => setPageState({ key:filterKey, page:page-1 })}>{lang === 'de' ? 'Zurück' : 'Précédent'}</button>
+          <span>{page+1} / {Math.ceil(total/24)}</span>
+          <button className="sr-reset" disabled={(page+1)*24 >= total} onClick={() => setPageState({ key:filterKey, page:page+1 })}>{lang === 'de' ? 'Weiter' : 'Suivant'}</button>
+        </nav>}
       </div>
     </div>
   )

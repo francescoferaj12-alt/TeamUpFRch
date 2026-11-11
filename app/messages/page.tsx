@@ -1,5 +1,7 @@
 'use client'
 
+import { realtimeFallback } from '../../lib/realtime-fallback'
+
 import { footballLabel } from '../../lib/football-labels'
 import MemberSafetyActions from '../../components/MemberSafetyActions'
 
@@ -63,7 +65,7 @@ export default function MessagesPage() {
   const [newUserResults, setNewUserResults] = useState<Profile[]>([])
   const [membersLoading, setMembersLoading] = useState(false)
   const [membersError, setMembersError] = useState(false)
-  const [memberLimit, setMemberLimit] = useState(50)
+  const [memberPage, setMemberPage] = useState(0)
   const [hasMoreMembers, setHasMoreMembers] = useState(false)
   const [pendingFile, setPendingFile] = useState<{ path: string; url: string; type: 'image' | 'video' | 'file'; name: string } | null>(null)
   const [sendError, setSendError] = useState('')
@@ -159,15 +161,15 @@ export default function MessagesPage() {
         const pattern = JSON.stringify('%' + word.replace(/[\\%_]/g, '\\$&') + '%')
         query = query.or(`first_name.ilike.${pattern},last_name.ilike.${pattern},club_name.ilike.${pattern}`)
       }
-      const { data, error } = await query.limit(memberLimit + 1)
+      const { data, error } = await query.range(memberPage * 50, memberPage * 50 + 50)
       if (!active) return
       setMembersLoading(false)
       setMembersError(!!error)
-      setNewUserResults(error ? [] : (data ?? []).slice(0, memberLimit) as Profile[])
-      setHasMoreMembers(!error && (data?.length ?? 0) > memberLimit)
+      setNewUserResults(previous => error ? [] : memberPage === 0 ? (data ?? []).slice(0, 50) as Profile[] : [...previous, ...(data ?? []).slice(0, 50) as Profile[]])
+      setHasMoreMembers(!error && (data?.length ?? 0) > 50)
     }, searchNewUser.trim() ? 250 : 0)
     return () => { active = false; clearTimeout(timer) }
-  }, [searchNewUser, profile?.id, mobileView, memberLimit])
+  }, [searchNewUser, profile?.id, mobileView, memberPage])
 
   async function loadMessages(prof: Profile) {
     const { data: storedMessages } = await supabase
@@ -280,12 +282,12 @@ export default function MessagesPage() {
           if (isMobileRef.current) setMobileView('chat')
         } else {
           setConversations(convList)
-          if (convList.length > 0 && !isMobileRef.current) setActivePartnerId(convList[0].partnerId)
+          if (convList.length > 0 && !isMobileRef.current) setActivePartnerId(current => current && convList.some(c => c.partnerId === current) ? current : convList[0].partnerId)
         }
       }
     } else {
       setConversations(convList)
-      if (convList.length > 0 && !isMobileRef.current) setActivePartnerId(convList[0].partnerId)
+      if (convList.length > 0 && !isMobileRef.current) setActivePartnerId(current => current && convList.some(c => c.partnerId === current) ? current : convList[0].partnerId)
     }
     setLoading(false)
   }
@@ -298,6 +300,7 @@ export default function MessagesPage() {
   // Realtime: incoming messages
   useEffect(() => {
     if (!profile) return
+    const fallback = realtimeFallback(() => { void loadMessages(profile) })
     const channel = supabase
       .channel(`msg-rt-${profile.id}`)
       .on('postgres_changes', {
@@ -315,8 +318,8 @@ export default function MessagesPage() {
         }
         loadMessages(profile)
       })
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+      .subscribe(fallback.status)
+    return () => { fallback.stop(); supabase.removeChannel(channel) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id])
 
@@ -479,7 +482,7 @@ export default function MessagesPage() {
         </div>
         <button
           className="msg-plus-btn"
-          onClick={() => { setSearchNewUser(''); setMemberLimit(50); setNewUserResults([]); setMembersLoading(true); setMobileView('newChat') }}
+          onClick={() => { setSearchNewUser(''); setMemberPage(0); setNewUserResults([]); setMembersLoading(true); setMobileView('newChat') }}
           title={t.messages.new_msg_btn[lang]}
           aria-label={t.messages.new_msg_btn[lang]}
         >
@@ -506,7 +509,7 @@ export default function MessagesPage() {
                 <div style={{ marginBottom:10, opacity:.4, color:'rgba(255,255,255,.7)' }}><IcoChatBubble s={48} /></div>
                 <div style={{ marginBottom:14 }}>{t.messages.no_conv_yet[lang]}</div>
                 <button
-                  onClick={() => { setSearchNewUser(''); setMemberLimit(50); setNewUserResults([]); setMembersLoading(true); setMobileView('newChat') }}
+                  onClick={() => { setSearchNewUser(''); setMemberPage(0); setNewUserResults([]); setMembersLoading(true); setMobileView('newChat') }}
                   style={{ background:'#FF3A3A', color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}
                 >
                   + {t.messages.new_msg_btn[lang]}
@@ -525,7 +528,7 @@ export default function MessagesPage() {
               style={{ display:'flex', alignItems:'center', gap:10, padding:'.85rem 1rem', cursor:'pointer', borderLeft:`3px solid ${isActive ? '#FF3A3A' : 'transparent'}`, background: isActive ? 'rgba(255,58,58,.12)' : 'transparent', borderBottom:'1px solid rgba(255,255,255,.06)', transition:'background .15s' }}
             >
               <Link href={`/profil/${c.partnerId}`} onClick={e => e.stopPropagation()} style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }}>
-                <UserAvatar userId={c.partnerId} size={42} radius={12}
+                <UserAvatar userId={c.partnerId} avatarUrl={c.partnerAvatar} size={42} radius={12}
                   fallback={<div style={{ width:42, height:42, borderRadius:12, background: isActive ? 'rgba(255,58,58,.3)' : 'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(c.partnerRole, 20)}</div>}
                 />
               </Link>
@@ -580,7 +583,7 @@ export default function MessagesPage() {
               </button>
             )}
             <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ textDecoration:'none', flexShrink:0, display:'block', width:42, height:42, borderRadius:12, overflow:'hidden' }} title={activeConv.partnerName}>
-              <UserAvatar userId={activeConv.partnerId} size={42} radius={12}
+              <UserAvatar userId={activeConv.partnerId} avatarUrl={activeConv.partnerAvatar} size={42} radius={12}
                 fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(activeConv.partnerRole, 22)}</div>}
               />
             </Link>
@@ -612,7 +615,7 @@ export default function MessagesPage() {
                       : <div style={{ width:28, height:28, borderRadius:8, background:'#FF3A3A', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#fff', flexShrink:0 }}>{myName?.slice(0, 2) || t.messages.me[lang]}</div>
                   ) : (
                     <Link href={`/profil/${activeConv.partnerId}`} className="msg-avatar-link" style={{ width:28, height:28, borderRadius:8, overflow:'hidden', flexShrink:0, display:'block', textDecoration:'none' }} title={activeConv.partnerName}>
-                      <UserAvatar userId={activeConv.partnerId} size={28} radius={8}
+                      <UserAvatar userId={activeConv.partnerId} avatarUrl={activeConv.partnerAvatar} size={28} radius={8}
                         fallback={<div style={{ width:28, height:28, borderRadius:8, background:'rgba(255,255,255,.12)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(activeConv.partnerRole, 14)}</div>}
                       />
                     </Link>
@@ -721,7 +724,7 @@ export default function MessagesPage() {
         <input
           ref={newChatInputRef}
           value={searchNewUser}
-          onChange={e => { setSearchNewUser(e.target.value); setMemberLimit(50) }}
+          onChange={e => { setSearchNewUser(e.target.value); setMemberPage(0) }}
           placeholder={t.messages.search_users_pl[lang]}
           style={{ width:'100%', background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', color:'#fff', borderRadius:8, padding:'10px 14px', fontSize:14, fontFamily:'inherit', outline:'none', boxSizing:'border-box' }}
         />
@@ -752,7 +755,7 @@ export default function MessagesPage() {
               style={{ display:'flex', width:'100%', background:'transparent', textAlign:'left', fontFamily:'inherit', alignItems:'center', gap:12, padding:'10px 12px', cursor:'pointer', borderRadius:12, border:'1px solid transparent', marginBottom:2, transition:'all .15s' }}
             >
               <div style={{ width:42, height:42, borderRadius:12, overflow:'hidden', flexShrink:0 }}>
-                <UserAvatar userId={user.id} size={42} radius={12}
+                <UserAvatar userId={user.id} avatarUrl={user.avatar_url ?? null} size={42} radius={12}
                   fallback={<div style={{ width:42, height:42, borderRadius:12, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,.7)' }}>{roleIcon(user.role, 20)}</div>}
                 />
               </div>
@@ -765,7 +768,7 @@ export default function MessagesPage() {
             </button>
           )
         })}
-        {hasMoreMembers && !membersError && <button type="button" disabled={membersLoading} className="msg-plus-btn" onClick={() => setMemberLimit(limit => limit + 50)} style={{ width:'100%', marginTop:12 }}>
+        {hasMoreMembers && !membersError && <button type="button" disabled={membersLoading} className="msg-plus-btn" onClick={() => setMemberPage(page => page + 1)} style={{ width:'100%', marginTop:12 }}>
           {lang === 'de' ? 'Weitere Mitglieder anzeigen' : 'Afficher plus de membres'}
         </button>}
       </div>

@@ -9,6 +9,7 @@ import { t } from '../../lib/translations'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import ClubCrest from '../../components/ClubCrest'
 import { footballLabel } from '../../lib/football-labels'
+import { directoryQueries } from '../../lib/directory-search'
 
 // ── SVG primitives ────────────────────────────────────────────────────────────
 const Svg = ({ children, size = 18, color = 'currentColor', ...p }: any) => (
@@ -41,7 +42,11 @@ const CREST_GRADS = [
 const ZONES = ['Fribourg-Ville','Gruyère','Broye','Glâne','Sensebezirk','Veveyse','Lac']
 
 export default function ClubsPage() {
-  const [clubs, setClubs] = useState<Profile[]>([])
+  const [directory, setDirectory] = useState<{items:Profile[];total:number;clubStats:{total:number;recruiting:number;zones:number}}>({items:[],total:0,clubStats:{total:0,recruiting:0,zones:0}})
+  const [pageState, setPageState] = useState({ key:'', page:0 })
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [loadError, setLoadError] = useState(false)
+  const [retry, setRetry] = useState(0)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterZone, setFilterZone] = useState('')
@@ -50,37 +55,29 @@ export default function ClubsPage() {
   const { profile: currentUser } = useAuth()
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from('public_profiles')
-        .select('*')
-        .eq('role', 'club')
-        .order('created_at', { ascending: false })
-      if (data) setClubs(data)
+    const timer = setTimeout(() => setDebouncedSearch(search), 250)
+    return () => clearTimeout(timer)
+  }, [search])
+  const filterKey = JSON.stringify({ role:'club', queries:directoryQueries(debouncedSearch,lang,ZONES), zone:filterZone, exclude:currentUser?.id || '', sort:sortAsc ? 'name_asc' : 'name_desc', clubStats:true })
+  const page = pageState.key === filterKey ? pageState.page : 0
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setLoadError(false)
+    supabase.rpc('browse_public_profiles',{p_filters:JSON.parse(filterKey),p_page:page,p_size:24}).then(({data,error}) => {
+      if (!active) return
       setLoading(false)
-    }
-    load()
-  }, [])
-
-  const filtered = clubs.filter(c => {
-    if (currentUser && c.id === currentUser.id) return false
-    if (filterZone && c.zone !== filterZone) return false
-    if (search) {
-      const q = search.toLowerCase()
-      if (!(c.club_name || '').toLowerCase().includes(q) && !(c.zone || '').toLowerCase().includes(q)) return false
-    }
-    return true
-  })
-
-  const sortedFiltered = [...filtered].sort((a, b) => {
-    const na = (a.club_name || '').toLowerCase()
-    const nb = (b.club_name || '').toLowerCase()
-    return sortAsc ? na.localeCompare(nb) : nb.localeCompare(na)
-  })
-
-  // Stats derived from loaded clubs (no extra query)
-  const statsRecruiting = clubs.filter(c => c.available).length
-  const statsZones = new Set(clubs.map(c => c.zone).filter(Boolean)).size
+      setLoadError(!!error)
+      if (!error && data) setDirectory(data)
+    })
+    return () => { active=false }
+  },[filterKey,page,retry])
+  const clubs=directory.items
+  const filtered=clubs
+  const sortedFiltered=clubs
+  const total=directory.total
+  const statsRecruiting=directory.clubStats.recruiting
+  const statsZones=directory.clubStats.zones
 
   const optSt = { background: '#081434' }
 
@@ -148,7 +145,7 @@ export default function ClubsPage() {
           <div className="cb-stats" style={{ marginTop:44, paddingBottom:'2.5rem' }}>
             <div className="stat-item">
               <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'clamp(28px,3vw,40px)', lineHeight:1, letterSpacing:'-1px', marginBottom:6 }}>
-                {loading ? '—' : clubs.length}
+                {loading ? '—' : directory.clubStats.total}
               </div>
               <div style={{ fontSize:11, letterSpacing:2, color:'rgba(255,255,255,.55)', textTransform:'uppercase' }}>
                 {t.clubs.count_plural[lang]}
@@ -201,8 +198,8 @@ export default function ClubsPage() {
         {!loading && (
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.5rem', flexWrap:'wrap', gap:10 }}>
             <span style={{ fontSize:13, color:'rgba(255,255,255,.5)', letterSpacing:.5, textTransform:'uppercase' }}>
-              <span style={{ fontFamily:"'Russo One',sans-serif", color:'#fff', fontSize:16, marginRight:6 }}>{filtered.length}</span>
-              {filtered.length > 1 ? t.clubs.count_plural[lang] : t.clubs.count_single[lang]}
+              <span style={{ fontFamily:"'Russo One',sans-serif", color:'#fff', fontSize:16, marginRight:6 }}>{total}</span>
+              {total > 1 ? t.clubs.count_plural[lang] : t.clubs.count_single[lang]}
             </span>
             <button className="cb-sort" onClick={() => setSortAsc(p => !p)}>
               <IcoSort s={13} />
@@ -211,7 +208,10 @@ export default function ClubsPage() {
           </div>
         )}
 
-        {loading ? (
+        {loadError ? <div role="alert" style={{textAlign:'center',padding:32}}>
+          <p>{lang === 'de' ? 'Vereine konnten nicht geladen werden.' : 'Impossible de charger les clubs.'}</p>
+          <button className="cb-sort" onClick={() => setRetry(value=>value+1)}>{lang === 'de' ? 'Erneut versuchen' : 'Réessayer'}</button>
+        </div> : loading ? (
           <div style={{ textAlign:'center', padding:'4rem', color:'rgba(255,255,255,.4)' }}>
             <div style={{ width:36, height:36, border:'3px solid rgba(255,255,255,.1)', borderTopColor:'#FF3A3A', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 1rem' }} />
             <div style={{ fontSize:14 }}>{t.clubs.loading[lang]}</div>
@@ -300,6 +300,12 @@ export default function ClubsPage() {
           </div>
         )}
       </div>
+
+      {!loading && !loadError && total>24 && <nav aria-label={lang==='de'?'Vereinsseiten':'Pages des clubs'} style={{display:'flex',justifyContent:'center',alignItems:'center',gap:20,paddingBottom:28}}>
+        <button className="cb-sort" disabled={page===0} onClick={()=>setPageState({key:filterKey,page:page-1})}>{lang==='de'?'Zurück':'Précédent'}</button>
+        <span>{page+1} / {Math.ceil(total/24)}</span>
+        <button className="cb-sort" disabled={(page+1)*24>=total} onClick={()=>setPageState({key:filterKey,page:page+1})}>{lang==='de'?'Weiter':'Suivant'}</button>
+      </nav>}
 
       {/* ── CTA BAND ────────────────────────────────────────────────────────── */}
       <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem 5rem' }}>

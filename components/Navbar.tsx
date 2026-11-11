@@ -1,5 +1,7 @@
 'use client'
 
+import { realtimeFallback } from '../lib/realtime-fallback'
+
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -65,11 +67,12 @@ export default function Navbar() {
         .then(({ count }) => setUnread(count || 0))
     }
     queryUnread()
+    const fallback = realtimeFallback(queryUnread)
     const channel = supabase
       .channel(`nav-unread-${uid}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, queryUnread)
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+      .subscribe(fallback.status)
+    return () => { fallback.stop(); supabase.removeChannel(channel) }
   }, [session?.user?.id])
 
   // Clear badge immediately when the user lands on /messages
@@ -101,11 +104,12 @@ export default function Navbar() {
         .then(({ count }) => setUnreadApps(count || 0))
     }
     queryApps()
+    const fallback = realtimeFallback(queryApps)
     const channel = supabase
       .channel(`nav-apps-${uid}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'applications' }, queryApps)
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+      .subscribe(fallback.status)
+    return () => { fallback.stop(); supabase.removeChannel(channel) }
   }, [session?.user?.id, profile?.id, profile?.role])
 
   // Clear badge immediately when the user lands on /candidatures
