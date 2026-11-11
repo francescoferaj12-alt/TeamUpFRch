@@ -29,6 +29,18 @@ export async function POST(req: NextRequest) {
 
   const active = new Set(profileVideoFields.map(field => ownedVideoPath(profile[field] || '', user.id, url)))
   const obsolete = [...new Set(paths.filter((path): path is string => !!path && !active.has(path)))]
+  // Cancelled drafts are retained for 24 hours so another open editor can finish.
+  // Only recognized files in this member's folder may be reclaimed.
+  if (body?.cleanup === true) {
+    const { data: files, error: listError } = await admin.storage.from('videos').list(user.id, { limit: 1000 })
+    if (listError) return NextResponse.json({ error: 'Could not list videos' }, { status: 502 })
+    for (const file of files || []) {
+      const path = ownedVideoPath(`${url}/storage/v1/object/public/videos/${user.id}/${file.name}`, user.id, url)
+      const updated = Date.parse(file.updated_at || file.created_at || '')
+      if (path && !active.has(path) && Number.isFinite(updated) && updated < Date.now() - 86_400_000 && !obsolete.includes(path)) obsolete.push(path)
+      if (obsolete.length >= 100) break
+    }
+  }
   if (obsolete.length === 0) return NextResponse.json({ ok: true })
 
   const { error: removeError } = await admin.storage.from('videos').remove(obsolete)

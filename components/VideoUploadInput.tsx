@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState, ChangeEvent } from 'react'
-import { ownedVideoPath } from '../lib/profile-videos'
+import { useRef, useState, useEffect, ChangeEvent } from 'react'
+import { ownedVideoPath, MAX_PROFILE_VIDEO_BYTES, uploadProfileVideo } from '../lib/profile-videos'
 import { supabase } from '../lib/supabase'
 
 interface Props {
@@ -21,13 +21,22 @@ function getVideoDuration(file: File): Promise<number> {
     const url = URL.createObjectURL(file)
     const video = document.createElement('video')
     video.preload = 'metadata'
-    video.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(video.duration) }
-    video.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Cannot read duration')) }
+    const timeout=setTimeout(()=>{URL.revokeObjectURL(url);video.src='';reject(new Error('Cannot read duration'))},15000)
+    video.onloadedmetadata = () => { clearTimeout(timeout);URL.revokeObjectURL(url); Number.isFinite(video.duration)?resolve(video.duration):reject(new Error('Invalid duration')) }
+    video.onerror = () => { clearTimeout(timeout);URL.revokeObjectURL(url); reject(new Error('Cannot read duration')) }
     video.src = url
   })
 }
 
 export default function VideoUploadInput({ value, onChange, placeholder, profileId, index, inpSt, otherDurations, onDurationChange, lang }: Props) {
+  const mounted=useRef(true)
+  const busy=useRef(false)
+  const uploadController=useRef<AbortController|null>(null)
+  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;uploadController.current?.abort()}},[])
+  useEffect(()=>{
+    if(index!==1)return
+    void supabase.auth.getSession().then(({data:{session}})=>{if(session)void fetch('/api/profile/obsolete-videos',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({urls:[],cleanup:true})}).catch(()=>{})})
+  },[profileId,index])
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -35,14 +44,16 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
 
   async function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || busy.current) return
     if (!file.type.startsWith('video/')) { alert(lang === 'de' ? 'Wähle eine Videodatei aus.' : 'Seuls les fichiers vidéo sont acceptés'); return }
-    if (file.size > 200 * 1024 * 1024) { alert('Max 200 MB'); return }
+    if (file.size > MAX_PROFILE_VIDEO_BYTES) { alert(lang==='de'?'Maximal 20 MB pro Video. Für grössere Videos kannst du einen YouTube-Link verwenden.':'Maximum 20 Mo par vidéo. Pour une vidéo plus lourde, utilise un lien YouTube.'); return }
 
+    busy.current=true
+    let nextDuration:number|null=null
     // Duration check — YouTube links are exempt, only applies to file uploads
     if (onDurationChange !== undefined || (otherDurations && otherDurations.length > 0)) {
       let duration = 0
-      try { duration = await getVideoDuration(file) } catch { /* fail open if unreadable */ }
+      try { duration = await getVideoDuration(file) } catch { busy.current=false;alert(lang==='de'?'Dieses Video konnte nicht gelesen werden. Verwende MP4, MOV oder WebM.':'Cette vidéo est illisible. Utilise MP4, MOV ou WebM.');return }
       const othersSum = (otherDurations || []).reduce((a, b) => a + b, 0)
       if (duration + othersSum > 900) {
         const om = Math.floor(othersSum / 60), os = Math.round(othersSum % 60)
@@ -51,10 +62,11 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
           ? `Maximale Gesamtdauer 15 Min. Aktuelle Videos: ${om} Min ${os} s. Dieses Video: ${tm} Min. Hinzufügen nicht möglich.`
           : `Durée totale max 15 min. Vidéos actuelles: ${om} min ${os} s. Cette vidéo: ${tm} min. Impossible d'ajouter.`
         alert(msg)
+        busy.current=false
         e.target.value = ''
         return
       }
-      onDurationChange?.(duration)
+      nextDuration=duration
     }
 
     setUploading(true)
@@ -64,31 +76,24 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
     const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || 'mp4'
     const path = `${profileId}/video_${index}_${crypto.randomUUID()}.${ext}`
 
-    // Supabase JS doesn't expose upload progress natively — fake it smoothly
-    let fakeP = 0
-    const fakeInterval = setInterval(() => {
-      fakeP = Math.min(fakeP + Math.random() * 12, 88)
-      setProgress(Math.round(fakeP))
-    }, 300)
-
-    const { data, error } = await supabase.storage
-      .from('videos')
-      .upload(path, file, { contentType: file.type })
-
-    clearInterval(fakeInterval)
-
-    if (error) {
-      alert(lang === 'de' ? 'Das Video konnte nicht hochgeladen werden. Versuche es erneut.' : 'Impossible de charger la vidéo. Réessaie.')
-      onDurationChange?.(null)
-      setUploading(false)
-      setProgress(0)
-      return
+    uploadController.current=new AbortController()
+    try {
+      const {data:{session}}=await supabase.auth.getSession()
+      if(!session)throw new Error('Authentication required')
+      await uploadProfileVideo(file,path,session.access_token,percent=>{if(mounted.current)setProgress(percent)},uploadController.current.signal)
+    } catch {
+      busy.current=false
+      if(!mounted.current)return
+      alert(lang==='de'?'Upload nicht abgeschlossen. Prüfe deine Verbindung und den verfügbaren Videospeicher. Dein bisheriges Video bleibt erhalten.':'Envoi non terminé. Vérifie ta connexion et ton espace vidéo disponible. Ta vidéo précédente est conservée.')
+      setUploading(false);setProgress(0);return
     }
-
+    busy.current=false
+    if(!mounted.current)return
     setProgress(100)
-    const { data: urlData } = supabase.storage.from('videos').getPublicUrl(data.path)
+    if(nextDuration!==null)onDurationChange?.(nextDuration)
+    const { data: urlData } = supabase.storage.from('videos').getPublicUrl(path)
     onChange(urlData.publicUrl + '?t=' + Date.now())
-    setTimeout(() => { setUploading(false); setProgress(0) }, 600)
+    setTimeout(() => { if(mounted.current){setUploading(false);setProgress(0)} }, 600)
   }
 
   const isUploaded = Boolean(ownedVideoPath(value, profileId, process.env.NEXT_PUBLIC_SUPABASE_URL || ''))
@@ -102,6 +107,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <input
           style={{ ...inpSt, flex: 1 }}
+          disabled={uploading}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
@@ -132,10 +138,10 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
       </div>
 
       {/* Duration hint */}
-      <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 4, lineHeight: 1.4 }}>
+      <div style={{ fontSize: 12, color:'#c7d1e3', marginTop: 4, lineHeight: 1.4 }}>
         {lang === 'de'
-          ? 'Video-Upload: max. 15 Min. insgesamt. YouTube-Link: unbegrenzt.'
-          : 'Vidéo importée : 15 min max au total. Lien YouTube : illimité.'}
+          ? 'Max. 20 MB pro Video, 3 Videos und 15 Min. insgesamt. Grössere Videos: YouTube-Link.'
+          : 'Max. 20 Mo par vidéo, 3 vidéos et 15 min au total. Vidéos plus lourdes : lien YouTube.'}
       </div>
 
       {/* Progress bar */}
@@ -154,6 +160,8 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
         <div style={{ marginTop: 8, borderRadius: 10, overflow: 'hidden', background: '#000', position: 'relative', maxHeight: 80 }}>
           <video
             src={value}
+            preload="none"
+            playsInline
             muted
             style={{ width: '100%', maxHeight: 80, objectFit: 'cover', display: 'block' }}
           />

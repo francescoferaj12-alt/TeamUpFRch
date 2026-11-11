@@ -1,9 +1,9 @@
 'use client'
 
-import { matchesAnnonce } from '../../lib/annonce-search'
+import { directoryQueries } from '../../lib/directory-search'
 import { footballLabel } from '../../lib/football-labels'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, Annonce, Profile, avatarSrc } from '../../lib/supabase'
@@ -90,7 +90,11 @@ const TABS = [
 // ——— Main page ————————————————————————————————
 export default function AnnoncesPage() {
   const { lang } = useLang()
-  const [annonces, setAnnonces]     = useState<Annonce[]>([])
+  const [directory,setDirectory]=useState<{items:Annonce[];total:number;counts:Record<string,number>}>({items:[],total:0,counts:{'':0,club:0,coach:0,player:0}})
+  const [pageState,setPageState]=useState({key:'',page:0})
+  const [loadError,setLoadError]=useState(false)
+  const [retry,setRetry]=useState(0)
+  const [debouncedQuery,setDebouncedQuery]=useState('')
   const [loading, setLoading]       = useState(true)
   const [filterLigue, setFilterLigue] = useState('')
   const [filterZone, setFilterZone]   = useState('')
@@ -102,40 +106,22 @@ export default function AnnoncesPage() {
   const router = useRouter()
   const { profile: currentUser } = useAuth()
 
-  // Public author details are loaded without exposing private profile fields.
-  useEffect(() => {
-    supabase.from('annonces')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .then(async ({ data }) => {
-        const rows = data || []
-        const authorIds = [...new Set(rows.map(a => a.author_id))]
-        const { data: authors } = authorIds.length
-          ? await supabase.from('public_profiles').select('id,avatar_url,verified').in('id', authorIds)
-          : { data: [] }
-        const byId = new Map((authors || []).map(author => [author.id, author]))
-        const visible = rows.filter(a => byId.has(a.author_id))
-          .map(a => ({ ...a, profiles: byId.get(a.author_id) }))
-        setAnnonces(visible as Annonce[])
-        setLoading(false)
-      })
-  }, [])
-
-  // ——— Filtered (unchanged) ———————————————————
-  const filtered = useMemo(() => {
-    return annonces.filter(annonce => matchesAnnonce({
-      query, ligue: filterLigue, zone: filterZone, position: filterPos, author_type: filterType,
-    }, annonce))
-  }, [annonces, filterLigue, filterZone, filterPos, filterType, query])
-
-  // ——— Tab counters ————————————————————————————
-  const typeCounts = useMemo(() => ({
-    '':      annonces.length,
-    club:    annonces.filter(a => a.author_type === 'club').length,
-    coach:   annonces.filter(a => a.author_type === 'coach').length,
-    player:  annonces.filter(a => a.author_type === 'player').length,
-  }), [annonces])
+  useEffect(()=>{const timer=setTimeout(()=>setDebouncedQuery(query),250);return()=>clearTimeout(timer)},[query])
+  const filterKey=JSON.stringify({queries:directoryQueries(debouncedQuery,lang,[...ligues.flatMap(group=>group.items),...positions,...zones]),ligue:filterLigue,zone:filterZone,position:filterPos,author_type:filterType})
+  const page=pageState.key===filterKey?pageState.page:0
+  useEffect(()=>{
+    let active=true;setLoading(true);setLoadError(false)
+    supabase.rpc('browse_annonces',{p_filters:JSON.parse(filterKey),p_page:page,p_size:24}).then(({data,error})=>{
+      if(!active)return
+      setLoading(false);setLoadError(!!error)
+      if(!error&&data)setDirectory(data)
+    })
+    return()=>{active=false}
+  },[filterKey,page,retry])
+  const annonces=directory.items
+  const filtered=annonces
+  const total=directory.total
+  const typeCounts=directory.counts
 
   const hasFilters = !!(filterLigue || filterZone || filterPos || filterType || query)
 
@@ -238,8 +224,8 @@ export default function AnnoncesPage() {
           {/* Results bar */}
           <div className="an-results-bar">
             <span>
-              <span className="an-results-num">{loading ? '—' : filtered.length}</span>
-              {' '}{lang === 'de' ? (filtered.length === 1 ? 'Anzeige gefunden' : 'Anzeigen gefunden') : (filtered.length === 1 ? 'annonce affichée' : 'annonces affichées')}
+              <span className="an-results-num">{loading ? '—' : total}</span>
+              {' '}{lang === 'de' ? (total === 1 ? 'Anzeige gefunden' : 'Anzeigen gefunden') : (total === 1 ? 'annonce affichée' : 'annonces affichées')}
             </span>
             {hasFilters && (
               <button className="an-reset" onClick={resetFilters}>
@@ -253,7 +239,7 @@ export default function AnnoncesPage() {
       {/* GRID */}
       <section className="an-grid-section">
         <div className="an-container">
-          {loading ? (
+          {loadError ? <div className="an-empty" role="alert"><p>{lang==='de'?'Anzeigen konnten nicht geladen werden.':'Impossible de charger les annonces.'}</p><button onClick={()=>setRetry(n=>n+1)}>{lang==='de'?'Erneut versuchen':'Réessayer'}</button></div> : loading ? (
             <div className="an-loading">
               <div className="an-spinner" />
               {lang === 'de' ? 'Anzeigen werden geladen…' : 'Chargement des annonces…'}
@@ -261,7 +247,7 @@ export default function AnnoncesPage() {
           ) : filtered.length === 0 ? (
             <div className="an-empty">
               <div className="an-empty-icon"><IcoEmpty s={36} /></div>
-              {annonces.length === 0 ? (
+              {!hasFilters ? (
                 <>
                   <h3 className="an-empty-title">{lang === 'de' ? 'Noch keine Anzeigen' : 'Aucune annonce publiée'}</h3>
                   <p className="an-empty-sub">{lang === 'de' ? 'Veröffentliche die erste Anzeige.' : 'Sois le premier à publier une annonce.'}</p>
@@ -291,6 +277,11 @@ export default function AnnoncesPage() {
         </div>
       </section>
 
+      {!loading&&!loadError&&total>24&&<nav aria-label={lang==='de'?'Anzeigenseiten':'Pages des annonces'} style={{display:'flex',justifyContent:'center',alignItems:'center',gap:20,padding:'0 16px 32px'}}>
+        <button disabled={page===0} onClick={()=>setPageState({key:filterKey,page:page-1})}>{lang==='de'?'Zurück':'Précédent'}</button>
+        <span>{page+1} / {Math.ceil(total/24)}</span>
+        <button disabled={(page+1)*24>=total} onClick={()=>setPageState({key:filterKey,page:page+1})}>{lang==='de'?'Weiter':'Suivant'}</button>
+      </nav>}
       {/* POSTULER MODAL */}
       {postulerModal && (
         <PostulerModal
@@ -306,7 +297,7 @@ export default function AnnoncesPage() {
         <PostModal
           profile={currentUser}
           onClose={() => setShowPublishModal(false)}
-          onSuccess={(a) => { setAnnonces(prev => [a, ...prev]); setShowPublishModal(false) }}
+          onSuccess={() => { setPageState({key:filterKey,page:0});setRetry(n=>n+1);setShowPublishModal(false) }}
         />
       )}
 

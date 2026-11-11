@@ -23,6 +23,7 @@ function load(file, mocks = {}) {
       if (Object.hasOwn(mocks, name)) return mocks[name]
       if (name.endsWith('/logger')) return { captureError() {} }
       if (name.endsWith('/email-throttle')) return { isThrottled: () => false }
+      if (name.endsWith('/football-labels')) return load('lib/football-labels.ts')
       if (name.endsWith('/email-templates')) return load('lib/email-templates.ts')
       if (name.endsWith('/onboarding-career')) return load('lib/onboarding-career.ts')
       return require(name)
