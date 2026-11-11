@@ -9,6 +9,7 @@ import { useLang } from '../../lib/lang-context'
 import { t, Lang } from '../../lib/translations'
 import { useAuth } from '../../lib/auth-context'
 import ClubCrest from '../../components/ClubCrest'
+import AccountTabs from '../../components/AccountTabs'
 import { relativeTime } from '../../lib/utils/time'
 import PostModal from '../../components/PostModal'
 import { footballLabel } from '../../lib/football-labels'
@@ -99,6 +100,7 @@ export default function DashboardPage() {
 
   return (
     <>
+      <AccountTabs />
       {section === 'overview' && (
         <DashboardOverview
           profile={profile}

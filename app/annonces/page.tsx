@@ -101,6 +101,7 @@ export default function AnnoncesPage() {
   const [filterPos, setFilterPos]     = useState('')
   const [filterType, setFilterType]   = useState('')
   const [query, setQuery]             = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [postulerModal, setPostulerModal] = useState<Annonce | null>(null)
   const [showPublishModal, setShowPublishModal] = useState(false)
   const router = useRouter()
@@ -131,7 +132,7 @@ export default function AnnoncesPage() {
 
   // ——— Render —————————————————————————————————
   return (
-    <div className="an-page">
+    <div className={`an-page${currentUser ? ' an-feed' : ''}`}>
 
       {/* PAGE HEADER */}
       <header className="an-header">
@@ -142,11 +143,19 @@ export default function AnnoncesPage() {
           </div>
           <span className="an-live-pulse">{lang === 'de' ? 'Aktuell' : 'En direct'}</span>
           <h1 className="an-title">
-            {lang === 'de' ? 'Angebote &' : 'Offres &'}<br /><span className="em">{lang === 'de' ? 'Gesuche.' : 'Recherches.'}</span>
+            {currentUser
+              ? (lang === 'de' ? <>Fussball <span className="em">aktuell.</span></> : <>Le fil <span className="em">du foot.</span></>)
+              : <>{lang === 'de' ? 'Angebote &' : 'Offres &'}<br /><span className="em">{lang === 'de' ? 'Gesuche.' : 'Recherches.'}</span></>}
           </h1>
           <p className="an-sub">
-            {lang === 'de' ? 'Vereine, Trainer und Spieler veröffentlichen hier ihre Angebote und Gesuche. Finde, was zu dir passt.' : 'Clubs, coachs et joueurs publient leurs besoins en temps réel. Trouve ton match en quelques clics.'}
+            {lang === 'de' ? 'Vereine, Spieler und Trainer: alle Angebote und Gesuche an einem Ort.' : 'Clubs, joueurs et coachs : toutes les opportunités, au même endroit.'}
           </p>
+          {currentUser && <div className="an-feed-shortcuts">
+            <Link href="/clubs">{lang === 'de' ? 'Vereine' : 'Clubs'}</Link>
+            <Link href="/candidatures">{lang === 'de' ? 'Bewerbungen' : 'Candidatures'}</Link>
+            <Link href="/dashboard">{lang === 'de' ? 'Mein Überblick' : 'Mon tableau de bord'}</Link>
+            <Link href="/publier" className="an-feed-post"><IcoPlus />{lang === 'de' ? 'Anzeige erstellen' : 'Publier une annonce'}</Link>
+          </div>}
           <div className="an-search-wrap">
             <IcoSearch s={18} />
             <input
@@ -181,6 +190,10 @@ export default function AnnoncesPage() {
             ))}
           </div>
 
+          <button className="an-filter-toggle" type="button" aria-expanded={filtersOpen} aria-controls="annonce-filters" onClick={() => setFiltersOpen(open => !open)}>
+            {lang === 'de' ? 'Filter & Suchaufträge' : 'Filtres et alertes'} {filtersOpen ? '−' : '+'}
+          </button>
+          <div id="annonce-filters" hidden={!filtersOpen}>
           {/* Dropdowns + Publish */}
           <div className="an-filters-grid">
             <select className="an-select" value={filterLigue} onChange={(e) => setFilterLigue(e.target.value)} aria-label={lang === 'de' ? 'Liga' : 'Ligue'}>
@@ -197,11 +210,11 @@ export default function AnnoncesPage() {
             </select>
             {currentUser ? (
               <button className="an-publish-btn" onClick={() => setShowPublishModal(true)}>
-                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
+                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier une annonce'}
               </button>
             ) : (
               <Link href="/login" className="an-publish-btn">
-                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
+                <IcoPlus s={16} />{lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier une annonce'}
               </Link>
             )}
           </div>
@@ -220,6 +233,8 @@ export default function AnnoncesPage() {
               }}
             />
           )}
+
+          </div>
 
           {/* Results bar */}
           <div className="an-results-bar">
@@ -322,6 +337,14 @@ export default function AnnoncesPage() {
           padding:140px 0 56px;
           text-align:center; position:relative;
         }
+        .an-feed .an-header { padding:32px 0 24px; }
+        .an-feed .an-title { font-size:clamp(30px,4.5vw,52px); line-height:1.15; margin-bottom:12px; }
+        .an-feed .an-eyebrow, .an-feed .an-live-pulse { margin-bottom:14px; }
+        .an-feed .an-sub { margin-bottom:16px; font-weight:400; color:#c7d1e3; }
+        .an-feed-shortcuts { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 18px; margin-bottom:20px; }
+        .an-feed-shortcuts a { color:#c7d1e3; font-size:13px; text-decoration:none; padding:6px 0; }
+        .an-feed-shortcuts .an-feed-post { display:inline-flex; align-items:center; gap:6px; background:#FF3A3A; padding:9px 14px; color:white; border-radius:9px; font-weight:700; }
+        .an-filter-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; background:transparent; border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:10px 14px; margin-bottom:12px; color:#c7d1e3; font:inherit; font-size:13px; cursor:pointer; }
         .an-header::before {
           content:''; position:absolute;
           top:0; left:50%; transform:translateX(-50%);
@@ -672,7 +695,19 @@ export default function AnnoncesPage() {
           .an-filters-grid { grid-template-columns:1fr 1fr; }
           .an-publish-btn  { grid-column:span 2; justify-content:center; }
         }
-        @media (max-width:720px)  { .an-grid { grid-template-columns:1fr; } }
+        @media (max-width:720px) {
+          .an-grid { grid-template-columns:1fr; }
+          .an-feed .an-header { padding:16px 0; }
+          .an-feed .an-eyebrow, .an-feed .an-live-pulse { display:none; }
+          .an-feed .an-eyebrow { font-size:10px; letter-spacing:2px; }
+          .an-feed .an-sub { font-size:14px; line-height:1.5; }
+          .an-feed-shortcuts { gap:4px 14px; margin-bottom:16px; }
+          .an-feed-post { display:none !important; }
+          .an-feed .an-filters { padding:14px 0; }
+          .an-tabs-row { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; margin-bottom:10px; }
+          .an-tab { flex-shrink:0; padding:9px 12px; gap:6px; }
+          .an-feed .an-grid-section { padding-top:20px; }
+        }
         @media (max-width:600px)  { .an-container { padding:0 16px; } }
         @media (max-width:520px) {
           .an-filters-grid { grid-template-columns:1fr; }

@@ -356,9 +356,9 @@ test('daily job sends one admin reminder and one localized digest for opted-in m
 test('login preserves valid site routes and falls back for untrusted redirect targets', () => {
   const { internalRedirect } = load('lib/internal-redirect.ts')
   assert.equal(internalRedirect('/messages?partner=fixture#chat'), '/messages?partner=fixture#chat')
-  assert.equal(internalRedirect(null), '/profil')
-  assert.equal(internalRedirect('https://example.test'), '/profil')
-  assert.equal(internalRedirect('//example.test'), '/profil')
+  assert.equal(internalRedirect(null), '/annonces')
+  assert.equal(internalRedirect('https://example.test'), '/annonces')
+  assert.equal(internalRedirect('//example.test'), '/annonces')
 })
 
 test('onboarding completes each actual role only on its final step', async () => {

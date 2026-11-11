@@ -259,9 +259,10 @@ export default function MessagesPage() {
       olderScrollRef.current=null
     }
   },[thread.items])
+  const lastThreadMessageId=thread.items.at(-1)?.id
   useEffect(()=>{
     if(bodyRef.current)bodyRef.current.scrollTop=bodyRef.current.scrollHeight
-  },[activePartnerId,thread.items.at(-1)?.id])
+  },[activePartnerId,lastThreadMessageId])
 
   // Realtime: incoming messages
   useEffect(() => {

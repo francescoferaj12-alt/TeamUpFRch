@@ -122,6 +122,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
           background:linear-gradient(180deg,#142659 0%,#0d1f4a 100%);
           border:1px solid rgba(255,255,255,.12); border-radius:20px;
           padding:32px; max-width:520px; width:100%;
+          max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain;
           box-shadow:0 24px 80px rgba(0,0,0,.6); color:#fff;
           font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
           animation:pmFadeIn .22s cubic-bezier(.22,1,.36,1);
@@ -253,7 +254,7 @@ export default function PostModal({ profile, annonce, onClose, onSuccess }: Prop
       `}</style>
 
       <div className="pm-overlay" onClick={onClose}>
-        <div className="pm-modal" onClick={e => e.stopPropagation()}>
+        <div className="pm-modal" role="dialog" aria-modal="true" aria-label={lang === 'de' ? 'Anzeige erstellen' : 'Publier une annonce'} onClick={e => e.stopPropagation()}>
 
           {/* Club verification gate */}
           {isGated && (
