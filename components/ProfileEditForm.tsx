@@ -6,6 +6,7 @@ import { ownedVideoPath, profileVideoFields } from '../lib/profile-videos'
 import { supabase, Profile } from '../lib/supabase'
 import { t, months, Lang } from '../lib/translations'
 import { liguesHomme, liguesFemme } from '../lib/data'
+import { footballLabel } from '../lib/football-labels'
 
 const VideoUploadInput = dynamic(() => import('./VideoUploadInput'), { ssr: false })
 
@@ -630,14 +631,14 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               <label>{t.profil.position[lang]}</label>
               <select value={position} onChange={e => setPosition(e.target.value)}>
                 <option value="">—</option>
-                {POSITIONS.map(p => <option key={p}>{p}</option>)}
+                {POSITIONS.map(p => <option key={p} value={p}>{footballLabel(p, lang)}</option>)}
               </select>
             </div>
             <div className="form-group">
               <label>{t.profil.position_secondary[lang]}</label>
               <select value={positionSecondary} onChange={e => setPositionSecondary(e.target.value)}>
                 <option value="">—</option>
-                {POSITIONS.map(p => <option key={p}>{p}</option>)}
+                {POSITIONS.map(p => <option key={p} value={p}>{footballLabel(p, lang)}</option>)}
               </select>
               <div className="field-help">{t.profil.position_secondary_help[lang]}</div>
             </div>
@@ -670,7 +671,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
                 <option value="">—</option>
                 {(genre === 'homme' ? liguesHomme : liguesFemme).map(g => (
                   <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group}>
-                    {g.items.map(l => <option key={l}>{l}</option>)}
+                    {g.items.map(l => <option key={l} value={l}>{footballLabel(l, lang)}</option>)}
                   </optgroup>
                 ))}
               </select>
@@ -679,7 +680,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               <label>{t.profil.zone[lang]}</label>
               <select value={zone} onChange={e => setZone(e.target.value)}>
                 <option value="">—</option>
-                {ZONES.map(z => <option key={z}>{z}</option>)}
+                {ZONES.map(z => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
               </select>
             </div>
           </div>
@@ -694,35 +695,35 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
               <label>{t.profil.coach_role[lang]}</label>
               <select value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)}>
                 <option value="">—</option>
-                {COACH_ROLES.map(r => <option key={r}>{r}</option>)}
+                {COACH_ROLES.map(r => <option key={r} value={r}>{footballLabel(r, lang)}</option>)}
               </select>
             </div>
             <div className="form-group">
               <label>{t.profil.coach_licence[lang]}</label>
               <select value={coachDiploma} onChange={e => setCoachDiploma(e.target.value)}>
                 <option value="">—</option>
-                {UEFA_LICENCES.map(l => <option key={l}>{l}</option>)}
+                {UEFA_LICENCES.map(l => <option key={l} value={l}>{footballLabel(l, lang)}</option>)}
               </select>
             </div>
             <div className="form-group">
               <label>{t.profil.coach_years[lang]}</label>
               <select value={coachExperience} onChange={e => setCoachExperience(e.target.value)}>
                 <option value="">—</option>
-                {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v}>{v}</option>)}
+                {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
               </select>
             </div>
             <div className="form-group">
               <label>{t.profil.dispo[lang]}</label>
               <select value={coachAvailability} onChange={e => setCoachAvailability(e.target.value)}>
                 <option value="">—</option>
-                {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v}>{v}</option>)}
+                {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
               </select>
             </div>
             <div className="form-group">
               <label>{t.profil.zone[lang]}</label>
               <select value={zone} onChange={e => setZone(e.target.value)}>
                 <option value="">—</option>
-                {ZONES.map(z => <option key={z}>{z}</option>)}
+                {ZONES.map(z => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
               </select>
             </div>
             <div className="form-group form-grid-full">
@@ -751,8 +752,8 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             <select value={ligue} onChange={e => setLigue(e.target.value)}>
               <option value="">—</option>
               {[...liguesHomme, ...liguesFemme].map(g => (
-                <optgroup key={g.group} label={g.group}>
-                  {g.items.map(l => <option key={l}>{l}</option>)}
+                <optgroup key={g.group} label={lang === 'de' ? g.groupDe : g.group}>
+                  {g.items.map(l => <option key={l} value={l}>{footballLabel(l, lang)}</option>)}
                 </optgroup>
               ))}
             </select>
@@ -761,7 +762,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             <label>{t.profil.zone[lang]}</label>
             <select value={zone} onChange={e => setZone(e.target.value)}>
               <option value="">—</option>
-              {ZONES.map(z => <option key={z}>{z}</option>)}
+              {ZONES.map(z => <option key={z} value={z}>{footballLabel(z, lang)}</option>)}
             </select>
           </div>
           <div className="form-group">

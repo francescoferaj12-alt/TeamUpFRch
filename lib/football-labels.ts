@@ -11,6 +11,21 @@ const germanLabels: Record<string, string> = {
   Droit: 'Rechts',
   Gauche: 'Links',
   'Les deux': 'Beide',
+  Ambidextre: 'Beidfüssig',
+  'Entraîneur principal': 'Cheftrainer',
+  'Entraîneur assistant': 'Assistenztrainer',
+  'Préparateur physique': 'Athletiktrainer',
+  'Entraîneur des gardiens': 'Torwarttrainer',
+  Aucune: 'Keine',
+  'Diplôme CFE': 'CFE-Diplom',
+  Débutant: 'Anfänger',
+  '1-3 ans': '1–3 Jahre',
+  '3-5 ans': '3–5 Jahre',
+  '5-10 ans': '5–10 Jahre',
+  '10+ ans': 'Über 10 Jahre',
+  'Cherche un club': 'Suche einen Verein',
+  'En poste actuellement': 'Aktuell im Amt',
+  'Pas disponible': 'Nicht verfügbar',
 }
 
 export function footballLabel(value: string, lang: Lang): string {
