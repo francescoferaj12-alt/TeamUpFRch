@@ -145,7 +145,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`nav${scrolled ? ' nav-scrolled' : ''}`}>
-        <Link href={user ? "/annonces" : "/"} className="nav-logo" aria-label="TeamUpFR" style={{ textDecoration: 'none' }}>
+        <Link href="/accueil" className="nav-logo" aria-label="TeamUpFR" style={{ textDecoration: 'none' }}>
           <span className="official-brand-logo"><img src="/images/logo-official.jpeg" width="48" height="48" alt="" /></span>
           <span className="brand-text">
             <span className="brand-teamup">TeamUp</span>

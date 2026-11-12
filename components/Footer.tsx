@@ -47,7 +47,7 @@ export default function Footer() {
         <div className="hp-footer-grid">
           {/* Brand */}
           <div>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none', marginBottom: 18 }}>
+            <Link href="/accueil" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none', marginBottom: 18 }}>
               <img
                 src="/images/logo-official.jpeg"
                 alt="TeamUpFR"
