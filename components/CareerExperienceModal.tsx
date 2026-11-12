@@ -1,6 +1,7 @@
 'use client'
 
 import { footballLabel } from '../lib/football-labels'
+import { liguesHomme, liguesFemme } from '../lib/data'
 import { useState, useEffect } from 'react'
 import { supabase, CareerExperience } from '../lib/supabase'
 import { t } from '../lib/translations'
@@ -8,6 +9,8 @@ import type { Lang } from '../lib/translations'
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const COACH_ROLES = ['Entraîneur principal','Entraîneur adjoint','Préparateur physique','Entraîneur des gardiens','Responsable technique']
+const LEAGUE_GROUPS = [...liguesHomme, ...liguesFemme]
+const KNOWN_LEAGUES = new Set(LEAGUE_GROUPS.flatMap(group => group.items))
 const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 const MONTHS_DE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember']
 
@@ -147,7 +150,13 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
 
           <div>
             <label style={lblSt}>{tc.ligue[lang]}</label>
-            <input style={inpSt} aria-label={tc.ligue[lang]} value={league} onChange={e => setLeague(e.target.value)} placeholder={lang === 'de' ? '3. Liga' : '3ème Ligue'} />
+            <select style={inpSt} aria-label={tc.ligue[lang]} value={league} onChange={e => setLeague(e.target.value)}>
+              <option value="" style={optSt}>{lang === 'de' ? 'Liga auswählen…' : 'Choisir une ligue…'}</option>
+              {league && !KNOWN_LEAGUES.has(league) && <option value={league} style={optSt}>{footballLabel(league, lang)}</option>}
+              {LEAGUE_GROUPS.map(group => <optgroup key={group.group} label={lang === 'de' ? group.groupDe : group.group} style={optSt}>
+                {group.items.map(item => <option key={item} value={item} style={optSt}>{footballLabel(item, lang)}</option>)}
+              </optgroup>)}
+            </select>
           </div>
 
           {role === 'player' && (
