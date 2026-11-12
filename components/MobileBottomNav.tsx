@@ -7,9 +7,9 @@ import { navigationItems, navigationHref, navigationActive, NavigationIcon } fro
 
 export default function MobileBottomNav({ lang, signedIn, unread, unreadApplications = 0 }: { lang: Lang; signedIn: boolean; unread: number; unreadApplications?: number }) {
   const pathname = usePathname()
-  return <nav className="mobile-bottom-nav mobile-bottom-nav-six" aria-label={lang === 'de' ? 'Hauptnavigation' : 'Navigation principale'}>
-    {navigationItems(lang).map(item => {
-      const active = navigationActive(item, pathname)
+  return <nav className="mobile-bottom-nav" aria-label={lang === 'de' ? 'Hauptnavigation' : 'Navigation principale'}>
+    {navigationItems(lang).filter(item => item.key !== 'clubs').map(item => {
+      const active = navigationActive(item, pathname) || (item.key === 'search' && (pathname === '/clubs' || !!pathname?.startsWith('/club/')))
       const badge = item.key === 'messages' ? unread : item.key === 'account' ? unreadApplications : 0
       const badgeLabel = item.key === 'messages'
         ? (lang === 'de' ? 'ungelesene Nachrichten' : 'messages non lus')
