@@ -38,6 +38,7 @@ const germanLabels: Record<string, string> = {
   'Préparateur physique': 'Athletiktrainer',
   'Entraîneur des gardiens': 'Torwarttrainer',
   Aucune: 'Keine',
+  'Sans diplôme': 'Ohne Diplom',
   'Diplôme CFE': 'CFE-Diplom',
   Débutant: 'Anfänger',
   '1-3 ans': '1–3 Jahre',
