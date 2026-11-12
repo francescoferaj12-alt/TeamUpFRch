@@ -731,6 +731,10 @@ export const t = {
 
   // ONBOARDING
   onboarding: {
+    prefilled_notice: { fr: 'Tes réponses déjà enregistrées sont reprises ici. Vérifie-les, modifie-les si besoin et complète les informations manquantes.', de: 'Deine gespeicherten Angaben sind bereits eingetragen. Prüfe sie, ändere sie bei Bedarf und ergänze die fehlenden Informationen.' },
+    confirm_next: { fr: 'Confirmer et continuer →', de: 'Bestätigen und weiter →' },
+    load_error: { fr: 'Impossible de charger tes informations. Réessaie avant de compléter ton profil.', de: 'Deine Angaben konnten nicht geladen werden. Versuche es erneut, bevor du dein Profil vervollständigst.' },
+    retry: { fr: 'Réessayer', de: 'Erneut versuchen' },
     // Nav / progress
     step_of: { fr: 'Étape', de: 'Schritt' },
     back: { fr: '← Retour', de: '← Zurück' },
