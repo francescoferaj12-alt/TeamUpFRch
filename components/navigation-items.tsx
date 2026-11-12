@@ -21,7 +21,8 @@ export function navigationItems(lang: Lang): NavigationItem[] {
 }
 
 export function navigationHref(item: NavigationItem, signedIn: boolean): string {
-  return item.requiresLogin && !signedIn ? `/login?redirect=${encodeURIComponent(item.href)}` : item.href
+  // Guests can reach the locked preview; the gate offers login and signup.
+  return item.href
 }
 
 export function navigationActive(item: NavigationItem, pathname: string | null): boolean {
