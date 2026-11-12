@@ -1,5 +1,8 @@
 'use client'
 
+import AnnonceStatusActions from '../../components/AnnonceStatusActions'
+import { currentAnnonceFilter } from '../../lib/annonce-lifecycle'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -280,7 +283,7 @@ function RecommendedSection({ profile }: { profile: Profile }) {
   useEffect(() => {
     const targetType = 'club'
     const base = () => supabase.from('annonces').select('*')
-      .eq('status','active').eq('author_type', targetType)
+      .eq('status','active').or(currentAnnonceFilter()).eq('author_type', targetType)
       .neq('author_id', profile.id)
       .order('created_at', { ascending: false }).limit(4)
 
@@ -485,10 +488,6 @@ function MesAnnonces({ profile, refreshKey, onOpenPublish }: {
       .then(({ data }) => { setAnnonces(data || []); setLoading(false) })
   }, [profile.id, refreshKey])
 
-  async function closeAnnonce(id: string) {
-    await supabase.from('annonces').update({ status:'closed' }).eq('id', id)
-    setAnnonces(prev => prev.map(a => a.id === id ? { ...a, status:'closed' } : a))
-  }
 
   return (
     <div className="db-section-card">
@@ -513,14 +512,7 @@ function MesAnnonces({ profile, refreshKey, onOpenPublish }: {
                 </div>
               </div>
               <div className="db-annonce-right">
-                <span className={`db-annonce-status ${a.status}`}>
-                  {a.status === 'active' ? t.dash.annonce_active[lang] : t.dash.annonce_closed[lang]}
-                </span>
-                {a.status === 'active' && (
-                  <button className="db-btn-close-ann" onClick={() => closeAnnonce(a.id)}>
-                    {t.dash.close_btn[lang]}
-                  </button>
-                )}
+                <AnnonceStatusActions annonce={a} onUpdated={updated => setAnnonces(rows => rows.map(row => row.id === updated.id ? updated : row))} />
               </div>
             </div>
           ))}

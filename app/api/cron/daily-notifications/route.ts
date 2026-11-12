@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { matchesAnnonce } from '../../../../lib/annonce-search'
+import { currentAnnonceFilter } from '../../../../lib/annonce-lifecycle'
 import { notificationLang } from '../../../../lib/email-templates'
 
 export const dynamic = 'force-dynamic'
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
       from: sender,
       to: 'teamupfr.ch@gmail.com',
       subject: 'TeamUpFR — demandes de clubs à traiter',
-      text: `${pending.count === 1 ? 'Une demande de club est' : `${pending.count} demandes de clubs sont`} en attente depuis plus de 24 h. https://teamupfr.ch/admin/clubs`,
+      text: `${pending.count === 1 ? 'Une demande de club est' : `${pending.count} demandes de clubs sont`} en attente depuis plus de 24 h. https://teamupfr.ch/admin?tab=clubs`,
     }, { idempotencyKey: `club-reminder/${day}` }).catch(() => null)
     if (!result || result.error) failures++
     else sent++
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
 
   const [listings, searches] = await Promise.all([
     db.from('annonces').select('id,title,body,author_name,ligue,zone,position,author_type,author_id,created_at')
-      .eq('status', 'active').gte('created_at', windowStart).lt('created_at', windowEnd.toISOString()).order('created_at', { ascending: false }),
+      .eq('status', 'active').or(currentAnnonceFilter()).gte('created_at', windowStart).lt('created_at', windowEnd.toISOString()).order('created_at', { ascending: false }),
     db.from('saved_annonce_searches').select('owner_id,query,ligue,zone,position,author_type,created_at')
       .eq('email_alert', true).order('id'),
   ])

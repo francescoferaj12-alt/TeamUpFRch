@@ -4,6 +4,8 @@ import { Resend } from 'resend'
 import { isThrottled } from '../../../../lib/email-throttle'
 import { newApplicationHtml, notificationLang } from '../../../../lib/email-templates'
 
+import { annonceIsCurrent } from '../../../../lib/annonce-lifecycle'
+
 const FROM = 'TeamUpFR <noreply@teamupfr.ch>'
 
 export async function POST(req: NextRequest) {
@@ -23,6 +25,9 @@ export async function POST(req: NextRequest) {
 
     const { annonce_id, message } = await req.json()
     if (!annonce_id) return NextResponse.json({ error: 'annonce_id required' }, { status: 400 })
+
+    const { data: listing, error: listingError } = await supabase.from('annonces').select('status,created_at,last_confirmed_at').eq('id', annonce_id).maybeSingle()
+    if (listingError || !listing || !annonceIsCurrent(listing)) return NextResponse.json({ error: 'This search is no longer available' }, { status: 409 })
 
     const { data: applicant, error: profileErr } = await supabase.from('profiles')
       .select('first_name,last_name,club_name,role').eq('id', user.id).single()

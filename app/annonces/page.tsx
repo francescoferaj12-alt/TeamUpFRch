@@ -1,5 +1,7 @@
 'use client'
 
+import GettingStartedGuide from '../../components/GettingStartedGuide'
+
 import { directoryQueries } from '../../lib/directory-search'
 import { footballLabel } from '../../lib/football-labels'
 
@@ -156,6 +158,7 @@ export default function AnnoncesPage() {
             <Link href="/dashboard">{lang === 'de' ? 'Mein Überblick' : 'Mon tableau de bord'}</Link>
             <Link href="/publier" className="an-feed-post"><IcoPlus />{lang === 'de' ? 'Anzeige erstellen' : 'Publier une annonce'}</Link>
           </div>}
+          {currentUser && <GettingStartedGuide key={currentUser.id} profile={currentUser} />}
           <div className="an-search-wrap">
             <IcoSearch s={18} />
             <input

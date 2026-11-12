@@ -139,6 +139,7 @@ export type Annonce = {
   zone: string
   status: 'active' | 'closed'
   type?: 'club_cherche_joueur' | 'joueur_cherche_club' | 'coach_cherche_club' | 'club_cherche_coach' | 'coach_cherche_joueurs'
+  last_confirmed_at?: string | null
   created_at: string
 }
 

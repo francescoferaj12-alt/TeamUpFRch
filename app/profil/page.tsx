@@ -1,5 +1,8 @@
 'use client'
 
+import GettingStartedGuide from '../../components/GettingStartedGuide'
+import AnnonceStatusActions from '../../components/AnnonceStatusActions'
+
 import SeasonStats from '../../components/SeasonStats'
 import AccountTabs from '../../components/AccountTabs'
 import { strengthLabel } from '../../lib/strength-labels'
@@ -435,6 +438,8 @@ export default function ProfilPage() {
         </div>
       )}
 
+      <GettingStartedGuide key={profile.id} profile={profile} />
+
       {/* ── HERO ── */}
       <div style={{ background:'linear-gradient(135deg, #0D1F4A 0%, #081434 100%)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:'2rem', marginBottom:'1.25rem', position:'relative', overflow:'hidden' }}>
         <div style={{ display:'flex', alignItems:'flex-end', gap:'1.5rem', flexWrap:'wrap', position:'relative' }}>
@@ -667,7 +672,8 @@ export default function ProfilPage() {
                     {post.ligue ? ` · ${post.ligue}` : ''}{post.zone ? ` · ${post.zone}` : ''}
                   </div>
                 </div>
-                <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                <div style={{ display:'flex', gap:6, flexShrink:0, flexWrap:'wrap', maxWidth:'100%' }}>
+                  <AnnonceStatusActions annonce={post} onUpdated={updated => setMyPosts(rows => rows.map(row => row.id === updated.id ? updated : row))} />
                   {post.status === 'active' && (
                     <button onClick={() => setEditingPost(post)} style={{ background:'rgba(58,140,255,.15)', color:'#3a8cff', border:'1px solid rgba(58,140,255,.3)', borderRadius:7, padding:'4px 9px', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center' }}><IcoPen s={12}/></button>
                   )}

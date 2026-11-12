@@ -1,5 +1,7 @@
 'use client'
 
+import { currentAnnonceFilter } from '../../../lib/annonce-lifecycle'
+
 import { useLang } from '../../../lib/lang-context'
 import { footballLabel } from '../../../lib/football-labels'
 import { strengthLabel } from '../../../lib/strength-labels'
@@ -58,7 +60,7 @@ export default function ClubPage() {
       setClub(data)
       const { data: ann } = await supabase
         .from('annonces').select('*')
-        .eq('author_id', slug).eq('status', 'active')
+        .eq('author_id', slug).eq('status', 'active').or(currentAnnonceFilter())
         .order('created_at', { ascending: false })
       setAnnonces(ann || [])
       setLoading(false)
