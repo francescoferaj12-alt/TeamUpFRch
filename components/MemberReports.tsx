@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useLang } from '../lib/lang-context'
 import { supabase } from '../lib/supabase'
 
 type Report = { id: string; reported_id: string; reporter_id: string; reason: string; created_at: string }
 
 export default function MemberReports() {
+  const { lang } = useLang()
+  const de = lang === 'de'
   const [reports, setReports] = useState<Report[] | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
@@ -17,17 +20,17 @@ export default function MemberReports() {
       .is('reviewed_at', null).order('created_at', { ascending: true }).limit(50)
       .then(({ data, error }) => {
         if (!active) return
-        if (error) setError('Impossible de charger les signalements.')
+        if (error) setError(de ? 'Die Meldungen konnten nicht geladen werden.' : 'Impossible de charger les signalements.')
         else setReports(data)
       })
     return () => { active = false }
-  }, [])
+  }, [de])
 
   async function review(id: string) {
     setBusy(id)
     const { error } = await supabase.from('member_reports').update({ reviewed_at: new Date().toISOString() })
       .eq('id', id).is('reviewed_at', null)
-    if (error) setError('Impossible de clôturer le signalement.')
+    if (error) setError(de ? 'Die Meldung konnte nicht abgeschlossen werden.' : 'Impossible de clôturer le signalement.')
     else {
       setError('')
       setReports(items => items?.filter(item => item.id !== id) ?? null)
@@ -37,16 +40,16 @@ export default function MemberReports() {
 
   return (
     <details style={{ marginTop: 12 }}>
-      <summary style={{ cursor: 'pointer' }}>Signalements à traiter{reports && ` (${reports.length})`}</summary>
+      <summary style={{ cursor: 'pointer' }}>{de ? 'Offene Meldungen' : 'Signalements à traiter'}{reports && ` (${reports.length})`}</summary>
       {error && <p role="alert">{error}</p>}
-      {reports?.length === 0 && <p>Aucun signalement en attente.</p>}
+      {reports?.length === 0 && <p>{de ? 'Keine offenen Meldungen.' : 'Aucun signalement en attente.'}</p>}
       {reports?.map(report => (
         <article key={report.id} style={{ borderTop: '1px solid #ffffff30', marginTop: 8, paddingTop: 8 }}>
-          <Link href={`/profil/${report.reported_id}`}>Profil signalé</Link>
+          <Link href={`/profil/${report.reported_id}`}>{de ? 'Gemeldetes Profil' : 'Profil signalé'}</Link>
           {' · '}
-          <Link href={`/profil/${report.reporter_id}`}>Auteur du signalement</Link>
+          <Link href={`/profil/${report.reporter_id}`}>{de ? 'Meldende Person' : 'Auteur du signalement'}</Link>
           <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{report.reason}</p>
-          <button type="button" disabled={busy !== null} onClick={() => review(report.id)}>Marquer comme traité</button>
+          <button type="button" disabled={busy !== null} onClick={() => review(report.id)}>{de ? 'Als bearbeitet markieren' : 'Marquer comme traité'}</button>
         </article>
       ))}
     </details>

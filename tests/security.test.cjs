@@ -26,6 +26,7 @@ function load(file, mocks = {}) {
       if (name.endsWith('/football-labels')) return load('lib/football-labels.ts')
       if (name.endsWith('/email-templates')) return load('lib/email-templates.ts')
       if (name.endsWith('/onboarding-career')) return load('lib/onboarding-career.ts')
+      if (name.endsWith('/annonce-lifecycle')) return load('lib/annonce-lifecycle.ts')
       return require(name)
     },
   }, { filename: file })

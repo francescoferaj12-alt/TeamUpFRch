@@ -5,7 +5,7 @@ import { isThrottled } from '../../../lib/email-throttle'
 import { createClient } from '@supabase/supabase-js'
 
 const ADMIN_EMAIL = 'teamupfr.ch@gmail.com'
-const ADMIN_CLUBS_URL = 'https://teamupfr.ch/admin/clubs'
+const ADMIN_CLUBS_URL = 'https://teamupfr.ch/admin?tab=clubs'
 
 export async function POST(req: NextRequest) {
   let userId: unknown
