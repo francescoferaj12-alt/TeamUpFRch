@@ -545,7 +545,7 @@ export default function OnboardingPage() {
         {error && <p style={{ color: '#FF3A3A', fontSize: 13, marginTop: '0.5rem', textAlign: 'center' }}>{error}</p>}
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.75rem', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1.75rem', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             {step > 0 && (
               <button
@@ -557,18 +557,18 @@ export default function OnboardingPage() {
               </button>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', flex: '1 1 240px', minWidth: 0, justifyContent: 'flex-end', gap: '0.6rem' }}>
             <button
               onClick={handleSkipStep}
               disabled={saving}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 12px' }}
+              style={{ flex: '1 1 120px', background: 'none', border: 'none', color: 'rgba(255,255,255,.35)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 12px' }}
             >
               {o.skip[lang]}
             </button>
             <button
               onClick={handleNext}
               disabled={saving}
-              style={{ background: '#3a8cff', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}
+              style={{ flex: '1 1 120px', background: '#3a8cff', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}
             >
               {saving ? o.saving[lang] : isLast ? o.finish[lang] : o.confirm_next[lang]}
             </button>
