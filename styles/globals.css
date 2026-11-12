@@ -1337,12 +1337,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   .an-search, .pm-modal input, .pm-modal textarea, .pm-modal select, .msg-main input { font-size:16px !important; }
 }
 
-@media (max-width:768px) {
-  .mobile-bottom-nav-six { grid-template-columns:repeat(6,minmax(0,1fr)); gap:0; padding-left:2px; padding-right:2px; }
-  .mobile-bottom-nav-six .mobile-nav-item { font-size:10px; letter-spacing:-.1px; }
-  .mobile-bottom-nav-six .mobile-nav-icon { width:28px; }
-  .mobile-bottom-nav-six .mobile-nav-publish .mobile-nav-icon { width:36px; }
-}
+
 
 .account-space-header { background:#081434; border-bottom:1px solid rgba(255,255,255,.1); color:#fff; padding:18px 24px; }
 .account-space-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
@@ -1359,6 +1354,24 @@ textarea.input { resize: vertical; min-height: 80px; }
   .account-space-tabs a { flex:1; text-align:center; padding:11px 8px; }
   .account-space-header + .db-page .db-welcome { padding-top:28px; }
 }
-@media(max-width:359px) {
-  .mobile-bottom-nav-six .mobile-nav-item { font-size:9px; }
+
+
+/* Desktop and mobile share their destinations and icons. */
+@media(min-width:769px) {
+  .nav-main-links { flex:1; min-width:0; justify-content:center; gap:4px; margin:0 12px; }
+  .nav-main-links .nav-link { font-family:'Inter',sans-serif; font-size:12px; font-weight:600; text-transform:none; letter-spacing:0; padding:10px 9px; gap:6px !important; align-items:center; min-height:40px; }
+  .nav-main-links .nav-link svg { flex-shrink:0; }
+  .nav-main-links .nav-publish-link { background:#FF3A3A; color:#fff; }
+  .nav-main-links .nav-publish-link:hover { background:#e52e37; }
+  .nav-main-links .nav-publish-link::after { display:none; }
+}
+@media(min-width:769px) and (max-width:1200px) {
+  .nav-logo .brand-text { display:none; }
+  .nav-right .nav-avatar, .nav-right .nav-logout, .nav-right .nav-login { display:none !important; }
+  .nav-main-links { margin:0 6px; gap:2px; }
+  .nav-main-links .nav-link { padding:10px 7px; font-size:11px; }
+}
+
+@media(max-width:768px) {
+  .an-feed-shortcuts .an-shortcut-clubs { display:none; }
 }

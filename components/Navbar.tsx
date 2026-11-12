@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase, avatarSrc } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
 import MobileBottomNav from './MobileBottomNav'
+import { navigationItems, navigationHref, navigationActive, NavigationIcon } from './navigation-items'
 import { useLang } from '../lib/lang-context'
 import { t } from '../lib/translations'
 import { useAuth } from '../lib/auth-context'
@@ -31,14 +32,7 @@ export default function Navbar() {
       }
     : null
 
-  const links = [
-    { href: '/recherche',   label: t.nav.recherche[lang] },
-    { href: '/annonces',    label: t.nav.annonces[lang] },
-    { href: '/clubs',       label: t.nav.clubs[lang] },
-    { href: '/dashboard',   label: t.nav.dashboard[lang] },
-    { href: '/candidatures',label: t.nav.candidatures[lang] },
-    ...(user ? [{ href: '/messages', label: t.nav.messages[lang] }] : []),
-  ]
+  const links = navigationItems(lang)
 
   // Scroll-aware background opacity
   useEffect(() => {
@@ -151,7 +145,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`nav${scrolled ? ' nav-scrolled' : ''}`}>
-        <Link href={user ? "/annonces" : "/"} className="nav-logo" aria-label="TeamUpFR" style={{ textDecoration: 'none' }}>
+        <Link href="/accueil" className="nav-logo" aria-label="TeamUpFR" style={{ textDecoration: 'none' }}>
           <span className="official-brand-logo"><img src="/images/logo-official.jpeg" width="48" height="48" alt="" /></span>
           <span className="brand-text">
             <span className="brand-teamup">TeamUp</span>
@@ -160,19 +154,21 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="nav-links nav-desktop" style={{ overflow: 'auto', maxWidth: '52vw' }}>
+        <div className="nav-links nav-desktop nav-main-links" role="navigation" aria-label={lang === 'de' ? 'Hauptnavigation' : 'Navigation principale'}>
           {links.map(l => (
             <Link
-              key={l.href}
-              href={l.href}
-              className={`nav-link${pathname?.startsWith(l.href) ? ' active' : ''}`}
+              key={l.key}
+              href={navigationHref(l, !!session)}
+              className={`nav-link${navigationActive(l, pathname) ? ' active' : ''}${l.key === 'publish' ? ' nav-publish-link' : ''}`}
+              aria-current={navigationActive(l, pathname) ? 'page' : undefined}
               style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}
             >
+              <NavigationIcon name={l.key} size={17} />
               {l.label}
-              {l.href === '/messages' && unread > 0 && (
+              {l.key === 'messages' && unread > 0 && (
                 <span style={badgeStyle}>{unread > 9 ? '9+' : unread}</span>
               )}
-              {l.href === '/candidatures' && unreadApps > 0 && (
+              {l.key === 'account' && unreadApps > 0 && (
                 <span style={badgeStyle}>{unreadApps > 9 ? '9+' : unreadApps}</span>
               )}
             </Link>
@@ -196,7 +192,7 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="nav-desktop"
+                className="nav-desktop nav-logout"
                 style={{ background: 'none', border: 'none', color: 'rgba(255,100,100,0.9)', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 10px', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
               >
                 {t.nav.deconnexion[lang]}
@@ -211,7 +207,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <MobileBottomNav lang={lang} signedIn={!!session} unread={unread} />
+      <MobileBottomNav lang={lang} signedIn={!!session} unread={unread} unreadApplications={unreadApps} />
 
     </>
   )

@@ -151,7 +151,7 @@ export default function AnnoncesPage() {
             {lang === 'de' ? 'Vereine, Spieler und Trainer: alle Angebote und Gesuche an einem Ort.' : 'Clubs, joueurs et coachs : toutes les opportunités, au même endroit.'}
           </p>
           {currentUser && <div className="an-feed-shortcuts">
-            <Link href="/clubs">{lang === 'de' ? 'Vereine' : 'Clubs'}</Link>
+            <Link href="/clubs" className="an-shortcut-clubs">{lang === 'de' ? 'Vereine' : 'Clubs'}</Link>
             <Link href="/candidatures">{lang === 'de' ? 'Bewerbungen' : 'Candidatures'}</Link>
             <Link href="/dashboard">{lang === 'de' ? 'Mein Überblick' : 'Mon tableau de bord'}</Link>
             <Link href="/publier" className="an-feed-post"><IcoPlus />{lang === 'de' ? 'Anzeige erstellen' : 'Publier une annonce'}</Link>
