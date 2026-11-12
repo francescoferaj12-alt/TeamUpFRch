@@ -653,32 +653,32 @@ function LoginForm() {
                     {role === 'coach' && <>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                         <div>
-                          <label style={lbl}>Expérience</label>
+                          <label style={lbl}>{t.login.coach_experience[lang]}</label>
                           <select className="ln-inp" style={inp} value={coachExperience} onChange={e => setCoachExperience(e.target.value)} required>
-                            <option value="">Choisir…</option>
+                            <option value="">{t.login.choose[lang]}</option>
                             {['Débutant','1-3 ans','3-5 ans','5-10 ans','10+ ans'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label style={lbl}>Diplôme</label>
+                          <label style={lbl}>{t.login.coach_diploma[lang]}</label>
                           <select className="ln-inp" style={inp} value={coachDiploma} onChange={e => setCoachDiploma(e.target.value)} required>
-                            <option value="">Choisir…</option>
+                            <option value="">{t.login.choose[lang]}</option>
                             {['Sans diplôme','UEFA C','UEFA B','UEFA A','UEFA Pro','Diplôme CFE','BBaby','BFut'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                         <div>
-                          <label style={lbl}>Spécialité</label>
+                          <label style={lbl}>{t.login.coach_specialty[lang]}</label>
                           <select className="ln-inp" style={inp} value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)} required>
-                            <option value="">Choisir…</option>
+                            <option value="">{t.login.choose[lang]}</option>
                             {['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label style={lbl}>Disponibilité</label>
+                          <label style={lbl}>{t.login.coach_availability[lang]}</label>
                           <select className="ln-inp" style={inp} value={coachAvailability} onChange={e => setCoachAvailability(e.target.value)} required>
-                            <option value="">Choisir…</option>
+                            <option value="">{t.login.choose[lang]}</option>
                             {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
                           </select>
                         </div>
