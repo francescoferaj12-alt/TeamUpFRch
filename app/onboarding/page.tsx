@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation'
 import { supabase, avatarSrc } from '../../lib/supabase'
 import { useLang } from '../../lib/lang-context'
 import { t } from '../../lib/translations'
-import { ligues, zones, positions } from '../../lib/data'
+import { liguesHomme, liguesFemme, zones, positions } from '../../lib/data'
+import { footballLabel } from '../../lib/football-labels'
+
+const ligues = [...liguesHomme, ...liguesFemme]
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,13 +31,7 @@ const LAST_STEP: Record<Role, number> = { player: 6, coach: 5, club: 4 }
 
 const FOOT_OPTIONS = ['Droit', 'Gauche', 'Ambidextre']
 
-const COACH_EXPERIENCE_OPTIONS = [
-  "Moins d'1 an",
-  '1 à 3 ans',
-  '3 à 5 ans',
-  '5 à 10 ans',
-  'Plus de 10 ans',
-]
+const COACH_EXPERIENCE_OPTIONS = ['Débutant', '1-3 ans', '3-5 ans', '5-10 ans', '10+ ans']
 
 const COACH_ROLE_OPTIONS = [
   'Coach principal',
@@ -90,16 +87,19 @@ function getStepDesc(role: Role, step: number, lang: 'fr' | 'de'): string {
 function SelectField({
   label, value, onChange, options, placeholder,
 }: { label: string; value: string; onChange: (v: string) => void; options: string[]; placeholder?: string }) {
+  const { lang } = useLang()
   return (
     <div style={{ marginBottom: '1.25rem' }}>
       <label style={{ display: 'block', color: 'rgba(255,255,255,.7)', fontSize: 13, marginBottom: 6 }}>{label}</label>
       <select
+        aria-label={label}
         value={value}
         onChange={e => onChange(e.target.value)}
         style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.06)', color: value ? '#fff' : 'rgba(255,255,255,.4)', fontSize: 15, fontFamily: 'inherit', outline: 'none' }}
       >
         {placeholder && <option value="">{placeholder}</option>}
-        {options.map(o => <option key={o} value={o} style={{ background: '#1a2a4a', color: '#fff' }}>{o}</option>)}
+        {value && !options.includes(value) && <option value={value}>{footballLabel(value, lang)}</option>}
+        {options.map(o => <option key={o} value={o} style={{ background: '#1a2a4a', color: '#fff' }}>{footballLabel(o, lang)}</option>)}
       </select>
     </div>
   )
@@ -112,14 +112,16 @@ function GroupedSelectField({
     <div style={{ marginBottom: '1.25rem' }}>
       <label style={{ display: 'block', color: 'rgba(255,255,255,.7)', fontSize: 13, marginBottom: 6 }}>{label}</label>
       <select
+        aria-label={label}
         value={value}
         onChange={e => onChange(e.target.value)}
         style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.06)', color: value ? '#fff' : 'rgba(255,255,255,.4)', fontSize: 15, fontFamily: 'inherit', outline: 'none' }}
       >
         {placeholder && <option value="">{placeholder}</option>}
+        {value && !groups.some(group => group.items.includes(value)) && <option value={value}>{footballLabel(value, lang === 'de' ? 'de' : 'fr')}</option>}
         {groups.map(g => (
           <optgroup key={g.group} label={lang === 'de' ? (g.groupDe ?? g.group) : g.group} style={{ background: '#1a2a4a' }}>
-            {g.items.map(item => <option key={item} value={item} style={{ background: '#1a2a4a', color: '#fff' }}>{item}</option>)}
+            {g.items.map(item => <option key={item} value={item} style={{ background: '#1a2a4a', color: '#fff' }}>{footballLabel(item, lang === 'de' ? 'de' : 'fr')}</option>)}
           </optgroup>
         ))}
       </select>
@@ -286,6 +288,7 @@ export default function OnboardingPage() {
   const [role, setRole] = useState<Role>('player')
   const [step, setStep] = useState(0)
   const [careerLoaded, setCareerLoaded] = useState(false)
+  const [profileReady, setProfileReady] = useState(false)
 
   // Joueur state
   const [jPosition, setJPosition] = useState('')
@@ -329,13 +332,39 @@ export default function OnboardingPage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, profile_completed, onboarding_skipped, onboarding_step')
+        .select('*')
         .eq('id', session.user.id)
         .single()
 
       if (profile) {
         setRole((profile.role as Role) || 'player')
         if (profile.profile_completed) { router.push('/profil'); return }
+        // Use the persisted registration answers, including when confirming on
+        // another device or resuming an unfinished onboarding later.
+        setJPosition(profile.position || '')
+        setJPositionSecondary(profile.position_secondary || '')
+        setJFoot(profile.foot || '')
+        setJBirthdate(profile.birthdate || '')
+        setJLigue(profile.ligue || '')
+        setJZone(profile.zone || '')
+        setJBio(profile.bio || '')
+        setJAvatarUrl(profile.avatar_url || '')
+        setJVideo1(profile.video1_url || '')
+        setJVideo2(profile.video2_url || '')
+        setJVideo3(profile.video3_url || '')
+        setCExperience(profile.coach_experience || '')
+        setCDiploma(profile.coach_diploma || '')
+        setCPhilosophy(profile.coach_philosophy || '')
+        setCCategories(profile.coach_categories || '')
+        setCAvatarUrl(profile.avatar_url || '')
+        setClAvatarUrl(profile.avatar_url || '')
+        setClLigue(profile.ligue || '')
+        setClZone(profile.zone || '')
+        setClBio(profile.bio || '')
+        setClFirstName(profile.first_name || '')
+        setClLastName(profile.last_name || '')
+        setClContactRole(profile.club_contact_role || '')
+        setClEmailPublic(profile.club_email_public || '')
         if (profile.onboarding_step && profile.onboarding_step > 0) {
           setStep(profile.onboarding_step)
         }
@@ -355,10 +384,11 @@ export default function OnboardingPage() {
             setCareerLoaded(true)
           }
         }
+        setProfileReady(true)
       }
       setLoading(false)
     }
-    init()
+    init().catch(() => { setLoading(false) })
   }, [router])
 
   const totalSteps = LAST_STEP[role] + 1
@@ -392,6 +422,7 @@ export default function OnboardingPage() {
   }
 
   const saveStep = async (targetStep: number) => {
+    if (!profileReady) return false
     // Do not replace an existing career with an empty form after a failed load.
     if (step === 3 && role !== 'club' && !careerLoaded) { setError(o.error[lang]); return false }
     setSaving(true)
@@ -461,6 +492,13 @@ export default function OnboardingPage() {
     )
   }
 
+  if (!profileReady) return (
+    <div role="alert" style={{ minHeight: '70vh', display: 'grid', placeContent: 'center', padding: '2rem', color: '#fff', textAlign: 'center' }}>
+      <p>{o.load_error[lang]}</p>
+      <button className="btn btn-red" onClick={() => window.location.reload()}>{o.retry[lang]}</button>
+    </div>
+  )
+
   const title = getStepTitle(role, step, lang)
   const desc = getStepDesc(role, step, lang)
   const isLast = step === LAST_STEP[role]
@@ -501,6 +539,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Step content */}
+        <p style={{ color: '#c7d1e3', fontSize: 13, lineHeight: 1.6, marginBottom: '1.25rem' }}>{o.prefilled_notice[lang]}</p>
         {renderStepContent()}
 
         {error && <p style={{ color: '#FF3A3A', fontSize: 13, marginTop: '0.5rem', textAlign: 'center' }}>{error}</p>}
@@ -531,7 +570,7 @@ export default function OnboardingPage() {
               disabled={saving}
               style={{ background: '#3a8cff', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: saving ? .6 : 1 }}
             >
-              {saving ? o.saving[lang] : isLast ? o.finish[lang] : o.next[lang]}
+              {saving ? o.saving[lang] : isLast ? o.finish[lang] : o.confirm_next[lang]}
             </button>
           </div>
         </div>
