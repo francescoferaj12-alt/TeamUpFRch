@@ -84,7 +84,8 @@ export default function LoginPage() {
 function LoginForm() {
   const { lang } = useLang()
   const { session, authLoading } = useAuth()
-  const [mode, setMode] = useState<'login'|'register'|'forgot'>('login')
+  const searchParams = useSearchParams()
+  const [mode, setMode] = useState<'login'|'register'|'forgot'>(() => searchParams.get('mode') === 'register' ? 'register' : 'login')
   const [role, setRole] = useState<'player'|'coach'|'club'>('player')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -95,7 +96,6 @@ function LoginForm() {
   const [cooldown, setCooldown] = useState(0)
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const router = useRouter()
-  const searchParams = useSearchParams()
   const redirectTo = internalRedirect(searchParams.get('redirect'))
   const resetSuccess = searchParams.get('reset') === '1'
   const loginTriggered = useRef(false)

@@ -7,6 +7,7 @@ import { AuthProvider } from '../lib/auth-context'
 import EmailVerificationBanner from '../components/EmailVerificationBanner';
 import IncompleteProfileBanner from '../components/IncompleteProfileBanner';
 import ClubPendingBanner from '../components/ClubPendingBanner';
+import MemberAccessGate from '../components/MemberAccessGate';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://teamupfr.ch'),
@@ -45,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <EmailVerificationBanner />
             <IncompleteProfileBanner />
             <ClubPendingBanner />
-            <main>{children}</main>
+            <main><MemberAccessGate>{children}</MemberAccessGate></main>
             <Footer />
           </AuthProvider>
         </LangProvider>

@@ -24,7 +24,7 @@ export default function Navbar() {
   const pathnameRef = useRef(pathname)
   useEffect(() => { pathnameRef.current = pathname }, [pathname])
 
-  const user = profile
+  const user = session && profile
     ? {
         email: profile.email,
         initials: `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '??',

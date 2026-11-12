@@ -13,7 +13,7 @@ import { t, tagsByRole, Lang } from '../lib/translations'
 const VIDEO_URL = 'https://videos.pexels.com/video-files/28870860/12500591_2560_1440_30fps.mp4'
 
 // ── useCounters (unchanged logic) ────────────────────────────────────────────
-function useCounters() {
+function useCounters(enabled: boolean) {
   const [counts, setCounts] = useState({ players: 0, clubs: 0, coaches: 0 })
   const real = useRef({ players: 0, clubs: 0, coaches: 0 })
   const displayed = useRef({ players: 0, clubs: 0, coaches: 0 })
@@ -21,6 +21,7 @@ function useCounters() {
   const visible = useRef(false)
 
   useEffect(() => {
+    if (!enabled) return
     async function loadCounts() {
       const [rp, rc] = await Promise.all([
         supabase.from('public_profiles').select('id', { count: 'exact', head: true }).eq('role', 'player'),
@@ -57,7 +58,7 @@ function useCounters() {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'profiles' }, loadCounts)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [])
+  }, [enabled])
 
   useEffect(() => {
     const el = ref.current
@@ -184,7 +185,7 @@ export default function LandingPage() {
   const { session } = useAuth()
   const { lang } = useLang()
   const [activeTab, setActiveTab] = useState<LigueTab>('all')
-  const [counts, statsRef] = useCounters()
+  const [counts, statsRef] = useCounters(!!session)
 
   const filteredLigues = activeTab === 'all'
     ? allLigueItems
@@ -228,11 +229,16 @@ export default function LandingPage() {
     },
   ]
 
-  const statItems = [
+  const statItems = session ? [
     { value: String(allLigueItems.length),                   label: lang === 'fr' ? 'Ligues' : 'Ligen' },
     { value: String(counts.clubs),   label: lang === 'fr' ? 'Clubs inscrits' : 'Eingetragene Vereine' },
     { value: String(counts.players), label: lang === 'fr' ? 'Joueurs visibles' : 'Sichtbare Spieler' },
     { value: '2',                    label: lang === 'fr' ? 'Langues' : 'Sprachen' },
+  ] : [
+    { value: String(allLigueItems.length), label: lang === 'fr' ? 'Ligues' : 'Ligen' },
+    { value: '7', label: lang === 'fr' ? 'Zones du canton' : 'Regionen im Kanton' },
+    { value: '3', label: lang === 'fr' ? 'Joueurs · Coachs · Clubs' : 'Spieler · Trainer · Vereine' },
+    { value: '2', label: lang === 'fr' ? 'Langues' : 'Sprachen' },
   ]
 
   const statMotivation = lang === 'fr'
