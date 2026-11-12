@@ -98,6 +98,18 @@ test('all homepage leagues have localized display labels and preserve French sto
   assert.equal(footballLabel('Junior B', 'de'), 'Junioren B')
 })
 
+test('existing player and coach careers offer every league as a native dropdown in both languages', () => {
+  const { liguesHomme, liguesFemme } = load('lib/data.ts')
+  for (const role of ['player', 'coach']) for (const lang of ['fr', 'de']) {
+    const html = render(CareerModal, { userId: 'test', role, lang, onClose() {}, onSaved() {} })
+    assert.match(html, /<select[^>]*aria-label="(?:Ligue|Liga)[^"]*"/)
+    for (const group of [...liguesHomme, ...liguesFemme]) for (const league of group.items) {
+      assert.ok(html.includes(`value="${league}"`), `${role}/${lang}: ${league}`)
+    }
+    assert.doesNotMatch(html, /<input[^>]*aria-label="(?:Ligue|Liga)[^"]*"/)
+  }
+})
+
 test('strength labels respect the role and keep unknown personal text intact', () => {
   assert.equal(strengthLabel('youth', 'de', 'club'), 'Jugendförderung')
   assert.equal(strengthLabel('youth', 'de', 'coach'), 'Jugendausbildung')
