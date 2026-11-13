@@ -275,7 +275,7 @@ export const conversations: Conversation[] = [
 export const ligues = [
   { group: 'Actifs', groupDe: 'Aktive', items: ['2ème Ligue', '3ème Ligue', '4ème Ligue', '5ème Ligue'] },
   { group: 'Youth League', groupDe: 'Youth League', items: ['Youth League A', 'Youth League B', 'Youth League C'] },
-  { group: 'Juniors A & B', groupDe: 'Junioren A & B', items: ['Junior A Promotion', 'Junior A', 'Junior B Promotion', 'Junior B'] },
+  { group: 'Juniors B', groupDe: 'Junioren B', items: ['Junior B Promotion', 'Junior B'] },
   { group: 'Juniors C', groupDe: 'Junioren C', items: ['Junior C Promotion', 'Junior C'] },
 ];
 
@@ -283,7 +283,6 @@ export const liguesHomme = [
   { group: 'Actifs Hommes', groupDe: 'Aktive Männer', items: ['2ème Ligue', '3ème Ligue', '4ème Ligue', '5ème Ligue'] },
   { group: 'Youth League', groupDe: 'Youth League', items: ['Youth League A', 'Youth League B', 'Youth League C'] },
   { group: 'Juniors Garçons', groupDe: 'Junioren', items: [
-    'Juniors A - Promotion', 'Juniors A - 1er degré', 'Juniors A - 2ème degré',
     'Juniors B - Promotion', 'Juniors B - 1er degré', 'Juniors B - 2ème degré',
     'Juniors C - Promotion', 'Juniors C - 1er degré', 'Juniors C - 2ème degré',
     'Juniors D-9 - Promotion', 'Juniors D-9 - 1er degré', 'Juniors D-9 - 2ème degré', 'Juniors D-9 - 3ème degré',
