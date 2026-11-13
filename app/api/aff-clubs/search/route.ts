@@ -15,6 +15,9 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase
     .from('aff_clubs')
     .select('id, aff_number, name')
+    // Futsal-only clubs verified in the AFF team directory and approved by the owner.
+    .not('aff_number', 'in', '(5146,5154,5157,5149,5144)')
+    .not('name', 'ilike', '%futsal%')
     .ilike('name_normalized', `%${q.toLowerCase()}%`)
     .order('name')
     .limit(10)
