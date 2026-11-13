@@ -626,7 +626,7 @@ export default function MessagesPage() {
                           {m.file_url && m.file_type === 'image' && (
                             <img src={m.file_url} alt={m.file_name || 'image'}
                               style={{ maxWidth:220, maxHeight:200, borderRadius:8, display:'block', cursor:'pointer', objectFit:'cover' }}
-                              onClick={() => window.open(m.file_url, '_blank')}
+                              onClick={() => window.open(m.file_url, '_blank', 'noopener,noreferrer')}
                             />
                           )}
                           {m.file_url && m.file_type === 'video' && (
