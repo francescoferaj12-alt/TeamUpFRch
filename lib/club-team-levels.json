@@ -1,0 +1,147 @@
+[
+  {
+    "key": "men",
+    "items": [
+      {
+        "key": "super",
+        "fr": "Super League",
+        "de": "Super League"
+      },
+      {
+        "key": "challenge",
+        "fr": "Challenge League",
+        "de": "Challenge League"
+      },
+      {
+        "key": "promotion_league",
+        "fr": "Promotion League",
+        "de": "Promotion League"
+      },
+      {
+        "key": "league1",
+        "fr": "1re ligue",
+        "de": "1. Liga"
+      },
+      {
+        "key": "league2inter",
+        "fr": "2e ligue interrégionale",
+        "de": "2. Liga interregional"
+      },
+      {
+        "key": "league2",
+        "fr": "2e ligue",
+        "de": "2. Liga"
+      },
+      {
+        "key": "league3",
+        "fr": "3e ligue",
+        "de": "3. Liga"
+      },
+      {
+        "key": "league4",
+        "fr": "4e ligue",
+        "de": "4. Liga"
+      },
+      {
+        "key": "league5",
+        "fr": "5e ligue",
+        "de": "5. Liga"
+      }
+    ]
+  },
+  {
+    "key": "women",
+    "items": [
+      {
+        "key": "wsl",
+        "fr": "Women’s Super League",
+        "de": "Women’s Super League"
+      },
+      {
+        "key": "lnb",
+        "fr": "Ligue nationale B",
+        "de": "Nationalliga B"
+      },
+      {
+        "key": "league1",
+        "fr": "1re ligue",
+        "de": "1. Liga"
+      },
+      {
+        "key": "league2",
+        "fr": "2e ligue",
+        "de": "2. Liga"
+      },
+      {
+        "key": "league3",
+        "fr": "3e ligue",
+        "de": "3. Liga"
+      },
+      {
+        "key": "league4",
+        "fr": "4e ligue",
+        "de": "4. Liga"
+      }
+    ]
+  },
+  {
+    "key": "juniors",
+    "items": [
+      {
+        "key": "promotion",
+        "fr": "Promotion",
+        "de": "Promotion"
+      },
+      {
+        "key": "degree1",
+        "fr": "1er degré",
+        "de": "1. Stärkeklasse"
+      },
+      {
+        "key": "degree2",
+        "fr": "2e degré",
+        "de": "2. Stärkeklasse"
+      },
+      {
+        "key": "degree3",
+        "fr": "3e degré",
+        "de": "3. Stärkeklasse"
+      }
+    ]
+  },
+  {
+    "key": "regional",
+    "items": [
+      {
+        "key": "regional",
+        "fr": "Championnat régional",
+        "de": "Regionale Meisterschaft"
+      },
+      {
+        "key": "recreational",
+        "fr": "Loisirs",
+        "de": "Freizeitfussball"
+      }
+    ]
+  },
+  {
+    "key": "youth",
+    "items": [
+      {
+        "key": "youth",
+        "fr": "Youth League",
+        "de": "Youth League"
+      }
+    ]
+  },
+  {
+    "key": "children",
+    "items": [
+      {
+        "key": "festival",
+        "fr": "Tournois / plateaux",
+        "de": "Turniere / Spieltage"
+      }
+    ]
+  }
+]

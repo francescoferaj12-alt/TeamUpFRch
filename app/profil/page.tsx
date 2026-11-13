@@ -1,5 +1,7 @@
 'use client'
 
+import ClubTeamCategories from '../../components/ClubTeamCategories'
+
 import GettingStartedGuide from '../../components/GettingStartedGuide'
 import AnnonceStatusActions from '../../components/AnnonceStatusActions'
 
@@ -582,33 +584,7 @@ export default function ProfilPage() {
       )}
 
       {/* ── CLUB CATEGORIES ── */}
-      {profile.role === 'club' && profile.club_categories && (
-        <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:16, marginBottom:'1.25rem', padding:'1.25rem' }}>
-          <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:2, color:'#fff', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
-            <IcoStadium s={15} /> {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
-          </div>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-            {profile.club_categories.split(',').map(s => s.trim()).filter(Boolean).map(key => {
-              const labels: Record<string, { fr: string; de: string }> = {
-                cat_seniors_h:  { fr:'Seniors hommes', de:'Senioren Männer' },
-                cat_seniors_f:  { fr:'Seniors femmes', de:'Senioren Frauen' },
-                cat_youth:      { fr:'Youth League',   de:'Youth League' },
-                cat_juniors_a:  { fr:'Juniors A',      de:'Junioren A' },
-                cat_juniors_b:  { fr:'Juniors B',      de:'Junioren B' },
-                cat_juniors_c:  { fr:'Juniors C',      de:'Junioren C' },
-                cat_juniors_d:  { fr:'Juniors D',      de:'Junioren D' },
-                cat_juniores_f: { fr:'Juniors filles', de:'Juniorinnen' },
-                cat_veterans:   { fr:'Vétérans',       de:'Veteranen' },
-              }
-              return (
-                <span key={key} style={{ background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:600 }}>
-                  {labels[key]?.[lang] || key}
-                </span>
-              )
-            })}
-          </div>
-        </div>
-      )}
+      {profile.role === 'club' && <ClubTeamCategories value={profile.club_categories} lang={lang} />}
 
       {/* ── CAREER SECTION ── */}
       {profile.role !== 'club' && (
