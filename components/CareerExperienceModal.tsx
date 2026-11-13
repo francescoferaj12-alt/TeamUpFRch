@@ -1,5 +1,6 @@
 'use client'
 
+import ClubNameInput from './ClubNameInput'
 import { footballLabel } from '../lib/football-labels'
 import { liguesHomme, liguesFemme } from '../lib/data'
 import { useState, useEffect } from 'react'
@@ -145,7 +146,7 @@ export default function CareerExperienceModal({ userId, role, lang, experience, 
         <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
           <div>
             <label style={lblSt}>{tc.club_name[lang]}</label>
-            <input style={inpSt} aria-label={tc.club_name[lang]} value={clubName} onChange={e => setClubName(e.target.value)} placeholder="FC Bulle" />
+            <ClubNameInput style={inpSt} label={tc.club_name[lang]} value={clubName} onChange={setClubName} lang={lang} />
           </div>
 
           <div>

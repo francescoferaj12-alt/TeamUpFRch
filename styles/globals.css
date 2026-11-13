@@ -1429,3 +1429,32 @@ textarea.input { resize: vertical; min-height: 80px; }
 .admin-mini-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }.admin-mini-stats p { color:#c2cee4; font-size:13px; }.admin-mini-stats strong { display:block; color:white; font-size:26px; margin-bottom:6px; }.admin-muted { color:#b5c0d6; font-size:12px; line-height:1.7; margin-top:12px; }.admin-error { color:#ff9d9d; padding:16px; border:1px solid #ff3a3a44; border-radius:10px; margin-bottom:20px; }
 .admin-directory-filters { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }.admin-directory-filters input,.admin-directory-filters select { background:#14203f; border:1px solid #ffffff25; border-radius:10px; color:white; padding:12px; font:inherit; font-size:14px; min-width:0; }.admin-directory-filters input { flex:1 1 220px; }.admin-directory-filters select { flex:0 1 180px; }.admin-directory-list article { border-top:1px solid #ffffff18; padding:20px 0; display:flex; align-items:flex-start; gap:16px; justify-content:space-between; }.admin-directory-list article > div:first-child { min-width:0; flex:1; }.admin-directory-list h3 { font-size:16px; color:white; margin-bottom:8px; overflow-wrap:anywhere; }.admin-directory-list p { overflow-wrap:anywhere; color:#bdc9df; font-size:13px; line-height:1.6; margin-top:5px; }.admin-row-actions { display:flex; gap:10px; align-items:flex-start; flex-direction:column; flex-shrink:0; max-width:100%; }.admin-row-actions a,.admin-row-actions button { color:#abcaff; font-size:12px; background:none; border:1px solid #ffffff25; border-radius:8px; padding:8px 12px; text-decoration:none; cursor:pointer; }.admin-row-actions button:disabled { opacity:.5; }.admin-pagination { display:flex; gap:16px; align-items:center; justify-content:center; margin-top:20px; font-size:13px; }.admin-pagination button { padding:8px 14px; color:white; background:#ffffff09; border:1px solid #ffffff20; border-radius:8px; cursor:pointer; }.admin-pagination button:disabled { opacity:.35; cursor:default; }
 @media(max-width:700px) { .start-guide { padding:20px; }.start-guide-grid { grid-template-columns:1fr; gap:20px; }.start-guide-head { flex-wrap:wrap; gap:12px; }.admin-workspace { padding:100px 16px 48px; }.admin-count-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }.admin-task-grid { grid-template-columns:1fr; }.admin-mini-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }.admin-section { padding:18px; }.admin-directory-list article { flex-direction:column; }.admin-row-actions { flex-direction:row; flex-wrap:wrap; }.admin-workspace-tabs { gap:8px; }.admin-workspace-tabs button { flex:1 1 130px; }.db-annonce-row { flex-wrap:wrap; }.db-annonce-right { max-width:100%; } }
+
+/* Career and season editing share the existing profile palette. */
+.club-name-input { position: relative; }
+.club-name-input > input { width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; background: rgba(255,255,255,.07); color: #fff; border: 1px solid rgba(255,255,255,.18); border-radius: 9px; padding: 11px 14px; }
+.club-name-options { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; background: #0d1f4a; border: 1px solid #526487; border-radius: 10px; box-shadow: 0 12px 28px #0006; }
+.club-name-options > button { display: block; width: 100%; min-height: 44px; padding: 11px 14px; color: #fff; background: none; border: 0; border-bottom: 1px solid #ffffff12; text-align: left; font: inherit; cursor: pointer; }
+.club-name-options > button:hover, .club-name-options > button[aria-selected=true] { background: #ffffff15; }
+.club-name-status { color: #c7d1e3; padding: 14px; font-size: 14px; }
+.season-stats-toolbar { display: flex; justify-content: flex-end; padding: 10px 14px; }
+.season-stats-toolbar button { min-height: 44px; background: #ffffff12; border: 1px solid #ffffff30; color: #fff; border-radius: 9px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+.season-edit-dialog { box-sizing: border-box; width: calc(100% - 32px); max-width: 560px; max-height: 90dvh; overflow-y: auto; padding: 24px; color: #fff; background: #0d1f4a; border: 1px solid #ffffff30; border-radius: 18px; }
+.season-edit-dialog::backdrop { background: #000b; }
+.season-edit-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.season-edit-heading h2 { font-family: 'Russo One',sans-serif; font-size: 20px; margin: 0; }
+.season-edit-heading button { min-width: 44px; min-height: 44px; color: #fff; background: none; border: 0; font-size: 28px; cursor: pointer; }
+.season-edit-dialog p { font-size: 14px; color: #c7d1e3; line-height: 1.6; }
+.season-edit-dialog fieldset { border: 1px solid #ffffff24; border-radius: 12px; margin: 20px 0; padding: 16px 12px; min-width: 0; }
+.season-edit-dialog legend { padding: 0 6px; font-size: 14px; font-weight: 700; }
+.season-edit-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.season-edit-grid label { font-size: 12px; line-height: 1.5; color: #c7d1e3; }
+.season-edit-grid input { box-sizing: border-box; display: block; width: 100%; margin-top: 8px; font-size: 18px; min-height: 48px; padding: 10px; border-radius: 8px; background: #ffffff0d; color: #fff; border: 1px solid #ffffff40; }
+.season-edit-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.season-edit-actions button { min-height: 44px; padding: 10px 16px; border-radius: 9px; border: 1px solid #ffffff30; color: #fff; background: #ffffff12; font: inherit; cursor: pointer; }
+.season-edit-actions button[type=submit] { background: #e52d3a; border-color: #e52d3a; font-weight: 700; }
+.season-edit-dialog .season-edit-error { color: #ffb6bc; }
+@media(max-width: 480px) { .season-edit-dialog { padding: 18px; } .season-edit-grid { gap: 6px; } .season-edit-grid input { padding: 8px; } }
+.season-edit-dialog { margin: auto; }
+.season-edit-grid label { display: flex; flex-direction: column; justify-content: flex-end; }
+.career-stations-label { color: #c7d1e3; font-size: 13px; font-weight: 700; margin: 20px 0 14px; letter-spacing: .04em; }

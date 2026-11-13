@@ -124,3 +124,11 @@ test('club interface dictionaries have matching keys and relative dates follow t
   assert.match(relativeTime('2026-11-11T10:00:00Z', 'fr', now), /il y a 2 heures/)
   assert.equal(relativeTime('invalid', 'de', now), '')
 })
+
+test('season statistics accept missing and zero values, but reject negative, decimal and overflowing input', () => {
+  const { parseSeasonStatistics, seasonStatFields } = load('lib/season-statistics.ts')
+  const empty = Object.fromEntries(seasonStatFields.map(field => [field, '']))
+  assert.equal(parseSeasonStatistics({ ...empty, goals: '0', assists: '12', matches: '20' }).goals, 0)
+  assert.equal(parseSeasonStatistics(empty).goals, null)
+  for (const bad of ['-1', '1.5', 'NaN', '2e3', '2147483648']) assert.throws(() => parseSeasonStatistics({ ...empty, matches: bad }))
+})

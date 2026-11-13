@@ -3,7 +3,7 @@
 import GettingStartedGuide from '../../components/GettingStartedGuide'
 import AnnonceStatusActions from '../../components/AnnonceStatusActions'
 
-import SeasonStats from '../../components/SeasonStats'
+import SeasonStatsModal from '../../components/SeasonStatsModal'
 import AccountTabs from '../../components/AccountTabs'
 import { strengthLabel } from '../../lib/strength-labels'
 import { footballLabel } from '../../lib/football-labels'
@@ -112,6 +112,7 @@ export default function ProfilPage() {
   const [birthDay, setBirthDay] = useState('')
   const [birthMonth, setBirthMonth] = useState('')
   const [birthYear, setBirthYear] = useState('')
+  const [showStatsModal, setShowStatsModal] = useState(false)
   const [goals, setGoals] = useState('')
   const [assists, setAssists] = useState('')
   const [matches, setMatches] = useState('')
@@ -533,7 +534,7 @@ export default function ProfilPage() {
       </div>
 
       {/* ── STATS (joueur uniquement) ── */}
-      {profile.role === 'player' && <SeasonStats profile={profile} lang={lang} large />}
+      {showStatsModal && <SeasonStatsModal profile={profile} lang={lang} onClose={() => setShowStatsModal(false)} onSaved={updated => { setProfile(current => current ? { ...current, ...updated } : current); void refreshProfile() }} />}
 
       {/* ── COACH INFO CARD ── */}
       {profile.role === 'coach' && (profile.coach_experience || profile.coach_diploma || profile.coach_specialty || profile.coach_availability) && (
@@ -628,6 +629,8 @@ export default function ProfilPage() {
           )}
           <CareerSection
             experiences={experiences}
+            seasonProfile={profile}
+            onEditStats={editing ? undefined : () => setShowStatsModal(true)}
             role={profile.role as 'player'|'coach'}
             lang={lang}
             canEdit

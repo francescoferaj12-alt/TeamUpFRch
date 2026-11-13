@@ -1,6 +1,5 @@
 'use client'
 
-import SeasonStats from '../../../components/SeasonStats'
 import { strengthLabel } from '../../../lib/strength-labels'
 import { footballLabel } from '../../../lib/football-labels'
 
@@ -256,7 +255,7 @@ export default function PublicProfilPage() {
         <div style={{ marginBottom: '1.25rem' }}><MemberSafetyActions key={id} memberId={id} /></div>
 
         {/* Stats (player only) */}
-        {profile.role === 'player' && <SeasonStats profile={profile} lang={lang} />}
+
 
         {/* Club info card */}
         {profile.role === 'club' && (
@@ -331,7 +330,7 @@ export default function PublicProfilPage() {
 
         {/* Career section — player & coach only */}
         {profile.role !== 'club' && (
-          <CareerSection experiences={experiences} role={profile.role as 'player'|'coach'} lang={lang} />
+          <CareerSection seasonProfile={profile} experiences={experiences} role={profile.role as 'player'|'coach'} lang={lang} />
         )}
 
         {/* Coach certificates */}

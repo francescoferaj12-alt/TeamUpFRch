@@ -1,5 +1,7 @@
 'use client'
 
+import ClubNameInput from '../../components/ClubNameInput'
+
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, avatarSrc } from '../../lib/supabase'
@@ -186,7 +188,7 @@ function CareerEditor({
       )}
       {entries.map((entry, i) => (
         <div key={entry.id} style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 12, padding: '1rem', marginBottom: '0.75rem' }}>
-          <TextField label={o.career_club[lang]} value={entry.club_name} onChange={v => update(i, 'club_name', v)} />
+          <div className="form-group"><label>{o.career_club[lang]}</label><ClubNameInput label={o.career_club[lang]} value={entry.club_name} onChange={v => update(i, 'club_name', v)} lang={lang} /></div>
           {roleType === 'player'
             ? <SelectField label={o.career_role[lang]} value={entry.position} onChange={v => update(i, 'position', v)} options={positions} placeholder={t.onboarding.choose[lang]} />
             : <SelectField label={o.career_role[lang]} value={entry.coach_role} onChange={v => update(i, 'coach_role', v)} options={COACH_ROLE_OPTIONS} placeholder={t.onboarding.choose[lang]} />
