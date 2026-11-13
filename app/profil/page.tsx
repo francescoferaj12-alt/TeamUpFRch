@@ -531,6 +531,9 @@ export default function ProfilPage() {
             <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'#c7d1e3', border:'1px solid rgba(255,255,255,.12)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
+            <Link href="/supprimer-compte" style={{ color:'#ffb4b4', padding:'7px 12px', fontSize:13, display:'inline-flex', alignItems:'center', minHeight:36 }}>
+              {lang === 'de' ? 'Mein Konto löschen' : 'Supprimer mon compte'}
+            </Link>
           </div>
         </div>
       </div>

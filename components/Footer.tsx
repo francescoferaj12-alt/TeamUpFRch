@@ -18,6 +18,7 @@ export default function Footer() {
   const aboutLinks = [
     ['/a-propos', t.nav.apropos[lang]],
     ['/faq',      t.nav.faq[lang]],
+    ['/assistance', lang === 'de' ? 'Hilfe' : 'Assistance'],
     ['/privacy',  t.footer.privacy_link[lang]],
     ['/cgu',      t.footer.cgu_link[lang]],
   ]

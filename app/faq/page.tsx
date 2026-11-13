@@ -99,7 +99,7 @@ const faqs: { category: { fr: string; de: string }; icon: string; items: FAQ[] }
     items: [
       {
         q: { fr: 'Comment supprimer mon profil ?', de: 'Wie lösche ich mein Profil?' },
-        a: { fr: "Pour supprimer ton compte, envoie un email à teamupfr.ch@gmail.com avec ton adresse email. Nous supprimerons toutes tes données dans les 48 heures conformément à la LPD suisse.", de: "Um dein Konto zu löschen, sende eine E-Mail an teamupfr.ch@gmail.com mit deiner E-Mail-Adresse. Wir löschen alle deine Daten innerhalb von 48 Stunden gemäss dem Schweizer DSG." }
+        a: { fr: "Depuis ton profil, choisis « Supprimer mon compte », puis confirme sur la page dédiée. Une connexion récente est nécessaire. Tu peux aussi ouvrir teamupfr.ch/supprimer-compte ou contacter teamupfr.ch@gmail.com si tu n’arrives plus à te connecter.", de: "Wähle in deinem Profil « Mein Konto löschen » und bestätige auf der dafür vorgesehenen Seite. Eine kürzlich erfolgte Anmeldung ist erforderlich. Du kannst auch teamupfr.ch/supprimer-compte öffnen oder bei Anmeldeproblemen teamupfr.ch@gmail.com kontaktieren." }
       },
       {
         q: { fr: 'Comment changer mon mot de passe ?', de: 'Wie ändere ich mein Passwort?' },
