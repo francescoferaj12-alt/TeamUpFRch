@@ -67,3 +67,5 @@ test('each selected category displays its own level in French and German',()=>{
  assert.match(picker,/Spielklasse — Junioren B/)
  assert.doesNotMatch(picker,/Niveau|Choisir|1er degré/)
 })
+
+test('juniors A B and C can select Youth League as their own level alongside the first degree',()=>{for(const category of ['cat_juniors_a','cat_juniors_b','cat_juniors_c']){const choices=model.clubTeamLevels(category);assert.ok(choices.some(level=>level.key==='youth'));assert.ok(choices.some(level=>level.key==='degree1'));}assert.ok(!model.clubTeamLevels('cat_juniors_e').some(level=>level.key==='youth'));const teams=[{category:'cat_juniors_a',level:'degree1'},{category:'cat_juniors_b',level:'youth'}];assert.deepEqual(model.parseClubTeams(model.serializeClubTeams(teams)),teams)});
