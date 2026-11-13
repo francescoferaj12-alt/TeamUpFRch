@@ -4,10 +4,11 @@ import type { Lang } from '../lib/translations'
 type Props = {
   profile: Pick<Profile, 'goals' | 'assists' | 'matches' | 'goals_prev' | 'assists_prev' | 'matches_prev'>
   lang: Lang
+  onEdit?: () => void
   large?: boolean
 }
 
-export default function SeasonStats({ profile, lang, large = false }: Props) {
+export default function SeasonStats({ profile, lang, large = false, onEdit }: Props) {
   const now = new Date()
   const year = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1
   const current = [profile.goals, profile.assists, profile.matches]
@@ -35,6 +36,7 @@ export default function SeasonStats({ profile, lang, large = false }: Props) {
   }
 
   return <section className={`season-stats${large ? ' large' : ''}`} aria-label={lang === 'de' ? 'Saisonstatistiken' : 'Statistiques de saison'}>
+    {onEdit && <div className="season-stats-toolbar"><button type="button" onClick={onEdit}>{lang === 'de' ? 'Statistiken bearbeiten' : 'Modifier les statistiques'}</button></div>}
     <div className="season-stats-heading">
       <h3>{lang === 'de' ? 'Aktuelle Saison' : 'Saison actuelle'}</h3>
       <span>{year} – {String(year + 1).slice(2)}</span>

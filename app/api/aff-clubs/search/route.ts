@@ -7,20 +7,23 @@ const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q') ?? ''
-  if (!q || q.length < 1 || q.length > 100) {
+  if (q.length > 100) {
     return NextResponse.json({ clubs: [] })
   }
 
   const supabase = createClient(url, anonKey)
-  const { data, error } = await supabase
+  let query = supabase
     .from('aff_clubs')
     .select('id, aff_number, name')
-    // Futsal-only clubs verified in the AFF team directory and approved by the owner.
-    .not('aff_number', 'in', '(5146,5154,5157,5149,5144)')
     .not('name', 'ilike', '%futsal%')
-    .ilike('name_normalized', `%${q.toLowerCase()}%`)
+    // Futsal-only clubs confirmed against each AFF club's team competitions.
+    // Approved by Francesco after reviewing the complete AFF audit (2026-11-13).
+    .not('aff_number', 'in', '(5146,5154,5157,5149,5144)')
     .order('name')
-    .limit(10)
+    .limit(500)
+  const normalized = q.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[%_,()*\\]/g, '')
+  if (normalized) query = query.ilike('name_normalized', `%${normalized}%`)
+  const { data, error } = await query
 
   if (error) {
     captureError(error, { api: 'aff-clubs/search', query: q })

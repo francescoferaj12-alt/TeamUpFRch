@@ -794,7 +794,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   function renderStats() {
     if (role !== 'player') return null
     return (
-      <Section title={t.profil.sec_stats[lang]} desc={t.profil.sec_stats_desc[lang]} defaultOpen={false} lang={lang}>
+      <Section title={t.profil.sec_stats[lang]} desc={t.profil.sec_stats_desc[lang]} lang={lang}>
         <div style={{ fontFamily:"'Russo One',sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'.5rem', color:'#3A7AFF' }}>{t.profil.current_season[lang]}</div>
         <div className="form-grid-3" style={{ marginBottom:18 }}>
           {[

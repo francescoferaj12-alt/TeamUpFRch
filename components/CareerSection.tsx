@@ -2,6 +2,8 @@
 
 import { footballLabel } from '../lib/football-labels'
 import { useState } from 'react'
+import SeasonStats from './SeasonStats'
+import type { Profile } from '../lib/supabase'
 import ClubCrest from './ClubCrest'
 import { CareerExperience } from '../lib/supabase'
 import { t } from '../lib/translations'
@@ -22,6 +24,8 @@ type Props = {
   role: 'player' | 'coach'
   lang: Lang
   canEdit?: boolean
+  seasonProfile?: Profile
+  onEditStats?: () => void
   onAdd?: () => void
   onEdit?: (exp: CareerExperience) => void
   onDelete?: (id: string) => void
@@ -37,7 +41,7 @@ function initials(name: string): string {
   return name.split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 3)
 }
 
-export default function CareerSection({ experiences, role, lang, canEdit, onAdd, onEdit, onDelete }: Props) {
+export default function CareerSection({ experiences, role, lang, canEdit, onAdd, onEdit, onDelete, seasonProfile, onEditStats }: Props) {
   const [filter, setFilter] = useState<'all' | 'current' | 'past'>('all')
   const tc = t.career_section
 
@@ -62,7 +66,7 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
         <div>
           <div className="section-label">{tc.label[lang]}</div>
           <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1.4rem', letterSpacing:1, color:'#fff' }}>
-            {tc.title[lang]}
+            {role === 'player' && seasonProfile ? (lang === 'de' ? 'Werdegang & Statistiken' : 'Parcours & statistiques') : tc.title[lang]}
           </div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
@@ -82,6 +86,9 @@ export default function CareerSection({ experiences, role, lang, canEdit, onAdd,
         </div>
       </div>
 
+      {role === 'player' && seasonProfile && <SeasonStats profile={seasonProfile} lang={lang} onEdit={canEdit ? onEditStats : undefined} />}
+
+      {role === 'player' && seasonProfile && <p className="career-stations-label">{lang === 'de' ? 'Vereine & Stationen' : 'Clubs & expériences'}</p>}
       {filtered.length === 0 && experiences.length === 0 ? (
         <div className="career-empty">
           <div className="career-empty-icon"><IcoClipboard s={32} /></div>
