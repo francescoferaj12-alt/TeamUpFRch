@@ -1458,3 +1458,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .season-edit-dialog { margin: auto; }
 .season-edit-grid label { display: flex; flex-direction: column; justify-content: flex-end; }
 .career-stations-label { color: #c7d1e3; font-size: 13px; font-weight: 700; margin: 20px 0 14px; letter-spacing: .04em; }
+
+/* Keep profile actions reachable above the mobile navigation, including iPhone safe areas. */
+@media (max-width:768px) { .pe-savebar { bottom:calc(var(--mobile-nav-space, 66px) + 12px); } }

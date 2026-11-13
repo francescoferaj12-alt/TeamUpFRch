@@ -19,6 +19,7 @@ export function clubTeamLevels(category: string) {
   const group = ['cat_juniors_g','cat_ff11'].includes(category) ? 'children' : category === 'cat_seniors_h' ? 'men' : category === 'cat_seniors_f' ? 'women' : category.startsWith('cat_youth') ? 'youth' : category.startsWith('cat_juniors_') || category.startsWith('cat_ff') || category === 'cat_juniores_f' ? 'juniors' : 'regional'
   const options = levelGroups.find(item => item.key === group)!.items
   if (['cat_juniors_e','cat_juniors_f','cat_juniors_d','cat_juniors_d7','cat_juniors_d9'].includes(category)) return options.filter(item => item.key !== 'promotion')
+  if (['cat_juniors_a','cat_juniors_b','cat_juniors_c'].includes(category)) return [...levelGroups.find(item => item.key === 'youth')!.items, ...options.filter(item => item.key !== 'degree3')]
   if (group === 'juniors') return options.filter(item => item.key !== 'degree3')
   return options
 }
