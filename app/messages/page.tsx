@@ -326,7 +326,7 @@ export default function MessagesPage() {
     const file = e.target.files?.[0]
     if (!file || !profile) return
     e.target.value = ''
-    if (file.size > 20 * 1024 * 1024) { alert('Fichier trop lourd (max 20 Mo)'); return }
+    if (file.size > 20 * 1024 * 1024) { alert(lang === 'de' ? 'Datei zu gross (max. 20 MB)' : 'Fichier trop lourd (max 20 Mo)'); return }
     setUploadingFile(true)
     const fileType = getFileType(file)
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -334,7 +334,7 @@ export default function MessagesPage() {
     const { data, error } = await supabase.storage
       .from('message-files')
       .upload(path, file, { upsert: false, contentType: file.type || 'application/octet-stream' })
-    if (error) { alert('Erreur upload: ' + error.message); setUploadingFile(false); return }
+    if (error) { alert(lang === 'de' ? 'Hochladen fehlgeschlagen. Bitte versuche es erneut.' : 'Le chargement a échoué. Réessaie.'); setUploadingFile(false); return }
     const { data: urlData, error: urlError } = await supabase.storage.from('message-files').createSignedUrl(data.path, 3600)
     if (urlError || !urlData) {
       await supabase.storage.from('message-files').remove([data.path])
