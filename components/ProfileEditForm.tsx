@@ -71,7 +71,7 @@ const STRENGTHS_CLUB = [
 const COACH_ROLES = ['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens']
 const UEFA_LICENCES = ['Aucune','UEFA C','UEFA B','UEFA A','UEFA Pro','BBaby','BFut','Diplôme CFE']
 const LEVELS = ['beginner','amateur','confirmed','experienced'] as const
-const CATEGORIES = ['cat_seniors_h','cat_seniors_f','cat_youth','cat_juniors_a','cat_juniors_b','cat_juniors_c','cat_juniors_d','cat_juniores_f','cat_veterans'] as const
+const CATEGORIES = ['cat_seniors_h','cat_seniors_f','cat_youth','cat_youth_a','cat_juniors_b','cat_juniors_c','cat_juniors_d','cat_juniores_f','cat_veterans'] as const
 
 const Svg = ({ children, size = 18, ...p }: any) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"

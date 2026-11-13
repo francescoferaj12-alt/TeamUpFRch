@@ -404,6 +404,7 @@ export const t = {
     cat_seniors_h: { fr: 'Seniors hommes', de: 'Senioren Männer' },
     cat_seniors_f: { fr: 'Seniors femmes', de: 'Senioren Frauen' },
     cat_youth: { fr: 'Youth League', de: 'Youth League' },
+    cat_youth_a: { fr: 'Youth League A', de: 'Youth League A' },
     cat_juniors_a: { fr: 'Juniors A', de: 'Junioren A' },
     cat_juniors_b: { fr: 'Juniors B', de: 'Junioren B' },
     cat_juniors_c: { fr: 'Juniors C', de: 'Junioren C' },

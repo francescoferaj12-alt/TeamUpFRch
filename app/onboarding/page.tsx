@@ -636,7 +636,7 @@ export default function OnboardingPage() {
         <CareerEditor entries={cCareer} onChange={setCCareer} roleType="coach" lang={lang} />
       )
       if (step === 4) return (
-        <TextareaField label={o.c4_title[lang]} value={cCategories} onChange={setCCategories} placeholder="Seniors, Juniors A, Juniors B…" rows={3} />
+        <TextareaField label={o.c4_title[lang]} value={cCategories} onChange={setCCategories} placeholder="Seniors, Youth League A, Juniors B…" rows={3} />
       )
       if (step === 5) return (
         <PhotoStep userId={userId} avatarUrl={cAvatarUrl} onUploaded={setCAvatarUrl} lang={lang} />

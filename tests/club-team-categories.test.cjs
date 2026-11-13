@@ -68,7 +68,7 @@ test('each selected category displays its own level in French and German',()=>{
  assert.doesNotMatch(picker,/Niveau|Choisir|1er degré/)
 })
 
-test('juniors A B and C can select Youth League as their own level alongside the first degree',()=>{for(const category of ['cat_juniors_a','cat_juniors_b','cat_juniors_c']){const choices=model.clubTeamLevels(category);assert.ok(choices.some(level=>level.key==='youth'));assert.ok(choices.some(level=>level.key==='degree1'));}assert.ok(!model.clubTeamLevels('cat_juniors_e').some(level=>level.key==='youth'));const teams=[{category:'cat_juniors_a',level:'degree1'},{category:'cat_juniors_b',level:'youth'}];assert.deepEqual(model.parseClubTeams(model.serializeClubTeams(teams)),teams)});
+test('juniors B and C can select Youth League alongside the first degree',()=>{for(const category of ['cat_juniors_b','cat_juniors_c']){const choices=model.clubTeamLevels(category);assert.ok(choices.some(level=>level.key==='youth'));assert.ok(choices.some(level=>level.key==='degree1'));}assert.ok(!model.clubTeamLevels('cat_juniors_e').some(level=>level.key==='youth'));const teams=[{category:'cat_juniors_a',level:'degree1'},{category:'cat_juniors_b',level:'youth'}];assert.deepEqual(model.parseClubTeams(model.serializeClubTeams(teams)),teams)});
 test('two teams in the same category retain independent names and levels through save and reload',()=>{
  let teams=model.parseClubTeams('cat_juniors_a,cat_seniors_h')
  teams=model.setClubTeamLevel(teams,'cat_juniors_a','degree1')
@@ -98,4 +98,18 @@ test('unnamed teams receive distinct localized titles and old version-one record
  assert.match(picker,/Weiteres Team hinzufügen/)
  assert.match(picker,/Teamname/)
  assert.match(picker,/type="checkbox"[^>]*disabled=""[^>]*checked=""/)
+})
+
+test('current A choices contain only Youth League A across roles and landing page sources',()=>{
+ assert.deepEqual(model.clubTeamLevels('cat_juniors_a').map(item=>item.key),['youth'])
+ const categories=model.CLUB_TEAM_GROUPS.flatMap(group=>group.items.map(item=>item.key))
+ assert.ok(!categories.includes('cat_juniors_a'))
+ assert.ok(categories.includes('cat_youth_a'))
+ const data=load(path.resolve(__dirname,'../lib/data.ts'))
+ for(const groups of [data.ligues,data.liguesHomme]){const leagues=groups.flatMap(group=>group.items);assert.ok(leagues.includes('Youth League A'));assert.ok(!leagues.some(item=>/^Juniors? A(?:$| -| Promotion)/.test(item)))}
+ const historical=[{category:'cat_juniors_a',level:'degree1'}]
+ assert.deepEqual(model.parseClubTeams(model.serializeClubTeams(historical)),historical)
+ for(const lang of ['fr','de']){const markup=renderToStaticMarkup(React.createElement(component.ClubTeamCategoryPicker,{lang,value:[],onChange(){}}));assert.match(markup,/Youth League A/);assert.doesNotMatch(markup,/>Junior(?:s|en) A</)}
+ const coach=fs.readFileSync(path.resolve(__dirname,'../components/ProfileEditForm.tsx'),'utf8').match(/const CATEGORIES = (.*)/)[1]
+ assert.ok(!coach.includes("'cat_juniors_a'"));assert.ok(coach.includes("'cat_youth_a'"))
 })

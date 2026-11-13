@@ -1,6 +1,7 @@
 import levelGroups from './club-team-levels.json'
 import groups from './club-team-categories.json'
-export const CLUB_TEAM_GROUPS = groups
+// Legacy A categories remain readable but are no longer offered for new teams.
+export const CLUB_TEAM_GROUPS = groups.map(group => ({ ...group, items: group.items.filter(item => item.key !== 'cat_juniors_a') }))
 const labels = new Map(groups.flatMap(group => group.items.map(item => [item.key, item] as const)))
 export function parseClubCategories(raw?: string | null): string[] {
   if (raw?.trim().startsWith('{')) return [...new Set(parseClubTeams(raw).map(team => team.category))]
@@ -16,10 +17,11 @@ export function toggleClubCategory(selected: string[], key: string): string[] {
 
 export type ClubTeam = { id?: string; name?: string; category: string; level: string }
 export function clubTeamLevels(category: string) {
+  if (category === 'cat_juniors_a') return levelGroups.find(item => item.key === 'youth')!.items
   const group = ['cat_juniors_g','cat_ff11'].includes(category) ? 'children' : category === 'cat_seniors_h' ? 'men' : category === 'cat_seniors_f' ? 'women' : category.startsWith('cat_youth') ? 'youth' : category.startsWith('cat_juniors_') || category.startsWith('cat_ff') || category === 'cat_juniores_f' ? 'juniors' : 'regional'
   const options = levelGroups.find(item => item.key === group)!.items
   if (['cat_juniors_e','cat_juniors_f','cat_juniors_d','cat_juniors_d7','cat_juniors_d9'].includes(category)) return options.filter(item => item.key !== 'promotion')
-  if (['cat_juniors_a','cat_juniors_b','cat_juniors_c'].includes(category)) return [...levelGroups.find(item => item.key === 'youth')!.items, ...options.filter(item => item.key !== 'degree3')]
+  if (['cat_juniors_b','cat_juniors_c'].includes(category)) return [...levelGroups.find(item => item.key === 'youth')!.items, ...options.filter(item => item.key !== 'degree3')]
   if (group === 'juniors') return options.filter(item => item.key !== 'degree3')
   return options
 }
