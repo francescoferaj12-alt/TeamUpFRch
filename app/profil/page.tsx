@@ -437,7 +437,7 @@ export default function ProfilPage() {
       {postSuccess && (
         <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
           <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
-          Post publié ! Visible dans <a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>le fil d&apos;annonces</a>.
+          {lang === 'de' ? 'Anzeige veröffentlicht! Sichtbar im ' : 'Post publié ! Visible dans '}<a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>{lang === 'de' ? 'Anzeigenfeed' : 'fil d’annonces'}</a>.
         </div>
       )}
 
@@ -531,6 +531,9 @@ export default function ProfilPage() {
             <button onClick={handleLogout} style={{ background:'rgba(255,255,255,.08)', color:'#c7d1e3', border:'1px solid rgba(255,255,255,.12)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
               {t.profil.logout[lang]}
             </button>
+            <Link href="/supprimer-compte" style={{ color:'#ffb4b4', padding:'7px 12px', fontSize:13, display:'inline-flex', alignItems:'center', minHeight:36 }}>
+              {lang === 'de' ? 'Mein Konto löschen' : 'Supprimer mon compte'}
+            </Link>
           </div>
         </div>
       </div>

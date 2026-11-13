@@ -307,7 +307,7 @@ function RecommendedSection({ profile }: { profile: Profile }) {
         <Link href="/annonces" className="db-section-link">{lang === 'de' ? 'Alle ansehen' : 'Voir tout'} <IcoArrow s={12}/></Link>
       </div>
       {loading ? <Loading /> : annonces.length === 0 ? (
-        <Empty icon={<IcoEmpty s={28}/>} msg="Aucune annonce dans ta zone pour l'instant.">
+        <Empty icon={<IcoEmpty s={28}/>} msg={lang === 'de' ? 'Zurzeit gibt es keine Anzeigen in deiner Region.' : "Aucune annonce dans ta zone pour l'instant."}>
           <Link href="/annonces" className="db-empty-link">{lang === 'de' ? 'Alle Anzeigen ansehen' : 'Explorer toutes les annonces'} <IcoArrow s={12}/></Link>
         </Empty>
       ) : (

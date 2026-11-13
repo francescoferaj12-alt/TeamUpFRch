@@ -60,7 +60,7 @@ test('authenticated members still reach each protected page', () => {
 })
 
 test('landing, signup, email confirmation, recovery and legal pages stay accessible', () => {
-  for (const route of ['/', '/accueil', '/login', '/verify-email', '/verify-email-pending', '/reset-password', '/privacy', '/cgu', '/login/']) {
+  for (const route of ['/', '/accueil', '/login', '/verify-email', '/verify-email-pending', '/reset-password', '/privacy', '/cgu', '/supprimer-compte', '/assistance', '/login/']) {
     assert.equal(harness(route).mounted, true, route)
   }
 })
