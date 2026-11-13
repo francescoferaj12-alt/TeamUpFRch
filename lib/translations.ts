@@ -397,7 +397,7 @@ export const t = {
     club_stadium_address: { fr: 'Adresse du stade', de: 'Adresse des Stadions' },
     club_color_primary: { fr: 'Couleur principale', de: 'Hauptfarbe' },
     club_color_secondary: { fr: 'Couleur secondaire', de: 'Zweitfarbe' },
-    club_categories: { fr: 'Catégories proposées', de: 'Angebotene Kategorien' },
+    club_categories: { fr: 'Équipes du club', de: 'Teams des Vereins' },
     club_categories_help: { fr: 'Sélectionne toutes les catégories actives dans ton club.', de: 'Wähle alle aktiven Kategorien in deinem Verein.' },
 
     // ── Categories list (shared coach + club) ──────────────────────

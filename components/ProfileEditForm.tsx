@@ -6,6 +6,8 @@ import { ownedVideoPath, profileVideoFields } from '../lib/profile-videos'
 import { supabase, Profile } from '../lib/supabase'
 import { t, months, Lang } from '../lib/translations'
 import { liguesHomme, liguesFemme } from '../lib/data'
+import { parseClubTeams, serializeClubTeams, type ClubTeam } from '../lib/club-team-categories'
+import { ClubTeamCategoryPicker } from './ClubTeamCategories'
 import { footballLabel } from '../lib/football-labels'
 
 const VideoUploadInput = dynamic(() => import('./VideoUploadInput'), { ssr: false })
@@ -69,10 +71,7 @@ const STRENGTHS_CLUB = [
 const COACH_ROLES = ['Entraîneur principal','Entraîneur assistant','Préparateur physique','Entraîneur des gardiens']
 const UEFA_LICENCES = ['Aucune','UEFA C','UEFA B','UEFA A','UEFA Pro','BBaby','BFut','Diplôme CFE']
 const LEVELS = ['beginner','amateur','confirmed','experienced'] as const
-
-const CATEGORIES = [
-  'cat_seniors_h','cat_seniors_f','cat_youth','cat_juniors_a','cat_juniors_b','cat_juniors_c','cat_juniors_d','cat_juniores_f','cat_veterans',
-] as const
+const CATEGORIES = ['cat_seniors_h','cat_seniors_f','cat_youth','cat_juniors_a','cat_juniors_b','cat_juniors_c','cat_juniors_d','cat_juniores_f','cat_veterans'] as const
 
 const Svg = ({ children, size = 18, ...p }: any) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"
@@ -255,7 +254,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [clubStadiumAddress, setClubStadiumAddress] = useState((profile as any).club_stadium_address || '')
   const [clubColorPrimary, setClubColorPrimary] = useState((profile as any).club_color_primary || '#FF3A3A')
   const [clubColorSecondary, setClubColorSecondary] = useState((profile as any).club_color_secondary || '#ffffff')
-  const [clubCategories, setClubCategories] = useState<string[]>(parseList((profile as any).club_categories))
+  const [clubCategories, setClubCategories] = useState<ClubTeam[]>(parseClubTeams(profile.club_categories))
 
   // ── About: edit/preview tab ──────────────────────────────────────
   const [bioTab, setBioTab] = useState<'edit'|'preview'>('edit')
@@ -376,7 +375,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       ext.club_stadium_address = clubStadiumAddress || null
       ext.club_color_primary = clubColorPrimary || null
       ext.club_color_secondary = clubColorSecondary || null
-      ext.club_categories = clubCategories.join(',') || null
+      ext.club_categories = serializeClubTeams(clubCategories) || null
     }
     return { base, ext }
   }
@@ -502,7 +501,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     coach_categories: coachCategories.join(','), coach_philosophy: coachPhilosophy,
     coach_certificates: coachCertificates.length > 0 ? 'yes' : null,
     club_founded_year: clubFoundedYear as any, club_teams_count: clubTeamsCount as any,
-    club_stadium_name: clubStadiumName, club_categories: clubCategories.join(','), club_website: clubWebsite,
+    club_stadium_name: clubStadiumName, club_categories: serializeClubTeams(clubCategories), club_website: clubWebsite,
   }), [profile, bio, zone, phone, selectedStrengths, available, firstName, lastName, clubName,
        ligue, position, foot, level, birthDay, birthMonth, birthYear, coachSpecialty, coachDiploma,
        coachExperience, coachCategories, coachPhilosophy, coachCertificates, clubFoundedYear, clubTeamsCount,
@@ -775,16 +774,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
           </div>
           <div className="form-group form-grid-full">
             <label>{t.profil.club_categories[lang]}</label>
-            <div className="pe-multi">
-              {CATEGORIES.map(c => (
-                <button key={c} type="button"
-                  className={`pe-multi-chip ${clubCategories.includes(c) ? 'active' : ''}`}
-                  onClick={() => toggleInList(clubCategories, setClubCategories, c)}>
-                  {(t.profil as any)[c][lang]}
-                </button>
-              ))}
-            </div>
-            <div className="field-help">{t.profil.club_categories_help[lang]}</div>
+            <ClubTeamCategoryPicker value={clubCategories} onChange={setClubCategories} lang={lang} />
           </div>
         </div>
       </Section>

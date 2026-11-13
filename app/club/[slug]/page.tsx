@@ -1,5 +1,7 @@
 'use client'
 
+import ClubTeamCategories from '../../../components/ClubTeamCategories'
+
 import { currentAnnonceFilter } from '../../../lib/annonce-lifecycle'
 
 import { useLang } from '../../../lib/lang-context'
@@ -225,6 +227,7 @@ export default function ClubPage() {
                 ? <p>{club.bio}</p>
                 : <p style={{ color:'#c7d1e3', fontStyle: 'italic' }}>{copy.noDescription}</p>
               }
+              <ClubTeamCategories value={club.club_categories} lang={lang} />
               {strengths.length > 0 && (
                 <div className="cd-strengths">
                   <div className="cd-strengths-title">{copy.strengths}</div>

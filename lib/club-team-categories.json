@@ -1,0 +1,165 @@
+[
+  {
+    "key": "adults",
+    "fr": "Équipes adultes",
+    "de": "Aktive Teams",
+    "items": [
+      {
+        "key": "cat_seniors_h",
+        "fr": "Actifs hommes",
+        "de": "Aktive Männer"
+      },
+      {
+        "key": "cat_seniors_f",
+        "fr": "Actives femmes",
+        "de": "Aktive Frauen"
+      },
+      {
+        "key": "cat_football_67",
+        "fr": "Football 6/7 (mixte)",
+        "de": "Fussball 6/7 (gemischt)"
+      }
+    ]
+  },
+  {
+    "key": "juniors",
+    "fr": "Juniors",
+    "de": "Junioren",
+    "items": [
+      {
+        "key": "cat_juniors_a",
+        "fr": "Juniors A",
+        "de": "Junioren A"
+      },
+      {
+        "key": "cat_juniors_b",
+        "fr": "Juniors B",
+        "de": "Junioren B"
+      },
+      {
+        "key": "cat_juniors_c",
+        "fr": "Juniors C",
+        "de": "Junioren C"
+      },
+      {
+        "key": "cat_juniors_d",
+        "fr": "Juniors D",
+        "de": "Junioren D"
+      },
+      {
+        "key": "cat_juniors_e",
+        "fr": "Juniors E",
+        "de": "Junioren E"
+      },
+      {
+        "key": "cat_juniors_f",
+        "fr": "Juniors F",
+        "de": "Junioren F"
+      },
+      {
+        "key": "cat_juniors_g",
+        "fr": "Juniors G",
+        "de": "Junioren G"
+      },
+      {
+        "key": "cat_juniors_d7",
+        "fr": "Juniors D-7",
+        "de": "Junioren D-7"
+      },
+      {
+        "key": "cat_juniors_d9",
+        "fr": "Juniors D-9",
+        "de": "Junioren D-9"
+      },
+      {
+        "key": "cat_youth",
+        "fr": "Youth League",
+        "de": "Youth League"
+      },
+      {
+        "key": "cat_youth_a",
+        "fr": "Youth League A",
+        "de": "Youth League A"
+      },
+      {
+        "key": "cat_youth_b",
+        "fr": "Youth League B",
+        "de": "Youth League B"
+      },
+      {
+        "key": "cat_youth_c",
+        "fr": "Youth League C",
+        "de": "Youth League C"
+      }
+    ]
+  },
+  {
+    "key": "girls",
+    "fr": "Juniores féminines",
+    "de": "Juniorinnen",
+    "items": [
+      {
+        "key": "cat_juniores_f",
+        "fr": "Juniores féminines (autres catégories)",
+        "de": "Juniorinnen (weitere Kategorien)"
+      },
+      {
+        "key": "cat_ff11",
+        "fr": "Juniores FF-11",
+        "de": "Juniorinnen FF-11"
+      },
+      {
+        "key": "cat_ff14_7",
+        "fr": "Juniores FF-14 (7v7)",
+        "de": "Juniorinnen FF-14 (7v7)"
+      },
+      {
+        "key": "cat_ff14_9",
+        "fr": "Juniores FF-14 (9v9)",
+        "de": "Juniorinnen FF-14 (9v9)"
+      },
+      {
+        "key": "cat_ff17",
+        "fr": "Juniores FF-17",
+        "de": "Juniorinnen FF-17"
+      },
+      {
+        "key": "cat_ff21",
+        "fr": "Juniores FF-21",
+        "de": "Juniorinnen FF-21"
+      }
+    ]
+  },
+  {
+    "key": "seniors",
+    "fr": "Seniors & vétérans",
+    "de": "Senioren & Veteranen",
+    "items": [
+      {
+        "key": "cat_30",
+        "fr": "Seniors 30+ (mixte)",
+        "de": "Senioren 30+ (gemischt)"
+      },
+      {
+        "key": "cat_40",
+        "fr": "Seniors 40+ (mixte)",
+        "de": "Senioren 40+ (gemischt)"
+      },
+      {
+        "key": "cat_50",
+        "fr": "Seniors 50+ (mixte)",
+        "de": "Senioren 50+ (gemischt)"
+      },
+      {
+        "key": "cat_f28",
+        "fr": "Seniores femmes 28+",
+        "de": "Seniorinnen 28+"
+      },
+      {
+        "key": "cat_veterans",
+        "fr": "Vétérans",
+        "de": "Veteranen"
+      }
+    ]
+  }
+]

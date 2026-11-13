@@ -1,5 +1,7 @@
 'use client'
 
+import ClubTeamCategories from '../../../components/ClubTeamCategories'
+
 import { strengthLabel } from '../../../lib/strength-labels'
 import { footballLabel } from '../../../lib/football-labels'
 
@@ -30,18 +32,6 @@ const IcoGradCap    = ({ s = 13 }: { s?: number }) => <Svg size={s}><path d="M22
 const IcoCalendar   = ({ s = 13 }: { s?: number }) => <Svg size={s}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></Svg>
 const IcoUsers      = ({ s = 13 }: { s?: number }) => <Svg size={s}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></Svg>
 const IcoUserX      = ({ s = 52 }: { s?: number }) => <Svg size={s} strokeWidth="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></Svg>
-
-const CATEGORY_LABELS: Record<string, { fr: string; de: string }> = {
-  cat_seniors_h:  { fr: 'Seniors hommes', de: 'Senioren Männer' },
-  cat_seniors_f:  { fr: 'Seniors femmes', de: 'Senioren Frauen' },
-  cat_youth:      { fr: 'Youth League',   de: 'Youth League' },
-  cat_juniors_a:  { fr: 'Juniors A',      de: 'Junioren A' },
-  cat_juniors_b:  { fr: 'Juniors B',      de: 'Junioren B' },
-  cat_juniors_c:  { fr: 'Juniors C',      de: 'Junioren C' },
-  cat_juniors_d:  { fr: 'Juniors D',      de: 'Junioren D' },
-  cat_juniores_f: { fr: 'Juniors filles', de: 'Juniorinnen' },
-  cat_veterans:   { fr: 'Vétérans',       de: 'Veteranen' },
-}
 
 function getYouTubeEmbed(url: string): string | null {
   try {
@@ -366,25 +356,7 @@ export default function PublicProfilPage() {
             )}
 
             {/* Club categories */}
-            {profile.role === 'club' && (profile as any).club_categories && (
-              <div style={darkCard}>
-                <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'1rem', letterSpacing:1, marginBottom:'1rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,.08)', display:'flex', alignItems:'center', gap:8 }}>
-                  <IcoStadium s={15} /> {lang === 'fr' ? 'Catégories proposées' : 'Angebotene Kategorien'}
-                </div>
-                <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-                  {((profile as any).club_categories as string)
-                    .split(',').map((s: string) => s.trim()).filter(Boolean)
-                    .map((key: string) => {
-                      const label = CATEGORY_LABELS[key]?.[lang] || key
-                      return (
-                        <span key={key} style={{ background:'rgba(255,255,255,.07)', border:'1.5px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', borderRadius:100, padding:'5px 16px', fontSize:13, fontWeight:600 }}>
-                          {label}
-                        </span>
-                      )
-                    })}
-                </div>
-              </div>
-            )}
+            {profile.role === 'club' && <ClubTeamCategories value={profile.club_categories} lang={lang} />}
 
           </div>
 
