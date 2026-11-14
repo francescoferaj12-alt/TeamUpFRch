@@ -7,7 +7,7 @@ const React = require('react')
 const { renderToStaticMarkup } = require('react-dom/server')
 const root = path.resolve(__dirname, '..')
 
-function harness(pathname, session = null, authLoading = false, lang = 'fr') {
+function harness(pathname, session = null, authLoading = false, lang = 'fr', mediaReady = true, mediaError = false) {
   const cache = new Map()
   function load(file) {
     file = path.resolve(root, file)
@@ -19,7 +19,7 @@ function harness(pathname, session = null, authLoading = false, lang = 'fr') {
     const localRequire = name => {
       if (name === 'next/navigation') return { usePathname: () => pathname }
       if (name === 'next/link') return { __esModule: true, default: props => React.createElement('a', props) }
-      if (name.endsWith('/auth-context')) return { useAuth: () => ({ session, authLoading }) }
+      if (name.endsWith('/auth-context')) return { useAuth: () => ({ session, authLoading, mediaReady, mediaError }) }
       if (name.endsWith('/lang-context')) return { useLang: () => ({ lang }) }
       if (!name.startsWith('.')) return require(name)
       const base = path.resolve(path.dirname(file), name)
@@ -78,3 +78,5 @@ test('both gate actions preserve destination; German copy is complete', () => {
   }
   assert.match(r.access.memberLoginHref('//evil.example'), /redirect=%2Fannonces/)
 })
+
+test('verified login waits for the media cookie and offers a retry on failure without mounting private pages',()=>{let r=harness('/profil',{user:{id:'member'}},false,'fr',false);assert.equal(r.mounted,false);assert.match(r.html,/role="status"/);r=harness('/profil',{user:{id:'member'}},false,'de',false,true);assert.equal(r.mounted,false);assert.match(r.html,/Erneut versuchen/)});

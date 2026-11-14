@@ -1,5 +1,7 @@
 'use client'
 
+import { profileMediaUrl } from '../../lib/profile-media'
+
 import ClubNameInput from '../../components/ClubNameInput'
 
 import { useEffect, useRef, useState } from 'react'
@@ -248,8 +250,7 @@ function PhotoStep({
     const path = `${userId}/avatar.jpg`
     const { data, error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
     if (upErr) { setError(o.photo_error[lang]); setUploading(false); return }
-    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(data.path)
-    const url = urlData.publicUrl + '?t=' + Date.now()
+    const url = profileMediaUrl('avatars',data.path) + '?t=' + Date.now()
     onUploaded(url)
     setUploading(false)
   }

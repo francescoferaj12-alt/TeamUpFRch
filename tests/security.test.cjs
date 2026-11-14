@@ -21,6 +21,7 @@ function load(file, mocks = {}) {
     process: { env: { NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'test-only', RESEND_API_KEY: 'test-only', CRON_SECRET: 'test-only' } },
     require(name) {
       if (Object.hasOwn(mocks, name)) return mocks[name]
+      if (name.endsWith('/profile-media') || name==='./profile-media') return load('lib/profile-media.ts')
       if (name.endsWith('/logger')) return { captureError() {} }
       if (name.endsWith('/email-throttle')) return { isThrottled: () => false }
       if (name.endsWith('/football-labels')) return load('lib/football-labels.ts')
