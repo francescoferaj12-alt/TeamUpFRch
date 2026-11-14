@@ -1,5 +1,7 @@
 'use client'
 
+import { profileMediaSrc } from '../../../lib/profile-media'
+
 import ClubTeamCategories from '../../../components/ClubTeamCategories'
 
 import { strengthLabel } from '../../../lib/strength-labels'
@@ -309,7 +311,7 @@ export default function PublicProfilPage() {
                 )
                 if (isNative) return (
                   <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
-                    <video preload="none" src={url} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
+                    <video preload="none" src={profileMediaSrc(url) || undefined} controls playsInline style={{ width:'100%', maxHeight:320, display:'block', objectFit:'cover' }} />
                   </div>
                 )
                 return null

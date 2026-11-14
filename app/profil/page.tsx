@@ -1,5 +1,7 @@
 'use client'
 
+import { profileMediaSrc, profileMediaUrl } from '../../lib/profile-media'
+
 import ClubTeamCategories from '../../components/ClubTeamCategories'
 
 import GettingStartedGuide from '../../components/GettingStartedGuide'
@@ -240,8 +242,7 @@ export default function ProfilPage() {
       .from('avatars')
       .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
     if (error) { alert('Erreur upload: ' + error.message); setUploadingPhoto(false); return }
-    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
-    const avatar_url = urlData.publicUrl + '?t=' + Date.now()
+    const avatar_url = profileMediaUrl('avatars',uploadData.path) + '?t=' + Date.now()
     await supabase.from('profiles').update({ avatar_url }).eq('id', profile.id)
     setProfile({ ...profile, avatar_url })
     await refreshProfile()
@@ -742,7 +743,7 @@ export default function ProfilPage() {
                   )
                   if (isNativeVideo) return (
                     <div key={i} style={{ borderRadius:12, overflow:'hidden', background:'#000' }}>
-                      <video preload="none" src={url} controls playsInline style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }} />
+                      <video preload="none" src={profileMediaSrc(url) || undefined} controls playsInline style={{ width:'100%', maxHeight:360, display:'block', objectFit:'cover' }} />
                     </div>
                   )
                   return (

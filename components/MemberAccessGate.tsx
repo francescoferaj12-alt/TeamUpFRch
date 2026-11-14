@@ -9,11 +9,15 @@ import { isPublicPage, memberLoginHref } from '../lib/member-access'
 
 export default function MemberAccessGate({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  const { session, authLoading } = useAuth()
+  const { session, authLoading, mediaReady, mediaError } = useAuth()
   const { lang } = useLang()
   if (isPublicPage(pathname)) return <>{children}</>
+  if (session && !mediaReady && mediaError) return <section style={{padding:'140px 24px',textAlign:'center'}} role="alert">
+    <p>{lang==='de'?'Die sichere Verbindung konnte nicht hergestellt werden. Prüfe deine Verbindung und versuche es erneut.':'La connexion sécurisée n’a pas pu être établie. Vérifie ta connexion puis réessaie.'}</p>
+    <button className="btn btn-red" onClick={()=>window.location.reload()}>{lang==='de'?'Erneut versuchen':'Réessayer'}</button>
+  </section>
   // Never mount member pages (or run their data effects) before authentication.
-  if (authLoading) return <div className="home-session-loading" role="status">{lang === 'de' ? 'Wird geladen…' : 'Chargement…'}</div>
+  if (authLoading || (session && !mediaReady)) return <div className="home-session-loading" role="status">{lang === 'de' ? 'Wird geladen…' : 'Chargement…'}</div>
   if (session) return <>{children}</>
 
   return <section className="member-access-gate" aria-labelledby="member-access-title">
