@@ -17,7 +17,7 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { lang } = useLang()
-  const { session, profile } = useAuth()
+  const { session, profile, mediaReady } = useAuth()
   const [unread, setUnread] = useState(0)
   const [unreadApps, setUnreadApps] = useState(0)
   const [scrolled, setScrolled] = useState(false)
@@ -28,7 +28,7 @@ export default function Navbar() {
     ? {
         email: profile.email,
         initials: `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '??',
-        avatar_url: profile.avatar_url,
+        avatar_url: mediaReady ? profile.avatar_url : null,
       }
     : null
 

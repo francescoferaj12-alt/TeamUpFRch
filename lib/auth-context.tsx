@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react'
 import { Session } from '@supabase/supabase-js'
 import { supabase, Profile } from './supabase'
+import { syncMediaSession } from './media-session'
 
 const PROFILE_CACHE_KEY = 'teamup-profile-cache'
 
@@ -25,6 +26,8 @@ function writeCachedProfile(p: Profile | null) {
 type AuthCtx = {
   session: Session | null
   profile: Profile | null
+  mediaReady: boolean
+  mediaError: boolean
   authLoading: boolean
   refreshProfile: () => Promise<void>
 }
@@ -32,14 +35,19 @@ type AuthCtx = {
 const AuthContext = createContext<AuthCtx>({
   session: null,
   profile: null,
+  mediaReady: false,
+  mediaError: false,
   authLoading: true,
   refreshProfile: async () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [mediaUser, setMediaUser] = useState<string | null>(null)
+  const [mediaError, setMediaError] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const mediaRevision = useRef(0)
   const activeUserRef = useRef<string | null>(null)
   const pendingProfiles = useRef(new Map<string, Promise<void>>())
 
@@ -63,6 +71,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true
 
+    function connectMedia(s:Session|null) {
+      const revision=++mediaRevision.current
+      if (!s) setMediaUser(null)
+      setMediaError(false)
+      void syncMediaSession(s).then(ok=>{
+        if(mounted && revision===mediaRevision.current && s && activeUserRef.current===s.user.id) {
+          setMediaError(!ok)
+          if(ok) setMediaUser(s.user.id)
+        }
+      })
+    }
+
     // 1. Optimistically hydrate profile from cache (instant first paint)
     const cached = readCachedProfile()
     if (cached) setProfile(cached)
@@ -72,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return
       activeUserRef.current = s?.user.id ?? null
       setSession(s)
+      connectMedia(s)
 
       if (s) {
         if (cached && cached.id === s.user.id) {
@@ -94,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return
       activeUserRef.current = s?.user.id ?? null
       setSession(s)
+      connectMedia(s)
       if (!s) {
         setProfile(null)
         writeCachedProfile(null)
@@ -127,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ session, profile, authLoading, refreshProfile }}>
+    <AuthContext.Provider value={{ session, profile, mediaReady: !!session && mediaUser===session.user.id, mediaError, authLoading, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

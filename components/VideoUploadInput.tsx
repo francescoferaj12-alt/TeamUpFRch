@@ -1,5 +1,7 @@
 'use client'
 
+import { profileMediaUrl, profileMediaSrc } from '../lib/profile-media'
+
 import { useRef, useState, useEffect, ChangeEvent } from 'react'
 import { ownedVideoPath, MAX_PROFILE_VIDEO_BYTES, uploadProfileVideo } from '../lib/profile-videos'
 import { supabase } from '../lib/supabase'
@@ -91,8 +93,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
     if(!mounted.current)return
     setProgress(100)
     if(nextDuration!==null)onDurationChange?.(nextDuration)
-    const { data: urlData } = supabase.storage.from('videos').getPublicUrl(path)
-    onChange(urlData.publicUrl + '?t=' + Date.now())
+    onChange(profileMediaUrl('videos',path) + '?t=' + Date.now())
     setTimeout(() => { if(mounted.current){setUploading(false);setProgress(0)} }, 600)
   }
 
@@ -159,7 +160,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
       {isVideo && !uploading && (
         <div style={{ marginTop: 8, borderRadius: 10, overflow: 'hidden', background: '#000', position: 'relative', maxHeight: 80 }}>
           <video
-            src={value}
+            src={profileMediaSrc(value) || undefined}
             preload="none"
             playsInline
             muted
