@@ -68,7 +68,7 @@ export default function PublicProfilPage() {
       ])
       const ownProfile = auth.user?.id === id
       const { data, error } = await supabase
-        .from(ownProfile ? 'profiles' : 'public_profiles')
+        .from(ownProfile || auth.user?.email === 'teamupfr.ch@gmail.com' ? 'profiles' : 'public_profiles')
         .select('*')
         .eq('id', id)
         .single()
