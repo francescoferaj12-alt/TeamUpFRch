@@ -12,6 +12,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, Profile, CareerExperience, CoachCertificate, avatarSrc } from '../../../lib/supabase'
 import MemberSafetyActions from '../../../components/MemberSafetyActions'
+import ProfilePhoto from '../../../components/ProfilePhoto'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import CareerSection from '../../../components/CareerSection'
 import { useLang } from '../../../lib/lang-context'
@@ -134,7 +135,7 @@ export default function PublicProfilPage() {
             {/* Avatar */}
             <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#3a8cff,#1a5fb4)', border:'3px solid rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', flexShrink:0 }}>
               {profile.avatar_url
-                ? <img src={avatarSrc(profile.avatar_url)!} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                ? <ProfilePhoto key={profile.avatar_url} src={avatarSrc(profile.avatar_url)!} name={displayName || fullName} lang={lang} fallback={initials} />
                 : initials
                   ? <span style={{ fontSize:'2rem', fontWeight:700, color:'#fff', letterSpacing:1 }}>{initials}</span>
                   : <span style={{ color:'rgba(255,255,255,.8)' }}>{roleIcon(36)}</span>
