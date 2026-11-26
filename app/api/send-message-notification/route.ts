@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await admin.auth.getUser(token)
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: message, error: messageError } = await admin.from('messages')
+  const viewer = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false },
+  })
+  const { data: message, error: messageError } = await viewer.from('messages')
     .select('id,sender_id,receiver_id,text,file_name')
     .eq('id', messageId)
     .eq('sender_id', user.id)

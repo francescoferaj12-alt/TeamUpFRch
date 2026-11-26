@@ -65,7 +65,7 @@ function AdminWorkspace() {
       </>}
       {tab === 'clubs' && <AdminClubsPanel key={revision} onChanged={() => void loadOverview()} />}
       {(tab === 'members' || tab === 'annonces') && <AdminDirectory key={`${tab}-${revision}`} type={tab} token={token!} onChanged={() => void loadOverview()} />}
-      {tab === 'reports' && <section className="admin-section"><h2>{labels[lang].reports}</h2><MemberReports key={revision} /></section>}
+      {tab === 'reports' && <section className="admin-section"><h2>{labels[lang].reports}</h2><MemberReports key={revision} onChanged={() => void loadOverview()} /></section>}
     </>}
   </div>
 }

@@ -23,14 +23,14 @@ async function serve(req:NextRequest,ctx:Context) {
     if (!reader) return reply('UNAUTHORIZED',401)
     const admin=createClient(project,secret,{auth:{persistSession:false,autoRefreshToken:false}})
     if (reader.id!==media.owner && !reader.admin) {
-      const {data:profile,error}=await admin.from('profiles').select('hidden,role,club_verification_status,avatar_url,video1_url,video2_url,video3_url').eq('id',media.owner).maybeSingle()
+      const {data:profile,error}=await admin.from('public_profiles').select('role,club_verification_status,avatar_url,video1_url,video2_url,video3_url').eq('id',media.owner).maybeSingle()
       if (error) return reply('UNAVAILABLE',503)
       const fields:('avatar_url'|'video1_url'|'video2_url'|'video3_url')[]=bucket==='avatars'?['avatar_url']:['video1_url','video2_url','video3_url']
       const referenced=profile && fields.some(key=>{
         const stored=parseProfileMedia(profile[key] || '',project)
         return stored?.bucket===media.bucket && stored.path===media.path
       })
-      if (!profile || profile.hidden || (profile.role==='club' && profile.club_verification_status!=='approved') || !referenced) return reply('NOT_FOUND',404)
+      if (!profile || ('hidden' in profile && profile.hidden) || (profile.role==='club' && profile.club_verification_status!=='approved') || !referenced) return reply('NOT_FOUND',404)
     }
     // Fixed origin and validated path only; never redirect to a signed/bearer URL.
     const url=new URL(`/storage/v1/object/authenticated/${media.bucket}/${media.path.split('/').map(encodeURIComponent).join('/')}`,project)
