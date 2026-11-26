@@ -1,6 +1,7 @@
 'use client'
 
 import GettingStartedGuide from '../../components/GettingStartedGuide'
+import AnnonceBody from '../../components/AnnonceBody'
 
 import { directoryQueries } from '../../lib/directory-search'
 import { footballLabel } from '../../lib/football-labels'
@@ -569,6 +570,7 @@ export default function AnnoncesPage() {
         }
 
         .an-card-title {
+          overflow-wrap:anywhere;
           font-family:'Russo One',sans-serif;
           font-size:17px; line-height:1.25; letter-spacing:.2px;
           margin-bottom:10px;
@@ -576,9 +578,11 @@ export default function AnnoncesPage() {
         .an-card-body {
           font-size:13px; color:rgba(255,255,255,.75); line-height:1.55;
           margin-bottom:18px; flex:1;
-          display:-webkit-box; -webkit-line-clamp:3;
-          -webkit-box-orient:vertical; overflow:hidden;
+          
         }
+
+        .an-read-more { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; margin-top:4px; background:none; border:0; color:#fff; font:inherit; font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+        .an-read-more:focus-visible { outline:2px solid #fff; outline-offset:4px; border-radius:4px; }
 
         .an-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px; }
         .an-tag {
@@ -780,7 +784,7 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
 
       {/* Content */}
       <h3 className="an-card-title">{annonce.title}</h3>
-      <p className="an-card-body">{annonce.body}</p>
+      <AnnonceBody text={annonce.body} lang={lang} />
 
       {/* Tags */}
       {(annonce.position || annonce.ligue || annonce.zone) && (
