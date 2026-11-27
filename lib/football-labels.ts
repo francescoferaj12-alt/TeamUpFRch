@@ -1,6 +1,7 @@
 import type { Lang } from './translations'
 
 const germanLabels: Record<string, string> = {
+  'Élite': 'Elite',
   'Président(e)': 'Präsident/in',
   'Vice-président(e)': 'Vizepräsident/in',
   Secrétaire: 'Sekretariat',

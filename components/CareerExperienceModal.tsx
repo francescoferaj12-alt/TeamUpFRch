@@ -10,7 +10,10 @@ import type { Lang } from '../lib/translations'
 
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const COACH_ROLES = ['Entraîneur principal','Entraîneur adjoint','Préparateur physique','Entraîneur des gardiens','Responsable technique']
-const LEAGUE_GROUPS = [...liguesHomme, ...liguesFemme]
+const LEAGUE_GROUPS = [
+  { group: 'Élite', groupDe: 'Elite', items: ['Élite'] },
+  ...liguesHomme, ...liguesFemme,
+]
 const KNOWN_LEAGUES = new Set(LEAGUE_GROUPS.flatMap(group => group.items))
 const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 const MONTHS_DE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember']
