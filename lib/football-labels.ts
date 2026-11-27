@@ -54,6 +54,7 @@ const germanLabels: Record<string, string> = {
 export function footballLabel(value: string, lang: Lang): string {
   if (lang === 'fr') return value
   return germanLabels[value] ?? value
+    .replace(/^Élite M(\d+)$/, 'Elite U$1')
     .replace(/^(\d+)ème Ligue( Féminine)?$/, (_, number, women) => `${number}. Liga${women ? ' Frauen' : ''}`)
     .replace(/^Juniors (.+) - (\d+)(?:er|ème) degré$/, 'Junioren $1 - $2. Stärkeklasse')
     .replace(/^Juniors /, 'Junioren ')

@@ -11,7 +11,7 @@ import type { Lang } from '../lib/translations'
 const POSITIONS = ['Attaquant','Milieu offensif','Milieu défensif','Défenseur central','Défenseur latéral','Gardien']
 const COACH_ROLES = ['Entraîneur principal','Entraîneur adjoint','Préparateur physique','Entraîneur des gardiens','Responsable technique']
 const LEAGUE_GROUPS = [
-  { group: 'Élite', groupDe: 'Elite', items: ['Élite'] },
+  { group: 'Élite', groupDe: 'Elite', items: ['Élite', 'Élite M15', 'Élite M16', 'Élite M17', 'Élite M18', 'Élite M19', 'Élite M21'] },
   ...liguesHomme, ...liguesFemme,
 ]
 const KNOWN_LEAGUES = new Set(LEAGUE_GROUPS.flatMap(group => group.items))
