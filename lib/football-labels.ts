@@ -1,6 +1,13 @@
 import type { Lang } from './translations'
 
 const germanLabels: Record<string, string> = {
+  'Élite': 'Elite',
+  '1ère Ligue': '1. Liga',
+  '2ème Ligue interrégionale': '2. Liga interregional',
+  "Women's Super League — LNA": "Women's Super League — NLA",
+  'Ligue nationale B — LNB': 'Nationalliga B — NLB',
+  '1ère Ligue Féminine': '1. Liga Frauen',
+  '2ème Ligue interrégionale Féminine': '2. Liga interregional Frauen',
   'Président(e)': 'Präsident/in',
   'Vice-président(e)': 'Vizepräsident/in',
   Secrétaire: 'Sekretariat',
@@ -53,6 +60,7 @@ const germanLabels: Record<string, string> = {
 export function footballLabel(value: string, lang: Lang): string {
   if (lang === 'fr') return value
   return germanLabels[value] ?? value
+    .replace(/^Élite M(\d+)$/, 'Elite U$1')
     .replace(/^(\d+)ème Ligue( Féminine)?$/, (_, number, women) => `${number}. Liga${women ? ' Frauen' : ''}`)
     .replace(/^Juniors (.+) - (\d+)(?:er|ème) degré$/, 'Junioren $1 - $2. Stärkeklasse')
     .replace(/^Juniors /, 'Junioren ')
