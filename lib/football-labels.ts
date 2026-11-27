@@ -2,6 +2,12 @@ import type { Lang } from './translations'
 
 const germanLabels: Record<string, string> = {
   'Élite': 'Elite',
+  '1ère Ligue': '1. Liga',
+  '2ème Ligue interrégionale': '2. Liga interregional',
+  "Women's Super League — LNA": "Women's Super League — NLA",
+  'Ligue nationale B — LNB': 'Nationalliga B — NLB',
+  '1ère Ligue Féminine': '1. Liga Frauen',
+  '2ème Ligue interrégionale Féminine': '2. Liga interregional Frauen',
   'Président(e)': 'Präsident/in',
   'Vice-président(e)': 'Vizepräsident/in',
   Secrétaire: 'Sekretariat',
