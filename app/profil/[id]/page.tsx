@@ -149,9 +149,10 @@ export default function PublicProfilPage() {
 
             <div style={{ flex:1, minWidth:0 }}>
               {/* Display name */}
-              <div style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(1.4rem, 4vw, 2rem)', color:'#fff', lineHeight:1.1, marginBottom:8, display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
-                {displayName || 'Profil'}
+              <div className="member-name-follow" style={{ fontFamily:"'Russo One', sans-serif", fontSize:'clamp(1.4rem, 4vw, 2rem)', color:'#fff', lineHeight:1.1, marginBottom:8, display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                <span className="member-name-text">{displayName || 'Profil'}</span>
                 {(profile.verified || (profile.role === 'club' && profile.club_verification_status === 'approved')) && <VerifiedBadge size={22} />}
+                <FollowButton key={id+'follow'} memberId={id} />
               </div>
 
               {/* Badges row */}
@@ -250,7 +251,7 @@ export default function PublicProfilPage() {
           </div>
         </div>
 
-        <div style={{ marginBottom: '1.25rem' }}><FollowButton key={id+'follow'} memberId={id} /><MemberSafetyActions key={id} memberId={id} /></div>
+        <div style={{ marginBottom: '1.25rem' }}><MemberSafetyActions key={id} memberId={id} /></div>
 
         <MemberPublications key={id+'posts'} memberId={id}/>
         {/* Stats (player only) */}
