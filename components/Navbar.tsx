@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { supabase, avatarSrc } from '../lib/supabase'
 import LangSwitcher from './LangSwitcher'
+import NotificationBell from './community/NotificationBell'
 import MobileBottomNav from './MobileBottomNav'
 import { navigationItems, navigationHref, navigationActive, NavigationIcon } from './navigation-items'
 import { useLang } from '../lib/lang-context'
@@ -177,6 +178,7 @@ export default function Navbar() {
 
         <div className="nav-right">
           <LangSwitcher />
+          <NotificationBell />
           {user ? (
             <>
               <Link

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-const buckets = ['avatars', 'videos', 'message-files'] as const
+const buckets = ['avatars', 'videos', 'message-files', 'community-media'] as const
 const safeSegment = (value: string) => !!value && value !== '.' && value !== '..' && !/[\\/\u0000-\u001f\u007f]/.test(value)
 
 /** Only folders rooted at the authenticated account ID can be removed. */

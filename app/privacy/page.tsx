@@ -25,7 +25,7 @@ const content: Record<'fr' | 'de', { badge: string; title: string; updated: stri
   fr: {
     badge:    'Politique de confidentialité',
     title:    'Vos données, votre vie privée',
-    updated:  'Mise à jour · Mai 2026',
+    updated:  'Mise à jour · Novembre 2026',
     tocTitle: 'Sommaire',
     intro:    "TeamUpFR s'engage à protéger vos données personnelles conformément à la Loi fédérale sur la protection des données (LPD) suisse. Cette politique explique quelles données nous collectons, pourquoi, et comment vous pouvez les contrôler.",
     contactQ:   'Des questions sur vos données ?',
@@ -46,12 +46,13 @@ const content: Record<'fr' | 'de', { badge: string; title: string; updated: stri
         content: "TeamUpFR est ouvert dès 14 ans. Les mineurs de moins de 18 ans doivent obtenir l'accord de leurs parents ou tuteurs légaux pour s'inscrire.\n\nPour les utilisateurs de 14 à 17 ans, les parents/tuteurs peuvent demander à tout moment l'accès aux données de leur enfant ou la suppression du compte en nous écrivant.",
         callout: "Nous ne collectons sciemment aucune donnée d'enfant de moins de 14 ans. Si vous pensez qu'un mineur de moins de 14 ans s'est inscrit, contactez-nous immédiatement à teamupfr.ch@gmail.com et nous supprimerons le compte.",
       },
+      { title: '12. Publications et comptes suivis', content: "Lorsque vous publiez une photo ou une vidéo, nous conservons le fichier, votre texte, votre identifiant et la date de publication. Ces publications sont visibles par les membres connectés autorisés, dans le fil et sur votre profil. Vous pouvez les supprimer depuis le fil ou Mon espace : la suppression retire aussi le fichier stocké.\n\nNous conservons les comptes que vous suivez pour vous signaler leurs nouvelles annonces et publications dans votre espace de notifications. Vous pouvez arrêter de suivre un compte à tout moment. Ces notifications ne déclenchent pas d’email. Votre situation sportive choisie est affichée aux autres membres. Les blocages et suspensions limitent également l’accès aux publications." },
     ],
   },
   de: {
     badge:    'Datenschutzrichtlinie',
     title:    'Ihre Daten, Ihre Privatsphäre',
-    updated:  'Aktualisierung · Mai 2026',
+    updated:  'Aktualisierung · November 2026',
     tocTitle: 'Inhalt',
     intro:    "TeamUpFR verpflichtet sich, Ihre personenbezogenen Daten gemäss dem Schweizer Datenschutzgesetz (DSG) zu schützen. Diese Richtlinie erklärt, welche Daten wir erheben, warum und wie Sie diese kontrollieren können.",
     contactQ:   'Fragen zu Ihren Daten?',
@@ -72,6 +73,7 @@ const content: Record<'fr' | 'de', { badge: string; title: string; updated: stri
         content: "TeamUpFR steht ab 14 Jahren offen. Minderjährige unter 18 Jahren müssen die Zustimmung ihrer Eltern oder gesetzlichen Vormund einholen, um sich zu registrieren.\n\nFür Nutzer zwischen 14 und 17 Jahren können Eltern/Erziehungsberechtigte jederzeit den Zugang zu den Daten ihres Kindes oder die Kontolöschung anfordern, indem sie uns schreiben.",
         callout: "Wir erheben wissentlich keine Daten von Kindern unter 14 Jahren. Wenn Sie glauben, dass sich ein Kind unter 14 Jahren registriert hat, kontaktieren Sie uns umgehend unter teamupfr.ch@gmail.com und wir löschen das Konto.",
       },
+      { title: '12. Veröffentlichungen und gefolgte Konten', content: "Wenn Sie ein Foto oder Video veröffentlichen, speichern wir die Datei, Ihren Text, Ihre Nutzer-ID und das Veröffentlichungsdatum. Die Beiträge sind für berechtigte angemeldete Mitglieder im Feed und in Ihrem Profil sichtbar. Sie können sie im Feed oder unter Mein Bereich löschen; dabei wird auch die gespeicherte Datei entfernt.\n\nWir speichern, welchen Konten Sie folgen, um Sie im Benachrichtigungsbereich über deren neue Anzeigen und Beiträge zu informieren. Sie können einem Konto jederzeit entfolgen. Diese Benachrichtigungen lösen keine E-Mail aus. Die gewählte sportliche Situation wird anderen Mitgliedern angezeigt. Blockierungen und Kontosperren schränken den Zugriff auf Beiträge ebenfalls ein." },
     ],
   },
 }

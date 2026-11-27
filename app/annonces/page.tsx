@@ -2,6 +2,7 @@
 
 import GettingStartedGuide from '../../components/GettingStartedGuide'
 import AnnonceBody from '../../components/AnnonceBody'
+import CommunityFeed from '../../components/community/CommunityFeed'
 
 import { directoryQueries } from '../../lib/directory-search'
 import { footballLabel } from '../../lib/football-labels'
@@ -93,6 +94,7 @@ const TABS = [
 // ——— Main page ————————————————————————————————
 export default function AnnoncesPage() {
   const { lang } = useLang()
+  const [feedKind,setFeedKind]=useState<'all'|'annonce'|'publication'>('all')
   const [directory,setDirectory]=useState<{items:Annonce[];total:number;counts:Record<string,number>}>({items:[],total:0,counts:{'':0,club:0,coach:0,player:0}})
   const [pageState,setPageState]=useState({key:'',page:0})
   const [loadError,setLoadError]=useState(false)
@@ -114,6 +116,7 @@ export default function AnnoncesPage() {
   const filterKey=JSON.stringify({queries:directoryQueries(debouncedQuery,lang,[...ligues.flatMap(group=>group.items),...positions,...zones]),ligue:filterLigue,zone:filterZone,position:filterPos,author_type:filterType})
   const page=pageState.key===filterKey?pageState.page:0
   useEffect(()=>{
+    if(feedKind!=='annonce')return
     let active=true;setLoading(true);setLoadError(false)
     supabase.rpc('browse_annonces',{p_filters:JSON.parse(filterKey),p_page:page,p_size:24}).then(({data,error})=>{
       if(!active)return
@@ -121,7 +124,7 @@ export default function AnnoncesPage() {
       if(!error&&data)setDirectory(data)
     })
     return()=>{active=false}
-  },[filterKey,page,retry])
+  },[filterKey,page,retry,feedKind])
   const annonces=directory.items
   const filtered=annonces
   const total=directory.total
@@ -142,7 +145,7 @@ export default function AnnoncesPage() {
         <div className="an-container">
           <div className="an-eyebrow">
             <IcoGrid s={14} />
-            {lang === 'de' ? 'Anzeigenübersicht' : "Fil d'annonces"}
+            {lang === 'de' ? 'Fussball-Community' : 'La communauté du foot'}
           </div>
           <span className="an-live-pulse">{lang === 'de' ? 'Aktuell' : 'En direct'}</span>
           <h1 className="an-title">
@@ -151,13 +154,13 @@ export default function AnnoncesPage() {
               : <>{lang === 'de' ? 'Angebote &' : 'Offres &'}<br /><span className="em">{lang === 'de' ? 'Gesuche.' : 'Recherches.'}</span></>}
           </h1>
           <p className="an-sub">
-            {lang === 'de' ? 'Vereine, Spieler und Trainer: alle Angebote und Gesuche an einem Ort.' : 'Clubs, joueurs et coachs : toutes les opportunités, au même endroit.'}
+            {lang === 'de' ? 'Anzeigen und Fussballmomente von Vereinen, Spielern und Trainern.' : 'Annonces et moments de foot des clubs, joueurs et coachs.'}
           </p>
           {currentUser && <div className="an-feed-shortcuts">
             <Link href="/clubs" className="an-shortcut-clubs">{lang === 'de' ? 'Vereine' : 'Clubs'}</Link>
             <Link href="/candidatures">{lang === 'de' ? 'Bewerbungen' : 'Candidatures'}</Link>
             <Link href="/dashboard">{lang === 'de' ? 'Mein Überblick' : 'Mon tableau de bord'}</Link>
-            <Link href="/publier" className="an-feed-post"><IcoPlus />{lang === 'de' ? 'Anzeige erstellen' : 'Publier une annonce'}</Link>
+            <Link href="/publier" className="an-feed-post"><IcoPlus />{lang === 'de' ? 'Veröffentlichen' : 'Publier'}</Link>
           </div>}
           {currentUser && <GettingStartedGuide key={currentUser.id} profile={currentUser} />}
           <div className="an-search-wrap">
@@ -167,12 +170,15 @@ export default function AnnoncesPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               maxLength={120}
-              placeholder={lang === 'de' ? 'Anzeige, Verein oder Position suchen…' : 'Chercher une annonce, un club, une position…'}
+              placeholder={lang === 'de' ? 'Im Feed suchen…' : 'Rechercher dans le fil…'}
             />
           </div>
         </div>
       </header>
 
+      <div className="an-container"><div className="community-tabs" aria-label={lang==='de'?'Beitragsart':'Type de contenu'}>{(['all','annonce','publication'] as const).map(kind=><button type="button" key={kind} aria-pressed={feedKind===kind} onClick={()=>setFeedKind(kind)}>{kind==='all'?(lang==='de'?'Alle':'Tout'):kind==='annonce'?(lang==='de'?'Anzeigen':'Annonces'):(lang==='de'?'Beiträge':'Publications')}</button>)}</div></div>
+      {feedKind!=='annonce'&&<section className="an-grid-section"><div className="an-container"><CommunityFeed key={feedKind+debouncedQuery} kind={feedKind} query={debouncedQuery} renderAnnonce={a=><AnnonceCard key={a.id} annonce={a} currentUser={currentUser} onPostuler={()=>{if(!currentUser){router.push('/login');return}setPostulerModal(a)}}/>}/></div></section>}
+      {feedKind==='annonce'&&<>
       {/* FILTERS */}
       <div className="an-filters">
         <div className="an-container">
@@ -301,6 +307,7 @@ export default function AnnoncesPage() {
         <span>{page+1} / {Math.ceil(total/24)}</span>
         <button disabled={(page+1)*24>=total} onClick={()=>setPageState({key:filterKey,page:page+1})}>{lang==='de'?'Weiter':'Suivant'}</button>
       </nav>}
+      </>}
       {/* POSTULER MODAL */}
       {postulerModal && (
         <PostulerModal
@@ -570,17 +577,15 @@ export default function AnnoncesPage() {
         }
 
         .an-card-title {
-          overflow-wrap:anywhere;
           font-family:'Russo One',sans-serif;
           font-size:17px; line-height:1.25; letter-spacing:.2px;
           margin-bottom:10px;
+          overflow-wrap:anywhere;
         }
         .an-card-body {
           font-size:13px; color:rgba(255,255,255,.75); line-height:1.55;
           margin-bottom:18px; flex:1;
-          
         }
-
         .an-read-more { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; margin-top:4px; background:none; border:0; color:#fff; font:inherit; font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
         .an-read-more:focus-visible { outline:2px solid #fff; outline-offset:4px; border-radius:4px; }
 

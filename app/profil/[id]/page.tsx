@@ -1,5 +1,10 @@
 'use client'
 
+import MemberPublications from '../../../components/community/MemberPublications'
+import AvailabilityStatus from '../../../components/community/AvailabilityStatus'
+import FollowButton from '../../../components/community/FollowButton'
+
+
 import { profileMediaSrc } from '../../../lib/profile-media'
 
 import ClubTeamCategories from '../../../components/ClubTeamCategories'
@@ -212,10 +217,10 @@ export default function PublicProfilPage() {
                 )}
 
                 {/* Availability */}
-                <span style={{ display:'inline-flex', alignItems:'center', gap:6, background: profile.available ? 'rgba(46,210,127,.12)' : 'rgba(255,58,58,.1)', border:`1px solid ${profile.available ? 'rgba(46,210,127,.3)' : 'rgba(255,58,58,.25)'}`, color:'rgba(255,255,255,.9)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
+                {profile.role==='player'?<AvailabilityStatus memberId={id}/>:<span style={{ display:'inline-flex', alignItems:'center', gap:6, background: profile.available ? 'rgba(46,210,127,.12)' : 'rgba(255,58,58,.1)', border:`1px solid ${profile.available ? 'rgba(46,210,127,.3)' : 'rgba(255,58,58,.25)'}`, color:'rgba(255,255,255,.9)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
                   <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : '#FF3A3A', flexShrink:0 }} />
                   {profile.available ? (lang === 'de' ? 'Verfügbar' : 'Disponible') : (lang === 'de' ? 'Nicht verfügbar' : 'Non disponible')}
-                </span>
+                </span>}
               </div>
 
               {/* Strengths — text-only pills (Opzione A) */}
@@ -245,8 +250,9 @@ export default function PublicProfilPage() {
           </div>
         </div>
 
-        <div style={{ marginBottom: '1.25rem' }}><MemberSafetyActions key={id} memberId={id} /></div>
+        <div style={{ marginBottom: '1.25rem' }}><FollowButton key={id+'follow'} memberId={id} /><MemberSafetyActions key={id} memberId={id} /></div>
 
+        <MemberPublications key={id+'posts'} memberId={id}/>
         {/* Stats (player only) */}
 
 
@@ -413,3 +419,4 @@ export default function PublicProfilPage() {
     </div>
   )
 }
+

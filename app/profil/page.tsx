@@ -1,5 +1,9 @@
 'use client'
 
+import MemberPublications from '../../components/community/MemberPublications'
+import AvailabilityStatus from '../../components/community/AvailabilityStatus'
+
+
 import { profileMediaSrc, profileMediaUrl } from '../../lib/profile-media'
 
 import ClubTeamCategories from '../../components/ClubTeamCategories'
@@ -438,7 +442,7 @@ export default function ProfilPage() {
       {postSuccess && (
         <div style={{ background:'rgba(13,122,54,.15)', border:'1px solid rgba(76,219,122,.25)', borderRadius:10, padding:'10px 16px', fontSize:14, color:'#2ED27F', marginBottom:'1rem', display:'flex', alignItems:'center', gap:8 }}>
           <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F', flexShrink:0 }} />
-          {lang === 'de' ? 'Anzeige veröffentlicht! Sichtbar im ' : 'Post publié ! Visible dans '}<a href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>{lang === 'de' ? 'Anzeigenfeed' : 'fil d’annonces'}</a>.
+          {lang === 'de' ? 'Anzeige veröffentlicht! Sichtbar im ' : 'Post publié ! Visible dans '}<Link href="/annonces" style={{ color:'#2ED27F', fontWeight:700 }}>{lang === 'de' ? 'Anzeigenfeed' : 'fil d’annonces'}</Link>.
         </div>
       )}
 
@@ -493,10 +497,10 @@ export default function ProfilPage() {
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
               {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:5 }}><IcoTrophy s={11} />{footballLabel(profile.ligue, lang)}</span>}
-              <span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
+              {profile.role==='player'?<AvailabilityStatus memberId={profile.id} editable/>:<span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
                 <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
                 {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
-              </span>
+              </span>}
             </div>
 
             {strengthKeys.length > 0 && (
@@ -520,12 +524,7 @@ export default function ProfilPage() {
           </div>
 
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            <button
-              onClick={() => setShowPostModal(true)}
-              style={{ background:'rgba(255,58,58,0.12)', color:'#FF3A3A', border:'1.5px solid rgba(255,58,58,0.35)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:6 }}
-            >
-              <IcoMegaphone s={13} /> {lang === 'de' ? 'Anzeige veröffentlichen' : 'Publier un post'}
-            </button>
+            <Link href="/publier" className="btn btn-red btn-sm" style={{fontSize:12}}><IcoMegaphone s={13} /> {lang==='de'?'Veröffentlichen':'Publier'}</Link>
             <button onClick={() => { setEditing(!editing); if (!editing) populateForm(profile) }} style={{ background:'rgba(255,255,255,0.1)', color:'rgba(255,255,255,.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:999, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
               {editing ? t.profil.cancel[lang] : t.profil.edit[lang]}
             </button>
@@ -624,6 +623,7 @@ export default function ProfilPage() {
         </>
       )}
 
+      <MemberPublications key={profile.id+'posts'} memberId={profile.id}/>
       {/* ── MES ANNONCES ── */}
       <div style={{ ...darkCard, marginBottom:'1.25rem' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
@@ -639,7 +639,7 @@ export default function ProfilPage() {
         </div>
         {myPosts.length === 0 ? (
           <div style={{ textAlign:'center', padding:'1rem', color:'#c7d1e3', fontSize:14 }}>
-            {lang === 'de' ? 'Noch keine Anzeigen veröffentlicht.' : 'Aucun post publié.'}{' '}
+            {lang === 'de' ? 'Noch keine Anzeigen veröffentlicht.' : 'Aucune annonce publiée.'}{' '}
             <button onClick={() => setShowPostModal(true)} style={{ color:'#FF3A3A', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:14, fontWeight:700, borderRadius:999 }}>
               {lang === 'de' ? 'Veröffentlichen →' : 'Publier →'}
             </button>
@@ -810,3 +810,4 @@ export default function ProfilPage() {
     </div>
   )
 }
+
