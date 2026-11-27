@@ -8,6 +8,7 @@ import { useAuth } from '../../lib/auth-context'
 import { t } from '../../lib/translations'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import ClubCrest from '../../components/ClubCrest'
+import FollowButton from '../../components/community/FollowButton'
 import { footballLabel } from '../../lib/football-labels'
 import { directoryQueries } from '../../lib/directory-search'
 
@@ -250,11 +251,12 @@ export default function ClubsPage() {
 
                   {/* Name + verified */}
                   <div style={{ marginBottom:14 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:4, flexWrap:'wrap' }}>
-                      <span style={{ fontFamily:"'Russo One',sans-serif", fontSize:19, letterSpacing:.3, color:'#fff', lineHeight:1.1 }}>
+                    <div className="member-name-follow" style={{ marginBottom:4 }}>
+                      <span className="member-name-text" style={{ fontFamily:"'Russo One',sans-serif", fontSize:19, letterSpacing:.3, color:'#fff', lineHeight:1.1 }}>
                         {club.club_name || 'Club'}
                       </span>
                       {(club as any).club_verification_status === 'approved' && <VerifiedBadge size={15} />}
+                      <FollowButton memberId={club.id} />
                     </div>
                   </div>
 

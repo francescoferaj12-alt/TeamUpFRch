@@ -11,6 +11,7 @@ import { t } from '../../lib/translations'
 import { liguesHomme, liguesFemme } from '../../lib/data'
 import VerifiedBadge from '../../components/VerifiedBadge'
 import ClubCrest from '../../components/ClubCrest'
+import FollowButton from '../../components/community/FollowButton'
 import { useAuth } from '../../lib/auth-context'
 
 const ALL_LIGUE_GROUPS = [...liguesHomme, ...liguesFemme]
@@ -401,11 +402,12 @@ function ProfileCard({ profile: p }: { profile: Profile }) {
 
       {/* Name + verified badges */}
       <div style={{ marginBottom:14 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:3, flexWrap:'wrap' }}>
-          <span style={{ fontFamily:"'Russo One',sans-serif", fontSize:17, letterSpacing:.3, color:'#fff', lineHeight:1.2 }}>{name}</span>
+        <div className="member-name-follow" style={{ marginBottom:3 }}>
+          <span className="member-name-text" style={{ fontFamily:"'Russo One',sans-serif", fontSize:17, letterSpacing:.3, color:'#fff', lineHeight:1.2 }}>{name}</span>
           {p.role === 'club' && p.club_verification_status === 'approved'
             ? <VerifiedBadge size={15} />
             : p.verified && <VerifiedBadge size={15} />}
+          <FollowButton memberId={p.id} />
         </div>
         {subLine && <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', marginTop:2 }}>{subLine}</p>}
       </div>

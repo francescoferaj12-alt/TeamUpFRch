@@ -15,6 +15,7 @@ import { ligues, zones, positions } from '../../lib/data'
 import { useLang } from '../../lib/lang-context'
 import { useAuth } from '../../lib/auth-context'
 import VerifiedBadge from '../../components/VerifiedBadge'
+import FollowButton from '../../components/community/FollowButton'
 import ClubCrest from '../../components/ClubCrest'
 import { relativeTime } from '../../lib/utils/time'
 import SavedAnnonceSearches from '../../components/SavedAnnonceSearches'
@@ -768,7 +769,8 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
       </div>
 
       {/* Author */}
-      <Link href={`/profil/${authorId}`} className="an-author">
+      <div className="an-author">
+        <Link href={`/profil/${authorId}`} aria-label={annonce.author_name} style={{flexShrink:0}}>
         {isClub
           ? <ClubCrest src={avatarSrc(avatarUrl)} size={40} fallback={initials} />
           : <div className="an-avatar" style={{ background: avatarUrl ? 'transparent' : grad }}>
@@ -778,14 +780,16 @@ function AnnonceCard({ annonce, currentUser, onPostuler }: {
               }
             </div>
         }
+        </Link>
         <div className="an-author-info">
-          <div className="an-author-name">
-            {annonce.author_name}
+          <div className="member-name-follow">
+            <Link href={`/profil/${authorId}`} className="an-author-name member-name-text">{annonce.author_name}</Link>
             {annonce.profiles?.verified && <VerifiedBadge size={14} />}
+            <FollowButton memberId={authorId} />
           </div>
           {authorSub && <div className="an-author-sub">{authorSub}</div>}
         </div>
-      </Link>
+      </div>
 
       {/* Content */}
       <h3 className="an-card-title">{annonce.title}</h3>
