@@ -4,7 +4,7 @@ function load(file,mocks={}){const source=ts.transpileModule(fs.readFileSync(pat
 function request(body={confirmation:'DELETE'},token='test-token',origin){return new Request('https://teamupfr.ch/api/account/delete',{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} : {}),...(origin?{Origin:origin}:{})},body:JSON.stringify(body)})}
 function handler(options={}) {
  const calls=[];
- const files=new Map(['avatars','videos','message-files'].map(bucket=>[bucket,new Map([[uid,[{id:'file-1',name:'test.mp4'}]]])]));
+ const files=new Map(['avatars','videos','message-files','community-media'].map(bucket=>[bucket,new Map([[uid,[{id:'file-1',name:'test.mp4'}]]])]));
  const admin={
   auth:{
    getUser:async()=>({data:{user:options.unauth?null:{id:uid,email:options.owner?'teamupfr.ch@gmail.com':'test@example.com',email_confirmed_at:new Date().toISOString(),last_sign_in_at:options.old?'2020-01-01':new Date().toISOString()}},error:null}),

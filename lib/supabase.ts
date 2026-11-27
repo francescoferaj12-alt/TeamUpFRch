@@ -20,6 +20,7 @@ export type Profile = {
   age?: number
   birthdate?: string
   foot?: string
+  availability_status?: 'settled' | 'open' | 'seeking' | null
   available: boolean
   bio?: string
   club_name?: string

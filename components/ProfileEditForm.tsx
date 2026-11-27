@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import {availabilityLabels,Availability} from '../lib/community'
 import dynamic from 'next/dynamic'
 import { ownedVideoPath, profileVideoFields } from '../lib/profile-videos'
 import { supabase, Profile } from '../lib/supabase'
@@ -208,6 +209,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [zone, setZone] = useState(profile.zone || '')
   const [foot, setFoot] = useState(profile.foot || 'Droit')
   const [available, setAvailable] = useState(profile.available ?? true)
+  const [availabilityStatus,setAvailabilityStatus]=useState<Availability>(profile.availability_status||(profile.available?'seeking':'settled'))
   const [phone, setPhone] = useState(profile.phone || '')
   const [career, setCareer] = useState(profile.career || '')
   const initBd = parseBirthdate(profile.birthdate)
@@ -302,7 +304,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
     autosaveTimerRef.current = setTimeout(() => { void doSave(true, revision) }, 2000)
     return () => { if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bio, position, positionSecondary, genre, ligue, zone, foot, available, phone, career,
+  }, [bio, position, positionSecondary, genre, ligue, zone, foot, available, availabilityStatus, phone, career,
       birthDay, birthMonth, birthYear, goals, assists, matches, goalsPrev, assistsPrev, matchesPrev,
       selectedStrengths, video1, video2, video3, coachExperience, coachDiploma, coachSpecialty,
       coachAvailability, coachCategories, coachPhilosophy, coachCertificates, clubWebsite, clubInstagram, clubFacebook,
@@ -325,6 +327,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       zone: zone || null,
       foot: foot || null,
       available,
+      ...(profile.role==='player'?{availability_status:availabilityStatus}:{}),
       phone: phone || null,
       career: career || null,
       birthdate,
@@ -1061,10 +1064,10 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
         <div className="form-grid">
           <div className="form-group form-grid-full">
             <label>{t.profil.dispo[lang]}</label>
-            <select value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
+            {profile.role==='player'?<select value={availabilityStatus} onChange={e=>{const status=e.target.value as Availability;setAvailabilityStatus(status);setAvailable(status!=='settled')}}>{Object.entries(availabilityLabels).map(([key,label])=><option key={key} value={key}>{label[lang]}</option>)}</select>:<select value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
               <option value="oui">{t.profil.dispo_yes[lang]}</option>
               <option value="non">{t.profil.dispo_no[lang]}</option>
-            </select>
+            </select>}
           </div>
         </div>
       </Section>
