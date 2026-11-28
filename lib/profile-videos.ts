@@ -9,11 +9,11 @@ export function ownedVideoPath(value: string, owner: string, storageUrl: string)
   return /^video_[123](?:_[0-9a-f-]{36})?\.[a-z0-9]{1,12}$/i.test(filename) ? media.path : null
 }
 
-export const MAX_PROFILE_VIDEO_BYTES = 20 * 1024 * 1024
+export const MAX_PROFILE_VIDEO_BYTES = 50 * 1024 * 1024
 export const MAX_PROFILE_VIDEO_FILES = 6 // three active files plus three replacements
 
 export function uploadProfileVideo(file: File, path: string, token: string, onProgress: (percent:number)=>void, signal?:AbortSignal):Promise<void> {
-  if(file.size>MAX_PROFILE_VIDEO_BYTES)return Promise.reject(new Error('Video exceeds 20 MiB'))
+  if(file.size>MAX_PROFILE_VIDEO_BYTES)return Promise.reject(new Error('Video exceeds 50 MiB'))
   const origin=process.env.NEXT_PUBLIC_SUPABASE_URL
   const apiKey=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if(!origin||!apiKey) return Promise.reject(new Error('Storage unavailable'))
@@ -25,7 +25,7 @@ export function uploadProfileVideo(file: File, path: string, token: string, onPr
     xhr.setRequestHeader('Authorization',`Bearer ${token}`)
     xhr.setRequestHeader('apikey',apiKey)
     xhr.setRequestHeader('x-upsert','false')
-    xhr.timeout=180_000
+    xhr.timeout=600_000
     xhr.upload.onprogress=event=>{if(event.lengthComputable)onProgress(Math.min(99,Math.round(event.loaded/event.total*100)))}
     xhr.onload=()=>xhr.status>=200&&xhr.status<300?finish():finish(new Error(`Upload failed (${xhr.status})`))
     xhr.onerror=()=>finish(new Error('Upload network error'))
