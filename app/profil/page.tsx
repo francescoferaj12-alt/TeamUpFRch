@@ -766,7 +766,9 @@ export default function ProfilPage() {
 
           {/* Informations */}
           <div style={darkCard}>
-            {memberIsAvailable(profile) && (
+            {profile.role === 'player' ? (
+              <div style={{ marginBottom:'1rem' }}><AvailabilityStatus memberId={profile.id} /></div>
+            ) : memberIsAvailable(profile) && (
               <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(13,122,54,.2)', color:'#2ED27F', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
                 <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F' }} />
                 {t.profil.available_badge[lang]}
