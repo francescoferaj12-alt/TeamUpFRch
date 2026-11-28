@@ -1,4 +1,5 @@
 'use client'
+import { memberIsAvailable } from '../../../lib/member-availability'
 
 import MemberPublications from '../../../components/community/MemberPublications'
 import AvailabilityStatus from '../../../components/community/AvailabilityStatus'
@@ -218,9 +219,9 @@ export default function PublicProfilPage() {
                 )}
 
                 {/* Availability */}
-                {profile.role==='player'?<AvailabilityStatus memberId={id}/>:<span style={{ display:'inline-flex', alignItems:'center', gap:6, background: profile.available ? 'rgba(46,210,127,.12)' : 'rgba(255,58,58,.1)', border:`1px solid ${profile.available ? 'rgba(46,210,127,.3)' : 'rgba(255,58,58,.25)'}`, color:'rgba(255,255,255,.9)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
-                  <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : '#FF3A3A', flexShrink:0 }} />
-                  {profile.available ? (lang === 'de' ? 'Verfügbar' : 'Disponible') : (lang === 'de' ? 'Nicht verfügbar' : 'Non disponible')}
+                {profile.role==='player'?<AvailabilityStatus memberId={id}/>:<span style={{ display:'inline-flex', alignItems:'center', gap:6, background: memberIsAvailable(profile) ? 'rgba(46,210,127,.12)' : 'rgba(255,58,58,.1)', border:`1px solid ${memberIsAvailable(profile) ? 'rgba(46,210,127,.3)' : 'rgba(255,58,58,.25)'}`, color:'rgba(255,255,255,.9)', fontSize:12, padding:'4px 12px', borderRadius:100 }}>
+                  <span style={{ width:7, height:7, borderRadius:'50%', background: memberIsAvailable(profile) ? '#2ED27F' : '#FF3A3A', flexShrink:0 }} />
+                  {memberIsAvailable(profile) ? (lang === 'de' ? 'Verfügbar' : 'Disponible') : (lang === 'de' ? 'Nicht verfügbar' : 'Non disponible')}
                 </span>}
               </div>
 
@@ -267,7 +268,7 @@ export default function PublicProfilPage() {
               {[
                 { label:(lang === 'de' ? 'Liga' : 'Ligue'),       value: profile.ligue,  color:'#FF3A3A' },
                 { label:(lang === 'de' ? 'Region' : 'Zone'),        value: profile.zone,   color:'#3A7AFF' },
-                { label:(lang === 'de' ? 'Spielersuche' : 'Recrutement'), value: profile.available ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)' },
+                { label:(lang === 'de' ? 'Spielersuche' : 'Recrutement'), value: memberIsAvailable(profile) ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: memberIsAvailable(profile) ? '#2ED27F' : 'rgba(255,255,255,.4)' },
                 { label:(lang === 'de' ? 'Verifiziert' : 'Vérifié'),     value: profile.verified ? (lang === 'de' ? 'Ja ✓' : 'Oui ✓') : null, color:'#3A7AFF' },
               ].filter(s => s.value).map((s, i, arr) => (
                 <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>

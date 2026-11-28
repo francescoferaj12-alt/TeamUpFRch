@@ -1,4 +1,5 @@
 'use client'
+import { memberIsAvailable } from '../../lib/member-availability'
 
 import MemberPublications from '../../components/community/MemberPublications'
 import AvailabilityStatus from '../../components/community/AvailabilityStatus'
@@ -497,9 +498,9 @@ export default function ProfilPage() {
             </div>
             <div style={{ display:'flex', gap:'.75rem', flexWrap:'wrap' }}>
               {profile.ligue && <span style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.2)', color:'rgba(255,255,255,.85)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:5 }}><IcoTrophy s={11} />{footballLabel(profile.ligue, lang)}</span>}
-              {profile.role==='player'?<AvailabilityStatus memberId={profile.id} editable/>:<span style={{ background: profile.available ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${profile.available ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
-                <span style={{ width:7, height:7, borderRadius:'50%', background: profile.available ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
-                {profile.available ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
+              {profile.role==='player'?<AvailabilityStatus memberId={profile.id} editable/>:<span style={{ background: memberIsAvailable(profile) ? 'rgba(13,122,54,.3)' : 'rgba(255,255,255,.1)', border:`1px solid ${memberIsAvailable(profile) ? 'rgba(13,122,54,.5)' : 'rgba(255,255,255,.2)'}`, color:'rgba(255,255,255,.95)', fontSize:12, padding:'4px 12px', borderRadius:100, display:'inline-flex', alignItems:'center', gap:6 }}>
+                <span style={{ width:7, height:7, borderRadius:'50%', background: memberIsAvailable(profile) ? '#2ED27F' : 'rgba(255,255,255,.4)', flexShrink:0 }} />
+                {memberIsAvailable(profile) ? t.profil.dispo_yes[lang] : t.profil.dispo_no[lang]}
               </span>}
             </div>
 
@@ -574,7 +575,7 @@ export default function ProfilPage() {
             {[
               { label:lang === 'de' ? 'Liga' : 'Ligue',       value: profile.ligue ? footballLabel(profile.ligue, lang) : null,  color:'#FF3A3A' },
               { label:lang === 'de' ? 'Region' : 'Zone',        value: profile.zone ? footballLabel(profile.zone, lang) : null,   color:'#3A7AFF' },
-              { label:lang === 'de' ? 'Spielersuche' : 'Recrutement', value: profile.available ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: profile.available ? '#2ED27F' : '#888' },
+              { label:lang === 'de' ? 'Spielersuche' : 'Recrutement', value: memberIsAvailable(profile) ? (lang === 'de' ? 'Offen' : 'Ouvert') : (lang === 'de' ? 'Geschlossen' : 'Complet'), color: memberIsAvailable(profile) ? '#2ED27F' : '#888' },
             ].filter(s => s.value).map((s, i, arr) => (
               <div key={s.label} style={{ padding:'1.2rem 1rem', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.07)' : 'none', textAlign:'center', position:'relative' }}>
                 <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:3, background:s.color, borderRadius:'0 0 4px 4px' }} />
@@ -765,7 +766,7 @@ export default function ProfilPage() {
 
           {/* Informations */}
           <div style={darkCard}>
-            {profile.available && (
+            {memberIsAvailable(profile) && (
               <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(13,122,54,.2)', color:'#2ED27F', fontSize:13, fontWeight:600, padding:'6px 14px', borderRadius:100, marginBottom:'1rem' }}>
                 <span style={{ width:8, height:8, borderRadius:'50%', background:'#2ED27F' }} />
                 {t.profil.available_badge[lang]}

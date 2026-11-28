@@ -1,4 +1,5 @@
 'use client'
+import { coachIsAvailable, memberIsAvailable } from '../lib/member-availability'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {availabilityLabels,Availability} from '../lib/community'
@@ -208,7 +209,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [ligue, setLigue] = useState(profile.ligue || '')
   const [zone, setZone] = useState(profile.zone || '')
   const [foot, setFoot] = useState(profile.foot || 'Droit')
-  const [available, setAvailable] = useState(profile.available ?? true)
+  const [available, setAvailable] = useState(memberIsAvailable(profile))
   const [availabilityStatus,setAvailabilityStatus]=useState<Availability>(profile.availability_status||(profile.available?'seeking':'settled'))
   const [phone, setPhone] = useState(profile.phone || '')
   const [career, setCareer] = useState(profile.career || '')
@@ -232,7 +233,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
   const [coachExperience, setCoachExperience] = useState(profile.coach_experience || '')
   const [coachDiploma, setCoachDiploma] = useState(profile.coach_diploma || '')
   const [coachSpecialty, setCoachSpecialty] = useState(profile.coach_specialty || '')
-  const [coachAvailability, setCoachAvailability] = useState(profile.coach_availability || '')
+  const [coachAvailability, setCoachAvailability] = useState(profile.coach_availability || (profile.available === false ? 'Pas disponible' : 'Cherche un club'))
   const [coachCategories, setCoachCategories] = useState<string[]>(parseList((profile as any).coach_categories))
   const [coachPhilosophy, setCoachPhilosophy] = useState((profile as any).coach_philosophy || '')
   const [coachCertificates, setCoachCertificates] = useState<{name:string;year:string}[]>([])
@@ -326,7 +327,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
       ligue: ligue || null,
       zone: zone || null,
       foot: foot || null,
-      available,
+      available: profile.role === 'coach' ? coachIsAvailable(coachAvailability, available) : available,
       ...(profile.role==='player'?{availability_status:availabilityStatus}:{}),
       phone: phone || null,
       career: career || null,
@@ -716,7 +717,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
             </div>
             <div className="form-group">
               <label>{t.profil.dispo[lang]}</label>
-              <select value={coachAvailability} onChange={e => setCoachAvailability(e.target.value)}>
+              <select value={coachAvailability} onChange={e => {setCoachAvailability(e.target.value);setAvailable(coachIsAvailable(e.target.value, available))}}>
                 <option value="">—</option>
                 {['Cherche un club','En poste actuellement','Pas disponible'].map(v => <option key={v} value={v}>{footballLabel(v, lang)}</option>)}
               </select>
@@ -1064,7 +1065,7 @@ export default function ProfileEditForm({ profile, lang, onSaved, onCancel }: Pr
         <div className="form-grid">
           <div className="form-group form-grid-full">
             <label>{t.profil.dispo[lang]}</label>
-            {profile.role==='player'?<select value={availabilityStatus} onChange={e=>{const status=e.target.value as Availability;setAvailabilityStatus(status);setAvailable(status!=='settled')}}>{Object.entries(availabilityLabels).map(([key,label])=><option key={key} value={key}>{label[lang]}</option>)}</select>:<select value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
+            {profile.role==='coach'?<select value={coachAvailability} onChange={e=>{setCoachAvailability(e.target.value);setAvailable(coachIsAvailable(e.target.value,available))}}>{['Cherche un club','En poste actuellement','Pas disponible'].map(v=><option key={v} value={v}>{footballLabel(v,lang)}</option>)}</select>:profile.role==='player'?<select value={availabilityStatus} onChange={e=>{const status=e.target.value as Availability;setAvailabilityStatus(status);setAvailable(status!=='settled')}}>{Object.entries(availabilityLabels).map(([key,label])=><option key={key} value={key}>{label[lang]}</option>)}</select>:<select value={available ? 'oui' : 'non'} onChange={e => setAvailable(e.target.value === 'oui')}>
               <option value="oui">{t.profil.dispo_yes[lang]}</option>
               <option value="non">{t.profil.dispo_no[lang]}</option>
             </select>}

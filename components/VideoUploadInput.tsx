@@ -48,7 +48,7 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
     const file = e.target.files?.[0]
     if (!file || busy.current) return
     if (!file.type.startsWith('video/')) { alert(lang === 'de' ? 'Wähle eine Videodatei aus.' : 'Seuls les fichiers vidéo sont acceptés'); return }
-    if (file.size > MAX_PROFILE_VIDEO_BYTES) { alert(lang==='de'?'Maximal 20 MB pro Video. Für grössere Videos kannst du einen YouTube-Link verwenden.':'Maximum 20 Mo par vidéo. Pour une vidéo plus lourde, utilise un lien YouTube.'); return }
+    if (file.size > MAX_PROFILE_VIDEO_BYTES) { alert(lang==='de'?'Maximal 50 MB pro Video. Für grössere Videos kannst du einen YouTube-Link verwenden.':'Maximum 50 Mo par vidéo. Pour une vidéo plus lourde, utilise un lien YouTube.'); return }
 
     busy.current=true
     let nextDuration:number|null=null
@@ -141,8 +141,8 @@ export default function VideoUploadInput({ value, onChange, placeholder, profile
       {/* Duration hint */}
       <div style={{ fontSize: 12, color:'#c7d1e3', marginTop: 4, lineHeight: 1.4 }}>
         {lang === 'de'
-          ? 'Max. 20 MB pro Video, 3 Videos und 15 Min. insgesamt. Grössere Videos: YouTube-Link.'
-          : 'Max. 20 Mo par vidéo, 3 vidéos et 15 min au total. Vidéos plus lourdes : lien YouTube.'}
+          ? 'Max. 50 MB pro Video, 3 Videos und 15 Min. insgesamt. Grössere Videos: YouTube-Link.'
+          : 'Max. 50 Mo par vidéo, 3 vidéos et 15 min au total. Vidéos plus lourdes : lien YouTube.'}
       </div>
 
       {/* Progress bar */}
